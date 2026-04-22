@@ -1,0 +1,38 @@
+{
+  "entities": {
+    "Device": {
+      "title": "Device",
+      "description": "User device registration and subscription data",
+      "type": "object",
+      "properties": {
+        "deviceCode": { "type": "string" },
+        "role": { "type": "string", "enum": ["TRIAL", "PRO", "MASTER"] },
+        "expiresAt": { "type": "number" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "systemSecret": { "type": "string" }
+      },
+      "required": ["deviceCode", "role"]
+    },
+    "Market": {
+      "title": "Market",
+      "description": "Lottery market configuration and historical results",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "historyData": { "type": "string" },
+        "order": { "type": "number" }
+      },
+      "required": ["name", "order"]
+    }
+  },
+  "firestore": {
+    "/devices/{deviceCode}": {
+      "schema": "Device",
+      "description": "Registration for a specific device"
+    },
+    "/markets/{marketId}": {
+      "schema": "Market",
+      "description": "Configuration for a lottery market"
+    }
+  }
+}

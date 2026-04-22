@@ -175,98 +175,161 @@ export default function AnalysisPage({ type, title, icon, marketId }: { type: st
     if (type === "rekap") {
         const isTop = param === 2;
         return (
-            <div className="bg-[var(--surface)] border border-[var(--border2)] rounded-[var(--radius)] p-[16px] mt-3 font-['JetBrains_Mono'] relative overflow-hidden text-left animate-[fadeIn_0.3s_ease-out]">
-                <div className="flex justify-between items-end border-b border-[var(--border2)] pb-3 mb-4">
-                    <div className="text-left">
-                        <div className="text-[9px] text-[var(--gray)] tracking-[2px] mb-1 uppercase font-bold">HASIL REKAP</div>
-                        <div className="text-[14px] text-white font-bold tracking-[2px] font-['Orbitron'] underline underline-offset-4 decoration-[var(--blue)]">{marketId.toUpperCase()} 📌</div>
+            <div className="space-y-4 animate-[fadeIn_0.3s_ease-out]">
+                {/* Section Header */}
+                <div className="bg-[var(--card)] border border-white/5 rounded-xl p-4">
+                    <div className="flex justify-between items-center mb-4">
+                        <span className="text-[9px] font-bold text-white/40 tracking-[2px] uppercase">HASIL ANALISA</span>
+                        <div className="text-[9px] font-bold bg-blue-500/10 border border-blue-500/40 text-[var(--blue)] px-2 py-1 rounded tracking-[1px] uppercase">
+                            MODE: {isTop ? 'TOP' : 'INVEST'}
+                        </div>
                     </div>
-                    <div className="text-[9px] font-bold bg-blue-500/10 border border-blue-500/40 text-[var(--blue)] px-2 py-1 rounded tracking-[1px] uppercase">
-                        {isTop ? 'TOP' : 'INVEST'}
-                    </div>
-                </div>
-
-                <div className="flex flex-col gap-[6px] mb-5">
-                    <div className="flex justify-between items-center bg-white/[0.02] p-2 px-3 rounded border border-white/[0.04]">
-                        <span className="text-[9px] text-slate-300 font-bold tracking-[1px] w-[80px] uppercase">{isTop ? 'AI TOP' : 'CT'}</span>
-                        <span className="text-[14px] font-bold text-[var(--gold)] tracking-[3px] font-['Orbitron']">{result.ai.join(" ")}</span>
-                    </div>
-                    <div className="flex justify-between items-center bg-white/[0.02] p-2 px-3 rounded border border-white/[0.04]">
-                        <span className="text-[9px] text-slate-300 font-bold tracking-[1px] w-[80px] uppercase">OFF KEP</span>
-                        <span className="text-[13px] font-bold text-[#ff6b6b] drop-shadow-[0_0_2px_rgba(255,107,107,0.4)] tracking-[2px]">{(result.offKepala || []).join(" . ")}</span>
-                    </div>
-                    <div className="flex justify-between items-center bg-white/[0.02] p-2 px-3 rounded border border-white/[0.04]">
-                        <span className="text-[9px] text-slate-300 font-bold tracking-[1px] w-[80px] uppercase">OFF EKR</span>
-                        <span className="text-[13px] font-bold text-[#ff6b6b] drop-shadow-[0_0_2px_rgba(255,107,107,0.4)] tracking-[2px]">{(result.offEkor || []).join(" . ")}</span>
-                    </div>
-                    <div className="flex justify-between items-center bg-white/[0.02] p-2 px-3 rounded border border-white/[0.04]">
-                        <span className="text-[9px] text-slate-300 font-bold tracking-[1px] w-[80px] uppercase">OFF JML</span>
-                        <span className="text-[13px] font-bold text-[#b388ff] drop-shadow-[0_0_2px_rgba(179,136,255,0.4)] tracking-[2px]">{(result.offJumlah || []).join(" . ")}</span>
-                    </div>
-                    <div className="flex justify-between items-center bg-white/[0.02] p-2 px-3 rounded border border-white/[0.04] text-right">
-                        <span className="text-[9px] text-slate-300 font-bold tracking-[1px] w-[80px] shrink-0 uppercase">OFF SHIO</span>
-                        <span className="text-[11px] font-bold text-[#00e5ff] drop-shadow-[0_0_2px_rgba(0,229,255,0.4)] tracking-[1px] leading-tight flex flex-wrap justify-end gap-1">
-                             {(result.offShio || []).map((s: number) => `${SHIO_EMOJI[s]}${s < 10 ? '0'+s : s}`).join(" ")}
-                        </span>
+                    <div className="text-[16px] text-white font-black tracking-[2px] font-['Orbitron'] flex items-center gap-2">
+                        {marketId.toUpperCase()} 📌
                     </div>
                 </div>
 
-                <div className="relative pt-3 border-t border-[var(--border2)]">
-                    <div className="flex justify-between items-center mb-3">
-                        <span className="text-[10px] font-bold text-white tracking-[2px] font-['Orbitron'] uppercase">GENERATE LINES</span>
-                        <span className="text-[9px] font-bold text-black bg-gradient-to-r from-[var(--gold)] to-[#c88a20] px-2 py-1 rounded shadow-[0_0_10px_rgba(240,192,64,0.3)] tracking-[1px]">
-                            {result.lines.length} LNS
+                {/* Details Card */}
+                <div className="bg-[var(--surface)] border border-white/10 rounded-xl p-5 space-y-3.5 shadow-2xl">
+                    <div className="flex justify-between items-center bg-white/[0.02] p-3 px-4 rounded-lg border border-white/[0.05]">
+                        <div className="flex items-center gap-3">
+                            <span className="text-sm">🔥</span>
+                            <span className="text-[10px] text-white/60 font-bold tracking-[2px] uppercase">{isTop ? 'AI TOP' : 'AI CT'}</span>
+                        </div>
+                        <span className="text-[15px] font-black text-[var(--gold)] tracking-[4px] font-['Orbitron']">{result.ai.join(" ")}</span>
+                    </div>
+                    
+                    <div className="flex justify-between items-center bg-white/[0.02] p-3 px-4 rounded-lg border border-white/[0.05]">
+                        <div className="flex items-center gap-3">
+                            <span className="text-sm">❌</span>
+                            <span className="text-[10px] text-white/60 font-bold tracking-[2px] uppercase">OFF KEP</span>
+                        </div>
+                        <span className="text-[14px] font-bold text-[#ff5252] tracking-[3px] opacity-90">{(result.offKepala || []).join(" . ")}</span>
+                    </div>
+
+                    <div className="flex justify-between items-center bg-white/[0.02] p-3 px-4 rounded-lg border border-white/[0.05]">
+                        <div className="flex items-center gap-3">
+                            <span className="text-sm">❌</span>
+                            <span className="text-[10px] text-white/60 font-bold tracking-[2px] uppercase">OFF EKR</span>
+                        </div>
+                        <span className="text-[14px] font-bold text-[#ff5252] tracking-[3px] opacity-90">{(result.offEkor || []).join(" . ")}</span>
+                    </div>
+
+                    <div className="flex justify-between items-center bg-white/[0.02] p-3 px-4 rounded-lg border border-white/[0.05]">
+                        <div className="flex items-center gap-3">
+                            <span className="text-sm">🔢</span>
+                            <span className="text-[10px] text-white/60 font-bold tracking-[2px] uppercase">OFF JML</span>
+                        </div>
+                        <span className="text-[14px] font-bold text-[#b388ff] tracking-[3px] opacity-90">{(result.offJumlah || []).join(" . ")}</span>
+                    </div>
+
+                    <div className="flex justify-between items-center bg-white/[0.02] p-3 px-4 rounded-lg border border-white/[0.05]">
+                        <div className="flex items-center gap-3">
+                            <span className="text-sm">🐉</span>
+                            <span className="text-[10px] text-white/60 font-bold tracking-[2px] uppercase">OFF SHIO</span>
+                        </div>
+                        <div className="flex gap-2 flex-wrap justify-end">
+                             {(result.offShio || []).map((s: number) => (
+                                 <span key={s} className="text-[11px] font-bold text-[#00e5ff] flex items-center gap-1 bg-cyan-500/5 p-1 px-2 rounded">
+                                     {SHIO_EMOJI[s]} {s < 10 ? '0'+s : s}
+                                 </span>
+                             ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Lines Generator Card */}
+                <div className="space-y-3">
+                    <div className="flex justify-between items-center px-1">
+                        <span className="text-[11px] font-black text-white/80 tracking-[2px] font-['Orbitron'] uppercase">GENERATE LINES</span>
+                        <span className="text-[9px] font-bold text-black bg-gradient-to-r from-[var(--gold)] to-[#c88a20] px-2 py-1 rounded shadow-[0_0_10px_rgba(240,192,64,0.3)] tracking-[1px] uppercase">
+                            {result.lines.length} LINE 💰
                         </span>
                     </div>
                     
-                    <div className="bg-[#05080f] border border-[var(--border)] rounded p-4 text-[13px] text-[var(--blue)] font-bold leading-[2.1] text-left break-all shadow-inner font-['Rajdhani'] tracking-[2px] max-h-[200px] overflow-y-auto">
-                        {result.lines.join("*")}
+                    <div className="bg-[#05080f] border border-white/10 rounded-xl p-5 text-[14px] text-[var(--blue)] font-bold leading-[2.2] shadow-inner font-['Rajdhani'] tracking-[3px] max-h-[220px] overflow-y-auto">
+                        {result.lines.join(" * ")}
                     </div>
-                </div>
 
-                <button onClick={() => { navigator.clipboard.writeText(result.lines.join("*")); alert("BERHASIL DISALIN!"); }} className="mt-4 flex items-center justify-center gap-2 w-full bg-gradient-to-br from-[var(--blue)] to-[#2563eb] text-white p-3.5 font-['Orbitron'] font-bold text-[12px] tracking-[4px] rounded hover:scale-[0.98] transition-transform shadow-[0_5px_15px_rgba(37,99,235,0.2)]">
-                    📋 COPY SEMUA
-                </button>
+                    <button 
+                        onClick={() => { 
+                            navigator.clipboard.writeText(result.lines.join("*")); 
+                        }} 
+                        className="flex items-center justify-center gap-3 w-full bg-[#1a2b5e] border border-[#2563eb]/30 text-white p-4 font-['Orbitron'] font-black text-[12px] tracking-[4px] rounded-xl hover:bg-[#2563eb] transition-all shadow-lg uppercase"
+                    >
+                        📋 COPY SEMUA
+                    </button>
+                </div>
             </div>
         );
     }
 
     if (type === "ai") {
-        const { stats = [], elitCount = 0, fallback = false, result: aiResult = [] } = result;
+        const { stats = [], elitCount = 0, result: aiResult = [] } = result;
         const isBBFS = param && param >= 8;
         return (
-            <div className="bg-[var(--surface)] border border-[var(--border2)] rounded-[var(--radius)] p-[12px] mt-3 font-['JetBrains_Mono'] text-left animate-[fadeIn_0.3s_ease-out]">
-                <div className="bg-green-500/10 border-l-[3px] border-[var(--green)] p-3 text-center mb-3 font-bold text-[11px] tracking-[3px] font-['Orbitron'] text-[var(--green)] rounded">
-                    ⚡ {isBBFS ? 'BBFS' : 'ANGKA IKUT'} (25 RUMUS)
-                </div>
-                
-                <div className="space-y-1 mt-4">
-                    {stats.map((s: any, i: number) => {
-                        const pct = s.valid > 0 ? Math.round((s.hits / s.valid) * 100) : 0;
-                        return (
-                            <div key={i} className="flex items-center gap-2 p-1.5 rounded text-[9px] bg-white/[0.01] border border-transparent">
-                                <span className="text-[8px] font-bold p-1 px-2 rounded bg-green-500/10 text-[var(--green)] border border-green-500/20 tracking-[1px] font-['Orbitron']">ELITE</span>
-                                <span className="flex-1 text-white opacity-80 uppercase tracking-[0.5px]">{s.name}</span>
-                                <span className="text-right text-[var(--green)] font-bold">[{s.hits}/{s.valid}]</span>
+            <div className="space-y-4 animate-[fadeIn_0.3s_ease-out]">
+                {/* Stats Container */}
+                <div className="bg-[var(--card)] border border-white/5 rounded-xl p-4 pt-0 overflow-hidden">
+                    <div className="bg-gradient-to-r from-transparent via-[var(--cyan)]/20 to-transparent h-[1px] w-full mb-4"></div>
+                    <div className="flex flex-col items-center mb-6">
+                        <div className="bg-[#0a1120] border border-[var(--cyan)]/30 p-2.5 px-8 rounded-lg flex items-center gap-3 shadow-[0_0_15px_rgba(0,229,255,0.1)]">
+                           <span className="text-[var(--gold)] text-sm">{isBBFS ? '⚡' : '⚡'}</span>
+                           <span className="font-['Orbitron'] text-[11px] font-black tracking-[3px] text-white uppercase">
+                               {isBBFS ? 'BBFS' : 'ANGKA IKUT'} — 25 RUMUS
+                           </span>
+                        </div>
+                        <div className="text-[9px] font-bold text-white/30 tracking-[3px] mt-4 uppercase">-- VALIDASI WALK-FORWARD --</div>
+                    </div>
+
+                    <div className="space-y-1.5 px-2">
+                        {stats.map((s: any, i: number) => (
+                            <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-white/[0.01]">
+                                <span className="text-[8px] font-black p-1 px-2 rounded-md bg-green-500/10 text-[#00e676] border border-[#00e676]/20 tracking-[1px] font-['Orbitron']">ELITE</span>
+                                <span className="flex-1 text-[11px] text-white/70 font-medium tracking-[0.5px] font-['Rajdhani'] uppercase">{s.name}</span>
+                                <div className="flex items-center gap-3">
+                                    <div className="w-16 h-[3px] bg-white/5 rounded-full overflow-hidden">
+                                        <div className="h-full bg-[#00e676] shadow-[0_0_8px_#00e676]" style={{ width: `${(s.hits / 14) * 100}%` }}></div>
+                                    </div>
+                                    <span className="text-[10px] font-['JetBrains_Mono'] text-[#00e676] font-black">
+                                        {s.hits || s.score}/14
+                                    </span>
+                                </div>
                             </div>
-                        );
-                    })}
+                        ))}
+                    </div>
+
+                    <div className="bg-black/40 border border-white/5 p-2.5 mt-6 rounded-lg text-center">
+                        <span className="text-[10px] font-black tracking-[4px] text-[var(--green)] font-['Orbitron'] uppercase">RUMUS ACTIVE: {elitCount}/25</span>
+                    </div>
                 </div>
 
-                <div className="border border-[var(--green)] bg-green-500/10 rounded-lg p-5 my-5 text-center shadow-inner">
-                    <div className="text-[var(--green)] text-[12px] font-bold mb-3 tracking-[3px] font-['Orbitron'] uppercase">✅ {isBBFS ? 'BBFS 8 DIGIT' : `AI ${param} DIGIT`}</div>
-                    <div className="flex justify-center gap-2 flex-wrap">
+                {/* Result Container */}
+                <div className="bg-[var(--surface)] border-2 border-[var(--green)]/40 rounded-2xl p-5 shadow-[0_0_30px_rgba(0,230,118,0.05)] text-center">
+                    <div className="flex justify-center items-center gap-2 mb-4">
+                        <span className="text-[#00e676] text-sm">✅</span>
+                        <span className="text-[11px] font-black text-white tracking-[3px] font-['Orbitron'] uppercase">{isBBFS ? 'BBFS' : 'ANGKA IKUT'}</span>
+                    </div>
+                    
+                    <div className={`flex justify-center flex-wrap ${isBBFS ? 'gap-1.5' : 'gap-2.5'}`}>
                         {aiResult.map((d: number, i: number) => (
-                            <div key={i} className="w-9 h-9 flex items-center justify-center border border-[var(--green)] bg-green-500/10 rounded text-[18px] font-extrabold text-white font-['Orbitron'] shadow-md">
+                            <div key={i} className={`${isBBFS ? 'w-8 h-8 text-[15px]' : 'w-10 h-10 text-[18px]'} flex items-center justify-center border-2 border-[var(--green)]/60 bg-[var(--green)]/5 rounded-xl font-black text-white font-['Orbitron'] shadow-lg`}>
                                 {d}
                             </div>
                         ))}
                     </div>
                 </div>
 
-                <div className="bg-black/30 rounded p-3 mt-4 text-[9px] text-[var(--gray)] leading-relaxed tracking-[0.5px] border border-[var(--border)] italic">
-                    📌 Validasi: 14 Langkah WF • Active: {elitCount}/25 {fallback ? '(Low Conf)' : ''}<br/>
-                    📌 Mode: {isBBFS ? 'Full BBFS' : `${param} Digit Selection`}
+                {/* Footer Info */}
+                <div className="bg-black/20 border border-white/5 rounded-xl p-4 text-[10px] text-white/40 space-y-2 font-medium tracking-[1px] font-['Rajdhani'] text-left">
+                    <div className="flex items-center gap-2">
+                        <span>📌</span>
+                        <span>Validasi: 14 langkah WF • Elit: {elitCount}/25</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <span>📌</span>
+                        <span>Mode: {param} {isBBFS ? 'BBFS' : 'Digit AI Selection'}</span>
+                    </div>
                 </div>
             </div>
         );
@@ -274,133 +337,285 @@ export default function AnalysisPage({ type, title, icon, marketId }: { type: st
     
     if (type === "mati") {
         const POS = ['AS', 'KOP', 'KEPALA', 'EKOR'];
+        const totalActive = POS.reduce((acc, p) => acc + (result[p]?.stats?.length || 0), 0);
+
         return (
-            <div className="bg-[var(--surface)] border border-[var(--border2)] rounded-[var(--radius)] p-[12px] mt-3 font-['JetBrains_Mono'] text-left animate-[fadeIn_0.3s_ease-out]">
-                <div className="bg-red-500/10 border-l-[3px] border-[var(--red)] p-3 text-center mb-3 font-bold text-[11px] tracking-[3px] font-['Orbitron'] text-[var(--red)] rounded">
-                    💀 ANGKA MATI (50 RUMUS)
-                </div>
-                
-                <div className="border border-[var(--red)] bg-red-500/10 rounded-lg p-5 my-5 space-y-3 shadow-inner">
-                    {POS.map(p => {
-                        const posData = result[p];
-                        if (!posData) return null;
-                        return (
-                            <div key={p} className="flex items-center justify-between p-2 px-3 rounded bg-white/[0.02] border border-white/[0.04]">
-                                <span className="text-[10px] font-bold text-[var(--red)] tracking-[2px] font-['Orbitron'] shrink-0">OFF {p}</span>
-                                <div className="flex gap-1.5 justify-end">
-                                    {posData.result.map((d: string, i: number) => (
-                                        <div key={i} className="w-8 h-8 flex items-center justify-center border border-[var(--red)] bg-red-500/20 rounded text-[16px] font-extrabold text-white font-['Orbitron'] shadow-sm">
-                                            {d}
+            <div className="space-y-4 animate-[fadeIn_0.3s_ease-out]">
+                {/* Stats Container */}
+                <div className="bg-[var(--card)] border border-white/5 rounded-xl p-4 pt-0 overflow-hidden">
+                    <div className="bg-gradient-to-r from-transparent via-[var(--red)]/20 to-transparent h-[1px] w-full mb-4"></div>
+                    <div className="flex flex-col items-center mb-6">
+                        <div className="bg-[#1a0b0b] border border-[var(--red)]/30 p-2.5 px-8 rounded-lg flex items-center gap-3 shadow-[0_0_15px_rgba(255,82,82,0.1)]">
+                           <span className="text-sm">💀</span>
+                           <span className="font-['Orbitron'] text-[11px] font-black tracking-[3px] text-white uppercase">
+                               ANGKA MATI — 50 RUMUS
+                           </span>
+                        </div>
+                        <div className="text-[9px] font-bold text-white/30 tracking-[3px] mt-4 uppercase">-- VALIDASI WALK-FORWARD --</div>
+                    </div>
+
+                    <div className="space-y-6">
+                        {POS.map(p => (
+                            <div key={p} className="space-y-2">
+                                <div className="flex items-center gap-3 w-full">
+                                    <div className="h-[1px] bg-white/5 flex-1"></div>
+                                    <span className="text-[10px] font-black text-[var(--red)] tracking-[4px] font-['Orbitron'] uppercase">{p}</span>
+                                    <div className="h-[1px] bg-white/5 flex-1"></div>
+                                </div>
+                                <div className="space-y-1.5 px-2">
+                                    {(result[p]?.stats || []).map((s: any, i: number) => (
+                                        <div key={i} className="flex items-center justify-between p-2 rounded-lg bg-white/[0.01]">
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-[8px] font-black p-1 px-1.5 rounded-md bg-green-500/10 text-[#00e676] border border-[#00e676]/20 tracking-[1px] font-['Orbitron']">ELITE</span>
+                                                <span className="text-[11px] text-white/70 font-medium tracking-[0.5px] font-['Rajdhani'] uppercase">{s.name}</span>
+                                            </div>
+                                            <span className="text-[10px] font-['JetBrains_Mono'] text-[var(--red)] font-black">
+                                                [{s.score}/14] 100%
+                                            </span>
                                         </div>
                                     ))}
                                 </div>
                             </div>
-                        )
-                    })}
+                        ))}
+                    </div>
+
+                    <div className="bg-black/40 border border-white/5 p-2.5 mt-8 rounded-lg text-center">
+                        <span className="text-[10px] font-black tracking-[4px] text-[var(--red)] font-['Orbitron'] uppercase opacity-80">
+                            RUMUS ACTIVE: {totalActive}/50
+                        </span>
+                    </div>
                 </div>
-                
-                <div className="bg-black/30 rounded p-3 mt-4 text-[9px] text-[var(--gray)] leading-relaxed tracking-[0.5px] border border-[var(--border)] italic">
-                    📌 Validasi: 14 Langkah Teruji • State: PERFECT<br/>
-                    📌 Mode: {param} Digit Off per Posisi
+
+                {/* Result Container */}
+                <div className="bg-[var(--surface)] border-2 border-[var(--red)]/40 rounded-2xl p-5 shadow-[0_0_30px_rgba(255,82,82,0.05)] text-left space-y-3.5">
+                    {POS.map(p => (
+                        <div key={p} className="flex items-center justify-between bg-white/[0.03] border border-white/5 p-3.5 py-3 rounded-xl">
+                            <div className="flex items-center gap-3">
+                                <span className="text-[#ff5252] text-sm">❌</span>
+                                <span className="text-[10px] font-black text-white/80 tracking-[2px] font-['Orbitron'] uppercase">OFF {p}</span>
+                            </div>
+                            <div className="flex gap-2">
+                                {(result[p]?.result || []).map((val: any, idx: number) => (
+                                    <div key={idx} className="w-9 h-9 flex items-center justify-center border-2 border-[var(--red)]/50 bg-[var(--red)]/5 rounded-lg text-[18px] font-black text-white font-['Orbitron'] shadow-lg">
+                                        {val}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Footer Info */}
+                <div className="bg-black/20 border border-white/5 rounded-xl p-4 text-[10px] text-white/40 space-y-2 font-medium tracking-[1px] font-['Rajdhani'] text-left">
+                    <div className="flex items-center gap-3">
+                        <span>📌</span>
+                        <span>Validasi: 14 langkah WF • Threshold: 14/14</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <span>📌</span>
+                        <span>Mode: {param} Digit OFF per posisi</span>
+                    </div>
                 </div>
             </div>
         );
     }
     
     if (type === "jumlah") {
-        const resArray = Array.isArray(result.result) ? result.result : [result.result];
+        const { stats = [], result: resArray = [], supportCount = 0, eliteTotal = 0 } = result;
+        const resList = Array.isArray(resArray) ? resArray : [resArray];
         return (
-            <div className="bg-[var(--surface)] border border-[var(--border2)] rounded-[var(--radius)] p-[12px] mt-3 font-['JetBrains_Mono'] text-center animate-[fadeIn_0.3s_ease-out]">
-                <div className="bg-purple-500/10 border-l-[3px] border-[var(--purple)] p-3 text-center mb-3 font-bold text-[11px] tracking-[3px] font-['Orbitron'] text-[var(--purple)] rounded">
-                    🔢 JUMLAH MATI 2D
+            <div className="space-y-4 animate-[fadeIn_0.3s_ease-out]">
+                {/* Stats Container */}
+                <div className="bg-[var(--card)] border border-white/5 rounded-xl p-4 pt-0 overflow-hidden text-left">
+                    <div className="bg-gradient-to-r from-transparent via-[var(--purple)]/20 to-transparent h-[1px] w-full mb-4"></div>
+                    <div className="flex flex-col items-center mb-6">
+                        <div className="bg-[#120a20] border border-[var(--purple)]/30 p-2.5 px-8 rounded-lg flex items-center gap-3 shadow-[0_0_15px_rgba(179,136,255,0.1)]">
+                           <span className="text-sm">🔢</span>
+                           <span className="font-['Orbitron'] text-[11px] font-black tracking-[3px] text-white uppercase">
+                               JUMLAH MATI — 50 RUMUS
+                           </span>
+                        </div>
+                        <div className="text-[9px] font-bold text-white/30 tracking-[3px] mt-4 uppercase">-- VALIDASI WALK-FORWARD --</div>
+                    </div>
+
+                    <div className="space-y-1.5 px-2">
+                        {stats.map((s: any, i: number) => (
+                            <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-white/[0.01]">
+                                <span className="text-[8px] font-black p-1 px-1.5 rounded-md bg-green-500/10 text-[#00e676] border border-[#00e676]/20 tracking-[1px] font-['Orbitron']">ELITE</span>
+                                <span className="flex-1 text-[11px] text-white/70 font-medium tracking-[0.5px] font-['Rajdhani'] uppercase">{s.name}</span>
+                                <span className="text-[10px] font-['JetBrains_Mono'] text-[var(--purple)] font-black">
+                                    [{s.score}/14] 100%
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="bg-black/40 border border-white/5 p-2.5 mt-6 rounded-lg text-center">
+                        <span className="text-[10px] font-black tracking-[4px] text-[var(--purple)] font-['Orbitron'] uppercase opacity-80">
+                            RUMUS ACTIVE: {stats.length}/50
+                        </span>
+                    </div>
                 </div>
-                
-                <div className="border border-[var(--purple)] bg-purple-500/10 rounded-lg p-6 my-6 shadow-inner mx-auto max-w-[280px]">
-                    <div className="text-[var(--purple)] text-[12px] font-bold mb-4 tracking-[3px] font-['Orbitron'] uppercase">❌ OFF JUMLAH</div>
-                    <div className="flex justify-center gap-3 flex-wrap">
-                        {resArray.map((d: string, i: number) => (
-                            <div key={i} className="w-10 h-10 flex items-center justify-center border border-[var(--purple)] bg-purple-500/20 rounded text-[20px] font-extrabold text-white font-['Orbitron'] shadow-md">
+
+                {/* Result Container */}
+                <div className="bg-[var(--surface)] border-2 border-[var(--purple)]/40 rounded-2xl p-5 shadow-[0_0_30px_rgba(179,136,255,0.05)] text-center">
+                    <div className="flex justify-center items-center gap-2 mb-4">
+                        <span className="text-[#b388ff] text-sm">❌</span>
+                        <span className="text-[11px] font-black text-white tracking-[3px] font-['Orbitron'] uppercase">OFF JUMLAH</span>
+                    </div>
+                    
+                    <div className="flex justify-center gap-2.5 flex-wrap">
+                        {resList.map((d: any, i: number) => (
+                            <div key={i} className="w-10 h-10 flex items-center justify-center border-2 border-[var(--purple)]/60 bg-[var(--purple)]/5 rounded-xl text-[20px] font-black text-white font-['Orbitron'] shadow-lg">
                                 {d}
                             </div>
                         ))}
                     </div>
                 </div>
 
-                <div className="bg-black/30 rounded p-3 mt-4 text-[9px] text-[var(--gray)] leading-relaxed tracking-[0.5px] border border-[var(--border)] italic text-left">
-                    📌 Validasi: 14 Langkah WF • Sigma 50 Rumus<br/>
-                    📌 Elite Support: {result.supportCount}/{result.eliteTotal} Patterns
+                {/* Footer Info */}
+                <div className="bg-black/20 border border-white/5 rounded-xl p-4 text-[10px] text-white/40 space-y-2 font-medium tracking-[1px] font-['Rajdhani'] text-left">
+                    <div className="flex items-center gap-2">
+                        <span>📌</span>
+                        <span>Validasi: 14 langkah WF • Sigma 50 Rumus</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <span>📌</span>
+                        <span>Elite Support: {supportCount}/{eliteTotal} Patterns</span>
+                    </div>
                 </div>
             </div>
         );
     }
     
     if (type === "shio") {
-        const resArray = Array.isArray(result.result) ? result.result : [result.result];
+        const { stats = [], result: resArray = [], supportCount = 0, eliteTotal = 0 } = result;
+        const resList = Array.isArray(resArray) ? resArray : [resArray];
         return (
-            <div className="bg-[var(--surface)] border border-[var(--border2)] rounded-[var(--radius)] p-[12px] mt-3 font-['JetBrains_Mono'] text-center animate-[fadeIn_0.3s_ease-out]">
-                <div className="bg-cyan-500/10 border-l-[3px] border-[var(--cyan)] p-3 text-center mb-3 font-bold text-[11px] tracking-[3px] font-['Orbitron'] text-[var(--cyan)] rounded">
-                    🐉 SHIO MATI
+            <div className="space-y-4 animate-[fadeIn_0.3s_ease-out]">
+                {/* Stats Container */}
+                <div className="bg-[var(--card)] border border-white/5 rounded-xl p-4 pt-0 overflow-hidden text-left">
+                    <div className="bg-gradient-to-r from-transparent via-[var(--cyan)]/20 to-transparent h-[1px] w-full mb-4"></div>
+                    <div className="flex flex-col items-center mb-6">
+                        <div className="bg-[#0a1820] border border-[var(--cyan)]/30 p-2.5 px-8 rounded-lg flex items-center gap-3 shadow-[0_0_15px_rgba(0,229,255,0.1)]">
+                           <span className="text-sm">🐉</span>
+                           <span className="font-['Orbitron'] text-[11px] font-black tracking-[3px] text-white uppercase">
+                               SHIO MATI — 50 RUMUS
+                           </span>
+                        </div>
+                        <div className="text-[9px] font-bold text-white/30 tracking-[3px] mt-4 uppercase">-- VALIDASI WALK-FORWARD --</div>
+                    </div>
+
+                    <div className="space-y-1.5 px-2">
+                        {stats.map((s: any, i: number) => (
+                            <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-white/[0.01]">
+                                <span className="text-[8px] font-black p-1 px-1.5 rounded-md bg-green-500/10 text-[#00e676] border border-[#00e676]/20 tracking-[1px] font-['Orbitron']">ELITE</span>
+                                <span className="flex-1 text-[11px] text-white/70 font-medium tracking-[0.5px] font-['Rajdhani'] uppercase">{s.name}</span>
+                                <span className="text-[10px] font-['JetBrains_Mono'] text-[var(--cyan)] font-black">
+                                    [{s.score}/14] 100%
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="bg-black/40 border border-white/5 p-2.5 mt-6 rounded-lg text-center">
+                        <span className="text-[10px] font-black tracking-[4px] text-[var(--cyan)] font-['Orbitron'] uppercase opacity-80">
+                            RUMUS ACTIVE: {stats.length}/50
+                        </span>
+                    </div>
                 </div>
-                
-                <div className="border border-[var(--cyan)] bg-cyan-500/10 rounded-lg p-6 my-6 shadow-inner mx-auto max-w-[280px]">
-                    <div className="text-[var(--cyan)] text-[12px] font-bold mb-4 tracking-[4px] font-['Orbitron'] uppercase">❌ OFF SHIO</div>
-                    <div className="flex justify-center gap-3 flex-wrap">
-                        {resArray.map((s: number, i: number) => (
-                            <div key={i} className="h-11 px-4 flex items-center justify-center gap-2.5 border border-[var(--cyan)] bg-cyan-500/20 rounded text-[16px] font-extrabold text-white font-['Orbitron'] shadow-md">
+
+                {/* Result Container */}
+                <div className="bg-[var(--surface)] border-2 border-[var(--cyan)]/40 rounded-2xl p-5 shadow-[0_0_30px_rgba(0,229,255,0.05)] text-center">
+                    <div className="flex justify-center items-center gap-2 mb-4">
+                        <span className="text-[#00e5ff] text-sm">🐉</span>
+                        <span className="text-[11px] font-black text-white tracking-[3px] font-['Orbitron'] uppercase">OFF SHIO</span>
+                    </div>
+                    
+                    <div className="flex justify-center gap-2.5 flex-wrap">
+                        {resList.map((s: number, i: number) => (
+                            <div key={i} className="min-w-[65px] h-11 px-3.5 flex items-center justify-center gap-3 border-2 border-[var(--cyan)]/60 bg-[var(--cyan)]/5 rounded-xl text-[18px] font-black text-white font-['Orbitron'] shadow-lg">
                                 <span className="text-xl drop-shadow-md">{SHIO_EMOJI[s]}</span>
-                                <span className="tracking-[1px]">{s < 10 ? '0'+s : s}</span>
+                                <span className="">{s < 10 ? '0'+s : s}</span>
                             </div>
                         ))}
                     </div>
                 </div>
 
-                <div className="bg-black/30 rounded p-3 mt-4 text-[9px] text-[var(--gray)] leading-relaxed tracking-[0.5px] border border-[var(--border)] italic text-left">
-                    📌 Validasi: 14 Langkah WF • 50 Modulo Rumus<br/>
-                    📌 Elite Support: {result.supportCount}/{result.eliteTotal} Patterns
+                {/* Footer Info */}
+                <div className="bg-black/20 border border-white/5 rounded-xl p-4 text-[10px] text-white/40 space-y-2 font-medium tracking-[1px] font-['Rajdhani'] text-left">
+                    <div className="flex items-center gap-2">
+                        <span>📌</span>
+                        <span>Validasi: 14 langkah WF • 50 Modulo Rumus</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <span>📌</span>
+                        <span>Elite Support: {supportCount}/{eliteTotal} Patterns</span>
+                    </div>
                 </div>
             </div>
         );
     }
-
-    return null;
   };
 
   return (
-    <div className="animate-[slideIn_0.22s_ease-out]">
-      <div className="flex items-center gap-2.5 mb-5 pb-2.5 border-b border-[var(--border2)]">
-        <span className="text-2xl drop-shadow-md">{icon}</span>
-        <h3 className={`font-['Orbitron'] text-[14px] font-bold tracking-[3px] m-0 ${titleColors[type]}`}>{title}</h3>
+    <div className="animate-[slideIn_0.22s_ease-out] w-full max-w-[450px] mx-auto px-4 pb-12">
+      {/* Small top breadcrumb style */}
+      <div className="flex items-center gap-3 mb-6 px-1">
+        <span className="text-xl drop-shadow-lg">{icon}</span>
+        <h3 className={`font-['Orbitron'] text-[13px] font-black tracking-[4px] m-0 uppercase flex-1 ${titleColors[type] || 'text-white'}`}>
+             {title}
+        </h3>
       </div>
 
-      <div className="bg-black/40 border border-[var(--border2)] rounded-[var(--radius-sm)] p-3.5 mb-5 text-center font-['Orbitron'] shadow-inner">
-        <span className="text-[11px] text-[var(--gold)] font-bold tracking-[3px] uppercase">PASARAN: {marketId}</span>
+      {/* Market Label Box */}
+      <div className="bg-[#0a1120] border border-white/10 rounded-xl p-4 mb-6 text-center font-['Orbitron'] shadow-2xl relative overflow-hidden group">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.02] to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+        <span className="text-[11px] text-[var(--gold)] font-black tracking-[4px] uppercase flex items-center justify-center gap-2">
+            PASARAN: <span className="text-white opacity-90">{marketId.toUpperCase()}</span>
+        </span>
       </div>
 
       {error && (
-        <div className="text-center text-[10px] p-3 mb-4 font-bold font-['JetBrains_Mono'] text-red-500 bg-red-500/5 border border-red-500/20 rounded uppercase tracking-[1px] animate-pulse">
+        <div className="text-center text-[10px] p-4 mb-6 font-black font-['JetBrains_Mono'] text-red-400 bg-red-400/5 border border-red-400/20 rounded-xl uppercase tracking-[2px] animate-pulse">
             {error}
         </div>
       )}
 
       {(param === null || !needsParam) && !loading && !result && (
-          <button onClick={() => handleAnalyze()} className={`w-full p-4 font-['Orbitron'] font-bold text-[12px] tracking-[4px] rounded hover:scale-[0.98] transition-all uppercase outline-none ${btnColors[type]}`}>
-             MULAI ANALISIS
+          <button 
+            onClick={() => handleAnalyze()} 
+            className={`w-full p-5 font-['Orbitron'] font-black text-[14px] tracking-[5px] rounded-xl hover:scale-[0.98] active:scale-95 transition-all uppercase outline-none flex items-center justify-center gap-3 shadow-2xl ${btnColors[type] || 'bg-white text-black'}`}
+          >
+             🚀 MULAI ANALISA
           </button>
       )}
 
       {renderParamSelector()}
 
       {loading && (
-        <div className="text-center p-8 text-[var(--cyan)] font-['Orbitron'] text-[10px] font-bold tracking-[6px] animate-pulse">
-            <span className="inline-block animate-bounce mr-1">⚡</span> MENGANALISIS...
+        <div className="flex flex-col items-center justify-center py-12 space-y-4">
+            <div className="w-12 h-12 border-4 border-[var(--cyan)]/20 border-t-[var(--cyan)] rounded-full animate-spin"></div>
+            <div className="text-[var(--cyan)] font-['Orbitron'] text-[10px] font-black tracking-[6px] animate-pulse uppercase">
+                MENGANALISIS DATA...
+            </div>
         </div>
       )}
 
       {renderResult()}
 
-      <button onClick={() => navigate(-1)} className="flex items-center justify-center gap-2 w-full bg-black/40 text-[var(--text-dim)] border border-[var(--border)] p-3 mt-6 text-[10px] font-bold font-['JetBrains_Mono'] tracking-[3px] rounded hover:border-[var(--cyan)] hover:text-[var(--cyan)] hover:bg-[var(--card2)] transition-all cursor-pointer uppercase outline-none">
-        ← KEMBALI
-      </button>
+      {!loading && (
+          <button 
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate(`/analyze/${marketId}`);
+            }} 
+            className="flex items-center justify-center gap-3 w-full bg-[#0a1120]/40 text-white/40 border border-white/10 p-5 mt-8 text-[11px] font-black font-['Orbitron'] tracking-[5px] rounded-xl hover:border-[var(--gold)]/40 hover:text-white transition-all cursor-pointer uppercase outline-none active:scale-95 shadow-xl"
+          >
+             ← DATA MENU 
+          </button>
+      )}
     </div>
   );
 }
