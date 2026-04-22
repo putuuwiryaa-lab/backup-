@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+@theme {
+  --bg: #030408;
+  --card: #080a13;
+  --card2: #0e111c;
+  --sidebar-bg: #05070f;
+  --navbar-bg: #030408;
+  --border: rgba(255, 255, 255, 0.05);
+  --border2: rgba(255, 255, 255, 0.08);
+  --text: #e2e8f0;
+  --text-dim: #94a3b8;
+  --gold: #f0c040;
+  --gold-dim: rgba(240, 192, 64, 0.1);
+  --cyan: #00e5ff;
+  --cyan-dim: rgba(0, 229, 255, 0.1);
+  --red: #ff5252;
+  --red-dim: rgba(255, 82, 82, 0.1);
+  --green: #00e676;
+  --green-dim: rgba(0, 230, 118, 0.1);
+  --purple: #b388ff;
+  --purple-dim: rgba(179, 136, 255, 0.1);
+  --blue: #448aff;
+  --blue-dim: rgba(68, 138, 255, 0.12);
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+
+@layer base {
+  body {
+    @apply bg-[var(--bg)] text-[var(--text)] font-sans antialiased;
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(240, 192, 64, 0.03) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(0, 229, 255, 0.03) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(179, 136, 255, 0.03) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, rgba(68, 138, 255, 0.03) 0px, transparent 50%);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scroll {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.animate-shake {
+  animation: shake 0.2s ease-in-out 0s 2;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--border2);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--gold);
+}
+
+@font-face {
+  font-family: 'Orbitron';
+  src: url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap');
+}
+
+@font-face {
+  font-family: 'Rajdhani';
+  src: url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap');
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&display=swap');
+}
+
+@font-face {
+  font-family: 'Space Grotesk';
+  src: url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+}
+
+@font-face {
+  font-family: 'Roboto Mono';
+  src: url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@100;200;300;400;500;600;700&display=swap');
+}
