@@ -1,19 +1,15 @@
-// api/verify.ts
+import jwt from "jsonwebtoken";
+
 export default async function handler(req: any, res: any) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
-  
+
   const { token } = req.body;
   if (!token) return res.status(401).json({ valid: false });
 
-  const parts = token.split("_");
-  if (parts.length < 3 || parts[0] !== "supreme") {
-    return res.status(401).json({ valid: false });
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || "fallback_secret") as any;
+    res.json({ valid: true, role: decoded.role });
+  } catch (e) {
+    res.status(401).json({ valid: false, error: "Token invalid atau expired" });
   }
-
-  const role = parts[1];
-  if (!["MASTER", "PRO", "TRIAL"].includes(role)) {
-    return res.status(401).json({ valid: false });
-  }
-
-  res.json({ valid: true, role });
 }
