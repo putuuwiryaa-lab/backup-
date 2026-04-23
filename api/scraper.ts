@@ -172,7 +172,6 @@ async function scrapeMarket(url: string): Promise<string> {
   });
   const html = await res.text();
 
-  // Ambil bagian antara marker
   const startIdx = html.indexOf('Tema Terang');
   const endIdx = html.indexOf('RESET');
 
@@ -180,17 +179,16 @@ async function scrapeMarket(url: string): Promise<string> {
 
   const section = html.substring(startIdx, endIdx);
 
-  // Ambil digit dari paito-digit
-  const digitMatches = section.match(/class="paito-digit">(\d)</g) || [];
-  const digits = digitMatches.map(m => m.replace(/class="paito-digit">/, '').replace('<', ''));
+  // Regex sama persis dengan Python yang sudah terbukti jalan
+  const digitMatches = [...section.matchAll(/class="paito-digit">(\d)<\/span>/g)];
+  const digits = digitMatches.map(m => m[1]);
 
-  // Gabungkan setiap 4 digit jadi 1 angka
+  // Gabungkan setiap 4 digit
   const results: string[] = [];
   for (let i = 0; i <= digits.length - 4; i += 4) {
     results.push(digits[i] + digits[i+1] + digits[i+2] + digits[i+3]);
   }
 
-  // Ambil 20 terakhir
   return results.slice(-20).join(" ");
 }
 
