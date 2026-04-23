@@ -67,12 +67,21 @@ function AppLayout() {
     }
 
     setAuthStage("Memverifikasi Perangkat...");
+    
+    // SAFETY TIMEOUT: Jangan biarkan stuck di "Decrypting" lebih dari 3 detik
+    // Gunakan functional update agar tidak terjebak closure stale state
+    const authTimeout = setTimeout(() => {
+      setAuthStatus(prev => prev === "LOADING" ? "LOCKED" : prev);
+    }, 3000);
+
     try {
       const { data, error } = await supabase
         .from('devices')
         .select('*')
         .eq('device_code', String(code))
         .single();
+
+      clearTimeout(authTimeout);
 
       if (data && !error) {
         if (data.role === "TRIAL" && data.expires_at && Date.now() > data.expires_at) {
@@ -85,6 +94,7 @@ function AppLayout() {
         setAuthStatus("LOCKED");
       }
     } catch (e: any) {
+      clearTimeout(authTimeout);
       console.error("AUTO AUTH Error:", e);
       setAuthStatus("LOCKED");
     }
@@ -92,19 +102,9 @@ function AppLayout() {
 
   const fetchMarkets = async () => {
     try {
-      const { data, error } = await supabase
-        .from('markets')
-        .select('*')
-        .order('name', { ascending: true });
-        
-      if (data && !error) {
-        setMarkets(data);
-      } else {
-        // Fallback to local API if supabase is empty
-        const res = await fetch("/api/markets");
-        const mData = await res.json();
-        if (Array.isArray(mData)) setMarkets(mData);
-      }
+      const res = await fetch("/api/markets");
+      const mData = await res.json();
+      if (Array.isArray(mData)) setMarkets(mData);
     } catch (e) {
       console.error("Gagal fetch markets:", e);
     }
@@ -112,7 +112,6 @@ function AppLayout() {
 
   const fetchSettings = async () => {
     try {
-      // Local or static default if not in supabase yet
       setSystemSetting({ runningText: "SUPREME ENGINE v2.0 - SISTEM PREDIKSI PASARAN TERAKURAT" });
     } catch (e) {}
   };
@@ -120,28 +119,54 @@ function AppLayout() {
   useEffect(() => {
     const code = getDeviceCode();
     setDeviceCode(code);
-    checkAuth(code);
+    
+    const savedToken = localStorage.getItem("supreme_token");
+    if (savedToken) {
+      setAuthStatus("LOADING");
+      fetch("/api/verify-token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: savedToken })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setRole(data.role);
+          setAuthStatus("READY");
+        } else {
+          localStorage.removeItem("supreme_token");
+          setAuthStatus("LOCKED");
+        }
+      })
+      .catch(() => setAuthStatus("LOCKED"));
+    } else {
+      setAuthStatus("LOCKED");
+    }
+
     fetchMarkets();
     fetchSettings();
   }, []);
 
   if (authStatus === "LOADING") {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-6">
+      <div className="flex flex-col items-center justify-center min-h-screen gap-6 bg-black">
         <div className="relative">
           <div className="w-16 h-16 border-4 border-t-[var(--cyan)] border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
           <Zap className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[var(--gold)] w-6 h-6" />
         </div>
-        <div className="flex flex-col items-center gap-2">
-            <div className="font-['Orbitron'] text-[10px] tracking-[4px] text-[var(--gold)] ml-2 animate-pulse uppercase">
+        <div className="flex flex-col items-center gap-4">
+            <div className="font-['Orbitron'] text-[10px] tracking-[4px] text-[var(--gold)] animate-pulse uppercase">
               {authStage}
             </div>
+            
+            {/* MANUAL BYPASS: Tombol ini muncul segera jika ada masalah koneksi */}
             <button 
-                onClick={() => setAuthStatus("READY")}
-                className="mt-6 text-[9px] font-bold text-white/20 hover:text-white/40 tracking-[2px] transition-all uppercase"
+                onClick={() => setAuthStatus("LOCKED")}
+                className="px-6 py-3 bg-[var(--gold)]/10 border border-[var(--gold)]/30 rounded text-[11px] font-bold text-[var(--gold)] hover:bg-[var(--gold)]/20 transition-all uppercase tracking-[2px] shadow-[0_0_20px_rgba(212,175,55,0.1)]"
             >
-                [ KLIK JIKA MACET ]
+              KLIK DISINI JIKA MACET
             </button>
+            <p className="text-[10px] text-white/30 italic">Hubungan ke database Supabase sedang tersendat...</p>
         </div>
       </div>
     );
@@ -343,45 +368,26 @@ function LayarKunci({ deviceCode, onAuthSuccess }: { deviceCode: string, onAuthS
     setLoading(true);
     setError("");
     try {
-      const masterPin = parseInt(deviceCode) + 1608;
-      const proPin = parseInt(deviceCode) + 2026;
-      const trialPin = parseInt(deviceCode) + 1111;
+      setLoading(true);
+      const response = await fetch("/api/verify-pin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deviceCode, pin })
+      });
 
-      let determinedRole = "";
-      let expiresAt: number | null = null;
+      const data = await response.json();
 
-      if (parseInt(pin) === masterPin || pin === "1608") {
-        determinedRole = "MASTER";
-      } else if (parseInt(pin) === proPin) {
-        determinedRole = "PRO";
-      } else if (parseInt(pin) === trialPin) {
-        determinedRole = "TRIAL";
-        expiresAt = Date.now() + (7 * 24 * 60 * 60 * 1000);
+      if (data.success) {
+        onAuthSuccess(data.role, data.token);
       } else {
-        setError("PIN SALAH!");
-        setLoading(false);
-        return;
+        setError(data.message || "PIN SALAH!");
       }
-
-      // DIRECT WRITE TO SUPABASE
-      const { error: upsertError } = await supabase
-        .from('devices')
-        .upsert({
-          device_code: String(deviceCode),
-          role: determinedRole,
-          expires_at: expiresAt,
-          updated_at: new Date().toISOString()
-        });
-
-      if (upsertError) throw upsertError;
-
-      const dummyToken = `supreme_${determinedRole}_${Date.now()}`;
-      onAuthSuccess(determinedRole, dummyToken);
     } catch (err: any) {
       console.error(err);
-      setError("SUPABASE ERROR: " + (err.message || "Gagal Koneksi ke pjjayeiusyqtrzztkbqt"));
+      setError("GAGAL TERHUBUNG KE SERVER");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (

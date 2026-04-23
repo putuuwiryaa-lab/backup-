@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
-import { Link, Routes, Route, useNavigate, useParams } from "react-router-dom";
-import { db } from "../lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
-import { RefreshCw, Target, Cpu } from "lucide-react";
+import { Routes, Route, useNavigate, useParams } from "react-router-dom";
+import { RefreshCw, Cpu } from "lucide-react";
 import AnalysisPage from "./AnalysisPage";
 
 export default function AnalyzeMenu() {
@@ -33,9 +31,11 @@ function AnalyzeList() {
   const fetchData = async () => {
     setRefreshing(true);
     try {
-      const snap = await getDoc(doc(db, 'markets', marketId as string));
-      if (snap.exists()) {
-          const mData = snap.data();
+      const res = await fetch("/api/markets");
+      const allMarkets = await res.json();
+      const mData = allMarkets.find((m: any) => m.id === marketId);
+      
+      if (mData) {
           if (mData.name) setMarketName(mData.name);
           
           const dataString = mData.historyData || "";
@@ -43,7 +43,7 @@ function AnalyzeList() {
           const data = rawTokens.filter((token: string) => /^\d{4}$/.test(token));
           
           if (data.length > 0) {
-             setLastResult(data[data.length - 1]);
+             setLastResult(data[0]); // Ambil yang paling atas (terbaru)
           } else {
              setLastResult('KOSONG');
           }

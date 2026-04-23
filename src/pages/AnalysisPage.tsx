@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../lib/firebase";
+import { useNavigate } from "react-router-dom";
 
 const SHIO_NAMES=['','Kuda','Ular','Naga','Kelinci','Harimau','Kerbau','Tikus','Babi','Anjing','Ayam','Monyet','Kambing'];
 const SHIO_EMOJI=['','🐴','🐍','🐉','🐰','🐯','🐂','🐭','🐷','🐕','🐔','🐒','🐐'];
@@ -31,14 +29,17 @@ export default function AnalysisPage({ type, title, icon, marketId }: { type: st
     setResult(null);
 
     try {
-        const snap = await getDoc(doc(db, 'markets', marketId));
-        if (!snap.exists()) {
+        const resMarkets = await fetch("/api/markets");
+        const allMarkets = await resMarkets.json();
+        const currentMarket = allMarkets.find((m: any) => m.id === marketId);
+        
+        if (!currentMarket) {
             setError(`Data histori ${marketId} belum disetup oleh Admin!`);
             setLoading(false);
             return;
         }
 
-        const dataString = snap.data().historyData || "";
+        const dataString = currentMarket.historyData || "";
         const rawTokens = dataString.split(/[\s\n\r\t,]+/);
         // Kita balik (reverse) datanya jika Admin input Terbaru di Atas
         const data = rawTokens.filter((token: string) => /^\d{4}$/.test(token)).reverse();
