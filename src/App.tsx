@@ -69,8 +69,9 @@ function AppLayout() {
   const fetchMarkets = async () => {
     try {
       const snap = await getDocs(collection(db, "markets"));
-      const mData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      setMarkets(mData);
+      const mData = snap.docs.map(d => ({ id: d.id, ...d.data() })) as any[];
+      const sorted = mData.sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
+      setMarkets(sorted);
       setSystemSetting(prev => ({ ...prev, dbError: null }));
     } catch (e: any) {
       console.error("Gagal fetch markets:", e);
