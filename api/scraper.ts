@@ -165,6 +165,20 @@ const MARKETS: Record<string, string> = {
   "LUCERNE": "/data-pengeluaran-togel-lucerne/",
 };
 
+// --- DATA URUTAN PRIORITAS ---
+const PRIORITY_ORDER: Record<string, number> = {
+  "MAGNUM CAMBODIA": 1,
+  "SYDNEY POOLS": 2,
+  "SYDNEY LOTTO": 3,
+  "CHINA POOLS": 4,
+  "JAPAN": 5,
+  "SINGAPORE": 6,
+  "PCSO": 7,
+  "TAIWAN": 8,
+  "HONGKONG POOLS": 9,
+  "HONGKONG LOTTO": 10,
+};
+
 async function scrapeMarket(url: string): Promise<string> {
   const res = await fetch(BASE + url, {
     headers: { "User-Agent": "Mozilla/5.0" }
@@ -200,12 +214,23 @@ export default async function handler(req: any, res: any) {
     const results: Record<string, string> = {};
     const errors: Record<string, string> = {};
 
+    // Mulai angka urutan dari 11 untuk pasaran yang tidak ada di daftar prioritas
+    let nextAvailableOrder = 11; 
+
     for (const [marketId, url] of Object.entries(MARKETS)) {
       try {
         const data = await scrapeMarket(url);
         if (data) {
+          // Tentukan order: ambil dari PRIORITY_ORDER, jika tidak ada pakai nextAvailableOrder
+          const currentOrder = PRIORITY_ORDER[marketId] || nextAvailableOrder++;
+
           await db.collection("markets").doc(marketId).set(
-            { historyData: data, name: marketId, updatedAt: new Date() },
+            { 
+              historyData: data, 
+              name: marketId, 
+              updatedAt: new Date(),
+              order: currentOrder // Menambahkan field order ke database
+            },
             { merge: true }
           );
           results[marketId] = "OK";
