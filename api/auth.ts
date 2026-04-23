@@ -1,3 +1,5 @@
+import jwt from "jsonwebtoken";
+
 export default async function handler(req: any, res: any) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
@@ -14,7 +16,12 @@ export default async function handler(req: any, res: any) {
   else if (pin === trialPin) role = "TRIAL";
 
   if (role) {
-    res.json({ success: true, role, token: `supreme_${role}_${Date.now()}` });
+    const token = jwt.sign(
+      { role, deviceCode },
+      process.env.JWT_SECRET || "fallback_secret",
+      { expiresIn: "30d" }
+    );
+    res.json({ success: true, role, token });
   } else {
     res.status(401).json({ success: false, error: "PIN SALAH!" });
   }
