@@ -167,29 +167,32 @@ const MARKETS: Record<string, string> = {
 };
 
 async function scrapeMarket(url: string): Promise<string> {
-async function scrapeMarket(url: string): Promise<string> {
   const res = await fetch(BASE + url, {
     headers: { "User-Agent": "Mozilla/5.0" }
   });
   const html = await res.text();
 
-  // Coba beberapa marker
-  let startIdx = html.indexOf('Tema Terang');
-  if (startIdx === -1) startIdx = html.indexOf('tema-terang');
-  if (startIdx === -1) startIdx = html.indexOf('Memuat data');
-  
-  let endIdx = html.indexOf('RESET');
-  if (endIdx === -1) endIdx = html.indexOf('Aplikasi Terkait');
+  // Ambil bagian antara marker
+  const startIdx = html.indexOf('Tema Terang');
+  const endIdx = html.indexOf('RESET');
 
-  if (startIdx === -1 || endIdx === -1) {
-    // Fallback: ambil semua angka dari halaman
-    const clean = html
-      .replace(/<script[\s\S]*?<\/script>/gi, '')
-      .replace(/<style[\s\S]*?<\/style>/gi, '')
-      .replace(/<[^>]*>/g, ' ');
-    const matches = clean.match(/\b\d{4}\b/g) || [];
-    return matches.slice(-20).join(" ");
+  if (startIdx === -1 || endIdx === -1) return '';
+
+  const section = html.substring(startIdx, endIdx);
+
+  // Ambil digit dari paito-digit
+  const digitMatches = section.match(/class="paito-digit">(\d)</g) || [];
+  const digits = digitMatches.map(m => m.replace(/class="paito-digit">/, '').replace('<', ''));
+
+  // Gabungkan setiap 4 digit jadi 1 angka
+  const results: string[] = [];
+  for (let i = 0; i <= digits.length - 4; i += 4) {
+    results.push(digits[i] + digits[i+1] + digits[i+2] + digits[i+3]);
   }
+
+  // Ambil 20 terakhir
+  return results.slice(-20).join(" ");
+}
 
   const dataSection = html.substring(startIdx, endIdx);
   const clean = dataSection.replace(/<[^>]*>/g, ' ');
