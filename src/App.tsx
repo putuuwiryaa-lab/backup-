@@ -82,8 +82,11 @@ function AppLayout() {
             setRole(json.role);
             setAuthStatus("READY");
           } else {
+            // FITUR BARU: Hapus ID saat token tidak valid di latar belakang
             localStorage.removeItem("supreme_token");
+            localStorage.removeItem("supreme_devcode");
             setAuthStatus("LOCKED");
+            window.location.reload(); // Refresh untuk langsung dapat ID baru
           }
         } catch {
           setAuthStatus("LOCKED");
@@ -136,7 +139,17 @@ function AppLayout() {
       <div className="border border-red-500 p-8 rounded-xl bg-black/80 shadow-[0_0_50px_rgba(239,68,68,0.2)] max-w-sm">
         <h2 className="font-['Orbitron'] text-red-500 mb-4 tracking-[4px]">ACCOUNT EXPIRED</h2>
         <p className="text-[12px] opacity-70 mb-6 font-['JetBrains_Mono']">Masa trial akun anda telah berakhir. Hubungi Admin untuk aktivasi VIP.</p>
-        <button onClick={() => window.location.reload()} className="w-full bg-red-600 p-3 rounded font-bold text-white text-[12px] tracking-[2px]">REFRESH</button>
+        <button 
+          onClick={() => {
+            // FITUR BARU: Hapus ID saat klik refresh di layar expired
+            localStorage.removeItem("supreme_token");
+            localStorage.removeItem("supreme_devcode");
+            window.location.reload();
+          }} 
+          className="w-full bg-red-600 p-3 rounded font-bold text-white text-[12px] tracking-[2px]"
+        >
+          REFRESH
+        </button>
       </div>
     </div>
   );
@@ -264,7 +277,9 @@ function Dashboard({ markets }: { markets: any[] }) {
       <div className="mt-8 mb-12 flex justify-center">
         <button
           onClick={() => {
+            // FITUR BARU: Hapus ID saat klik tombol keluar
             localStorage.removeItem("supreme_token");
+            localStorage.removeItem("supreme_devcode");
             sessionStorage.setItem("supreme_skip_auto", "true");
             window.location.reload();
           }}
@@ -355,4 +370,4 @@ function LayarKunci({ deviceCode, onAuthSuccess }: { deviceCode: string, onAuthS
       </div>
     </div>
   );
-            }
+}
