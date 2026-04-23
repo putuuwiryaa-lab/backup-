@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Trash2, Lock, ChevronUp, ChevronDown, Settings, List } from "lucide-react";
 import { db } from "../App";
-import { collection, getDocs, doc, setDoc, deleteDoc } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 
 export default function AdminPage() {
   const [isAuthorized, setIsAuthorized] = useState(false);
@@ -16,6 +16,7 @@ export default function AdminPage() {
   const [runningText, setRunningText] = useState('SUPREME ENGINE v2.0 - SISTEM PREDIKSI PASARAN TERAKURAT');
   const [systemStatus, setSystemStatus] = useState('ONLINE');
   const [appVersion, setAppVersion] = useState('v5.0');
+  const [token, setToken] = useState('');
 
   const fetchMarkets = async () => {
     try {
@@ -32,20 +33,33 @@ export default function AdminPage() {
     }
   };
 
+  const callAdmin = async (body: any) => {
+    const res = await fetch("/api/admin", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify(body)
+    });
+    return await res.json();
+  };
+
   useEffect(() => {
     const verifyToken = async () => {
-      const token = localStorage.getItem("supreme_token");
-      if (!token) { setIsAuthorized(false); setChecking(false); return; }
+      const t = localStorage.getItem("supreme_token");
+      if (!t) { setIsAuthorized(false); setChecking(false); return; }
 
       try {
         const res = await fetch("/api/verify", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token })
+          body: JSON.stringify({ token: t })
         });
         const json = await res.json();
         if (json.valid && json.role === "MASTER") {
           setIsAuthorized(true);
+          setToken(t);
           fetchMarkets();
         } else {
           setIsAuthorized(false);
@@ -69,10 +83,14 @@ export default function AdminPage() {
     setLoading(true);
     setMessage('Menyimpan ke Database...');
     try {
-      await setDoc(doc(db, "markets", selectedMarket), { historyData }, { merge: true });
-      setMarketsList(prev => prev.map(m => m.id === selectedMarket ? { ...m, historyData } : m));
-      setMessage('Data ' + selectedMarket + ' BERHASIL DISIMPAN!');
-      setTimeout(() => setMessage(''), 3000);
+      const json = await callAdmin({ action: "save", marketId: selectedMarket, historyData });
+      if (json.success) {
+        setMarketsList(prev => prev.map(m => m.id === selectedMarket ? { ...m, historyData } : m));
+        setMessage('Data ' + selectedMarket + ' BERHASIL DISIMPAN!');
+        setTimeout(() => setMessage(''), 3000);
+      } else {
+        setMessage("Error: " + json.error);
+      }
     } catch (e: any) {
       setMessage("Error: " + e.message);
     } finally {
@@ -85,12 +103,14 @@ export default function AdminPage() {
     if (!window.confirm(`Yakin ingin MENGHAPUS pasaran ${selectedMarket}?`)) return;
     setLoading(true);
     try {
-      await deleteDoc(doc(db, "markets", selectedMarket));
-      const updatedList = marketsList.filter(m => m.id !== selectedMarket);
-      setMarketsList(updatedList);
-      setSelectedMarket(updatedList[0]?.id || '');
-      setHistoryData(updatedList[0]?.historyData || '');
-      setMessage('PASARAN DIHAPUS');
+      const json = await callAdmin({ action: "delete", marketId: selectedMarket });
+      if (json.success) {
+        const updatedList = marketsList.filter(m => m.id !== selectedMarket);
+        setMarketsList(updatedList);
+        setSelectedMarket(updatedList[0]?.id || '');
+        setHistoryData(updatedList[0]?.historyData || '');
+        setMessage('PASARAN DIHAPUS');
+      }
     } catch (e) {}
     setLoading(false);
   };
@@ -100,12 +120,16 @@ export default function AdminPage() {
     if (!upperId) return;
     if (marketsList.find(m => m.id === upperId)) return;
     const newOrder = marketsList.length;
-    await setDoc(doc(db, "markets", upperId), { name: upperId, historyData: "", order: newOrder }, { merge: true });
-    const newList = [...marketsList, { id: upperId, historyData: "", order: newOrder }];
-    setMarketsList(newList);
-    setSelectedMarket(upperId);
-    setHistoryData("");
-    setNewMarketId('');
+    try {
+      const json = await callAdmin({ action: "add", marketId: upperId, order: newOrder });
+      if (json.success) {
+        const newList = [...marketsList, { id: upperId, historyData: "", order: newOrder }];
+        setMarketsList(newList);
+        setSelectedMarket(upperId);
+        setHistoryData("");
+        setNewMarketId('');
+      }
+    } catch (e) {}
   };
 
   const moveMarket = async (idx: number, dir: 'up' | 'down') => {
@@ -114,8 +138,15 @@ export default function AdminPage() {
     if (swapIdx < 0 || swapIdx >= newList.length) return;
     [newList[idx], newList[swapIdx]] = [newList[swapIdx], newList[idx]];
     setMarketsList(newList);
-    await setDoc(doc(db, "markets", newList[idx].id), { order: idx }, { merge: true });
-    await setDoc(doc(db, "markets", newList[swapIdx].id), { order: swapIdx }, { merge: true });
+    try {
+      await callAdmin({
+        action: "reorder",
+        markets: [
+          { id: newList[idx].id, order: idx },
+          { id: newList[swapIdx].id, order: swapIdx }
+        ]
+      });
+    } catch (e) {}
   };
 
   if (checking) {
@@ -164,7 +195,6 @@ export default function AdminPage() {
 
       {activeTab === 'markets' ? (
         <>
-          {/* Market List with Reorder */}
           <div className="flex flex-col gap-2 mb-6">
             {marketsList.map((m, idx) => (
               <div key={m.id} className="flex items-center gap-2">
@@ -194,7 +224,6 @@ export default function AdminPage() {
             ))}
           </div>
 
-          {/* Add New Market */}
           <div className="flex gap-2 mb-6">
             <input
               type="text"
@@ -208,7 +237,6 @@ export default function AdminPage() {
             </button>
           </div>
 
-          {/* History Data */}
           <div className="mb-6">
             <label className="text-[10px] text-[var(--cyan)] font-bold block mb-3 uppercase tracking-[2px] opacity-70">DATA HISTORY {selectedMarket}:</label>
             <textarea
@@ -219,7 +247,6 @@ export default function AdminPage() {
             />
           </div>
 
-          {/* Action Buttons */}
           <div className="flex gap-3 mb-4">
             <button
               onClick={handleSave}
@@ -273,4 +300,4 @@ export default function AdminPage() {
       )}
     </div>
   );
-                         }
+  }
