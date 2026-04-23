@@ -167,30 +167,33 @@ const MARKETS: Record<string, string> = {
 };
 
 async function scrapeMarket(url: string): Promise<string> {
+async function scrapeMarket(url: string): Promise<string> {
   const res = await fetch(BASE + url, {
     headers: { "User-Agent": "Mozilla/5.0" }
   });
   const html = await res.text();
 
-  // Ambil hanya konten di antara dua marker yang ada di halaman
-  // Data result ada setelah "Tema Terang" dan sebelum "RESET"
-  const startMarker = 'Tema Terang';
-  const endMarker = 'RESET';
+  // Coba beberapa marker
+  let startIdx = html.indexOf('Tema Terang');
+  if (startIdx === -1) startIdx = html.indexOf('tema-terang');
+  if (startIdx === -1) startIdx = html.indexOf('Memuat data');
   
-  const startIdx = html.indexOf(startMarker);
-  const endIdx = html.indexOf(endMarker);
-  
-  if (startIdx === -1 || endIdx === -1) return '';
-  
+  let endIdx = html.indexOf('RESET');
+  if (endIdx === -1) endIdx = html.indexOf('Aplikasi Terkait');
+
+  if (startIdx === -1 || endIdx === -1) {
+    // Fallback: ambil semua angka dari halaman
+    const clean = html
+      .replace(/<script[\s\S]*?<\/script>/gi, '')
+      .replace(/<style[\s\S]*?<\/style>/gi, '')
+      .replace(/<[^>]*>/g, ' ');
+    const matches = clean.match(/\b\d{4}\b/g) || [];
+    return matches.slice(-20).join(" ");
+  }
+
   const dataSection = html.substring(startIdx, endIdx);
-  
-  // Buang tag HTML
   const clean = dataSection.replace(/<[^>]*>/g, ' ');
-  
-  // Ambil angka 4 digit
   const matches = clean.match(/\b\d{4}\b/g) || [];
-  
-  // Ambil 20 result terakhir
   return matches.slice(-20).join(" ");
 }
 
