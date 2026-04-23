@@ -132,7 +132,6 @@ const MARKETS: Record<string, string> = {
   "HUIZHOU": "/data-pengeluaran-togel-huizhou/",
   "OSAKA": "/data-pengeluaran-togel-osaka/",
   "PHOENIX": "/data-pengeluaran-togel-phoenix/",
-  "CAMBODIA": "/data-pengeluaran-togel-cambodia/",
   "MOROCCO 18:00": "/data-pengeluaran-togel-morocco-quatro-18-00-wib/",
   "INCHEON": "/data-pengeluaran-togel-incheon/",
   "SEOUL": "/data-pengeluaran-togel-seoul/",
