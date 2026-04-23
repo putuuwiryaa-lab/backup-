@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Database, Cpu, Trash2, Unlock, Lock, ArrowLeft, ChevronUp, ChevronDown, Settings, List } from "lucide-react";
+import { Trash2, Lock, ChevronUp, ChevronDown, Settings, List } from "lucide-react";
 import { db } from "../App";
 import { collection, getDocs, doc, setDoc, deleteDoc } from "firebase/firestore";
 
 export default function AdminPage() {
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [checking, setChecking] = useState(true);
   const [activeTab, setActiveTab] = useState<'markets' | 'settings'>('markets');
   const [marketsList, setMarketsList] = useState<any[]>([]);
   const [selectedMarket, setSelectedMarket] = useState('');
@@ -12,7 +13,6 @@ export default function AdminPage() {
   const [historyData, setHistoryData] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-
   const [runningText, setRunningText] = useState('SUPREME ENGINE v2.0 - SISTEM PREDIKSI PASARAN TERAKURAT');
   const [systemStatus, setSystemStatus] = useState('ONLINE');
   const [appVersion, setAppVersion] = useState('v5.0');
@@ -21,13 +21,11 @@ export default function AdminPage() {
     try {
       const snap = await getDocs(collection(db, "markets"));
       const data = snap.docs.map(d => ({ id: d.id, ...d.data() })) as any[];
-      
-      if (Array.isArray(data)) {
-        setMarketsList(data);
-        if (data.length > 0 && !selectedMarket) {
-          setSelectedMarket(data[0].id);
-          setHistoryData(data[0].historyData || '');
-        }
+      const sorted = data.sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
+      setMarketsList(sorted);
+      if (sorted.length > 0) {
+        setSelectedMarket(sorted[0].id);
+        setHistoryData(sorted[0].historyData || '');
       }
     } catch (e) {
       console.error("Fetch error:", e);
@@ -35,13 +33,29 @@ export default function AdminPage() {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem("supreme_token");
-    if (token && token.includes("_MASTER_")) {
-      setIsAuthorized(true);
-      fetchMarkets();
-    } else {
-      setIsAuthorized(false);
-    }
+    const verifyToken = async () => {
+      const token = localStorage.getItem("supreme_token");
+      if (!token) { setIsAuthorized(false); setChecking(false); return; }
+
+      try {
+        const res = await fetch("/api/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token })
+        });
+        const json = await res.json();
+        if (json.valid && json.role === "MASTER") {
+          setIsAuthorized(true);
+          fetchMarkets();
+        } else {
+          setIsAuthorized(false);
+        }
+      } catch {
+        setIsAuthorized(false);
+      }
+      setChecking(false);
+    };
+    verifyToken();
   }, []);
 
   const loadData = (marketId: string) => {
@@ -54,24 +68,12 @@ export default function AdminPage() {
     if (!selectedMarket) return;
     setLoading(true);
     setMessage('Menyimpan ke Database...');
-
     try {
-      let updatedList = [...marketsList];
-      
-      if (!updatedList.find(m => m.id === selectedMarket)) {
-        updatedList.push({ id: selectedMarket, historyData });
-      } else {
-        updatedList = updatedList.map(m => m.id === selectedMarket ? { ...m, historyData } : m);
-      }
-
-      // Save to Firebase directly
       await setDoc(doc(db, "markets", selectedMarket), { historyData }, { merge: true });
-
-      setMarketsList(updatedList);
+      setMarketsList(prev => prev.map(m => m.id === selectedMarket ? { ...m, historyData } : m));
       setMessage('Data ' + selectedMarket + ' BERHASIL DISIMPAN!');
       setTimeout(() => setMessage(''), 3000);
     } catch (e: any) {
-      console.error(e);
       setMessage("Error: " + e.message);
     } finally {
       setLoading(false);
@@ -81,14 +83,10 @@ export default function AdminPage() {
   const handleDelete = async () => {
     if (!selectedMarket) return;
     if (!window.confirm(`Yakin ingin MENGHAPUS pasaran ${selectedMarket}?`)) return;
-
     setLoading(true);
     try {
-      const updatedList = marketsList.filter(m => m.id !== selectedMarket);
-      
-      // Delete from Firebase directly
       await deleteDoc(doc(db, "markets", selectedMarket));
-
+      const updatedList = marketsList.filter(m => m.id !== selectedMarket);
       setMarketsList(updatedList);
       setSelectedMarket(updatedList[0]?.id || '');
       setHistoryData(updatedList[0]?.historyData || '');
@@ -97,17 +95,36 @@ export default function AdminPage() {
     setLoading(false);
   };
 
-  const handleAddNewMarket = () => {
+  const handleAddNewMarket = async () => {
     const upperId = newMarketId.trim().toUpperCase();
     if (!upperId) return;
-    if (!marketsList.find(m => m.id === upperId)) {
-      const newList = [...marketsList, { id: upperId, historyData: "" }];
-      setMarketsList(newList);
-      setSelectedMarket(upperId);
-      setHistoryData("");
-    }
+    if (marketsList.find(m => m.id === upperId)) return;
+    const newOrder = marketsList.length;
+    await setDoc(doc(db, "markets", upperId), { name: upperId, historyData: "", order: newOrder }, { merge: true });
+    const newList = [...marketsList, { id: upperId, historyData: "", order: newOrder }];
+    setMarketsList(newList);
+    setSelectedMarket(upperId);
+    setHistoryData("");
     setNewMarketId('');
   };
+
+  const moveMarket = async (idx: number, dir: 'up' | 'down') => {
+    const newList = [...marketsList];
+    const swapIdx = dir === 'up' ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= newList.length) return;
+    [newList[idx], newList[swapIdx]] = [newList[swapIdx], newList[idx]];
+    setMarketsList(newList);
+    await setDoc(doc(db, "markets", newList[idx].id), { order: idx }, { merge: true });
+    await setDoc(doc(db, "markets", newList[swapIdx].id), { order: swapIdx }, { merge: true });
+  };
+
+  if (checking) {
+    return (
+      <div className="flex items-center justify-center min-h-[300px]">
+        <div className="w-8 h-8 border-4 border-t-[var(--cyan)] border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   if (!isAuthorized) {
     return (
@@ -125,43 +142,62 @@ export default function AdminPage() {
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-[14px] text-[var(--gold)] font-['Orbitron'] font-bold uppercase tracking-[4px]">SUPER ADMIN</h2>
         <div className="flex items-center gap-2">
-           <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-           <span className="text-[9px] font-bold text-green-500 tracking-[1px]">SERVER CONNECTED</span>
+          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+          <span className="text-[9px] font-bold text-green-500 tracking-[1px]">SERVER CONNECTED</span>
         </div>
       </div>
 
       <div className="flex gap-1 mb-6 bg-black/40 p-1 rounded-lg border border-white/5">
-         <button 
-           onClick={() => setActiveTab('markets')}
-           className={`flex-1 flex items-center justify-center gap-2 py-2 text-[10px] font-bold rounded transition-all tracking-[2px] ${activeTab === 'markets' ? 'bg-[var(--gold)] text-black' : 'text-gray-400 hover:text-white'}`}
-         >
-           <List size={14} /> KELOLA PASARAN
-         </button>
-         <button 
-           onClick={() => setActiveTab('settings')}
-           className={`flex-1 flex items-center justify-center gap-2 py-2 text-[10px] font-bold rounded transition-all tracking-[2px] ${activeTab === 'settings' ? 'bg-[var(--gold)] text-black' : 'text-gray-400 hover:text-white'}`}
-         >
-           <Settings size={14} /> SYSTEM SETTINGS
-         </button>
+        <button
+          onClick={() => setActiveTab('markets')}
+          className={`flex-1 flex items-center justify-center gap-2 py-2 text-[10px] font-bold rounded transition-all tracking-[2px] ${activeTab === 'markets' ? 'bg-[var(--gold)] text-black' : 'text-gray-400 hover:text-white'}`}
+        >
+          <List size={14} /> KELOLA PASARAN
+        </button>
+        <button
+          onClick={() => setActiveTab('settings')}
+          className={`flex-1 flex items-center justify-center gap-2 py-2 text-[10px] font-bold rounded transition-all tracking-[2px] ${activeTab === 'settings' ? 'bg-[var(--gold)] text-black' : 'text-gray-400 hover:text-white'}`}
+        >
+          <Settings size={14} /> SYSTEM SETTINGS
+        </button>
       </div>
-      
+
       {activeTab === 'markets' ? (
         <>
-          <div className="flex flex-wrap gap-2 mb-6">
-            {marketsList.map(m => (
-              <button 
-                key={m.id}
-                onClick={() => loadData(m.id)}
-                className={`px-4 py-2 text-[11px] font-bold border rounded transition-all tracking-[1px] ${selectedMarket === m.id ? 'bg-[var(--cyan)] border-[var(--cyan)] text-black shadow-[0_0_15px_rgba(0,229,255,0.3)]' : 'border-white/10 text-gray-500 hover:border-white/20'}`}
-              >
-                {m.id}
-              </button>
+          {/* Market List with Reorder */}
+          <div className="flex flex-col gap-2 mb-6">
+            {marketsList.map((m, idx) => (
+              <div key={m.id} className="flex items-center gap-2">
+                <div className="flex flex-col gap-0.5">
+                  <button
+                    onClick={() => moveMarket(idx, 'up')}
+                    disabled={idx === 0}
+                    className="text-white/30 hover:text-white disabled:opacity-10 p-0.5 transition-all"
+                  >
+                    <ChevronUp size={14} />
+                  </button>
+                  <button
+                    onClick={() => moveMarket(idx, 'down')}
+                    disabled={idx === marketsList.length - 1}
+                    className="text-white/30 hover:text-white disabled:opacity-10 p-0.5 transition-all"
+                  >
+                    <ChevronDown size={14} />
+                  </button>
+                </div>
+                <button
+                  onClick={() => loadData(m.id)}
+                  className={`flex-1 px-4 py-2 text-[11px] font-bold border rounded transition-all tracking-[1px] text-left ${selectedMarket === m.id ? 'bg-[var(--cyan)] border-[var(--cyan)] text-black shadow-[0_0_15px_rgba(0,229,255,0.3)]' : 'border-white/10 text-gray-500 hover:border-white/20'}`}
+                >
+                  {m.id}
+                </button>
+              </div>
             ))}
           </div>
 
+          {/* Add New Market */}
           <div className="flex gap-2 mb-6">
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={newMarketId}
               onChange={e => setNewMarketId(e.target.value)}
               placeholder="KODE PASARAN BARU..."
@@ -172,6 +208,7 @@ export default function AdminPage() {
             </button>
           </div>
 
+          {/* History Data */}
           <div className="mb-6">
             <label className="text-[10px] text-[var(--cyan)] font-bold block mb-3 uppercase tracking-[2px] opacity-70">DATA HISTORY {selectedMarket}:</label>
             <textarea
@@ -182,13 +219,14 @@ export default function AdminPage() {
             />
           </div>
 
+          {/* Action Buttons */}
           <div className="flex gap-3 mb-4">
             <button
               onClick={handleSave}
               disabled={loading || !selectedMarket}
               className="flex-1 bg-gradient-to-r from-emerald-600 to-emerald-800 text-white py-4 rounded-xl text-[11px] font-black disabled:opacity-50 tracking-[3px] shadow-lg active:scale-95 transition-all"
             >
-              SAVE TO SERVER
+              {loading ? 'MENYIMPAN...' : 'SAVE TO SERVER'}
             </button>
             <button
               onClick={handleDelete}
@@ -201,36 +239,38 @@ export default function AdminPage() {
         </>
       ) : (
         <div className="space-y-6">
-           <div>
-              <label className="text-[10px] text-[var(--cyan)] font-bold block mb-2 tracking-[2px] uppercase opacity-70">RUNNING TEXT:</label>
-              <textarea 
-                value={runningText}
-                onChange={e => setRunningText(e.target.value)}
-                className="w-full h-24 bg-black/50 border border-white/10 rounded-2xl p-4 text-[11px] text-white focus:outline-none"
-              />
-           </div>
-
-           <div className="grid grid-cols-2 gap-4">
-              <div>
-                 <label className="text-[10px] text-[var(--cyan)] font-bold block mb-2 tracking-[2px] uppercase opacity-70">SYSTEM STATUS:</label>
-                 <select value={systemStatus} onChange={e => setSystemStatus(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-[11px] text-white">
-                    <option value="ONLINE">ONLINE</option>
-                    <option value="MAINTENANCE">MAINTENANCE</option>
-                 </select>
-              </div>
-              <div>
-                 <label className="text-[10px] text-[var(--cyan)] font-bold block mb-2 tracking-[2px] uppercase opacity-70">VERSION:</label>
-                 <input type="text" value={appVersion} onChange={e => setAppVersion(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-[11px] text-white"/>
-              </div>
-           </div>
-
-           <button className="w-full bg-gradient-to-r from-blue-600 to-blue-800 text-white py-4 rounded-xl text-[11px] font-black tracking-[3px] shadow-lg opacity-50 cursor-not-allowed">
-              UPDATE GLOBAL SETTINGS
-           </button>
+          <div>
+            <label className="text-[10px] text-[var(--cyan)] font-bold block mb-2 tracking-[2px] uppercase opacity-70">RUNNING TEXT:</label>
+            <textarea
+              value={runningText}
+              onChange={e => setRunningText(e.target.value)}
+              className="w-full h-24 bg-black/50 border border-white/10 rounded-2xl p-4 text-[11px] text-white focus:outline-none"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-[10px] text-[var(--cyan)] font-bold block mb-2 tracking-[2px] uppercase opacity-70">SYSTEM STATUS:</label>
+              <select value={systemStatus} onChange={e => setSystemStatus(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-[11px] text-white">
+                <option value="ONLINE">ONLINE</option>
+                <option value="MAINTENANCE">MAINTENANCE</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-[10px] text-[var(--cyan)] font-bold block mb-2 tracking-[2px] uppercase opacity-70">VERSION:</label>
+              <input type="text" value={appVersion} onChange={e => setAppVersion(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-[11px] text-white" />
+            </div>
+          </div>
+          <button className="w-full bg-gradient-to-r from-blue-600 to-blue-800 text-white py-4 rounded-xl text-[11px] font-black tracking-[3px] shadow-lg opacity-50 cursor-not-allowed">
+            UPDATE GLOBAL SETTINGS
+          </button>
         </div>
       )}
 
-      {message && <div className="mt-6 p-4 bg-black/60 text-[10px] font-black text-center border border-white/10 text-[var(--gold)] rounded-xl uppercase tracking-[2px] animate-pulse">{message}</div>}
+      {message && (
+        <div className="mt-6 p-4 bg-black/60 text-[10px] font-black text-center border border-white/10 text-[var(--gold)] rounded-xl uppercase tracking-[2px] animate-pulse">
+          {message}
+        </div>
+      )}
     </div>
   );
-}
+                         }
