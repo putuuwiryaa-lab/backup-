@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Database, Cpu, Trash2, Unlock, Lock, ArrowLeft, ChevronUp, ChevronDown, Settings, List } from "lucide-react";
+import { db } from "../App";
+import { collection, getDocs, doc, setDoc, deleteDoc } from "firebase/firestore";
 
 export default function AdminPage() {
   const [isAuthorized, setIsAuthorized] = useState(false);
@@ -17,8 +19,9 @@ export default function AdminPage() {
 
   const fetchMarkets = async () => {
     try {
-      const res = await fetch("/api/markets");
-      const data = await res.json();
+      const snap = await getDocs(collection(db, "markets"));
+      const data = snap.docs.map(d => ({ id: d.id, ...d.data() })) as any[];
+      
       if (Array.isArray(data)) {
         setMarketsList(data);
         if (data.length > 0 && !selectedMarket) {
@@ -49,59 +52,47 @@ export default function AdminPage() {
 
   const handleSave = async () => {
     if (!selectedMarket) return;
-    const token = localStorage.getItem("supreme_token");
     setLoading(true);
-    setMessage('Menyimpan ke Server...');
+    setMessage('Menyimpan ke Database...');
 
     try {
-      const updatedList = marketsList.map(m => 
-        m.id === selectedMarket ? { ...m, historyData } : m
-      );
-
-      // Jika pasaran baru (tidak ada di list awal)
-      if (!marketsList.find(m => m.id === selectedMarket)) {
+      let updatedList = [...marketsList];
+      
+      if (!updatedList.find(m => m.id === selectedMarket)) {
         updatedList.push({ id: selectedMarket, historyData });
-      }
-
-      const res = await fetch("/api/markets/update", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ markets: updatedList, token })
-      });
-
-      const result = await res.json();
-      if (result.success) {
-        setMarketsList(updatedList);
-        setMessage('Data ' + selectedMarket + ' BERHASIL DISIMPAN!');
       } else {
-        throw new Error(result.message);
+        updatedList = updatedList.map(m => m.id === selectedMarket ? { ...m, historyData } : m);
       }
+
+      // Save to Firebase directly
+      await setDoc(doc(db, "markets", selectedMarket), { historyData }, { merge: true });
+
+      setMarketsList(updatedList);
+      setMessage('Data ' + selectedMarket + ' BERHASIL DISIMPAN!');
+      setTimeout(() => setMessage(''), 3000);
     } catch (e: any) {
+      console.error(e);
       setMessage("Error: " + e.message);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleDelete = async () => {
     if (!selectedMarket) return;
     if (!window.confirm(`Yakin ingin MENGHAPUS pasaran ${selectedMarket}?`)) return;
 
-    const token = localStorage.getItem("supreme_token");
     setLoading(true);
     try {
       const updatedList = marketsList.filter(m => m.id !== selectedMarket);
-      const res = await fetch("/api/markets/update", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ markets: updatedList, token })
-      });
+      
+      // Delete from Firebase directly
+      await deleteDoc(doc(db, "markets", selectedMarket));
 
-      if (res.ok) {
-        setMarketsList(updatedList);
-        setSelectedMarket(updatedList[0]?.id || '');
-        setHistoryData(updatedList[0]?.historyData || '');
-        setMessage('PASARAN DIHAPUS');
-      }
+      setMarketsList(updatedList);
+      setSelectedMarket(updatedList[0]?.id || '');
+      setHistoryData(updatedList[0]?.historyData || '');
+      setMessage('PASARAN DIHAPUS');
     } catch (e) {}
     setLoading(false);
   };

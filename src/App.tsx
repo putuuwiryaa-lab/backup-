@@ -2,6 +2,14 @@ import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 
+import { initializeApp } from "firebase/app";
+import { getFirestore, collection, getDocs, doc, setDoc } from "firebase/firestore";
+import firebaseConfig from "../firebase-applet-config.json";
+
+// Initialize Firebase SDK directly across the app
+export const firebaseApp = initializeApp(firebaseConfig);
+export const db = getFirestore(firebaseApp, firebaseConfig.firestoreDatabaseId || undefined);
+
 import { 
   BarChart3, 
   History, 
@@ -60,29 +68,17 @@ function AppLayout() {
 
   const fetchMarkets = async () => {
     try {
-      const savedToken = localStorage.getItem("supreme_token");
-      const res = await fetch("/api/markets", {
-         headers: {
-            "Authorization": `Bearer ${savedToken}`
-         }
-      });
-      // Deteksi jika server mengembalikan BUKAN json (misal HTML dari proxy vercel dsb)
-      const text = await res.text();
-      try {
-        const mData = JSON.parse(text);
-        if (mData.error) {
-           setSystemSetting(prev => ({ ...prev, dbError: mData.error }));
-           return;
-        }
-        if (Array.isArray(mData)) {
-           setMarkets(mData);
-           setSystemSetting(prev => ({ ...prev, dbError: null }));
-        }
-      } catch(parseErr) {
-        console.error("Bukan format JSON yang diterima. Merupakan text/html proxy error.");
-      }
-    } catch (e) {
+      const snap = await getDocs(collection(db, "markets"));
+      const mData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      setMarkets(mData);
+      setSystemSetting(prev => ({ ...prev, dbError: null }));
+    } catch (e: any) {
       console.error("Gagal fetch markets:", e);
+      if (e.message?.includes("Missing or insufficient permissions")) {
+         setSystemSetting(prev => ({ ...prev, dbError: "Sistem Keamanan Firebase Menolak Akses. Periksa Rules." }));
+      } else {
+         setSystemSetting(prev => ({ ...prev, dbError: e.message }));
+      }
     }
   };
 
@@ -97,24 +93,18 @@ function AppLayout() {
     setDeviceCode(code);
     
     const savedToken = localStorage.getItem("supreme_token");
-    if (savedToken) {
-      setAuthStatus("LOADING");
-      fetch("/api/verify-token", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: savedToken })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          setRole(data.role);
-          setAuthStatus("READY");
-        } else {
-          localStorage.removeItem("supreme_token");
-          setAuthStatus("LOCKED");
-        }
-      })
-      .catch(() => setAuthStatus("LOCKED"));
+    if (savedToken && savedToken.startsWith("supreme_")) {
+       setAuthStatus("LOADING");
+       setTimeout(() => { // Simulate small load
+          const parts = savedToken.split("_");
+          if (parts.length >= 3) {
+             setRole(parts[1]);
+             setAuthStatus("READY");
+          } else {
+             localStorage.removeItem("supreme_token");
+             setAuthStatus("LOCKED");
+          }
+       }, 500);
     } else {
       setAuthStatus("LOCKED");
     }
@@ -352,27 +342,26 @@ function LayarKunci({ deviceCode, onAuthSuccess }: { deviceCode: string, onAuthS
     if (!pin) return;
     setLoading(true);
     setError("");
-    try {
-      setLoading(true);
-      const response = await fetch("/api/verify-pin", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ deviceCode, pin })
-      });
+    
+    // Simulate slight network delay for effect
+    setTimeout(() => {
+       const devId = parseInt(deviceCode) || 0;
+       const masterPin = "120800";
+       const proPin = ((devId * 5) + 2026).toString();
+       const trialPin = ((devId * 3) + 1234).toString();
 
-      const data = await response.json();
+       let role = null;
+       if (pin === masterPin) role = "MASTER";
+       else if (pin === proPin) role = "PRO";
+       else if (pin === trialPin) role = "TRIAL";
 
-      if (data.success) {
-        onAuthSuccess(data.role, data.token);
-      } else {
-        setError(data.message || "PIN SALAH!");
-      }
-    } catch (err: any) {
-      console.error(err);
-      setError("GAGAL TERHUBUNG KE SERVER");
-    } finally {
-      setLoading(false);
-    }
+       if (role) {
+          onAuthSuccess(role, `supreme_${role}_${Date.now()}`);
+       } else {
+          setError("PIN SALAH!");
+       }
+       setLoading(false);
+    }, 600);
   };
 
   return (
