@@ -171,8 +171,27 @@ async function scrapeMarket(url: string): Promise<string> {
     headers: { "User-Agent": "Mozilla/5.0" }
   });
   const html = await res.text();
-  const matches = html.match(/\b\d{4}\b/g) || [];
-  return matches.slice(-200).join(" ");
+
+  // Ambil hanya konten di antara dua marker yang ada di halaman
+  // Data result ada setelah "Tema Terang" dan sebelum "RESET"
+  const startMarker = 'Tema Terang';
+  const endMarker = 'RESET';
+  
+  const startIdx = html.indexOf(startMarker);
+  const endIdx = html.indexOf(endMarker);
+  
+  if (startIdx === -1 || endIdx === -1) return '';
+  
+  const dataSection = html.substring(startIdx, endIdx);
+  
+  // Buang tag HTML
+  const clean = dataSection.replace(/<[^>]*>/g, ' ');
+  
+  // Ambil angka 4 digit
+  const matches = clean.match(/\b\d{4}\b/g) || [];
+  
+  // Ambil 20 result terakhir
+  return matches.slice(-20).join(" ");
 }
 
 export default async function handler(req: any, res: any) {
