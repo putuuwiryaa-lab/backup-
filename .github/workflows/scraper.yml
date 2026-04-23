@@ -1,0 +1,16 @@
+name: Auto Scraper
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # setiap 6 jam
+  workflow_dispatch:  # bisa trigger manual
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Scraper
+        run: |
+          curl -X GET \
+            -H "x-scraper-secret: ${{ secrets.SCRAPER_SECRET }}" \
+            https://backup-gray.vercel.app/api/scraper
