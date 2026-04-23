@@ -342,26 +342,23 @@ function LayarKunci({ deviceCode, onAuthSuccess }: { deviceCode: string, onAuthS
     if (!pin) return;
     setLoading(true);
     setError("");
-    
-    // Simulate slight network delay for effect
-    setTimeout(() => {
-       const devId = parseInt(deviceCode) || 0;
-       const masterPin = "120800";
-       const proPin = ((devId * 5) + 2026).toString();
-       const trialPin = ((devId * 3) + 1234).toString();
 
-       let role = null;
-       if (pin === masterPin) role = "MASTER";
-       else if (pin === proPin) role = "PRO";
-       else if (pin === trialPin) role = "TRIAL";
-
-       if (role) {
-          onAuthSuccess(role, `supreme_${role}_${Date.now()}`);
-       } else {
-          setError("PIN SALAH!");
-       }
-       setLoading(false);
-    }, 600);
+    try {
+      const res = await fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pin, deviceCode })
+      });
+      const json = await res.json();
+      if (json.success) {
+        onAuthSuccess(json.role, json.token);
+      } else {
+        setError(json.error || "PIN SALAH!");
+      }
+    } catch (e) {
+      setError("Error koneksi server!");
+    }
+    setLoading(false);
   };
 
   return (
