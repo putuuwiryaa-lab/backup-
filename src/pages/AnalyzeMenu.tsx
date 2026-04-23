@@ -43,7 +43,7 @@ function AnalyzeList() {
           const data = rawTokens.filter((token: string) => /^\d{4}$/.test(token));
           
           if (data.length > 0) {
-             setLastResult(data[0]); // Ambil yang paling atas (terbaru)
+             setLastResult(data[data.length - 1]); // Ambil yang paling atas (terbaru)
           } else {
              setLastResult('KOSONG');
           }
