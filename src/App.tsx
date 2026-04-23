@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { supabase } from "./lib/supabase";
+
 import { 
   BarChart3, 
   History, 
@@ -58,53 +58,29 @@ function AppLayout() {
     return code;
   };
 
-  const checkAuth = async (code: string) => {
-    // If user explicitly logged out, skip auto-login once
-    if (sessionStorage.getItem("supreme_skip_auto") === "true") {
-      sessionStorage.removeItem("supreme_skip_auto");
-      setAuthStatus("LOCKED");
-      return;
-    }
-
-    setAuthStage("Memverifikasi Perangkat...");
-    
-    // SAFETY TIMEOUT: Jangan biarkan stuck di "Decrypting" lebih dari 3 detik
-    // Gunakan functional update agar tidak terjebak closure stale state
-    const authTimeout = setTimeout(() => {
-      setAuthStatus(prev => prev === "LOADING" ? "LOCKED" : prev);
-    }, 3000);
-
-    try {
-      const { data, error } = await supabase
-        .from('devices')
-        .select('*')
-        .eq('device_code', String(code))
-        .single();
-
-      clearTimeout(authTimeout);
-
-      if (data && !error) {
-        if (data.role === "TRIAL" && data.expires_at && Date.now() > data.expires_at) {
-          setAuthStatus("EXPIRED");
-        } else {
-          setRole(data.role || "FREE");
-          setAuthStatus("READY");
-        }
-      } else {
-        setAuthStatus("LOCKED");
-      }
-    } catch (e: any) {
-      clearTimeout(authTimeout);
-      console.error("AUTO AUTH Error:", e);
-      setAuthStatus("LOCKED");
-    }
-  };
-
   const fetchMarkets = async () => {
     try {
-      const res = await fetch("/api/markets");
-      const mData = await res.json();
-      if (Array.isArray(mData)) setMarkets(mData);
+      const savedToken = localStorage.getItem("supreme_token");
+      const res = await fetch("/api/markets", {
+         headers: {
+            "Authorization": `Bearer ${savedToken}`
+         }
+      });
+      // Deteksi jika server mengembalikan BUKAN json (misal HTML dari proxy vercel dsb)
+      const text = await res.text();
+      try {
+        const mData = JSON.parse(text);
+        if (mData.error) {
+           setSystemSetting(prev => ({ ...prev, dbError: mData.error }));
+           return;
+        }
+        if (Array.isArray(mData)) {
+           setMarkets(mData);
+           setSystemSetting(prev => ({ ...prev, dbError: null }));
+        }
+      } catch(parseErr) {
+        console.error("Bukan format JSON yang diterima. Merupakan text/html proxy error.");
+      }
     } catch (e) {
       console.error("Gagal fetch markets:", e);
     }
@@ -166,7 +142,6 @@ function AppLayout() {
             >
               KLIK DISINI JIKA MACET
             </button>
-            <p className="text-[10px] text-white/30 italic">Hubungan ke database Supabase sedang tersendat...</p>
         </div>
       </div>
     );
@@ -207,6 +182,16 @@ function AppLayout() {
             <span className="font-['Orbitron'] text-[11px] font-bold tracking-[2px] text-white/40 uppercase">Device Identifier</span>
             <span className="font-['JetBrains_Mono'] text-[12px] font-black text-[var(--gold)]">ID: {deviceCode}</span>
          </div>
+         
+         {systemSetting?.dbError && (
+            <div className="flex items-center gap-3 bg-red-950/30 border border-red-500/30 p-3 rounded-lg border-l-4 border-l-red-500 shadow-[0_0_15px_rgba(239,68,68,0.1)] mt-4">
+              <ShieldCheck className="w-5 h-5 text-red-500 shrink-0" />
+              <div className="flex flex-col">
+                <span className="font-['Orbitron'] text-[11px] font-bold tracking-[1px] text-red-500 uppercase">AKSES DITOLAK FIREBASE</span>
+                <span className="font-['JetBrains_Mono'] text-[10px] text-red-300 mt-1">{systemSetting.dbError}</span>
+              </div>
+            </div>
+         )}
       </div>
 
       {/* Main Content */}

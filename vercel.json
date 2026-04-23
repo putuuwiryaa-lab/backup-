@@ -1,0 +1,7 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/package.json" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
