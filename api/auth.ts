@@ -16,10 +16,12 @@ export default async function handler(req: any, res: any) {
   else if (pin === trialPin) role = "TRIAL";
 
   if (role) {
+    const expiresIn = role === "TRIAL" ? "14d" : role === "PRO" ? "60d" : "365d";
+    
     const token = jwt.sign(
       { role, deviceCode },
       process.env.JWT_SECRET || "fallback_secret",
-      { expiresIn: "30d" }
+      { expiresIn }
     );
     res.json({ success: true, role, token });
   } else {
