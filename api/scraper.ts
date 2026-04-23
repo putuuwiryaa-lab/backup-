@@ -140,7 +140,7 @@ const MARKETS: Record<string, string> = {
   "HANOI": "/data-pengeluaran-togel-hanoi/",
   "TOTO MACAU 19": "/data-pengeluaran-togel-toto-macau-3/",
   "GUNPO": "/data-pengeluaran-togel-gunpo/",
-  "YOKOHAMA": "/data-pengeluaran-togel-yokohama/",
+  "YOKOHAMA": "/data-pengeluaran-togel-toto-macau-3/",
   "PAJU": "/data-pengeluaran-togel-paju/",
   "NAGOYA": "/data-pengeluaran-togel-nagoya/",
   "PCSO": "/data-pengeluaran-togel-pcso/",
@@ -179,23 +179,15 @@ async function scrapeMarket(url: string): Promise<string> {
 
   const section = html.substring(startIdx, endIdx);
 
-  // Regex sama persis dengan Python yang sudah terbukti jalan
   const digitMatches = [...section.matchAll(/class="paito-digit">(\d)<\/span>/g)];
   const digits = digitMatches.map(m => m[1]);
 
-  // Gabungkan setiap 4 digit
   const results: string[] = [];
   for (let i = 0; i <= digits.length - 4; i += 4) {
     results.push(digits[i] + digits[i+1] + digits[i+2] + digits[i+3]);
   }
 
   return results.slice(-20).join(" ");
-}
-
-  const dataSection = html.substring(startIdx, endIdx);
-  const clean = dataSection.replace(/<[^>]*>/g, ' ');
-  const matches = clean.match(/\b\d{4}\b/g) || [];
-  return matches.slice(-20).join(" ");
 }
 
 export default async function handler(req: any, res: any) {
@@ -218,6 +210,8 @@ export default async function handler(req: any, res: any) {
             { merge: true }
           );
           results[marketId] = "OK";
+        } else {
+          errors[marketId] = "Data kosong";
         }
       } catch (e: any) {
         errors[marketId] = e.message;
@@ -233,4 +227,4 @@ export default async function handler(req: any, res: any) {
   } catch (e: any) {
     res.status(500).json({ error: e.message });
   }
-  }
+}
