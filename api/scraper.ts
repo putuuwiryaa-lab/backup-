@@ -1,15 +1,9 @@
-import { initializeApp, getApps, cert } from "firebase-admin/app";
-import { getFirestore } from "firebase-admin/firestore";
+import { createClient } from '@supabase/supabase-js';
 
-if (!getApps().length) {
-  initializeApp({
-    credential: cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    }),
-  });
-}
+// Inisialisasi Client Supabase menggunakan Environment Variables dari Vercel
+const supabaseUrl = process.env.SUPABASE_URL || '';
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const BASE = "https://159.65.133.131";
 
@@ -165,7 +159,6 @@ const MARKETS: Record<string, string> = {
   "LUCERNE": "/data-pengeluaran-togel-lucerne/",
 };
 
-// --- DATA URUTAN PRIORITAS ---
 const PRIORITY_ORDER: Record<string, number> = {
   "MAGNUM CAMBODIA": 1,
   "SYDNEY POOLS": 2,
@@ -180,27 +173,33 @@ const PRIORITY_ORDER: Record<string, number> = {
 };
 
 async function scrapeMarket(url: string): Promise<string> {
-  const res = await fetch(BASE + url, {
-    headers: { "User-Agent": "Mozilla/5.0" }
-  });
-  const html = await res.text();
+  try {
+    const res = await fetch(BASE + url, {
+      headers: { "User-Agent": "Mozilla/5.0" }
+    });
+    const html = await res.text();
 
-  const startIdx = html.indexOf('Tema Terang');
-  const endIdx = html.indexOf('RESET');
+    const startIdx = html.indexOf('Tema Terang');
+    const endIdx = html.indexOf('RESET');
 
-  if (startIdx === -1 || endIdx === -1) return '';
+    if (startIdx === -1 || endIdx === -1) return '';
 
-  const section = html.substring(startIdx, endIdx);
+    const section = html.substring(startIdx, endIdx);
 
-  const digitMatches = [...section.matchAll(/class="paito-digit">(\d)<\/span>/g)];
-  const digits = digitMatches.map(m => m[1]);
+    const digitMatches = [...section.matchAll(/class="paito-digit">(\d)<\/span>/g)];
+    const digits = digitMatches.map(m => m[1]);
 
-  const results: string[] = [];
-  for (let i = 0; i <= digits.length - 4; i += 4) {
-    results.push(digits[i] + digits[i+1] + digits[i+2] + digits[i+3]);
+    const results: string[] = [];
+    for (let i = 0; i <= digits.length - 4; i += 4) {
+      results.push(digits[i] + digits[i+1] + digits[i+2] + digits[i+3]);
+    }
+
+    // Mengembalikan 20 data terakhir dipisah spasi
+    return results.slice(-20).join(" ");
+  } catch (err) {
+    console.error("Scrape Error:", err);
+    return '';
   }
-
-  return results.slice(-20).join(" ");
 }
 
 export default async function handler(req: any, res: any) {
@@ -210,32 +209,35 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    const db = getFirestore("ai-studio-4a754edd-ef20-4dae-a132-b2cc311e3272");
     const results: Record<string, string> = {};
     const errors: Record<string, string> = {};
 
-    // Mulai angka urutan dari 11 untuk pasaran yang tidak ada di daftar prioritas
     let nextAvailableOrder = 11; 
 
     for (const [marketId, url] of Object.entries(MARKETS)) {
       try {
         const data = await scrapeMarket(url);
         if (data) {
-          // Tentukan order: ambil dari PRIORITY_ORDER, jika tidak ada pakai nextAvailableOrder
           const currentOrder = PRIORITY_ORDER[marketId] || nextAvailableOrder++;
 
-          await db.collection("markets").doc(marketId).set(
-            { 
-              historyData: data, 
+          // Pindah ke Supabase menggunakan .upsert()
+          const { error } = await supabase
+            .from('markets')
+            .upsert({ 
+              id: marketId, 
               name: marketId, 
-              updatedAt: new Date(),
-              order: currentOrder // Menambahkan field order ke database
-            },
-            { merge: true }
-          );
-          results[marketId] = "OK";
+              history_data: data, // Sesuai kolom SQL history_data
+              order: currentOrder,
+              updated_at: new Date().toISOString()
+            });
+
+          if (error) {
+            errors[marketId] = error.message;
+          } else {
+            results[marketId] = "OK";
+          }
         } else {
-          errors[marketId] = "Data kosong";
+          errors[marketId] = "Data kosong dari sumber";
         }
       } catch (e: any) {
         errors[marketId] = e.message;
@@ -251,4 +253,5 @@ export default async function handler(req: any, res: any) {
   } catch (e: any) {
     res.status(500).json({ error: e.message });
   }
-}
+                            }
+    
