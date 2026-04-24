@@ -38,7 +38,7 @@ function AnalyzeList() {
       if (mData) {
           if (mData.name) setMarketName(mData.name);
           
-          const dataString = mData.historyData || "";
+          const dataString = mData.history_data || "";
           const rawTokens = dataString.split(/[\s\n\r\t,]+/);
           const data = rawTokens.filter((token: string) => /^\d{4}$/.test(token));
           
