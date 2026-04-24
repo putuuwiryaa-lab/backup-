@@ -1,4 +1,4 @@
-const CACHE_NAME = "analisa-angka-v2";
+const CACHE_NAME = "analisa-angka-v3";
 const urlsToCache = ["/", "/index.html"];
 
 self.addEventListener("install", (event) => {
@@ -18,6 +18,7 @@ self.addEventListener("activate", (event) => {
       );
     })
   );
+  self.clients.claim();
 });
 
 self.addEventListener("fetch", (event) => {
@@ -25,6 +26,17 @@ self.addEventListener("fetch", (event) => {
   if (event.request.url.includes("/api/")) {
     return;
   }
+
+  // Untuk navigasi (HTML), selalu ambil dari network dulu
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request).catch(() =>
+        caches.match("/index.html")
+      )
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then((response) => {
       return response || fetch(event.request);
