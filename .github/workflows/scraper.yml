@@ -2,8 +2,8 @@ name: Auto Scraper
 
 on:
   schedule:
-    - cron: '0 */6 * * *'  # setiap 6 jam
-  workflow_dispatch:  # bisa trigger manual
+    - cron: '0 */12 * * *'  # setiap 12 jam
+  workflow_dispatch:
 
 jobs:
   scrape:
@@ -13,4 +13,4 @@ jobs:
         run: |
           curl -X GET \
             -H "x-scraper-secret: ${{ secrets.SCRAPER_SECRET }}" \
-            https://backup-gray.vercel.app/api/scraper
+            https://analisaangka.online/api/scraper
