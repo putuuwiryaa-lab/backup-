@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate } from "react-router-dom";
+import { createClient } from "@supabase/supabase-js";
 
-import { initializeApp } from "firebase/app";
-import { getFirestore, collection, getDocs } from "firebase/firestore";
-import firebaseConfig from "../firebase-applet-config.json";
-
-export const firebaseApp = initializeApp(firebaseConfig);
-export const db = getFirestore(firebaseApp, firebaseConfig.firestoreDatabaseId || undefined);
+// Inisialisasi Supabase menggunakan Environment Variables dari Vercel
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 import {
   Lock, Zap, ShieldCheck, LogOut, ChevronRight, Database, Cpu, Search, RefreshCw, Smartphone
@@ -44,18 +43,20 @@ function AppLayout() {
 
   const fetchMarkets = async () => {
     try {
-      const snap = await getDocs(collection(db, "markets"));
-      const mData = snap.docs.map(d => ({ id: d.id, ...d.data() })) as any[];
+      // Menarik daftar pasaran dari tabel 'markets' di Supabase
+      const { data, error } = await supabase
+        .from('markets')
+        .select('*');
+
+      if (error) throw error;
+
+      const mData = data || [];
       const sorted = mData.sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
       setMarkets(sorted);
       setSystemSetting((prev: any) => ({ ...prev, dbError: null }));
     } catch (e: any) {
       console.error("Gagal fetch markets:", e);
-      if (e.message?.includes("Missing or insufficient permissions")) {
-        setSystemSetting((prev: any) => ({ ...prev, dbError: "Sistem Keamanan Firebase Menolak Akses. Periksa Rules." }));
-      } else {
-        setSystemSetting((prev: any) => ({ ...prev, dbError: e.message }));
-      }
+      setSystemSetting((prev: any) => ({ ...prev, dbError: e.message || "Koneksi ke Database Supabase gagal." }));
     }
   };
 
@@ -82,11 +83,10 @@ function AppLayout() {
             setRole(json.role);
             setAuthStatus("READY");
           } else {
-            // FITUR BARU: Hapus ID saat token tidak valid di latar belakang
             localStorage.removeItem("supreme_token");
             localStorage.removeItem("supreme_devcode");
             setAuthStatus("LOCKED");
-            window.location.reload(); // Refresh untuk langsung dapat ID baru
+            window.location.reload(); 
           }
         } catch {
           setAuthStatus("LOCKED");
@@ -141,7 +141,6 @@ function AppLayout() {
         <p className="text-[12px] opacity-70 mb-6 font-['JetBrains_Mono']">Masa trial akun anda telah berakhir. Hubungi Admin untuk aktivasi VIP.</p>
         <button 
           onClick={() => {
-            // FITUR BARU: Hapus ID saat klik refresh di layar expired
             localStorage.removeItem("supreme_token");
             localStorage.removeItem("supreme_devcode");
             window.location.reload();
@@ -188,7 +187,7 @@ function AppLayout() {
           <div className="flex items-center gap-3 bg-red-950/30 border border-red-500/30 p-3 rounded-lg border-l-4 border-l-red-500 shadow-[0_0_15px_rgba(239,68,68,0.1)] mt-4">
             <ShieldCheck className="w-5 h-5 text-red-500 shrink-0" />
             <div className="flex flex-col">
-              <span className="font-['Orbitron'] text-[11px] font-bold tracking-[1px] text-red-500 uppercase">AKSES DITOLAK FIREBASE</span>
+              <span className="font-['Orbitron'] text-[11px] font-bold tracking-[1px] text-red-500 uppercase">DATABASE ERROR</span>
               <span className="font-['JetBrains_Mono'] text-[10px] text-red-300 mt-1">{systemSetting.dbError}</span>
             </div>
           </div>
@@ -277,7 +276,6 @@ function Dashboard({ markets }: { markets: any[] }) {
       <div className="mt-8 mb-12 flex justify-center">
         <button
           onClick={() => {
-            // FITUR BARU: Hapus ID saat klik tombol keluar
             localStorage.removeItem("supreme_token");
             localStorage.removeItem("supreme_devcode");
             sessionStorage.setItem("supreme_skip_auto", "true");
@@ -370,4 +368,5 @@ function LayarKunci({ deviceCode, onAuthSuccess }: { deviceCode: string, onAuthS
       </div>
     </div>
   );
-}
+              }
+                
