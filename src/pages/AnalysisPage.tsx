@@ -39,7 +39,7 @@ export default function AnalysisPage({ type, title, icon, marketId }: { type: st
             return;
         }
 
-        const dataString = currentMarket.historyData || "";
+        const dataString = currentMarket.history_data || "";
         const rawTokens = dataString.split(/[\s\n\r\t,]+/);
         // Kita balik (reverse) datanya jika Admin input Terbaru di Atas
         const data = rawTokens.filter((token: string) => /^\d{4}$/.test(token)).reverse();
