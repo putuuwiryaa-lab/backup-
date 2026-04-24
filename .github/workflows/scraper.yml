@@ -2,7 +2,7 @@ name: Auto Scraper
 
 on:
   schedule:
-    - cron: '0 */12 * * *'  # setiap 12 jam
+    - cron: '0 */12 * * *'
   workflow_dispatch:
 
 jobs:
@@ -11,6 +11,6 @@ jobs:
     steps:
       - name: Trigger Scraper
         run: |
-          curl -X GET \
+          curl -L -X GET \
             -H "x-scraper-secret: ${{ secrets.SCRAPER_SECRET }}" \
             https://analisaangka.online/api/scraper
