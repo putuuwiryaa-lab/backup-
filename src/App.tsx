@@ -363,7 +363,14 @@ function LayarKunci({ deviceCode, onAuthSuccess }: { deviceCode: string, onAuthS
         </form>
 
         <p className="text-center text-[9px] text-[var(--gray)] mt-6 tracking-[1px] uppercase">
-          Contact Administrator for Activation Keys
+          <a
+  href="https://wa.me/6285792030642?text=Halo%2C%20saya%20minta%20PIN%20aktivasi%20Analisa%20Angka"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="text-[var(--gold)] hover:text-white transition-colors"
+>
+  🔑 Hubungi Pembuat untuk Aktivasi PIN
+</a>
         </p>
       </div>
     </div>
