@@ -199,7 +199,7 @@ def scrape_market(url):
         for i in range(0, len(digits) - 3, 4):
             results.append(digits[i] + digits[i+1] + digits[i+2] + digits[i+3])
 
-        return ' '.join(results[-20:])
+        return ' '.join(results[-170:])
     except Exception as e:
         print(f"Error scraping {url}: {e}")
         return ''
