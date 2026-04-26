@@ -114,7 +114,6 @@ MARKETS = {
   "BOGOTA": "/data-pengeluaran-togel-bogota/",
   "MELBOURNE": "/data-pengeluaran-togel-melbourne/",
   "JOHOR": "/data-pengeluaran-togel-johor/",
-  "MACAU": "/data-pengeluaran-togel-macau/",
   "SAPPORO": "/data-pengeluaran-togel-sapporo/",
   "SHANGHAI": "/data-pengeluaran-togel-shanghai/",
   "SAITAMA": "/data-pengeluaran-togel-saitama/",
