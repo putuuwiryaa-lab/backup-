@@ -8,7 +8,7 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 import {
-  Lock, Zap, ShieldCheck, LogOut, ChevronRight, Database, Cpu, Search, RefreshCw, Smartphone
+  Lock, Zap, ShieldCheck, LogOut, ChevronRight, Search, RefreshCw
 } from "lucide-react";
 import AnalyzeMenu from "./pages/AnalyzeMenu";
 import AdminPage from "./pages/AdminPage";
@@ -43,7 +43,6 @@ function AppLayout() {
 
   const fetchMarkets = async () => {
     try {
-      // Menarik daftar pasaran dari tabel 'markets' di Supabase
       const { data, error } = await supabase
         .from('markets')
         .select('*');
@@ -103,7 +102,7 @@ function AppLayout() {
 
   if (authStatus === "LOADING") {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-6 bg-black">
+      <div className="flex flex-col items-center justify-center min-h-screen gap-6 bg-[#030712]">
         <div className="relative">
           <div className="w-16 h-16 border-4 border-t-[var(--cyan)] border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
           <Zap className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[var(--gold)] w-6 h-6" />
@@ -114,7 +113,7 @@ function AppLayout() {
           </div>
           <button
             onClick={() => setAuthStatus("LOCKED")}
-            className="px-6 py-3 bg-[var(--gold)]/10 border border-[var(--gold)]/30 rounded text-[11px] font-bold text-[var(--gold)] hover:bg-[var(--gold)]/20 transition-all uppercase tracking-[2px] shadow-[0_0_20px_rgba(212,175,55,0.1)]"
+            className="px-6 py-3 bg-[var(--gold)]/10 border border-[var(--gold)]/30 rounded-xl text-[11px] font-bold text-[var(--gold)] hover:bg-[var(--gold)]/20 transition-all uppercase tracking-[2px] shadow-[0_0_20px_rgba(212,175,55,0.1)]"
           >
             KLIK DISINI JIKA MACET
           </button>
@@ -145,7 +144,7 @@ function AppLayout() {
             localStorage.removeItem("supreme_devcode");
             window.location.reload();
           }} 
-          className="w-full bg-red-600 p-3 rounded font-bold text-white text-[12px] tracking-[2px]"
+          className="w-full bg-red-600 p-3 rounded-xl font-bold text-white text-[12px] tracking-[2px]"
         >
           REFRESH
         </button>
@@ -154,33 +153,33 @@ function AppLayout() {
   );
 
   return (
-    <div className="relative flex flex-col min-h-screen bg-[#030408]">
-      <div className="pt-8 pb-4 text-center">
-        <h1 className="font-['Orbitron'] text-[24px] font-bold tracking-[3px] text-[#f0c040]">ANALISA ANGKA</h1>
-        <p className="font-['JetBrains_Mono'] text-[10px] tracking-[4px] text-[var(--cyan)] opacity-70 mt-1 uppercase">PREDICTION ENGINE</p>
+    <div className="relative flex flex-col min-h-screen bg-transparent">
+      <div className="pt-10 pb-5 text-center">
+        <h1 className="font-['Orbitron'] text-[25px] font-black tracking-[8px] text-[var(--gold)] drop-shadow-[0_0_22px_rgba(240,192,64,0.18)]">ANALISA ANGKA</h1>
+        <p className="font-['JetBrains_Mono'] text-[10px] tracking-[6px] text-[var(--cyan)] opacity-80 mt-4 uppercase">PREDICTION ENGINE</p>
       </div>
 
-      <div className="px-4 space-y-2 mb-6">
+      <div className="px-4 space-y-3 mb-8">
         {role === "MASTER" ? (
-          <div className="flex items-center gap-3 bg-[var(--card)] border border-[var(--cyan)]/20 p-2.5 rounded-lg border-l-4 border-l-[var(--gold)] shadow-[0_0_15px_rgba(240,192,64,0.05)]">
-            <div className="w-2 h-2 rounded-full bg-[var(--gold)] animate-pulse shadow-[0_0_8px_var(--gold)]"></div>
-            <span className="font-['Orbitron'] text-[11px] font-bold tracking-[2px] text-[var(--gold)] uppercase">ADMIN ACCESS</span>
+          <div className="premium-card flex items-center gap-3 p-4 rounded-2xl border-l-4 border-l-[var(--gold)]">
+            <div className="w-2.5 h-2.5 rounded-full bg-[var(--gold)] shadow-[0_0_14px_var(--gold)]"></div>
+            <span className="font-['Orbitron'] text-[11px] font-black tracking-[3px] text-[var(--gold)] uppercase">ADMIN ACCESS</span>
           </div>
         ) : role === "PRO" ? (
-          <div className="flex items-center gap-3 bg-[var(--card)] border border-[var(--blue)]/20 p-2.5 rounded-lg border-l-4 border-l-[var(--cyan)] shadow-[0_0_15px_rgba(0,229,255,0.05)]">
-            <div className="w-2 h-2 rounded-full bg-[var(--cyan)] animate-pulse shadow-[0_0_8px_var(--cyan)]"></div>
-            <span className="font-['Orbitron'] text-[11px] font-bold tracking-[2px] text-[var(--cyan)] uppercase">VIP ACCESS</span>
+          <div className="premium-card flex items-center gap-3 p-4 rounded-2xl border-l-4 border-l-[var(--cyan)]">
+            <div className="w-2.5 h-2.5 rounded-full bg-[var(--cyan)] shadow-[0_0_14px_var(--cyan)]"></div>
+            <span className="font-['Orbitron'] text-[11px] font-black tracking-[3px] text-[var(--cyan)] uppercase">VIP ACCESS</span>
           </div>
         ) : (
-          <div className="flex items-center gap-3 bg-[var(--card)] border border-white/10 p-2.5 rounded-lg border-l-4 border-l-[var(--gray)] shadow-[0_0_15px_rgba(255,255,255,0.02)]">
-            <div className="w-2 h-2 rounded-full bg-[var(--gray)] animate-pulse shadow-[0_0_8px_var(--gray)]"></div>
-            <span className="font-['Orbitron'] text-[11px] font-bold tracking-[2px] text-white font-normal opacity-70 uppercase">NON VIP ACCESS</span>
+          <div className="premium-card flex items-center gap-3 p-4 rounded-2xl border-l-4 border-l-white/20">
+            <div className="w-2.5 h-2.5 rounded-full bg-white/35"></div>
+            <span className="font-['Orbitron'] text-[11px] font-black tracking-[3px] text-white/65 uppercase">NON VIP ACCESS</span>
           </div>
         )}
 
-        <div className="flex items-center justify-between bg-[var(--card)] border border-white/5 p-2.5 rounded-lg">
-          <span className="font-['Orbitron'] text-[11px] font-bold tracking-[2px] text-white/40 uppercase">Device Identifier</span>
-          <span className="font-['JetBrains_Mono'] text-[12px] font-black text-[var(--gold)]">ID: {deviceCode}</span>
+        <div className="premium-card flex items-center justify-between p-4 rounded-2xl">
+          <span className="font-['Orbitron'] text-[11px] font-black tracking-[4px] text-white/38 uppercase">Device Identifier</span>
+          <span className="font-['JetBrains_Mono'] text-[13px] font-black text-[var(--gold)] tracking-[1px]">ID: {deviceCode}</span>
         </div>
 
         {systemSetting?.dbError && (
@@ -220,27 +219,27 @@ function Dashboard({ markets }: { markets: any[] }) {
   );
 
   return (
-    <div className="animate-[fadeIn_0.5s_ease-out]">
-      <div className="flex items-center justify-between mb-4 px-2">
-        <h2 className="font-['Orbitron'] text-[13px] font-bold tracking-[3px] text-white">PILIH PASARAN</h2>
+    <div className="animate-[riseIn_0.55s_ease-out]">
+      <div className="flex items-center justify-between mb-5 px-2">
+        <h2 className="font-['Orbitron'] text-[14px] font-black tracking-[6px] text-white">PILIH PASARAN</h2>
         <button
           onClick={() => window.location.reload()}
-          className="w-9 h-9 flex items-center justify-center rounded-lg bg-[var(--card2)] border border-[var(--border2)] text-white hover:text-[var(--gold)] transition-all active:scale-95 shadow-lg"
+          className="w-11 h-11 flex items-center justify-center rounded-xl bg-[var(--card2)] border border-[var(--border2)] text-white/70 hover:text-[var(--gold)] transition-all active:scale-95 shadow-[0_12px_28px_rgba(0,0,0,0.32)]"
         >
-          <RefreshCw size={18} className="opacity-70" />
+          <RefreshCw size={20} className="opacity-80" />
         </button>
       </div>
 
-      <div className="relative mb-6">
+      <div className="relative mb-7">
         <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-          <Search size={18} className="text-[var(--gray)]" />
+          <Search size={21} className="text-white/85" />
         </div>
         <input
           type="text"
           placeholder="CARI PASARAN..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full h-14 bg-[var(--card)]/80 border border-[var(--border2)] rounded-xl pl-12 pr-4 text-[13px] font-bold font-['JetBrains_Mono'] tracking-[2px] text-white placeholder:text-[var(--gray)]/40 focus:outline-none focus:border-[var(--cyan)]/40 transition-all shadow-inner"
+          className="w-full h-16 bg-[#08111f]/95 border border-white/10 rounded-2xl pl-14 pr-4 text-[14px] font-black font-['Orbitron'] tracking-[4px] text-white placeholder:text-white/70 focus:outline-none focus:border-[var(--cyan)]/45 focus:shadow-[0_0_24px_rgba(0,229,255,0.10)] transition-all shadow-[0_14px_32px_rgba(0,0,0,0.28)]"
         />
       </div>
 
@@ -253,21 +252,22 @@ function Dashboard({ markets }: { markets: any[] }) {
               <button
                 key={m.id}
                 onClick={() => navigate(`/analyze/${m.id}`)}
-                className="group flex items-center justify-between p-3.5 bg-[var(--card)]/90 border border-[var(--border2)] rounded-xl hover:border-white/20 transition-all hover:bg-[var(--card2)] active:scale-95 text-left relative overflow-hidden h-[54px]"
+                className="group flex items-center justify-between p-4 bg-gradient-to-br from-[#0d1728] to-[#07101d] border border-white/10 rounded-2xl hover:border-[var(--cyan)]/28 transition-all active:scale-[0.975] text-left relative overflow-hidden min-h-[66px] shadow-[0_16px_34px_rgba(0,0,0,0.30)]"
               >
-                <div className="flex items-center gap-3">
+                <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/12 to-transparent"></div>
+                <div className="flex items-center gap-3 min-w-0">
                   <div
-                    className="w-2 h-2 rounded-full shadow-[0_0_8px_currentColor]"
+                    className="w-3 h-3 rounded-full shrink-0 shadow-[0_0_14px_currentColor]"
                     style={{ backgroundColor: dotColor, color: dotColor }}
                   ></div>
-                  <span className="font-['Orbitron'] text-[11px] font-bold tracking-[1px] text-white/90 group-hover:text-white transition-colors">{m.id}</span>
+                  <span className="font-['Orbitron'] text-[11px] font-black tracking-[2.1px] text-white/92 group-hover:text-white transition-colors truncate">{m.id}</span>
                 </div>
-                <ChevronRight size={14} className="text-[var(--gray)] opacity-40 group-hover:translate-x-1 group-hover:opacity-80 transition-all" />
+                <ChevronRight size={17} className="text-white/32 group-hover:text-[var(--gold)] group-hover:translate-x-1 transition-all shrink-0" />
               </button>
             );
           })
         ) : (
-          <div className="col-span-2 py-10 text-center border border-dashed border-[var(--border2)] rounded-2xl opacity-40">
+          <div className="col-span-2 py-10 text-center border border-dashed border-[var(--border2)] rounded-2xl opacity-50">
             <p className="font-['JetBrains_Mono'] text-[11px] tracking-[2px]">PASARAN TIDAK DITEMUKAN</p>
           </div>
         )}
@@ -330,7 +330,7 @@ function LayarKunci({ deviceCode, onAuthSuccess }: { deviceCode: string, onAuthS
             <Lock className="text-black w-8 h-8" />
           </div>
           <h2 className="font-['Orbitron'] text-[18px] font-bold text-white tracking-[6px] mb-2">SYSTEM LOCKED</h2>
-          <p className="text-[10px] text-[var(--gray)] font-bold tracking-[2px] uppercase">Unauthorized Access Restricted</p>
+          <p className="text-[10px] text-[var(--text-dim)] font-bold tracking-[2px] uppercase">Unauthorized Access Restricted</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -362,18 +362,17 @@ function LayarKunci({ deviceCode, onAuthSuccess }: { deviceCode: string, onAuthS
           </button>
         </form>
 
-        <p className="text-center text-[9px] text-[var(--gray)] mt-6 tracking-[1px] uppercase">
+        <p className="text-center text-[9px] text-[var(--text-dim)] mt-6 tracking-[1px] uppercase">
           <a
-  href="https://wa.me/6285792030642?text=Halo%2C%20saya%20minta%20PIN%20aktivasi%20Analisa%20Angka"
-  target="_blank"
-  rel="noopener noreferrer"
-  className="text-[13px] text-[var(--gold)] hover:text-white transition-colors underline underline-offset-4 animate-pulse"
->
-  👉 🔑 Hubungi Pembuat untuk Aktivasi PIN 
-</a>
+            href="https://wa.me/6285792030642?text=Halo%2C%20saya%20minta%20PIN%20aktivasi%20Analisa%20Angka"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[13px] text-[var(--gold)] hover:text-white transition-colors underline underline-offset-4 animate-pulse"
+          >
+            👉 🔑 Hubungi Pembuat untuk Aktivasi PIN 
+          </a>
         </p>
       </div>
     </div>
   );
-              }
-                
+}
