@@ -194,8 +194,8 @@ async function scrapeMarket(url: string): Promise<string> {
       results.push(digits[i] + digits[i+1] + digits[i+2] + digits[i+3]);
     }
 
-    // Mengembalikan 20 data terakhir dipisah spasi
-    return results.slice(-20).join(" ");
+    // Mengembalikan 169 data terakhir dipisah spasi untuk engine prediksiv3
+    return results.slice(-169).join(" ");
   } catch (err) {
     console.error("Scrape Error:", err);
     return '';
