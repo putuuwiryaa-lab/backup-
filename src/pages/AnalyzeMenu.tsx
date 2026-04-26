@@ -1,9 +1,36 @@
 import { useState, useEffect } from "react";
-import { Routes, Route, useNavigate, useParams } from "react-router-dom";
+import { Routes, Route, useNavigate, useParams, useLocation } from "react-router-dom";
 import { RefreshCw, Cpu } from "lucide-react";
 import AnalysisPage from "./AnalysisPage";
 
 export default function AnalyzeMenu() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const isAnalyzeRoute = location.pathname.startsWith("/analyze/");
+    if (!isAnalyzeRoute) return;
+
+    const marker = `guard:${location.pathname}`;
+    if (history.state?.mobileBackGuard !== marker) {
+      history.pushState({ ...(history.state || {}), mobileBackGuard: marker }, "", location.pathname + location.search + location.hash);
+    }
+
+    const handleBack = () => {
+      const pathParts = location.pathname.split("/").filter(Boolean);
+      const hasModeDetail = pathParts.length >= 3;
+
+      if (hasModeDetail) {
+        navigate(`/analyze/${pathParts[1]}`, { replace: true });
+      } else {
+        navigate("/", { replace: true });
+      }
+    };
+
+    window.addEventListener("popstate", handleBack);
+    return () => window.removeEventListener("popstate", handleBack);
+  }, [location.pathname, location.search, location.hash, navigate]);
+
   return (
     <Routes>
       <Route path="/" element={<AnalyzeList />} />
@@ -43,7 +70,7 @@ function AnalyzeList() {
           const data = rawTokens.filter((token: string) => /^\d{4}$/.test(token));
           
           if (data.length > 0) {
-             setLastResult(data[data.length - 1]); // Ambil yang paling atas (terbaru)
+             setLastResult(data[data.length - 1]);
           } else {
              setLastResult('KOSONG');
           }
@@ -62,9 +89,7 @@ function AnalyzeList() {
 
   return (
     <div className="animate-[slideIn_0.22s_ease-out] px-1">
-      {/* Premium Market Header Card */}
       <div className="bg-[#0a1120] border border-white/10 rounded-2xl p-7 mb-8 text-center relative overflow-hidden group shadow-2xl">
-          {/* Decorative glow lines */}
           <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[var(--gold)]/40 to-transparent"></div>
           
           <h3 className="font-['Orbitron'] text-[24px] font-black tracking-[5px] text-[var(--gold)] uppercase mb-6 drop-shadow-[0_0_15px_rgba(240,192,64,0.2)]">
@@ -100,31 +125,11 @@ function AnalyzeList() {
       </div>
 
       <div className="grid grid-cols-1 gap-2.5">
-        <SubMenuCard
-          label="⚡ ANGKA IKUT 2D"
-          color="bg-gradient-to-br from-[var(--card)] to-[#081a10] text-[var(--green)] border-[rgba(0,230,118,0.18)]"
-          onClick={() => navigate("ai")}
-        />
-        <SubMenuCard
-          label="💀 ANGKA MATI 4D"
-          color="bg-gradient-to-br from-[var(--card)] to-[#1a0808] text-[var(--red)] border-[rgba(255,82,82,0.18)]"
-          onClick={() => navigate("mati")}
-        />
-        <SubMenuCard
-          label="🔢 JUMLAH MATI 2D"
-          color="bg-gradient-to-br from-[var(--card)] to-[#0e0a1f] text-[var(--purple)] border-[rgba(179,136,255,0.18)]"
-          onClick={() => navigate("jumlah")}
-        />
-        <SubMenuCard
-          label="🐉 SHIO MATI"
-          color="bg-gradient-to-br from-[var(--card)] to-[#081a10] text-[var(--cyan)] border-[rgba(0,229,255,0.18)]"
-          onClick={() => navigate("shio")}
-        />
-        <SubMenuCard
-          label="💰 MENU REKAP"
-          color="bg-gradient-to-br from-[var(--card)] to-[#081018] text-[#60a5fa] border-[rgba(68,138,255,0.2)]"
-          onClick={() => navigate("rekap")}
-        />
+        <SubMenuCard label="⚡ ANGKA IKUT 2D" color="bg-gradient-to-br from-[var(--card)] to-[#081a10] text-[var(--green)] border-[rgba(0,230,118,0.18)]" onClick={() => navigate("ai")} />
+        <SubMenuCard label="💀 ANGKA MATI 4D" color="bg-gradient-to-br from-[var(--card)] to-[#1a0808] text-[var(--red)] border-[rgba(255,82,82,0.18)]" onClick={() => navigate("mati")} />
+        <SubMenuCard label="🔢 JUMLAH MATI 2D" color="bg-gradient-to-br from-[var(--card)] to-[#0e0a1f] text-[var(--purple)] border-[rgba(179,136,255,0.18)]" onClick={() => navigate("jumlah")} />
+        <SubMenuCard label="🐉 SHIO MATI" color="bg-gradient-to-br from-[var(--card)] to-[#081a10] text-[var(--cyan)] border-[rgba(0,229,255,0.18)]" onClick={() => navigate("shio")} />
+        <SubMenuCard label="💰 MENU REKAP" color="bg-gradient-to-br from-[var(--card)] to-[#081018] text-[#60a5fa] border-[rgba(68,138,255,0.2)]" onClick={() => navigate("rekap")} />
       </div>
 
       <button 
