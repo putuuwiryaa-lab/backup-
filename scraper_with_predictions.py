@@ -4,8 +4,8 @@ import math
 import random
 from supabase import create_client
 
-# scraper.py lama masih membaca SUPABASE_ANON_KEY saat di-import.
-# Karena sekarang workflow memakai SERVICE_ROLE, kita arahkan ANON_KEY ke SERVICE_ROLE agar import aman.
+# scraper.py lama membaca SUPABASE_ANON_KEY saat di-import.
+# Karena workflow sekarang memakai SERVICE_ROLE, kita arahkan ANON_KEY ke SERVICE_ROLE agar import aman.
 os.environ.setdefault("SUPABASE_ANON_KEY", os.environ.get("SUPABASE_SERVICE_ROLE_KEY", ""))
 
 from scraper import MARKETS, PRIORITY_ORDER, scrape_market
@@ -26,6 +26,7 @@ WEIGHTS = {
 MARKOV_ALPHA = 0.35
 RECENCY_DECAY = 22
 MOMENTUM_WINDOW = 12
+MAX_EVALUATIONS_PER_MARKET = 14
 
 
 def parse_history(raw, limit=169):
@@ -193,6 +194,34 @@ def run_engine(results):
     }
 
 
+def normalize_json_list(value):
+    if value is None:
+        return []
+
+    if isinstance(value, list):
+        return [str(x) for x in value]
+
+    return []
+
+
+def get_existing_snapshot(market_id):
+    result = (
+        supabase
+        .table("prediction_snapshots")
+        .select("*")
+        .eq("market_id", market_id)
+        .limit(1)
+        .execute()
+    )
+
+    rows = result.data or []
+
+    if not rows:
+        return None
+
+    return rows[0]
+
+
 def save_prediction_snapshot(market_id, market_name, base_result, prediction):
     row = {
         "market_id": market_id,
@@ -210,24 +239,175 @@ def save_prediction_snapshot(market_id, market_name, base_result, prediction):
     supabase.table("prediction_snapshots").upsert(row).execute()
 
 
-def process_snapshot(market_id, market_name, history_data):
+def evaluate_bbfs(bbfs8, result):
+    bbfs_set = set(str(x) for x in bbfs8)
+
+    as_hit = result[0] in bbfs_set
+    kop_hit = result[1] in bbfs_set
+    kepala_hit = result[2] in bbfs_set
+    ekor_hit = result[3] in bbfs_set
+
+    if as_hit and kop_hit and kepala_hit and ekor_hit:
+        return "4D"
+
+    if kop_hit and kepala_hit and ekor_hit:
+        return "3D"
+
+    if kepala_hit and ekor_hit:
+        return "2D"
+
+    return "ZONK"
+
+
+def evaluate_ai(ai4, result):
+    ai_set = set(str(x) for x in ai4)
+
+    for digit in result:
+        if digit in ai_set:
+            return "MASUK"
+
+    return "ZONK"
+
+
+def find_rank(digits, target):
+    digits = [str(x) for x in digits]
+
+    try:
+        return digits.index(str(target)) + 1
+    except ValueError:
+        return None
+
+
+def evaluation_already_exists(market_id, from_result, new_result):
+    result = (
+        supabase
+        .table("prediction_evaluations")
+        .select("id")
+        .eq("market_id", market_id)
+        .eq("from_result", from_result)
+        .eq("new_result", new_result)
+        .limit(1)
+        .execute()
+    )
+
+    rows = result.data or []
+    return len(rows) > 0
+
+
+def save_evaluation(market_id, market_name, old_snapshot, new_result):
+    from_result = old_snapshot["base_result"]
+
+    if evaluation_already_exists(market_id, from_result, new_result):
+        print(f"EVALUATION SKIP DUPLICATE: {market_name} {from_result}->{new_result}")
+        return False
+
+    bbfs8 = normalize_json_list(old_snapshot.get("bbfs8"))
+    ai4 = normalize_json_list(old_snapshot.get("ai4"))
+
+    poltar_as = normalize_json_list(old_snapshot.get("poltar_as"))
+    poltar_kop = normalize_json_list(old_snapshot.get("poltar_kop"))
+    poltar_kepala = normalize_json_list(old_snapshot.get("poltar_kepala"))
+    poltar_ekor = normalize_json_list(old_snapshot.get("poltar_ekor"))
+
+    row = {
+        "market_id": market_id,
+        "market_name": market_name,
+        "from_result": from_result,
+        "new_result": new_result,
+        "bbfs_status": evaluate_bbfs(bbfs8, new_result),
+        "ai_status": evaluate_ai(ai4, new_result),
+        "rank_as": find_rank(poltar_as, new_result[0]),
+        "rank_kop": find_rank(poltar_kop, new_result[1]),
+        "rank_kepala": find_rank(poltar_kepala, new_result[2]),
+        "rank_ekor": find_rank(poltar_ekor, new_result[3]),
+    }
+
+    supabase.table("prediction_evaluations").insert(row).execute()
+
+    print(
+        f"EVALUATION OK: {market_name} "
+        f"{from_result}->{new_result} "
+        f"BBFS={row['bbfs_status']} AI={row['ai_status']} "
+        f"AS=#{row['rank_as']} KOP=#{row['rank_kop']} "
+        f"KEPALA=#{row['rank_kepala']} EKOR=#{row['rank_ekor']}"
+    )
+
+    return True
+
+
+def cleanup_old_evaluations(market_id):
+    result = (
+        supabase
+        .table("prediction_evaluations")
+        .select("id")
+        .eq("market_id", market_id)
+        .order("evaluated_at", desc=True)
+        .execute()
+    )
+
+    rows = result.data or []
+
+    if len(rows) <= MAX_EVALUATIONS_PER_MARKET:
+        return
+
+    old_rows = rows[MAX_EVALUATIONS_PER_MARKET:]
+
+    for row in old_rows:
+        supabase.table("prediction_evaluations").delete().eq("id", row["id"]).execute()
+
+    print(f"CLEANUP OK: {market_id} hapus {len(old_rows)} evaluasi lama")
+
+
+def process_prediction_flow(market_id, market_name, history_data):
     results = parse_history(history_data, 169)
 
     if len(results) < 21:
-        print(f"SNAPSHOT SKIP: {market_name} data kurang ({len(results)})")
+        print(f"PREDICTION SKIP: {market_name} data kurang ({len(results)})")
         return False
 
     latest_result = results[-1]
-    prediction = run_engine(results)
+    old_snapshot = get_existing_snapshot(market_id)
 
+    # Hitung prediksi baru berdasarkan history terbaru
+    new_prediction = run_engine(results)
+
+    # Kalau belum ada snapshot, buat snapshot awal saja
+    if not old_snapshot:
+        save_prediction_snapshot(
+            market_id=market_id,
+            market_name=market_name,
+            base_result=latest_result,
+            prediction=new_prediction,
+        )
+        print(f"SNAPSHOT INITIAL OK: {market_name} base_result={latest_result}")
+        return True
+
+    old_base_result = old_snapshot.get("base_result")
+
+    # Kalau result belum berubah, jangan evaluasi dan jangan overwrite
+    if old_base_result == latest_result:
+        print(f"NO CHANGE: {market_name} result masih {latest_result}")
+        return True
+
+    # Kalau result berubah, evaluasi snapshot lama terhadap result baru
+    save_evaluation(
+        market_id=market_id,
+        market_name=market_name,
+        old_snapshot=old_snapshot,
+        new_result=latest_result,
+    )
+
+    cleanup_old_evaluations(market_id)
+
+    # Setelah evaluasi, simpan snapshot baru untuk result berikutnya
     save_prediction_snapshot(
         market_id=market_id,
         market_name=market_name,
         base_result=latest_result,
-        prediction=prediction,
+        prediction=new_prediction,
     )
 
-    print(f"SNAPSHOT OK: {market_name} base_result={latest_result}")
+    print(f"SNAPSHOT UPDATED: {market_name} base_result={latest_result}")
     return True
 
 
@@ -235,7 +415,7 @@ def main():
     next_order = 11
     success = 0
     errors = 0
-    snapshots = 0
+    processed = 0
 
     for market_id, url in MARKETS.items():
         data = scrape_market(url)
@@ -254,8 +434,8 @@ def main():
                 "updated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             }).execute()
 
-            if process_snapshot(market_id, market_id, data):
-                snapshots += 1
+            if process_prediction_flow(market_id, market_id, data):
+                processed += 1
 
             print(f"OK: {market_id}")
             success += 1
@@ -267,7 +447,11 @@ def main():
         delay = random.uniform(2, 4)
         time.sleep(delay)
 
-    print(f"\nSelesai: {success} OK, {errors} skip/error, {snapshots} snapshot diproses")
+    print(
+        f"\nSelesai: {success} OK, "
+        f"{errors} skip/error, "
+        f"{processed} prediction flow diproses"
+    )
 
 
 if __name__ == "__main__":
