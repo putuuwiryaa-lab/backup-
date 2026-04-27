@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate, useLocation } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
 
@@ -41,11 +41,21 @@ function AppLayout() {
     return code;
   };
 
+  const getLastResult = (historyData: string) => {
+    const tokens = String(historyData || "").trim().split(/[\s\n\r\t,]+/);
+    for (let i = tokens.length - 1; i >= 0; i--) {
+      if (/^\d{4}$/.test(tokens[i])) return tokens[i];
+    }
+    return "----";
+  };
+
   const fetchMarkets = async () => {
     try {
       const { data, error } = await supabase.from("markets").select("*");
       if (error) throw error;
-      const sorted = (data || []).sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
+      const sorted = (data || [])
+        .sort((a, b) => (a.order ?? 99) - (b.order ?? 99))
+        .map((m: any) => ({ ...m, lastResult: getLastResult(m.history_data) }));
       setMarkets(sorted);
       setSystemSetting((prev: any) => ({ ...prev, dbError: null }));
     } catch (e: any) {
@@ -99,7 +109,7 @@ function AppLayout() {
   if (authStatus === "LOADING") {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-6 px-6 text-center">
-        <div className="relative flex h-22 w-22 items-center justify-center rounded-[2rem] bg-[var(--card)] shadow-xl ring-1 ring-white/10 backdrop-blur-xl">
+        <div className="relative flex h-22 w-22 items-center justify-center rounded-[2rem] bg-[var(--card)] shadow-xl ring-1 ring-white/10">
           <div className="absolute inset-3 rounded-[1.5rem] border-4 border-t-[var(--gold)] border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
           <Zap className="relative text-[var(--gold)] w-8 h-8" />
         </div>
@@ -149,7 +159,7 @@ function AppLayout() {
                   <h1 className="font-['Orbitron'] text-[25px] font-black tracking-[5px] text-[var(--text)] sm:text-[32px]">ANALISA ANGKA</h1>
                   <p className="mt-2 text-[12px] font-semibold uppercase tracking-[2.5px] text-[var(--text-dim)]">Analisis prediksi berbasis data</p>
                 </div>
-                <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--gold)] to-[#e6bf62] shadow-lg">
+                <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl bg-[var(--gold)] shadow-md">
                   <Crown className="h-7 w-7 text-white" />
                 </div>
               </div>
@@ -219,24 +229,22 @@ function Dashboard({ markets }: { markets: any[] }) {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
 
-  const getLastResult = (market: any) => {
-    const tokens = String(market.history_data || "").split(/[\s\n\r\t,]+/).filter((token: string) => /^\d{4}$/.test(token));
-    return tokens.length ? tokens[tokens.length - 1] : "----";
-  };
-
-  const filteredMarkets = markets.filter(m =>
-    m.id.toLowerCase().includes(search.toLowerCase()) ||
-    (m.name && m.name.toLowerCase().includes(search.toLowerCase()))
-  );
+  const filteredMarkets = useMemo(() => {
+    const q = search.toLowerCase();
+    return markets.filter(m =>
+      m.id.toLowerCase().includes(q) ||
+      (m.name && m.name.toLowerCase().includes(q))
+    );
+  }, [markets, search]);
 
   return (
-    <div className="animate-[riseIn_0.55s_ease-out]">
+    <div className="animate-[riseIn_0.35s_ease-out]">
       <div className="mb-3 flex items-center justify-between gap-3 px-1">
         <div>
           <h2 className="font-['Orbitron'] text-[15px] font-black tracking-[4px] text-[var(--text)]">PILIH PASARAN</h2>
           <p className="mt-1 text-xs text-[var(--text-dim)]">Pilih market untuk mulai analisa.</p>
         </div>
-        <button onClick={() => window.location.reload()} className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--card)] border border-[var(--border2)] text-[var(--text-dim)] shadow-md transition active:scale-95">
+        <button onClick={() => window.location.reload()} className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--card)] border border-[var(--border2)] text-[var(--text-dim)] transition active:scale-95">
           <RefreshCw size={18} />
         </button>
       </div>
@@ -250,7 +258,7 @@ function Dashboard({ markets }: { markets: any[] }) {
           placeholder="Cari pasaran..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full h-15 bg-[var(--card)] border border-[var(--border2)] rounded-3xl pl-13 pr-4 text-[15px] font-bold text-[var(--text)] placeholder:text-[var(--text-dim)] focus:outline-none focus:border-[var(--cyan)] focus:ring-4 focus:ring-sky-400/10 transition-all shadow-[0_12px_28px_rgba(0,0,0,0.20)]"
+          className="w-full h-15 bg-[var(--card)] border border-[var(--border2)] rounded-3xl pl-13 pr-4 text-[15px] font-bold text-[var(--text)] placeholder:text-[var(--text-dim)] focus:outline-none focus:border-[var(--cyan)] transition"
         />
       </div>
 
@@ -258,16 +266,14 @@ function Dashboard({ markets }: { markets: any[] }) {
         {filteredMarkets.length > 0 ? (
           filteredMarkets.map((m) => {
             const title = m.name || m.id;
-            const lastResult = getLastResult(m);
+            const lastResult = m.lastResult || "----";
             return (
-              <button key={m.id} onClick={() => navigate(`/analyze/${m.id}`)} className="group relative flex min-h-[102px] flex-col justify-between overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#1f2937] via-[#192231] to-[#111824] p-4 text-left shadow-[0_14px_32px_rgba(0,0,0,0.28)] transition active:scale-[0.975]">
-                <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/18 to-transparent"></div>
-                <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-white/[0.035]"></div>
+              <button key={m.id} onClick={() => navigate(`/analyze/${m.id}`)} className="group flex min-h-[96px] flex-col justify-between rounded-3xl border border-[var(--border2)] bg-[var(--card)] p-4 text-left transition active:scale-[0.985]">
                 <div className="flex items-center justify-between gap-3">
-                  <span className="rounded-full border border-white/10 bg-white/[0.045] px-2 py-1 text-[8px] font-black uppercase tracking-[1.5px] text-[var(--text-dim)]">Market</span>
-                  <ChevronRight size={18} className="text-[var(--text-dim)] group-hover:text-[var(--gold)] group-hover:translate-x-1 transition-all" />
+                  <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-1 text-[8px] font-black uppercase tracking-[1.5px] text-[var(--text-dim)]">Market</span>
+                  <ChevronRight size={18} className="text-[var(--text-dim)] group-active:text-[var(--gold)]" />
                 </div>
-                <div className="relative">
+                <div>
                   <span className="block truncate font-['Orbitron'] text-[12px] font-black tracking-[2px] text-[var(--text)]">{title}</span>
                   <span className="mt-3 inline-flex rounded-full border border-[var(--cyan)]/20 bg-[var(--cyan-dim)] px-2.5 py-1 font-['JetBrains_Mono'] text-[10px] font-black tracking-[1px] text-[var(--cyan)]">RESULT {lastResult}</span>
                 </div>
@@ -282,7 +288,7 @@ function Dashboard({ markets }: { markets: any[] }) {
       </div>
 
       <div className="mt-4 mb-10 flex justify-center">
-        <button onClick={() => { localStorage.removeItem("supreme_token"); localStorage.removeItem("supreme_devcode"); sessionStorage.setItem("supreme_skip_auto", "true"); window.location.reload(); }} className="flex items-center gap-3 rounded-2xl border border-red-400/25 bg-red-500/10 px-6 py-3 text-[11px] font-black uppercase tracking-[3px] text-red-300 shadow-sm transition active:scale-95">
+        <button onClick={() => { localStorage.removeItem("supreme_token"); localStorage.removeItem("supreme_devcode"); sessionStorage.setItem("supreme_skip_auto", "true"); window.location.reload(); }} className="flex items-center gap-3 rounded-2xl border border-red-400/25 bg-red-500/10 px-6 py-3 text-[11px] font-black uppercase tracking-[3px] text-red-300 transition active:scale-95">
           <LogOut size={16} /> KELUAR SISTEM
         </button>
       </div>
@@ -322,9 +328,9 @@ function LayarKunci({ deviceCode, onAuthSuccess }: { deviceCode: string, onAuthS
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-5">
       <div className="premium-panel relative w-full max-w-sm overflow-hidden p-7 sm:p-8">
-        <div className="absolute left-0 top-0 h-1 w-full bg-gradient-to-r from-[var(--gold)] via-[var(--cyan)] to-[var(--gold)]"></div>
+        <div className="absolute left-0 top-0 h-1 w-full bg-[var(--gold)]"></div>
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-5 flex h-18 w-18 items-center justify-center rounded-[1.75rem] bg-gradient-to-br from-[var(--gold)] to-[#e6bf62] shadow-xl ring-4 ring-white/10">
+          <div className="mx-auto mb-5 flex h-18 w-18 items-center justify-center rounded-[1.75rem] bg-[var(--gold)] shadow-md ring-4 ring-white/10">
             <Lock className="text-white w-8 h-8" />
           </div>
           <h2 className="font-['Orbitron'] text-[21px] font-black text-[var(--text)] tracking-[4px] mb-2">SYSTEM ACCESS</h2>
@@ -339,12 +345,12 @@ function LayarKunci({ deviceCode, onAuthSuccess }: { deviceCode: string, onAuthS
 
           <div>
             <label className="block text-[10px] font-black text-[var(--cyan)] mb-2 tracking-[2px] uppercase ml-1">Secure Entrance PIN</label>
-            <input type="password" value={pin} autoFocus onChange={e => setPin(e.target.value)} placeholder="••••" className="w-full h-15 bg-[#111824] border-2 border-[var(--border2)] focus:border-[var(--cyan)] focus:ring-4 focus:ring-sky-400/10 rounded-2xl px-4 text-[var(--text)] text-[24px] font-black tracking-[12px] font-['Roboto_Mono'] text-center transition-all placeholder:opacity-20 outline-none" />
+            <input type="password" value={pin} autoFocus onChange={e => setPin(e.target.value)} placeholder="••••" className="w-full h-15 bg-[#111824] border-2 border-[var(--border2)] focus:border-[var(--cyan)] rounded-2xl px-4 text-[var(--text)] text-[24px] font-black tracking-[12px] font-['Roboto_Mono'] text-center transition placeholder:opacity-20 outline-none" />
           </div>
 
           {error && <p className="text-[11px] text-red-300 font-bold bg-red-500/10 border border-red-400/25 p-3 rounded-2xl text-center tracking-[1px] uppercase">{error}</p>}
 
-          <button type="submit" disabled={loading || !pin} className="w-full bg-gradient-to-r from-[var(--gold)] to-[#e6bf62] text-white py-4 rounded-2xl text-[12px] font-black tracking-[4px] disabled:opacity-50 shadow-xl active:scale-95 transition-all uppercase">
+          <button type="submit" disabled={loading || !pin} className="w-full bg-[var(--gold)] text-white py-4 rounded-2xl text-[12px] font-black tracking-[4px] disabled:opacity-50 shadow-md active:scale-95 transition uppercase">
             {loading ? "MEMVERIFIKASI..." : "ACCESS GRANTED"}
           </button>
         </form>
