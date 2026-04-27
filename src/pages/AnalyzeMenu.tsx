@@ -4,11 +4,11 @@ import { RefreshCw, Cpu, ArrowLeft, Sparkles } from "lucide-react";
 import AnalysisPage from "./AnalysisPageV2";
 
 const MODE_META: any = {
-  ai: { code: "AI", accent: "var(--green)" },
-  mati: { code: "4D", accent: "var(--red)" },
-  jumlah: { code: "JM", accent: "var(--purple)" },
-  shio: { code: "SH", accent: "var(--cyan)" },
-  rekap: { code: "RK", accent: "var(--blue)" },
+  ai: { icon: "✨", accent: "var(--green)" },
+  mati: { icon: "🎯", accent: "var(--red)" },
+  jumlah: { icon: "🔢", accent: "var(--purple)" },
+  shio: { icon: "🐉", accent: "var(--cyan)" },
+  rekap: { icon: "💎", accent: "var(--blue)" },
 };
 
 export default function AnalyzeMenu() {
@@ -53,7 +53,7 @@ export default function AnalyzeMenu() {
 
 function AnalysisWrapper({ type, title }: any) {
   const { marketId } = useParams();
-  return <AnalysisPage type={type} title={title} icon={MODE_META[type]?.code || "AI"} marketId={marketId || "SGP"} />;
+  return <AnalysisPage type={type} title={title} icon={MODE_META[type]?.icon || "✨"} marketId={marketId || "SGP"} />;
 }
 
 function AnalyzeList() {
@@ -120,11 +120,11 @@ function AnalyzeList() {
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <SubMenuCard label="ANGKA IKUT 2D" code="AI" accent="var(--green)" onClick={() => navigate("ai")} />
-        <SubMenuCard label="ANGKA MATI 4D" code="4D" accent="var(--red)" onClick={() => navigate("mati")} />
-        <SubMenuCard label="JUMLAH MATI 2D" code="JM" accent="var(--purple)" onClick={() => navigate("jumlah")} />
-        <SubMenuCard label="SHIO MATI" code="SH" accent="var(--cyan)" onClick={() => navigate("shio")} />
-        <SubMenuCard label="MENU REKAP" code="RK" accent="var(--blue)" onClick={() => navigate("rekap")} wide />
+        <SubMenuCard label="ANGKA IKUT 2D" icon="✨" accent="var(--green)" onClick={() => navigate("ai")} />
+        <SubMenuCard label="ANGKA MATI 4D" icon="🎯" accent="var(--red)" onClick={() => navigate("mati")} />
+        <SubMenuCard label="JUMLAH MATI 2D" icon="🔢" accent="var(--purple)" onClick={() => navigate("jumlah")} />
+        <SubMenuCard label="SHIO MATI" icon="🐉" accent="var(--cyan)" onClick={() => navigate("shio")} />
+        <SubMenuCard label="MENU REKAP" icon="💎" accent="var(--blue)" onClick={() => navigate("rekap")} wide />
       </div>
 
       <button onClick={() => navigate("/")} className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-[var(--border2)] bg-[var(--card)] p-4 text-[11px] font-black uppercase tracking-[3px] text-[var(--text-dim)] shadow-sm transition active:scale-95">
@@ -134,11 +134,11 @@ function AnalyzeList() {
   );
 }
 
-function SubMenuCard({ label, code, accent, onClick, wide }: any) {
+function SubMenuCard({ label, icon, accent, onClick, wide }: any) {
   return (
     <button onClick={onClick} className={`group flex min-h-[88px] w-full items-center gap-4 rounded-3xl border border-[var(--border2)] bg-[var(--card)] p-4 text-left transition active:scale-[0.985] ${wide ? "sm:col-span-2" : ""}`}>
-      <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl border text-[13px] font-['Orbitron'] font-black tracking-[1px]" style={{ borderColor: accent, backgroundColor: `${accent}14`, color: accent }}>
-        {code}
+      <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl border text-[22px]" style={{ borderColor: accent, backgroundColor: `${accent}14`, color: accent }}>
+        {icon}
       </div>
       <div className="min-w-0 flex-1">
         <span className="block font-['Orbitron'] text-[13px] font-black uppercase tracking-[2px] text-[var(--text)]">{label}</span>
