@@ -2,13 +2,12 @@ import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
 
-// Inisialisasi Supabase menggunakan Environment Variables dari Vercel
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 import {
-  Lock, Zap, ShieldCheck, LogOut, ChevronRight, Search, RefreshCw
+  Lock, Zap, ShieldCheck, LogOut, ChevronRight, Search, RefreshCw, Crown, Sparkles, Smartphone
 } from "lucide-react";
 import AnalyzeMenu from "./pages/AnalyzeMenu";
 import AdminPage from "./pages/AdminPage";
@@ -16,7 +15,7 @@ import AdminPage from "./pages/AdminPage";
 export default function App() {
   return (
     <Router>
-      <div className="app-container min-h-screen bg-[var(--bg)] text-[var(--text)] font-['Rajdhani'] selection:bg-[var(--cyan)] selection:text-black overflow-x-hidden">
+      <div className="app-container min-h-screen text-[var(--text)] selection:bg-[var(--gold)] selection:text-white overflow-x-hidden">
         <AppLayout />
       </div>
     </Router>
@@ -24,10 +23,9 @@ export default function App() {
 }
 
 function AppLayout() {
-  const navigate = useNavigate();
   const [deviceCode, setDeviceCode] = useState("");
   const [authStatus, setAuthStatus] = useState<"LOADING" | "LOCKED" | "READY" | "EXPIRED">("LOADING");
-  const [authStage, setAuthStage] = useState("Inisialisasi...");
+  const [authStage, setAuthStage] = useState("Menyiapkan aplikasi...");
   const [role, setRole] = useState("FREE");
   const [markets, setMarkets] = useState<any[]>([]);
   const [systemSetting, setSystemSetting] = useState<any>({ runningText: "..." });
@@ -43,14 +41,9 @@ function AppLayout() {
 
   const fetchMarkets = async () => {
     try {
-      const { data, error } = await supabase
-        .from('markets')
-        .select('*');
-
+      const { data, error } = await supabase.from("markets").select("*");
       if (error) throw error;
-
-      const mData = data || [];
-      const sorted = mData.sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
+      const sorted = (data || []).sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
       setMarkets(sorted);
       setSystemSetting((prev: any) => ({ ...prev, dbError: null }));
     } catch (e: any) {
@@ -71,6 +64,7 @@ function AppLayout() {
       const savedToken = localStorage.getItem("supreme_token");
       if (savedToken) {
         setAuthStatus("LOADING");
+        setAuthStage("Memverifikasi akses...");
         try {
           const res = await fetch("/api/verify", {
             method: "POST",
@@ -85,7 +79,7 @@ function AppLayout() {
             localStorage.removeItem("supreme_token");
             localStorage.removeItem("supreme_devcode");
             setAuthStatus("LOCKED");
-            window.location.reload(); 
+            window.location.reload();
           }
         } catch {
           setAuthStatus("LOCKED");
@@ -102,22 +96,21 @@ function AppLayout() {
 
   if (authStatus === "LOADING") {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-6 bg-[#030712]">
-        <div className="relative">
-          <div className="w-16 h-16 border-4 border-t-[var(--cyan)] border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
-          <Zap className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[var(--gold)] w-6 h-6" />
+      <div className="flex min-h-screen flex-col items-center justify-center gap-6 px-6 text-center">
+        <div className="relative flex h-24 w-24 items-center justify-center rounded-[2rem] bg-white/80 shadow-2xl ring-1 ring-slate-900/10 backdrop-blur-xl">
+          <div className="absolute inset-3 rounded-[1.5rem] border-4 border-t-[var(--gold)] border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
+          <Zap className="relative text-[var(--gold)] w-8 h-8" />
         </div>
-        <div className="flex flex-col items-center gap-4">
-          <div className="font-['Orbitron'] text-[10px] tracking-[4px] text-[var(--gold)] animate-pulse uppercase">
-            {authStage}
-          </div>
-          <button
-            onClick={() => setAuthStatus("LOCKED")}
-            className="px-6 py-3 bg-[var(--gold)]/10 border border-[var(--gold)]/30 rounded-xl text-[11px] font-bold text-[var(--gold)] hover:bg-[var(--gold)]/20 transition-all uppercase tracking-[2px] shadow-[0_0_20px_rgba(212,175,55,0.1)]"
-          >
-            KLIK DISINI JIKA MACET
-          </button>
+        <div>
+          <p className="font-['Orbitron'] text-[11px] tracking-[4px] text-[var(--gold)] uppercase animate-pulse">{authStage}</p>
+          <p className="mt-3 text-sm text-[var(--text-dim)]">Membuka pengalaman premium mobile.</p>
         </div>
+        <button
+          onClick={() => setAuthStatus("LOCKED")}
+          className="rounded-2xl border border-[var(--border2)] bg-white/80 px-6 py-3 text-[11px] font-bold tracking-[2px] text-[var(--text)] shadow-lg transition active:scale-95 uppercase"
+        >
+          KLIK DISINI JIKA MACET
+        </button>
       </div>
     );
   }
@@ -134,77 +127,83 @@ function AppLayout() {
   );
 
   if (authStatus === "EXPIRED") return (
-    <div className="flex items-center justify-center min-h-screen p-8 text-center bg-red-950/20">
-      <div className="border border-red-500 p-8 rounded-xl bg-black/80 shadow-[0_0_50px_rgba(239,68,68,0.2)] max-w-sm">
-        <h2 className="font-['Orbitron'] text-red-500 mb-4 tracking-[4px]">ACCOUNT EXPIRED</h2>
-        <p className="text-[12px] opacity-70 mb-6 font-['JetBrains_Mono']">Masa trial akun anda telah berakhir. Hubungi Admin untuk aktivasi VIP.</p>
-        <button 
-          onClick={() => {
-            localStorage.removeItem("supreme_token");
-            localStorage.removeItem("supreme_devcode");
-            window.location.reload();
-          }} 
-          className="w-full bg-red-600 p-3 rounded-xl font-bold text-white text-[12px] tracking-[2px]"
-        >
-          REFRESH
-        </button>
+    <div className="flex items-center justify-center min-h-screen p-8 text-center">
+      <div className="premium-panel max-w-sm p-8 border-l-4 border-l-[var(--red)]">
+        <h2 className="font-['Orbitron'] text-[var(--red)] mb-4 tracking-[4px]">ACCOUNT EXPIRED</h2>
+        <p className="text-sm text-[var(--text-dim)] mb-6">Masa trial akun anda telah berakhir. Hubungi Admin untuk aktivasi VIP.</p>
+        <button onClick={() => { localStorage.removeItem("supreme_token"); localStorage.removeItem("supreme_devcode"); window.location.reload(); }} className="w-full bg-[var(--red)] p-4 rounded-2xl font-bold text-white text-[12px] tracking-[2px]">REFRESH</button>
       </div>
     </div>
   );
 
   return (
-    <div className="relative flex flex-col min-h-screen bg-transparent">
-      <div className="pt-10 pb-5 text-center">
-        <h1 className="font-['Orbitron'] text-[25px] font-black tracking-[8px] text-[var(--gold)] drop-shadow-[0_0_22px_rgba(240,192,64,0.18)]">ANALISA ANGKA</h1>
-        <p className="font-['JetBrains_Mono'] text-[10px] tracking-[6px] text-[var(--cyan)] opacity-80 mt-4 uppercase">PREDICTION ENGINE</p>
-      </div>
+    <div className="relative mx-auto flex min-h-screen w-full max-w-3xl flex-col px-4 pb-8 sm:px-6">
+      <header className="pt-6 pb-4 sm:pt-8">
+        <div className="premium-panel overflow-hidden p-5 sm:p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-[var(--gold-dim)] px-3 py-1 text-[10px] font-black uppercase tracking-[2px] text-[var(--gold)]">
+                <Sparkles size={13} /> Premium Engine
+              </div>
+              <h1 className="font-['Orbitron'] text-[25px] font-black tracking-[5px] text-[var(--text)] sm:text-[32px]">ANALISA ANGKA</h1>
+              <p className="mt-2 text-[12px] font-semibold uppercase tracking-[3px] text-[var(--text-dim)]">Prediction tools yang clean, cepat, dan mobile friendly</p>
+            </div>
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--gold)] to-[#f6d780] shadow-lg">
+              <Crown className="h-7 w-7 text-white" />
+            </div>
+          </div>
+        </div>
+      </header>
 
-      <div className="px-4 space-y-3 mb-8">
-        {role === "MASTER" ? (
-          <div className="premium-card flex items-center gap-3 p-4 rounded-2xl border-l-4 border-l-[var(--gold)]">
-            <div className="w-2.5 h-2.5 rounded-full bg-[var(--gold)] shadow-[0_0_14px_var(--gold)]"></div>
-            <span className="font-['Orbitron'] text-[11px] font-black tracking-[3px] text-[var(--gold)] uppercase">ADMIN ACCESS</span>
+      <div className="space-y-3 mb-5">
+        <AccessCard role={role} />
+        <div className="premium-card flex items-center justify-between gap-3 p-4 rounded-3xl">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[var(--cyan-dim)] text-[var(--cyan)]"><Smartphone size={18} /></div>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Device Identifier</p>
+              <p className="font-['JetBrains_Mono'] text-sm font-black text-[var(--text)]">ID: {deviceCode}</p>
+            </div>
           </div>
-        ) : role === "PRO" ? (
-          <div className="premium-card flex items-center gap-3 p-4 rounded-2xl border-l-4 border-l-[var(--cyan)]">
-            <div className="w-2.5 h-2.5 rounded-full bg-[var(--cyan)] shadow-[0_0_14px_var(--cyan)]"></div>
-            <span className="font-['Orbitron'] text-[11px] font-black tracking-[3px] text-[var(--cyan)] uppercase">VIP ACCESS</span>
-          </div>
-        ) : (
-          <div className="premium-card flex items-center gap-3 p-4 rounded-2xl border-l-4 border-l-white/20">
-            <div className="w-2.5 h-2.5 rounded-full bg-white/35"></div>
-            <span className="font-['Orbitron'] text-[11px] font-black tracking-[3px] text-white/65 uppercase">NON VIP ACCESS</span>
-          </div>
-        )}
-
-        <div className="premium-card flex items-center justify-between p-4 rounded-2xl">
-          <span className="font-['Orbitron'] text-[11px] font-black tracking-[4px] text-white/38 uppercase">Device Identifier</span>
-          <span className="font-['JetBrains_Mono'] text-[13px] font-black text-[var(--gold)] tracking-[1px]">ID: {deviceCode}</span>
+          <span className="rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-black text-emerald-600 ring-1 ring-emerald-200">ACTIVE</span>
         </div>
 
         {systemSetting?.dbError && (
-          <div className="flex items-center gap-3 bg-red-950/30 border border-red-500/30 p-3 rounded-lg border-l-4 border-l-red-500 shadow-[0_0_15px_rgba(239,68,68,0.1)] mt-4">
-            <ShieldCheck className="w-5 h-5 text-red-500 shrink-0" />
+          <div className="flex items-center gap-3 bg-red-50 border border-red-200 p-4 rounded-3xl shadow-sm">
+            <ShieldCheck className="w-5 h-5 text-[var(--red)] shrink-0" />
             <div className="flex flex-col">
-              <span className="font-['Orbitron'] text-[11px] font-bold tracking-[1px] text-red-500 uppercase">DATABASE ERROR</span>
-              <span className="font-['JetBrains_Mono'] text-[10px] text-red-300 mt-1">{systemSetting.dbError}</span>
+              <span className="font-['Orbitron'] text-[11px] font-bold tracking-[1px] text-[var(--red)] uppercase">DATABASE ERROR</span>
+              <span className="text-[11px] text-red-500 mt-1">{systemSetting.dbError}</span>
             </div>
           </div>
         )}
       </div>
 
-      <main className="flex-1 flex flex-col min-w-0">
-        <section className="flex-1 p-4 overflow-y-auto">
-          <div className="max-w-6xl mx-auto">
-            <Routes>
-              <Route path="/" element={<Dashboard markets={markets} />} />
-              <Route path="/analyze/:marketId/*" element={<AnalyzeMenu />} />
-              <Route path="/admin" element={<AdminPage />} />
-              <Route path="*" element={<Navigate to="/" />} />
-            </Routes>
-          </div>
-        </section>
+      <main className="flex-1 min-w-0">
+        <Routes>
+          <Route path="/" element={<Dashboard markets={markets} />} />
+          <Route path="/analyze/:marketId/*" element={<AnalyzeMenu />} />
+          <Route path="/admin" element={<AdminPage />} />
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
       </main>
+    </div>
+  );
+}
+
+function AccessCard({ role }: { role: string }) {
+  const isMaster = role === "MASTER";
+  const isPro = role === "PRO";
+  return (
+    <div className={`premium-card flex items-center justify-between gap-4 p-4 rounded-3xl border-l-4 ${isMaster ? 'border-l-[var(--gold)]' : isPro ? 'border-l-[var(--cyan)]' : 'border-l-slate-300'}`}>
+      <div className="flex items-center gap-3">
+        <div className={`h-3 w-3 rounded-full ${isMaster ? 'bg-[var(--gold)]' : isPro ? 'bg-[var(--cyan)]' : 'bg-slate-300'}`}></div>
+        <div>
+          <p className="font-['Orbitron'] text-[11px] font-black tracking-[3px] text-[var(--text)] uppercase">{isMaster ? 'Admin Access' : isPro ? 'VIP Access' : 'Non VIP Access'}</p>
+          <p className="mt-1 text-[11px] text-[var(--text-dim)]">Status akun dan fitur aktif.</p>
+        </div>
+      </div>
+      <Crown className={`h-5 w-5 ${isMaster || isPro ? 'text-[var(--gold)]' : 'text-slate-300'}`} />
     </div>
   );
 }
@@ -220,71 +219,57 @@ function Dashboard({ markets }: { markets: any[] }) {
 
   return (
     <div className="animate-[riseIn_0.55s_ease-out]">
-      <div className="flex items-center justify-between mb-5 px-2">
-        <h2 className="font-['Orbitron'] text-[14px] font-black tracking-[6px] text-white">PILIH PASARAN</h2>
-        <button
-          onClick={() => window.location.reload()}
-          className="w-11 h-11 flex items-center justify-center rounded-xl bg-[var(--card2)] border border-[var(--border2)] text-white/70 hover:text-[var(--gold)] transition-all active:scale-95 shadow-[0_12px_28px_rgba(0,0,0,0.32)]"
-        >
-          <RefreshCw size={20} className="opacity-80" />
+      <div className="mb-4 flex items-center justify-between gap-3 px-1">
+        <div>
+          <h2 className="font-['Orbitron'] text-[15px] font-black tracking-[4px] text-[var(--text)]">PILIH PASARAN</h2>
+          <p className="mt-1 text-xs text-[var(--text-dim)]">Pilih market untuk mulai analisa.</p>
+        </div>
+        <button onClick={() => window.location.reload()} className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/80 border border-[var(--border2)] text-[var(--text-dim)] shadow-lg transition active:scale-95">
+          <RefreshCw size={19} />
         </button>
       </div>
 
-      <div className="relative mb-7">
+      <div className="relative mb-5">
         <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-          <Search size={21} className="text-white/85" />
+          <Search size={20} className="text-[var(--text-dim)]" />
         </div>
         <input
           type="text"
-          placeholder="CARI PASARAN..."
+          placeholder="Cari pasaran..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full h-16 bg-[#08111f]/95 border border-white/10 rounded-2xl pl-14 pr-4 text-[14px] font-black font-['Orbitron'] tracking-[4px] text-white placeholder:text-white/70 focus:outline-none focus:border-[var(--cyan)]/45 focus:shadow-[0_0_24px_rgba(0,229,255,0.10)] transition-all shadow-[0_14px_32px_rgba(0,0,0,0.28)]"
+          className="w-full h-16 bg-white/86 border border-[var(--border2)] rounded-3xl pl-13 pr-4 text-[15px] font-bold text-[var(--text)] placeholder:text-slate-400 focus:outline-none focus:border-[var(--cyan)] focus:ring-4 focus:ring-sky-100 transition-all shadow-[0_16px_34px_rgba(15,23,42,0.08)]"
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-3 pb-8">
+      <div className="grid grid-cols-2 gap-3 pb-6 sm:grid-cols-3">
         {filteredMarkets.length > 0 ? (
           filteredMarkets.map((m, idx) => {
-            const dotColors = ["#b388ff", "#f0c040", "var(--cyan)", "#00e676", "var(--red)", "#448aff"];
+            const dotColors = ["#8b5cf6", "#d7a63a", "#0ea5e9", "#10b981", "#ef4444", "#2563eb"];
             const dotColor = dotColors[idx % dotColors.length];
             return (
-              <button
-                key={m.id}
-                onClick={() => navigate(`/analyze/${m.id}`)}
-                className="group flex items-center justify-between p-4 bg-gradient-to-br from-[#0d1728] to-[#07101d] border border-white/10 rounded-2xl hover:border-[var(--cyan)]/28 transition-all active:scale-[0.975] text-left relative overflow-hidden min-h-[66px] shadow-[0_16px_34px_rgba(0,0,0,0.30)]"
-              >
-                <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/12 to-transparent"></div>
-                <div className="flex items-center gap-3 min-w-0">
-                  <div
-                    className="w-3 h-3 rounded-full shrink-0 shadow-[0_0_14px_currentColor]"
-                    style={{ backgroundColor: dotColor, color: dotColor }}
-                  ></div>
-                  <span className="font-['Orbitron'] text-[11px] font-black tracking-[2.1px] text-white/92 group-hover:text-white transition-colors truncate">{m.id}</span>
+              <button key={m.id} onClick={() => navigate(`/analyze/${m.id}`)} className="group flex min-h-[82px] flex-col justify-between rounded-3xl border border-[var(--border2)] bg-white/84 p-4 text-left shadow-lg transition active:scale-[0.975]">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="h-3 w-3 rounded-full shadow-sm" style={{ backgroundColor: dotColor }}></div>
+                  <ChevronRight size={18} className="text-[var(--text-dim)] group-hover:text-[var(--gold)] group-hover:translate-x-1 transition-all" />
                 </div>
-                <ChevronRight size={17} className="text-white/32 group-hover:text-[var(--gold)] group-hover:translate-x-1 transition-all shrink-0" />
+                <div>
+                  <span className="block truncate font-['Orbitron'] text-[13px] font-black tracking-[2px] text-[var(--text)]">{m.id}</span>
+                  {m.name && <span className="mt-1 block truncate text-[11px] text-[var(--text-dim)]">{m.name}</span>}
+                </div>
               </button>
             );
           })
         ) : (
-          <div className="col-span-2 py-10 text-center border border-dashed border-[var(--border2)] rounded-2xl opacity-50">
-            <p className="font-['JetBrains_Mono'] text-[11px] tracking-[2px]">PASARAN TIDAK DITEMUKAN</p>
+          <div className="col-span-2 sm:col-span-3 py-10 text-center border border-dashed border-[var(--border2)] rounded-3xl bg-white/50">
+            <p className="text-[12px] tracking-[2px] text-[var(--text-dim)]">PASARAN TIDAK DITEMUKAN</p>
           </div>
         )}
       </div>
 
-      <div className="mt-8 mb-12 flex justify-center">
-        <button
-          onClick={() => {
-            localStorage.removeItem("supreme_token");
-            localStorage.removeItem("supreme_devcode");
-            sessionStorage.setItem("supreme_skip_auto", "true");
-            window.location.reload();
-          }}
-          className="flex items-center gap-3 bg-red-500/5 hover:bg-red-500/10 border border-red-500/20 p-3 px-6 rounded-xl text-red-500/80 hover:text-red-500 transition-all font-['Orbitron'] text-[11px] font-black tracking-[4px] uppercase group shadow-lg"
-        >
-          <LogOut size={16} className="group-hover:-translate-x-1 transition-transform" />
-          KELUAR SISTEM
+      <div className="mt-4 mb-10 flex justify-center">
+        <button onClick={() => { localStorage.removeItem("supreme_token"); localStorage.removeItem("supreme_devcode"); sessionStorage.setItem("supreme_skip_auto", "true"); window.location.reload(); }} className="flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 px-6 py-3 text-[11px] font-black uppercase tracking-[3px] text-red-500 shadow-sm transition active:scale-95">
+          <LogOut size={16} /> KELUAR SISTEM
         </button>
       </div>
     </div>
@@ -314,62 +299,45 @@ function LayarKunci({ deviceCode, onAuthSuccess }: { deviceCode: string, onAuthS
       } else {
         setError(json.error || "PIN SALAH!");
       }
-    } catch (e) {
+    } catch {
       setError("Error koneksi server!");
     }
     setLoading(false);
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-6 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-fixed">
-      <div className="w-full max-w-sm p-8 bg-[var(--card)] border border-[var(--border2)] rounded-[var(--radius)] shadow-[0_20px_50px_rgba(0,0,0,0.5)] backdrop-blur-2xl relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[var(--gold)] to-transparent animate-pulse"></div>
-
-        <div className="text-center mb-10">
-          <div className="w-16 h-16 bg-gradient-to-br from-[var(--gold)] to-[#c88a20] rounded-2xl mx-auto flex items-center justify-center shadow-lg mb-4 ring-4 ring-white/5">
-            <Lock className="text-black w-8 h-8" />
+    <div className="flex min-h-screen flex-col items-center justify-center p-5">
+      <div className="premium-panel relative w-full max-w-sm overflow-hidden p-7 sm:p-8">
+        <div className="absolute left-0 top-0 h-1 w-full bg-gradient-to-r from-[var(--gold)] via-[var(--cyan)] to-[var(--gold)]"></div>
+        <div className="mb-8 text-center">
+          <div className="mx-auto mb-5 flex h-18 w-18 items-center justify-center rounded-[1.75rem] bg-gradient-to-br from-[var(--gold)] to-[#f4d27a] shadow-xl ring-4 ring-white/70">
+            <Lock className="text-white w-8 h-8" />
           </div>
-          <h2 className="font-['Orbitron'] text-[18px] font-bold text-white tracking-[6px] mb-2">SYSTEM LOCKED</h2>
-          <p className="text-[10px] text-[var(--text-dim)] font-bold tracking-[2px] uppercase">Unauthorized Access Restricted</p>
+          <h2 className="font-['Orbitron'] text-[21px] font-black text-[var(--text)] tracking-[4px] mb-2">SYSTEM ACCESS</h2>
+          <p className="text-sm text-[var(--text-dim)]">Masukkan PIN untuk membuka dashboard premium.</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-[10px] font-['Orbitron'] font-bold text-[var(--gold)] mb-3 tracking-[3px] uppercase ml-1">Device Key Identifier</label>
-            <input type="text" value={deviceCode} readOnly className="w-full h-12 bg-black/40 border border-[var(--border2)] rounded-xl px-4 text-white text-[16px] font-black tracking-[4px] font-['Roboto_Mono'] text-center focus:outline-none" />
+            <label className="block text-[10px] font-black text-[var(--text-dim)] mb-2 tracking-[2px] uppercase ml-1">Device Key Identifier</label>
+            <input type="text" value={deviceCode} readOnly className="w-full h-13 bg-slate-50 border border-[var(--border2)] rounded-2xl px-4 text-[var(--text)] text-[16px] font-black tracking-[4px] font-['Roboto_Mono'] text-center focus:outline-none" />
           </div>
 
           <div>
-            <label className="block text-[10px] font-['Orbitron'] font-bold text-[var(--cyan)] mb-3 tracking-[3px] uppercase ml-1">Secure Entrance PIN</label>
-            <input
-              type="password"
-              value={pin}
-              autoFocus
-              onChange={e => setPin(e.target.value)}
-              placeholder="••••"
-              className="w-full h-14 bg-black/50 border-2 border-[var(--border2)] focus:border-[var(--cyan)] rounded-xl px-4 text-white text-[24px] font-black tracking-[12px] font-['Roboto_Mono'] text-center transition-all placeholder:opacity-20 outline-none"
-            />
+            <label className="block text-[10px] font-black text-[var(--cyan)] mb-2 tracking-[2px] uppercase ml-1">Secure Entrance PIN</label>
+            <input type="password" value={pin} autoFocus onChange={e => setPin(e.target.value)} placeholder="••••" className="w-full h-15 bg-white border-2 border-[var(--border2)] focus:border-[var(--cyan)] focus:ring-4 focus:ring-sky-100 rounded-2xl px-4 text-[var(--text)] text-[24px] font-black tracking-[12px] font-['Roboto_Mono'] text-center transition-all placeholder:opacity-20 outline-none" />
           </div>
 
-          {error && <p className="text-[10px] text-red-500 font-bold bg-red-500/10 border border-red-500/20 p-3 rounded-lg text-center tracking-[1px] uppercase">{error}</p>}
+          {error && <p className="text-[11px] text-red-500 font-bold bg-red-50 border border-red-200 p-3 rounded-2xl text-center tracking-[1px] uppercase">{error}</p>}
 
-          <button
-            type="submit"
-            disabled={loading || !pin}
-            className="w-full bg-gradient-to-r from-[var(--gold)] to-[#c88a20] text-black py-4 rounded-xl text-[12px] font-black tracking-[4px] disabled:opacity-50 shadow-lg active:scale-95 transition-all uppercase"
-          >
+          <button type="submit" disabled={loading || !pin} className="w-full bg-gradient-to-r from-[var(--gold)] to-[#f2cc70] text-white py-4 rounded-2xl text-[12px] font-black tracking-[4px] disabled:opacity-50 shadow-xl active:scale-95 transition-all uppercase">
             {loading ? "MEMVERIFIKASI..." : "ACCESS GRANTED"}
           </button>
         </form>
 
-        <p className="text-center text-[9px] text-[var(--text-dim)] mt-6 tracking-[1px] uppercase">
-          <a
-            href="https://wa.me/6285792030642?text=Halo%2C%20saya%20minta%20PIN%20aktivasi%20Analisa%20Angka"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[13px] text-[var(--gold)] hover:text-white transition-colors underline underline-offset-4 animate-pulse"
-          >
-            👉 🔑 Hubungi Pembuat untuk Aktivasi PIN 
+        <p className="text-center text-[11px] text-[var(--text-dim)] mt-6">
+          <a href="https://wa.me/6285792030642?text=Halo%2C%20saya%20minta%20PIN%20aktivasi%20Analisa%20Angka" target="_blank" rel="noopener noreferrer" className="font-bold text-[var(--gold)] hover:text-[var(--text)] transition-colors underline underline-offset-4">
+            Hubungi Pembuat untuk Aktivasi PIN
           </a>
         </p>
       </div>
