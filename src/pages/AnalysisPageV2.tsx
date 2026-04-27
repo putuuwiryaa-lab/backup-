@@ -20,17 +20,19 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState("");
   const meta = typeMeta[type] || typeMeta.ai;
-  const needsParam = ["ai", "mati", "shio", "jumlah", "rekap"].includes(type);
+
+  const safeArray = (value: any) => Array.isArray(value) ? value : value === undefined || value === null ? [] : [value];
+  const statsFrom = (value: any) => Array.isArray(value?.stats) ? value.stats : [];
 
   const handleAnalyze = async (p?: number) => {
-    if (needsParam && !p && param === null) {
+    if (!p && param === null) {
       setParam(0);
       setError("");
       return;
     }
 
     const selectedParam = p || param || 1;
-    if (needsParam) setParam(selectedParam);
+    setParam(selectedParam);
     setLoading(true);
     setError("");
     setResult(null);
@@ -39,16 +41,13 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
       const resMarkets = await fetch("/api/markets");
       const allMarkets = await resMarkets.json();
       const currentMarket = allMarkets.find((m: any) => m.id === marketId);
-
       if (!currentMarket) {
         setError(`Data histori ${marketId} belum disetup oleh Admin!`);
         setLoading(false);
         return;
       }
 
-      const rawTokens = String(currentMarket.history_data || "").split(/[\s\n\r\t,]+/);
-      const data = rawTokens.filter((token: string) => /^\d{4}$/.test(token)).reverse();
-
+      const data = String(currentMarket.history_data || "").split(/[\s\n\r\t,]+/).filter((token: string) => /^\d{4}$/.test(token)).reverse();
       if (!data || data.length < 17) {
         setError("Data dari server kurang! Min 17 result.");
         setLoading(false);
@@ -71,11 +70,8 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
     setLoading(false);
   };
 
-  const safeArray = (value: any) => Array.isArray(value) ? value : value === undefined || value === null ? [] : [value];
-  const statsFrom = (value: any) => Array.isArray(value?.stats) ? value.stats : [];
-
   const renderParamSelector = () => {
-    if (!needsParam || param !== 0) return null;
+    if (param !== 0) return null;
     const options: any = {
       ai: { title: "PILIH JUMLAH DIGIT AI", values: [2, 4, 6, 8], labels: { 8: "BBFS" } },
       mati: { title: "PILIH JUMLAH DIGIT OFF", values: [1, 2, 3] },
@@ -100,10 +96,7 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
   };
 
   const renderStatsList = (stats: any[], accent: string) => {
-    if (!stats.length) {
-      return <div className="rounded-2xl border border-[var(--border2)] bg-black/20 p-4 text-center text-[11px] font-bold uppercase tracking-[2px] text-[var(--text-dim)]">Belum ada statistik aktif</div>;
-    }
-
+    if (!stats.length) return <div className="rounded-2xl border border-[var(--border2)] bg-black/20 p-4 text-center text-[11px] font-bold uppercase tracking-[2px] text-[var(--text-dim)]">Belum ada statistik aktif</div>;
     return (
       <div className="space-y-2">
         {stats.map((s: any, i: number) => {
@@ -124,7 +117,7 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
     );
   };
 
-  const renderDigitPills = (items: any[], accent: string, compact = false) => (
+  const renderDigitPills = (items: any[], accent: string, compact = true) => (
     <div className="flex flex-wrap justify-end gap-2">
       {items.map((item: any, i: number) => (
         <div key={i} className={`${compact ? "h-9 min-w-9 text-[15px]" : "h-10 min-w-10 text-[18px]"} flex items-center justify-center rounded-2xl border px-3 font-['Orbitron'] font-black`} style={{ borderColor: accent, backgroundColor: `${accent}14`, color: "var(--text)" }}>
@@ -134,9 +127,9 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
     </div>
   );
 
-  const ResultRow = ({ label, values, accent, shio = false }: any) => (
-    <div className="flex items-center justify-between gap-3 rounded-2xl border border-[var(--border2)] bg-[#111824]/80 p-4">
-      <span className="shrink-0 font-['Orbitron'] text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">{label}</span>
+  const ResultRow = ({ label, values, accent, shio = false, hideLabel = false }: any) => (
+    <div className={`flex items-center ${hideLabel ? "justify-center" : "justify-between"} gap-3 rounded-2xl border border-[var(--border2)] bg-[#111824]/80 p-4`}>
+      {!hideLabel && <span className="shrink-0 font-['Orbitron'] text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">{label}</span>}
       {shio ? (
         <div className="flex flex-wrap justify-end gap-2">
           {safeArray(values).map((s: number) => <ShioChip key={s} value={s} />)}
@@ -165,7 +158,7 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
               <span className="font-['Orbitron'] text-[13px] font-black tracking-[2px]" style={{ color }}>{value || "-"}</span>
             </div>
           ))}
-          <ResultRow label="OFF SHIO" values={result.offShio} accent="var(--cyan)" shio />
+          <ResultRow label="🐉 OFF SHIO" values={result.offShio} accent="var(--cyan)" shio />
         </div>
 
         <div className="premium-panel space-y-3 p-4">
@@ -201,14 +194,14 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
     const displayResult = safeArray(result.result);
     const active = result.elitCount ?? result.eliteTotal ?? stats.length;
     const formulaTotal = type === "ai" ? 25 : type === "shio" ? 12 : 50;
-    const resultLabel = type === "ai" && param && param >= 8 ? "BBFS" : meta.label;
+    const resultLabel = meta.label;
 
     return (
       <div className="space-y-4 animate-[fadeIn_0.3s_ease-out]">
         <ResultHeader label="HASIL ANALISA" value={`RUMUS ACTIVE ${active}/${formulaTotal}`} accent={meta.accent} />
         <div className="premium-panel p-4"><div className="mb-4 text-center"><div className="inline-flex items-center gap-2 rounded-2xl border px-4 py-3" style={{ borderColor: meta.accent, backgroundColor: meta.soft }}><span className="text-base">{icon}</span><span className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px] text-[var(--text)]">{meta.label} — {meta.formula}</span></div><div className="mt-3 text-[9px] font-black uppercase tracking-[3px] text-[var(--text-dim)]">Validasi Walk-Forward</div></div>{renderStatsList(stats, meta.accent)}</div>
         <div className="premium-panel space-y-3 p-4">
-          <ResultRow label={resultLabel} values={displayResult} accent={meta.accent} shio={type === "shio"} />
+          <ResultRow label={resultLabel} values={displayResult} accent={meta.accent} shio={type === "shio"} hideLabel={type === "ai"} />
         </div>
       </div>
     );
