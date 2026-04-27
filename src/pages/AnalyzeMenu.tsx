@@ -3,6 +3,14 @@ import { Routes, Route, useNavigate, useParams, useLocation } from "react-router
 import { RefreshCw, Cpu, ArrowLeft, Sparkles } from "lucide-react";
 import AnalysisPage from "./AnalysisPageV2";
 
+const MODE_META: any = {
+  ai: { code: "AI", accent: "var(--green)" },
+  mati: { code: "4D", accent: "var(--red)" },
+  jumlah: { code: "JM", accent: "var(--purple)" },
+  shio: { code: "SH", accent: "var(--cyan)" },
+  rekap: { code: "RK", accent: "var(--blue)" },
+};
+
 export default function AnalyzeMenu() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -34,18 +42,18 @@ export default function AnalyzeMenu() {
   return (
     <Routes>
       <Route path="/" element={<AnalyzeList />} />
-      <Route path="/ai" element={<AnalysisWrapper type="ai" title="ANGKA IKUT 2D" icon="⚡" />} />
-      <Route path="/mati" element={<AnalysisWrapper type="mati" title="ANGKA MATI 4D" icon="💀" />} />
-      <Route path="/jumlah" element={<AnalysisWrapper type="jumlah" title="JUMLAH MATI 2D" icon="🔢" />} />
-      <Route path="/shio" element={<AnalysisWrapper type="shio" title="SHIO MATI" icon="🐉" />} />
-      <Route path="/rekap" element={<AnalysisWrapper type="rekap" title="MENU REKAP" icon="💰" />} />
+      <Route path="/ai" element={<AnalysisWrapper type="ai" title="ANGKA IKUT 2D" />} />
+      <Route path="/mati" element={<AnalysisWrapper type="mati" title="ANGKA MATI 4D" />} />
+      <Route path="/jumlah" element={<AnalysisWrapper type="jumlah" title="JUMLAH MATI 2D" />} />
+      <Route path="/shio" element={<AnalysisWrapper type="shio" title="SHIO MATI" />} />
+      <Route path="/rekap" element={<AnalysisWrapper type="rekap" title="MENU REKAP" />} />
     </Routes>
   );
 }
 
-function AnalysisWrapper({ type, title, icon }: any) {
+function AnalysisWrapper({ type, title }: any) {
   const { marketId } = useParams();
-  return <AnalysisPage type={type} title={title} icon={icon} marketId={marketId || "SGP"} />;
+  return <AnalysisPage type={type} title={title} icon={MODE_META[type]?.code || "AI"} marketId={marketId || "SGP"} />;
 }
 
 function AnalyzeList() {
@@ -112,11 +120,11 @@ function AnalyzeList() {
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <SubMenuCard label="ANGKA IKUT 2D" icon="⚡" accent="var(--green)" onClick={() => navigate("ai")} />
-        <SubMenuCard label="ANGKA MATI 4D" icon="💀" accent="var(--red)" onClick={() => navigate("mati")} />
-        <SubMenuCard label="JUMLAH MATI 2D" icon="🔢" accent="var(--purple)" onClick={() => navigate("jumlah")} />
-        <SubMenuCard label="SHIO MATI" icon="🐉" accent="var(--cyan)" onClick={() => navigate("shio")} />
-        <SubMenuCard label="MENU REKAP" icon="💰" accent="var(--blue)" onClick={() => navigate("rekap")} wide />
+        <SubMenuCard label="ANGKA IKUT 2D" code="AI" accent="var(--green)" onClick={() => navigate("ai")} />
+        <SubMenuCard label="ANGKA MATI 4D" code="4D" accent="var(--red)" onClick={() => navigate("mati")} />
+        <SubMenuCard label="JUMLAH MATI 2D" code="JM" accent="var(--purple)" onClick={() => navigate("jumlah")} />
+        <SubMenuCard label="SHIO MATI" code="SH" accent="var(--cyan)" onClick={() => navigate("shio")} />
+        <SubMenuCard label="MENU REKAP" code="RK" accent="var(--blue)" onClick={() => navigate("rekap")} wide />
       </div>
 
       <button onClick={() => navigate("/")} className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-[var(--border2)] bg-[var(--card)] p-4 text-[11px] font-black uppercase tracking-[3px] text-[var(--text-dim)] shadow-sm transition active:scale-95">
@@ -126,17 +134,16 @@ function AnalyzeList() {
   );
 }
 
-function SubMenuCard({ label, icon, accent, onClick, wide }: any) {
+function SubMenuCard({ label, code, accent, onClick, wide }: any) {
   return (
-    <button onClick={onClick} className={`group relative flex min-h-[88px] w-full items-center gap-4 overflow-hidden rounded-3xl border border-[var(--border2)] bg-[var(--card)] p-4 text-left shadow-md transition active:scale-[0.975] ${wide ? "sm:col-span-2" : ""}`}>
-      <div className="absolute right-0 top-0 h-20 w-20 translate-x-8 -translate-y-8 rounded-full opacity-20" style={{ backgroundColor: accent }}></div>
-      <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl text-2xl shadow-sm ring-1 ring-white/10" style={{ backgroundColor: `${accent}20`, color: accent }}>
-        {icon}
+    <button onClick={onClick} className={`group flex min-h-[88px] w-full items-center gap-4 rounded-3xl border border-[var(--border2)] bg-[var(--card)] p-4 text-left transition active:scale-[0.985] ${wide ? "sm:col-span-2" : ""}`}>
+      <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl border text-[13px] font-['Orbitron'] font-black tracking-[1px]" style={{ borderColor: accent, backgroundColor: `${accent}14`, color: accent }}>
+        {code}
       </div>
       <div className="min-w-0 flex-1">
         <span className="block font-['Orbitron'] text-[13px] font-black uppercase tracking-[2px] text-[var(--text)]">{label}</span>
       </div>
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-[var(--text-dim)] transition group-hover:translate-x-1 group-hover:text-[var(--gold)]">〉</div>
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-white/8 text-[var(--text-dim)] transition group-active:text-[var(--gold)]">〉</div>
     </button>
   );
 }
