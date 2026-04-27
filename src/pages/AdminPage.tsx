@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Trash2, Lock, ChevronUp, ChevronDown, Settings, List } from "lucide-react";
+import { Trash2, Lock, ChevronUp, ChevronDown, Settings, List, ShieldCheck } from "lucide-react";
 import { supabase } from "../App";
 
 export default function AdminPage() {
@@ -19,10 +19,7 @@ export default function AdminPage() {
 
   const fetchMarkets = async () => {
     try {
-      const { data, error } = await supabase
-        .from('markets')
-        .select('*')
-        .order('order', { ascending: true });
+      const { data, error } = await supabase.from('markets').select('*').order('order', { ascending: true });
       if (error) throw error;
       const sorted = (data || []) as any[];
       setMarketsList(sorted);
@@ -154,153 +151,118 @@ export default function AdminPage() {
   if (checking) {
     return (
       <div className="flex items-center justify-center min-h-[300px]">
-        <div className="w-8 h-8 border-4 border-t-[var(--cyan)] border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
+        <div className="w-10 h-10 border-4 border-t-[var(--gold)] border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   if (!isAuthorized) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 bg-black/40 border border-red-500/20 rounded-xl mt-12 mx-auto max-w-md text-center">
-        <Lock className="w-12 h-12 text-red-500 mb-4" />
-        <h2 className="text-xl text-red-500 mb-2 font-['Orbitron'] tracking-[2px]">AKSES DITOLAK</h2>
-        <p className="text-[10px] text-gray-500 uppercase tracking-[1px] mb-6">Silakan Login dengan PIN Master untuk mengakses halaman ini.</p>
-        <button onClick={() => window.location.href = "/"} className="bg-white text-black px-6 py-2 rounded text-[10px] font-bold hover:bg-gray-200 transition-colors tracking-[1px]">KEMBALI KE LOGIN</button>
+      <div className="premium-panel mx-auto mt-10 flex max-w-md flex-col items-center justify-center p-8 text-center">
+        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-red-50 text-[var(--red)] ring-1 ring-red-100">
+          <Lock className="w-8 h-8" />
+        </div>
+        <h2 className="font-['Orbitron'] text-xl text-[var(--red)] mb-2 tracking-[2px]">AKSES DITOLAK</h2>
+        <p className="mb-6 text-sm text-[var(--text-dim)]">Silakan login dengan PIN Master untuk mengakses halaman ini.</p>
+        <button onClick={() => window.location.href = "/"} className="rounded-2xl bg-[var(--text)] px-6 py-3 text-[11px] font-black uppercase tracking-[2px] text-white shadow-lg transition active:scale-95">KEMBALI KE LOGIN</button>
       </div>
     );
   }
 
   return (
-    <div className="p-4 bg-black/20 border border-white/5 rounded-2xl min-h-[500px] animate-[fadeIn_0.5s_ease-out]">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-[14px] text-[var(--gold)] font-['Orbitron'] font-bold uppercase tracking-[4px]">SUPER ADMIN</h2>
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-          <span className="text-[9px] font-bold text-green-500 tracking-[1px]">SERVER CONNECTED</span>
+    <div className="premium-panel min-h-[500px] p-4 animate-[fadeIn_0.5s_ease-out] sm:p-5">
+      <div className="mb-5 flex items-start justify-between gap-4">
+        <div>
+          <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-[var(--gold-dim)] px-3 py-1 text-[10px] font-black uppercase tracking-[2px] text-[var(--gold)]">
+            <ShieldCheck size={13} /> Master Panel
+          </div>
+          <h2 className="font-['Orbitron'] text-[18px] font-black uppercase tracking-[3px] text-[var(--text)]">SUPER ADMIN</h2>
+          <p className="mt-1 text-xs text-[var(--text-dim)]">Kelola pasaran dan pengaturan aplikasi.</p>
+        </div>
+        <div className="flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-2 ring-1 ring-emerald-100">
+          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+          <span className="text-[9px] font-black text-emerald-600 tracking-[1px]">ONLINE</span>
         </div>
       </div>
 
-      <div className="flex gap-1 mb-6 bg-black/40 p-1 rounded-lg border border-white/5">
-        <button
-          onClick={() => setActiveTab('markets')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2 text-[10px] font-bold rounded transition-all tracking-[2px] ${activeTab === 'markets' ? 'bg-[var(--gold)] text-black' : 'text-gray-400 hover:text-white'}`}
-        >
-          <List size={14} /> KELOLA PASARAN
+      <div className="mb-5 grid grid-cols-2 gap-2 rounded-3xl bg-slate-100/70 p-1 ring-1 ring-slate-900/5">
+        <button onClick={() => setActiveTab('markets')} className={`flex items-center justify-center gap-2 rounded-2xl py-3 text-[10px] font-black uppercase tracking-[1px] transition-all ${activeTab === 'markets' ? 'bg-white text-[var(--text)] shadow-sm' : 'text-[var(--text-dim)]'}`}>
+          <List size={14} /> Pasaran
         </button>
-        <button
-          onClick={() => setActiveTab('settings')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2 text-[10px] font-bold rounded transition-all tracking-[2px] ${activeTab === 'settings' ? 'bg-[var(--gold)] text-black' : 'text-gray-400 hover:text-white'}`}
-        >
-          <Settings size={14} /> SYSTEM SETTINGS
+        <button onClick={() => setActiveTab('settings')} className={`flex items-center justify-center gap-2 rounded-2xl py-3 text-[10px] font-black uppercase tracking-[1px] transition-all ${activeTab === 'settings' ? 'bg-white text-[var(--text)] shadow-sm' : 'text-[var(--text-dim)]'}`}>
+          <Settings size={14} /> Settings
         </button>
       </div>
 
       {activeTab === 'markets' ? (
         <>
-          <div className="flex flex-col gap-2 mb-6">
+          <div className="mb-5 grid max-h-[310px] gap-2 overflow-y-auto pr-1 custom-scrollbar sm:grid-cols-2">
             {marketsList.map((m, idx) => (
-              <div key={m.id} className="flex items-center gap-2">
-                <div className="flex flex-col gap-0.5">
-                  <button
-                    onClick={() => moveMarket(idx, 'up')}
-                    disabled={idx === 0}
-                    className="text-white/30 hover:text-white disabled:opacity-10 p-0.5 transition-all"
-                  >
+              <div key={m.id} className="flex items-center gap-2 rounded-2xl border border-[var(--border2)] bg-white/76 p-2 shadow-sm">
+                <div className="flex flex-col gap-1">
+                  <button onClick={() => moveMarket(idx, 'up')} disabled={idx === 0} className="rounded-lg p-1 text-[var(--text-dim)] transition hover:bg-slate-100 disabled:opacity-20">
                     <ChevronUp size={14} />
                   </button>
-                  <button
-                    onClick={() => moveMarket(idx, 'down')}
-                    disabled={idx === marketsList.length - 1}
-                    className="text-white/30 hover:text-white disabled:opacity-10 p-0.5 transition-all"
-                  >
+                  <button onClick={() => moveMarket(idx, 'down')} disabled={idx === marketsList.length - 1} className="rounded-lg p-1 text-[var(--text-dim)] transition hover:bg-slate-100 disabled:opacity-20">
                     <ChevronDown size={14} />
                   </button>
                 </div>
-                <button
-                  onClick={() => loadData(m.id)}
-                  className={`flex-1 px-4 py-2 text-[11px] font-bold border rounded transition-all tracking-[1px] text-left ${selectedMarket === m.id ? 'bg-[var(--cyan)] border-[var(--cyan)] text-black shadow-[0_0_15px_rgba(0,229,255,0.3)]' : 'border-white/10 text-gray-500 hover:border-white/20'}`}
-                >
+                <button onClick={() => loadData(m.id)} className={`min-h-12 flex-1 rounded-2xl px-4 py-3 text-left text-[12px] font-black tracking-[1px] transition-all ${selectedMarket === m.id ? 'bg-[var(--cyan)] text-white shadow-md' : 'bg-slate-50 text-[var(--text)] hover:bg-white'}`}>
                   {m.id}
                 </button>
               </div>
             ))}
           </div>
 
-          <div className="flex gap-2 mb-6">
-            <input
-              type="text"
-              value={newMarketId}
-              onChange={e => setNewMarketId(e.target.value)}
-              placeholder="KODE PASARAN BARU..."
-              className="flex-1 bg-black/50 border border-white/10 rounded-xl p-3 text-[11px] font-['JetBrains_Mono'] text-white focus:outline-none focus:border-[var(--cyan)]/40 uppercase tracking-[2px]"
-            />
-            <button onClick={handleAddNewMarket} className="bg-white text-black px-6 py-2 text-[10px] font-black rounded-xl hover:bg-gray-200 transition-colors uppercase tracking-[2px]">
-              ADD
-            </button>
+          <div className="mb-5 flex gap-2">
+            <input type="text" value={newMarketId} onChange={e => setNewMarketId(e.target.value)} placeholder="KODE PASARAN BARU..." className="min-w-0 flex-1 rounded-2xl border border-[var(--border2)] bg-white/85 p-4 text-[12px] font-black uppercase tracking-[2px] text-[var(--text)] placeholder:text-slate-400 focus:border-[var(--cyan)] focus:outline-none focus:ring-4 focus:ring-sky-100" />
+            <button onClick={handleAddNewMarket} className="rounded-2xl bg-[var(--text)] px-5 py-3 text-[10px] font-black uppercase tracking-[2px] text-white shadow-lg transition active:scale-95">ADD</button>
           </div>
 
-          <div className="mb-6">
-            <label className="text-[10px] text-[var(--cyan)] font-bold block mb-3 uppercase tracking-[2px] opacity-70">DATA HISTORY {selectedMarket}:</label>
-            <textarea
-              value={historyData}
-              onChange={(e) => setHistoryData(e.target.value)}
-              className="w-full h-[300px] bg-black/50 border border-white/10 rounded-2xl p-4 text-[12px] font-['JetBrains_Mono'] text-white focus:outline-none focus:border-[var(--cyan)]/40 leading-6 shadow-inner"
-              placeholder={`Contoh:\n5832\n6553\n3585`}
-            />
+          <div className="mb-5">
+            <label className="mb-2 block text-[10px] font-black uppercase tracking-[2px] text-[var(--cyan)]">DATA HISTORY {selectedMarket}:</label>
+            <textarea value={historyData} onChange={(e) => setHistoryData(e.target.value)} className="h-[300px] w-full rounded-3xl border border-[var(--border2)] bg-white/88 p-4 font-['JetBrains_Mono'] text-[12px] leading-6 text-[var(--text)] shadow-inner focus:border-[var(--cyan)] focus:outline-none focus:ring-4 focus:ring-sky-100" placeholder={`Contoh:\n5832\n6553\n3585`} />
           </div>
 
-          <div className="flex gap-3 mb-4">
-            <button
-              onClick={handleSave}
-              disabled={loading || !selectedMarket}
-              className="flex-1 bg-gradient-to-r from-emerald-600 to-emerald-800 text-white py-4 rounded-xl text-[11px] font-black disabled:opacity-50 tracking-[3px] shadow-lg active:scale-95 transition-all"
-            >
+          <div className="mb-4 flex gap-3">
+            <button onClick={handleSave} disabled={loading || !selectedMarket} className="flex-1 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 py-4 text-[11px] font-black tracking-[3px] text-white shadow-lg transition active:scale-95 disabled:opacity-50">
               {loading ? 'MENYIMPAN...' : 'SAVE TO SERVER'}
             </button>
-            <button
-              onClick={handleDelete}
-              disabled={loading || !selectedMarket}
-              className="bg-red-950/40 hover:bg-red-900/60 text-red-500 px-6 py-4 rounded-xl text-[10px] font-black disabled:opacity-50 border border-red-500/20 tracking-[1px] transition-all"
-            >
-              <Trash2 size={16} />
+            <button onClick={handleDelete} disabled={loading || !selectedMarket} className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-[var(--red)] transition active:scale-95 disabled:opacity-50">
+              <Trash2 size={18} />
             </button>
           </div>
         </>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-5">
           <div>
-            <label className="text-[10px] text-[var(--cyan)] font-bold block mb-2 tracking-[2px] uppercase opacity-70">RUNNING TEXT:</label>
-            <textarea
-              value={runningText}
-              onChange={e => setRunningText(e.target.value)}
-              className="w-full h-24 bg-black/50 border border-white/10 rounded-2xl p-4 text-[11px] text-white focus:outline-none"
-            />
+            <label className="mb-2 block text-[10px] font-black uppercase tracking-[2px] text-[var(--cyan)]">RUNNING TEXT:</label>
+            <textarea value={runningText} onChange={e => setRunningText(e.target.value)} className="h-28 w-full rounded-3xl border border-[var(--border2)] bg-white/88 p-4 text-[12px] text-[var(--text)] focus:border-[var(--cyan)] focus:outline-none focus:ring-4 focus:ring-sky-100" />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label className="text-[10px] text-[var(--cyan)] font-bold block mb-2 tracking-[2px] uppercase opacity-70">SYSTEM STATUS:</label>
-              <select value={systemStatus} onChange={e => setSystemStatus(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-[11px] text-white">
+              <label className="mb-2 block text-[10px] font-black uppercase tracking-[2px] text-[var(--cyan)]">SYSTEM STATUS:</label>
+              <select value={systemStatus} onChange={e => setSystemStatus(e.target.value)} className="w-full rounded-2xl border border-[var(--border2)] bg-white/88 p-4 text-[12px] text-[var(--text)] focus:outline-none">
                 <option value="ONLINE">ONLINE</option>
                 <option value="MAINTENANCE">MAINTENANCE</option>
               </select>
             </div>
             <div>
-              <label className="text-[10px] text-[var(--cyan)] font-bold block mb-2 tracking-[2px] uppercase opacity-70">VERSION:</label>
-              <input type="text" value={appVersion} onChange={e => setAppVersion(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-[11px] text-white" />
+              <label className="mb-2 block text-[10px] font-black uppercase tracking-[2px] text-[var(--cyan)]">VERSION:</label>
+              <input type="text" value={appVersion} onChange={e => setAppVersion(e.target.value)} className="w-full rounded-2xl border border-[var(--border2)] bg-white/88 p-4 text-[12px] text-[var(--text)] focus:outline-none" />
             </div>
           </div>
-          <button className="w-full bg-gradient-to-r from-blue-600 to-blue-800 text-white py-4 rounded-xl text-[11px] font-black tracking-[3px] shadow-lg opacity-50 cursor-not-allowed">
+          <button className="w-full cursor-not-allowed rounded-2xl bg-gradient-to-r from-[var(--blue)] to-sky-500 py-4 text-[11px] font-black tracking-[3px] text-white opacity-60 shadow-lg">
             UPDATE GLOBAL SETTINGS
           </button>
         </div>
       )}
 
       {message && (
-        <div className="mt-6 p-4 bg-black/60 text-[10px] font-black text-center border border-white/10 text-[var(--gold)] rounded-xl uppercase tracking-[2px] animate-pulse">
+        <div className="mt-5 rounded-2xl border border-[var(--gold)]/20 bg-[var(--gold-dim)] p-4 text-center text-[10px] font-black uppercase tracking-[2px] text-[var(--gold)] animate-pulse">
           {message}
         </div>
       )}
     </div>
   );
-          }
-                                    
+}
