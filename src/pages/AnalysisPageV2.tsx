@@ -111,12 +111,12 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
           const pct = Math.min(100, Math.max(8, (Number(score) / 14) * 100));
           return (
             <div key={i} className="grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-2xl border border-[var(--border2)] bg-[#111824]/80 p-3">
-              <span className="rounded-full border px-2 py-1 text-[8px] font-black uppercase tracking-[1px]" style={{ borderColor: accent, color: accent }}>Elite</span>
+              <span className="rounded-full border px-2 py-1 text-[7px] font-black uppercase tracking-[1px]" style={{ borderColor: accent, color: accent }}>Elite</span>
               <div className="min-w-0">
-                <div className="truncate text-[11px] font-bold uppercase tracking-[1px] text-[var(--text)]">{s.name || `Rumus ${i + 1}`}</div>
+                <div className="truncate text-[9px] font-semibold uppercase tracking-[1px] text-[var(--text)] opacity-90">{s.name || `Rumus ${i + 1}`}</div>
                 <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: accent }}></div></div>
               </div>
-              <span className="font-['JetBrains_Mono'] text-[10px] font-black" style={{ color: accent }}>{score}/14</span>
+              <span className="font-['JetBrains_Mono'] text-[9px] font-black" style={{ color: accent }}>{score}/14</span>
             </div>
           );
         })}
@@ -138,24 +138,24 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
     const isTop = param === 2;
     const lines = safeArray(result.lines);
     const rows = [
-      [isTop ? "AI TOP" : "AI CT", safeArray(result.ai).join(" "), "🔥", "var(--gold)"],
-      ["OFF KEP", safeArray(result.offKepala).join(" . "), "❌", "var(--red)"],
-      ["OFF EKR", safeArray(result.offEkor).join(" . "), "❌", "var(--red)"],
-      ["OFF JML", safeArray(result.offJumlah).join(" . "), "🔢", "var(--purple)"],
+      [isTop ? "AI TOP" : "AI CT", safeArray(result.ai).join(" "), "AI", "var(--gold)"],
+      ["OFF KEP", safeArray(result.offKepala).join(" . "), "K", "var(--red)"],
+      ["OFF EKR", safeArray(result.offEkor).join(" . "), "E", "var(--red)"],
+      ["OFF JML", safeArray(result.offJumlah).join(" . "), "J", "var(--purple)"],
     ];
 
     return (
       <div className="space-y-4 animate-[fadeIn_0.3s_ease-out]">
         <ResultHeader label="HASIL REKAP" value={`MODE ${isTop ? "TOP" : "INVEST"}`} accent={meta.accent} />
         <div className="premium-panel space-y-3 p-4">
-          {rows.map(([label, value, emoji, color]: any) => (
+          {rows.map(([label, value, code, color]: any) => (
             <div key={label} className="flex items-center justify-between gap-3 rounded-2xl border border-[var(--border2)] bg-[#111824]/80 p-3">
-              <div className="flex items-center gap-3"><span>{emoji}</span><span className="text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">{label}</span></div>
+              <div className="flex items-center gap-3"><span className="flex h-7 w-7 items-center justify-center rounded-xl border text-[9px] font-black" style={{ borderColor: color, color }}>{code}</span><span className="text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">{label}</span></div>
               <span className="font-['Orbitron'] text-[13px] font-black tracking-[2px]" style={{ color }}>{value || "-"}</span>
             </div>
           ))}
           <div className="rounded-2xl border border-[var(--border2)] bg-[#111824]/80 p-3">
-            <div className="mb-2 text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">🐉 OFF SHIO</div>
+            <div className="mb-2 text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">OFF SHIO</div>
             <div className="flex flex-wrap gap-2">{safeArray(result.offShio).map((s: number) => <ShioChip key={s} value={s} />)}</div>
           </div>
         </div>
@@ -197,9 +197,9 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
     return (
       <div className="space-y-4 animate-[fadeIn_0.3s_ease-out]">
         <ResultHeader label="HASIL ANALISA" value={`RUMUS ACTIVE ${active}/${formulaTotal}`} accent={meta.accent} />
-        <div className="premium-panel p-4"><div className="mb-4 text-center"><div className="inline-flex items-center gap-2 rounded-2xl border px-4 py-3" style={{ borderColor: meta.accent, backgroundColor: meta.soft }}><span>{icon}</span><span className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px] text-[var(--text)]">{meta.label} — {meta.formula}</span></div><div className="mt-3 text-[9px] font-black uppercase tracking-[3px] text-[var(--text-dim)]">Validasi Walk-Forward</div></div>{renderStatsList(stats, meta.accent)}</div>
-        <div className="premium-panel p-5 text-center"><div className="mb-4 flex items-center justify-center gap-2"><span>✅</span><span className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px] text-[var(--text)]">{type === "ai" && param && param >= 8 ? "BBFS" : meta.label}</span></div>{type === "shio" ? <div className="flex flex-wrap justify-center gap-2">{displayResult.map((s: number) => <ShioChip key={s} value={s} />)}</div> : renderDigitPills(displayResult, meta.accent, type === "ai" && Boolean(param && param >= 8))}</div>
-        <div className="rounded-2xl border border-[var(--border2)] bg-[#111824]/80 p-4 text-[10px] font-bold leading-5 tracking-[1px] text-[var(--text-dim)]"><div>📌 Validasi: 14 langkah WF</div><div>📌 Mode: {param || "-"}</div></div>
+        <div className="premium-panel p-4"><div className="mb-4 text-center"><div className="inline-flex items-center gap-2 rounded-2xl border px-4 py-3" style={{ borderColor: meta.accent, backgroundColor: meta.soft }}><span className="font-['Orbitron'] text-[10px] font-black" style={{ color: meta.accent }}>{icon}</span><span className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px] text-[var(--text)]">{meta.label} — {meta.formula}</span></div><div className="mt-3 text-[9px] font-black uppercase tracking-[3px] text-[var(--text-dim)]">Validasi Walk-Forward</div></div>{renderStatsList(stats, meta.accent)}</div>
+        <div className="premium-panel p-5 text-center"><div className="mb-4 flex items-center justify-center gap-2"><span className="rounded-lg border px-2 py-1 font-['Orbitron'] text-[9px] font-black" style={{ borderColor: meta.accent, color: meta.accent }}>{icon}</span><span className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px] text-[var(--text)]">{type === "ai" && param && param >= 8 ? "BBFS" : meta.label}</span></div>{type === "shio" ? <div className="flex flex-wrap justify-center gap-2">{displayResult.map((s: number) => <ShioChip key={s} value={s} />)}</div> : renderDigitPills(displayResult, meta.accent, type === "ai" && Boolean(param && param >= 8))}</div>
+        <div className="rounded-2xl border border-[var(--border2)] bg-[#111824]/80 p-4 text-[10px] font-bold leading-5 tracking-[1px] text-[var(--text-dim)]"><div>Validasi: 14 langkah WF</div><div>Mode: {param || "-"}</div></div>
       </div>
     );
   };
@@ -207,7 +207,7 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
   return (
     <div className="animate-[fadeIn_0.35s_ease-out] pb-8">
       <button onClick={() => navigate(-1)} className="mb-4 flex items-center gap-2 rounded-2xl border border-[var(--border2)] bg-[var(--card)] px-4 py-3 text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)] transition active:scale-95"><ArrowLeft size={16} /> Kembali</button>
-      <div className="premium-panel relative mb-4 overflow-hidden p-5"><div className="absolute inset-x-0 top-0 h-1" style={{ background: `linear-gradient(90deg, transparent, ${meta.accent}, transparent)` }}></div><div className="mb-4 flex items-center gap-3"><div className="flex h-14 w-14 items-center justify-center rounded-2xl text-2xl shadow-lg" style={{ backgroundColor: meta.soft, color: meta.accent }}>{icon}</div><div className="min-w-0"><div className="mb-1 inline-flex items-center gap-2 rounded-full px-3 py-1 text-[9px] font-black uppercase tracking-[2px]" style={{ backgroundColor: meta.soft, color: meta.accent }}><Sparkles size={11} /> Prediction Mode</div><h2 className="truncate font-['Orbitron'] text-[18px] font-black uppercase tracking-[4px] text-[var(--text)]">{title}</h2></div></div><div className="rounded-2xl bg-[#101724] p-4 text-center ring-1 ring-white/8"><span className="mr-3 text-[10px] font-black uppercase tracking-[3px] text-[var(--gold)]">Pasaran:</span><span className="font-['Orbitron'] text-[13px] font-black uppercase tracking-[4px] text-[var(--text)]">{marketId}</span></div></div>
+      <div className="premium-panel relative mb-4 overflow-hidden p-5"><div className="absolute inset-x-0 top-0 h-1" style={{ background: `linear-gradient(90deg, transparent, ${meta.accent}, transparent)` }}></div><div className="mb-4 flex items-center gap-3"><div className="flex h-14 w-14 items-center justify-center rounded-2xl border font-['Orbitron'] text-[14px] font-black shadow-sm" style={{ borderColor: meta.accent, backgroundColor: meta.soft, color: meta.accent }}>{icon}</div><div className="min-w-0"><div className="mb-1 inline-flex items-center gap-2 rounded-full px-3 py-1 text-[9px] font-black uppercase tracking-[2px]" style={{ backgroundColor: meta.soft, color: meta.accent }}><Sparkles size={11} /> Prediction Mode</div><h2 className="truncate font-['Orbitron'] text-[18px] font-black uppercase tracking-[4px] text-[var(--text)]">{title}</h2></div></div><div className="rounded-2xl bg-[#101724] p-4 text-center ring-1 ring-white/8"><span className="mr-3 text-[10px] font-black uppercase tracking-[3px] text-[var(--gold)]">Pasaran:</span><span className="font-['Orbitron'] text-[13px] font-black uppercase tracking-[4px] text-[var(--text)]">{marketId}</span></div></div>
       {!result && !loading && param !== 0 && <button onClick={() => handleAnalyze()} className="mb-4 flex w-full items-center justify-center gap-3 rounded-3xl p-5 font-['Orbitron'] text-[12px] font-black uppercase tracking-[4px] text-white shadow-xl transition active:scale-95" style={{ background: `linear-gradient(135deg, ${meta.accent}, rgba(255,255,255,0.08))` }}><RefreshCw size={18} /> Mulai Analisa</button>}
       {renderParamSelector()}
       {loading && <div className="premium-panel my-4 flex flex-col items-center justify-center gap-4 p-8 text-center"><div className="h-12 w-12 animate-spin rounded-full border-4 border-t-[var(--gold)] border-white/10"></div><div className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px] text-[var(--text-dim)]">Memproses Analisa</div></div>}
