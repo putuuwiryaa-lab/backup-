@@ -1,35 +1,35 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600;700&display=swap');
 
 @theme {
-  --bg: #030712;
-  --card: #08111f;
-  --card2: #101a2d;
-  --surface: #0b1324;
-  --sidebar-bg: #050914;
-  --navbar-bg: #030712;
-  --border: rgba(255, 255, 255, 0.075);
-  --border2: rgba(255, 255, 255, 0.11);
-  --text: #f8fafc;
-  --text-dim: #94a3b8;
-  --gold: #f0c040;
-  --gold-dim: rgba(240, 192, 64, 0.12);
-  --cyan: #00e5ff;
-  --cyan-dim: rgba(0, 229, 255, 0.10);
-  --red: #ff5252;
-  --red-dim: rgba(255, 82, 82, 0.10);
-  --green: #00e676;
-  --green-dim: rgba(0, 230, 118, 0.10);
-  --purple: #b388ff;
-  --purple-dim: rgba(179, 136, 255, 0.10);
-  --blue: #448aff;
-  --blue-dim: rgba(68, 138, 255, 0.12);
-  --radius: 16px;
-  --radius-sm: 10px;
+  --bg: #f4f7fb;
+  --card: #ffffff;
+  --card2: #f8fafc;
+  --surface: #ffffff;
+  --sidebar-bg: #f8fafc;
+  --navbar-bg: rgba(255, 255, 255, 0.78);
+  --border: rgba(15, 23, 42, 0.08);
+  --border2: rgba(15, 23, 42, 0.12);
+  --text: #101827;
+  --text-dim: #64748b;
+  --gold: #d7a63a;
+  --gold-dim: rgba(215, 166, 58, 0.14);
+  --cyan: #0ea5e9;
+  --cyan-dim: rgba(14, 165, 233, 0.12);
+  --red: #ef4444;
+  --red-dim: rgba(239, 68, 68, 0.10);
+  --green: #10b981;
+  --green-dim: rgba(16, 185, 129, 0.12);
+  --purple: #8b5cf6;
+  --purple-dim: rgba(139, 92, 246, 0.12);
+  --blue: #2563eb;
+  --blue-dim: rgba(37, 99, 235, 0.12);
+  --radius: 24px;
+  --radius-sm: 14px;
 }
 
 @layer base {
@@ -40,15 +40,13 @@
 
   body {
     @apply bg-[var(--bg)] text-[var(--text)] antialiased;
-    font-family: 'Rajdhani', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Space Grotesk', 'Rajdhani', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
     min-height: 100vh;
     background-image:
-      radial-gradient(circle at 20% 0%, rgba(240, 192, 64, 0.10), transparent 28%),
-      radial-gradient(circle at 85% 18%, rgba(0, 229, 255, 0.08), transparent 30%),
-      linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
-    background-size: 100% 100%, 100% 100%, 34px 34px, 34px 34px;
-    background-position: center center;
+      radial-gradient(circle at 16% -8%, rgba(215, 166, 58, 0.22), transparent 34%),
+      radial-gradient(circle at 100% 4%, rgba(14, 165, 233, 0.16), transparent 30%),
+      linear-gradient(180deg, #f8fbff 0%, #eef4fb 48%, #f7f8fb 100%);
+    background-attachment: fixed;
   }
 
   button, input, textarea, select {
@@ -58,27 +56,47 @@
   button {
     touch-action: manipulation;
   }
+
+  input, textarea, select {
+    color: var(--text);
+  }
 }
 
 @layer components {
   .app-container {
     background:
-      linear-gradient(180deg, rgba(3, 7, 18, 0.88), rgba(3, 7, 18, 0.98)),
-      radial-gradient(circle at top, rgba(240, 192, 64, 0.08), transparent 32%);
+      linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(244, 247, 251, 0.92)),
+      radial-gradient(circle at top left, rgba(215, 166, 58, 0.18), transparent 34%),
+      radial-gradient(circle at top right, rgba(14, 165, 233, 0.12), transparent 30%);
   }
 
   .premium-card,
   .glass-card {
-    background: linear-gradient(145deg, rgba(15, 23, 42, 0.94), rgba(8, 17, 31, 0.94));
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.035);
-    backdrop-filter: blur(14px);
+    background: rgba(255, 255, 255, 0.84);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    box-shadow: 0 18px 46px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(18px);
+  }
+
+  .premium-panel {
+    background: linear-gradient(145deg, rgba(255,255,255,0.94), rgba(248,250,252,0.88));
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: var(--radius);
+    box-shadow: 0 22px 54px rgba(15, 23, 42, 0.10);
+    backdrop-filter: blur(20px);
+  }
+
+  .premium-chip {
+    background: rgba(255, 255, 255, 0.78);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    color: var(--text-dim);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
   }
 
   button.group {
     position: relative;
     isolation: isolate;
-    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.025);
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.74);
     transition: transform 0.18s ease, border-color 0.22s ease, background 0.22s ease, box-shadow 0.22s ease, color 0.22s ease;
   }
 
@@ -87,23 +105,23 @@
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    background: linear-gradient(135deg, rgba(255,255,255,0.055), transparent 42%, rgba(0,229,255,0.035));
-    opacity: 0.72;
+    background: linear-gradient(135deg, rgba(255,255,255,0.55), transparent 46%, rgba(14,165,233,0.06));
+    opacity: 0.78;
     pointer-events: none;
     z-index: -1;
   }
 
   button.group:active {
     transform: scale(0.975);
-    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(240, 192, 64, 0.08);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
   }
 
   button.group:hover {
-    box-shadow: 0 16px 38px rgba(0, 0, 0, 0.30), 0 0 24px rgba(0, 229, 255, 0.045);
+    box-shadow: 0 16px 36px rgba(15, 23, 42, 0.12), 0 0 0 3px rgba(14, 165, 233, 0.06);
   }
 
   .premium-glow {
-    box-shadow: 0 0 28px rgba(240, 192, 64, 0.10), 0 18px 45px rgba(0,0,0,0.35);
+    box-shadow: 0 18px 48px rgba(15, 23, 42, 0.10), 0 0 0 1px rgba(215, 166, 58, 0.12);
   }
 }
 
@@ -151,7 +169,7 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.14);
+  background: rgba(15, 23, 42, 0.18);
   border-radius: 10px;
 }
 
