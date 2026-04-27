@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Routes, Route, useNavigate, useParams, useLocation } from "react-router-dom";
 import { RefreshCw, Cpu, ArrowLeft, Sparkles } from "lucide-react";
-import AnalysisPage from "./AnalysisPage";
+import AnalysisPage from "./AnalysisPageV2";
 
 export default function AnalyzeMenu() {
   const navigate = useNavigate();
@@ -93,10 +93,10 @@ function AnalyzeList() {
         </h3>
 
         <div className="mt-5 flex justify-center">
-          <div className="flex items-center gap-3 rounded-2xl border border-[var(--border2)] bg-slate-100/90 p-2.5 px-4 shadow-inner">
+          <div className="flex items-center gap-3 rounded-2xl border border-[var(--border2)] bg-[#111824]/80 p-2.5 px-4 shadow-inner">
             <span className="text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Last Result</span>
             <span className="font-['Orbitron'] text-[18px] font-black tracking-[2px] text-[var(--cyan)]">{lastResult}</span>
-            <button onClick={fetchData} disabled={refreshing} className="flex h-7 w-7 items-center justify-center rounded-xl bg-slate-200/70 text-[var(--text-dim)] transition active:scale-95 disabled:opacity-50">
+            <button onClick={fetchData} disabled={refreshing} className="flex h-7 w-7 items-center justify-center rounded-xl bg-white/10 text-[var(--text-dim)] transition active:scale-95 disabled:opacity-50">
               <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
             </button>
           </div>
@@ -104,11 +104,11 @@ function AnalyzeList() {
       </div>
 
       <div className="mb-4 flex items-center gap-4 px-1">
-        <div className="h-px flex-1 bg-gradient-to-r from-transparent to-slate-300"></div>
-        <div className="flex items-center gap-2 rounded-full bg-slate-100/85 px-3 py-1 text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)] ring-1 ring-slate-900/10">
+        <div className="h-px flex-1 bg-gradient-to-r from-transparent to-white/20"></div>
+        <div className="flex items-center gap-2 rounded-full bg-[var(--card)] px-3 py-1 text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)] ring-1 ring-white/10">
           <Cpu size={12} className="text-[var(--cyan)]" /> Select Mode
         </div>
-        <div className="h-px flex-1 bg-gradient-to-l from-transparent to-slate-300"></div>
+        <div className="h-px flex-1 bg-gradient-to-l from-transparent to-white/20"></div>
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -119,7 +119,7 @@ function AnalyzeList() {
         <SubMenuCard label="MENU REKAP" icon="💰" accent="var(--blue)" onClick={() => navigate("rekap")} wide />
       </div>
 
-      <button onClick={() => navigate("/")} className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-[var(--border2)] bg-slate-100/85 p-4 text-[11px] font-black uppercase tracking-[3px] text-[var(--text-dim)] shadow-sm transition active:scale-95">
+      <button onClick={() => navigate("/")} className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-[var(--border2)] bg-[var(--card)] p-4 text-[11px] font-black uppercase tracking-[3px] text-[var(--text-dim)] shadow-sm transition active:scale-95">
         <ArrowLeft size={16} /> Kembali ke Beranda
       </button>
     </div>
@@ -128,15 +128,15 @@ function AnalyzeList() {
 
 function SubMenuCard({ label, icon, accent, onClick, wide }: any) {
   return (
-    <button onClick={onClick} className={`group relative flex min-h-[88px] w-full items-center gap-4 overflow-hidden rounded-3xl border border-[var(--border2)] bg-slate-100/90 p-4 text-left shadow-md transition active:scale-[0.975] ${wide ? "sm:col-span-2" : ""}`}>
-      <div className="absolute right-0 top-0 h-20 w-20 translate-x-8 -translate-y-8 rounded-full opacity-16" style={{ backgroundColor: accent }}></div>
-      <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl text-2xl shadow-sm ring-1 ring-slate-900/10" style={{ backgroundColor: `${accent}20`, color: accent }}>
+    <button onClick={onClick} className={`group relative flex min-h-[88px] w-full items-center gap-4 overflow-hidden rounded-3xl border border-[var(--border2)] bg-[var(--card)] p-4 text-left shadow-md transition active:scale-[0.975] ${wide ? "sm:col-span-2" : ""}`}>
+      <div className="absolute right-0 top-0 h-20 w-20 translate-x-8 -translate-y-8 rounded-full opacity-20" style={{ backgroundColor: accent }}></div>
+      <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl text-2xl shadow-sm ring-1 ring-white/10" style={{ backgroundColor: `${accent}20`, color: accent }}>
         {icon}
       </div>
       <div className="min-w-0 flex-1">
         <span className="block font-['Orbitron'] text-[13px] font-black uppercase tracking-[2px] text-[var(--text)]">{label}</span>
       </div>
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-slate-200/65 text-[var(--text-dim)] transition group-hover:translate-x-1 group-hover:text-[var(--gold)]">〉</div>
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-[var(--text-dim)] transition group-hover:translate-x-1 group-hover:text-[var(--gold)]">〉</div>
     </button>
   );
 }
