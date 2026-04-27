@@ -7,7 +7,7 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 import {
-  Lock, Zap, ShieldCheck, LogOut, ChevronRight, Search, RefreshCw, Crown, Sparkles, Smartphone
+  Lock, Zap, ShieldCheck, LogOut, Search, RefreshCw, Crown, Sparkles, Smartphone
 } from "lucide-react";
 import AnalyzeMenu from "./pages/AnalyzeMenu";
 import AdminPage from "./pages/AdminPage";
@@ -268,15 +268,9 @@ function Dashboard({ markets }: { markets: any[] }) {
             const title = m.name || m.id;
             const lastResult = m.lastResult || "----";
             return (
-              <button key={m.id} onClick={() => navigate(`/analyze/${m.id}`)} className="group flex min-h-[96px] flex-col justify-between rounded-3xl border border-[var(--border2)] bg-[var(--card)] p-4 text-left transition active:scale-[0.985]">
-                <div className="flex items-center justify-between gap-3">
-                  <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-1 text-[8px] font-black uppercase tracking-[1.5px] text-[var(--text-dim)]">Market</span>
-                  <ChevronRight size={18} className="text-[var(--text-dim)] group-active:text-[var(--gold)]" />
-                </div>
-                <div>
-                  <span className="block truncate font-['Orbitron'] text-[12px] font-black tracking-[2px] text-[var(--text)]">{title}</span>
-                  <span className="mt-3 inline-flex rounded-full border border-[var(--cyan)]/20 bg-[var(--cyan-dim)] px-2.5 py-1 font-['JetBrains_Mono'] text-[10px] font-black tracking-[1px] text-[var(--cyan)]">RESULT {lastResult}</span>
-                </div>
+              <button key={m.id} onClick={() => navigate(`/analyze/${m.id}`)} className="group flex min-h-[96px] flex-col items-center justify-center gap-3 rounded-3xl border border-[var(--border2)] bg-[var(--card)] p-4 text-center transition active:scale-[0.985]">
+                <span className="block max-w-full truncate font-['Orbitron'] text-[12px] font-black uppercase tracking-[2px] text-[var(--text)]">{title}</span>
+                <span className="inline-flex rounded-full border border-[var(--cyan)]/20 bg-[var(--cyan-dim)] px-3 py-1 font-['JetBrains_Mono'] text-[11px] font-black tracking-[1.5px] text-[var(--cyan)]">{lastResult}</span>
               </button>
             );
           })
