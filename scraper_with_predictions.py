@@ -27,6 +27,7 @@ MARKOV_ALPHA = 0.35
 RECENCY_DECAY = 22
 MOMENTUM_WINDOW = 12
 MAX_EVALUATIONS_PER_MARKET = 14
+TOP_LINE_POSITION_LIMIT = 5
 
 
 def parse_history(raw, limit=169):
@@ -161,6 +162,44 @@ def compute_position(results, pos_out):
     return sorted_digits, normalized
 
 
+def build_top_line(poltar_kepala, poltar_ekor, bbfs8, ai4, limit=TOP_LINE_POSITION_LIMIT):
+    kepala = [str(x) for x in (poltar_kepala or [])[:limit]]
+    ekor = [str(x) for x in (poltar_ekor or [])[:limit]]
+    bbfs = set(str(x) for x in (bbfs8 or []))
+    ai = set(str(x) for x in (ai4 or []))
+
+    candidates = []
+
+    for k_index, k in enumerate(kepala):
+        for e_index, e in enumerate(ekor):
+            if k not in bbfs or e not in bbfs:
+                continue
+
+            line = f"{k}{e}"
+            ai_score = (2 if k in ai else 0) + (2 if e in ai else 0)
+            rank_score = (limit - k_index) + (limit - e_index)
+
+            candidates.append({
+                "line": line,
+                "score": rank_score + ai_score,
+                "ai_score": ai_score,
+                "k_index": k_index,
+                "e_index": e_index,
+            })
+
+    unique = {}
+    for item in candidates:
+        line = item["line"]
+        if line not in unique or item["score"] > unique[line]["score"]:
+            unique[line] = item
+
+    lines = [item["line"] for item in unique.values()]
+
+    # Final urut numerik kecil ke besar.
+    # Contoh: 46, 02, 05 -> 02, 05, 46
+    return sorted(lines, key=lambda x: int(x))
+
+
 def run_engine(results):
     pos_digits = []
     pos_normalized = []
@@ -184,6 +223,14 @@ def run_engine(results):
     bbfs8 = sorted(str(d) for d in strongest[:8])
     ai4 = sorted(str(d) for d in strongest[:4])
 
+    top_line = build_top_line(
+        poltar_kepala=pos_digits[2],
+        poltar_ekor=pos_digits[3],
+        bbfs8=bbfs8,
+        ai4=ai4,
+        limit=TOP_LINE_POSITION_LIMIT,
+    )
+
     return {
         "bbfs8": bbfs8,
         "ai4": ai4,
@@ -191,6 +238,7 @@ def run_engine(results):
         "poltar_kop": pos_digits[1],
         "poltar_kepala": pos_digits[2],
         "poltar_ekor": pos_digits[3],
+        "top_line": top_line,
     }
 
 
@@ -233,6 +281,7 @@ def save_prediction_snapshot(market_id, market_name, base_result, prediction):
         "poltar_kop": prediction["poltar_kop"],
         "poltar_kepala": prediction["poltar_kepala"],
         "poltar_ekor": prediction["poltar_ekor"],
+        "top_line": prediction.get("top_line", []),
         "updated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     }
 
