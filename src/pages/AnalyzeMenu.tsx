@@ -4,11 +4,36 @@ import { RefreshCw, Cpu, ArrowLeft, Sparkles } from "lucide-react";
 import AnalysisPage from "./AnalysisPageV2";
 
 const MODE_META: any = {
-  ai: { icon: "✦", accent: "#22C55E", bg: "rgba(34, 197, 94, 0.10)", border: "#14532D" },
-  mati: { icon: "×", accent: "#EF4444", bg: "rgba(239, 68, 68, 0.10)", border: "#7F1D1D" },
-  jumlah: { icon: "#", accent: "#A855F7", bg: "rgba(168, 85, 247, 0.11)", border: "#581C87" },
-  shio: { icon: "◎", accent: "#06B6D4", bg: "rgba(6, 182, 212, 0.10)", border: "#164E63" },
-  rekap: { icon: "◆", accent: "#3B82F6", bg: "rgba(59, 130, 246, 0.10)", border: "#1E3A8A" },
+  ai: {
+    icon: "✦",
+    accent: "#22D3EE",
+    glow: "rgba(34, 211, 238, 0.14)",
+    subtitle: "Rekomendasi angka pendamping",
+  },
+  mati: {
+    icon: "×",
+    accent: "#FB7185",
+    glow: "rgba(251, 113, 133, 0.13)",
+    subtitle: "Filter angka berisiko",
+  },
+  jumlah: {
+    icon: "#",
+    accent: "#C084FC",
+    glow: "rgba(192, 132, 252, 0.13)",
+    subtitle: "Analisa jumlah rawan",
+  },
+  shio: {
+    icon: "◎",
+    accent: "#38BDF8",
+    glow: "rgba(56, 189, 248, 0.13)",
+    subtitle: "Filter shio rawan",
+  },
+  rekap: {
+    icon: "◆",
+    accent: "#F5C542",
+    glow: "rgba(245, 197, 66, 0.15)",
+    subtitle: "Invest dan top pilihan",
+  },
 };
 
 export default function AnalyzeMenu() {
@@ -119,12 +144,12 @@ function AnalyzeList() {
         <div className="h-px flex-1 bg-gradient-to-l from-transparent to-white/20"></div>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <SubMenuCard label="ANGKA IKUT 2D" icon={MODE_META.ai.icon} meta={MODE_META.ai} onClick={() => navigate("ai")} />
-        <SubMenuCard label="ANGKA MATI 4D" icon={MODE_META.mati.icon} meta={MODE_META.mati} onClick={() => navigate("mati")} />
-        <SubMenuCard label="JUMLAH MATI 2D" icon={MODE_META.jumlah.icon} meta={MODE_META.jumlah} onClick={() => navigate("jumlah")} />
-        <SubMenuCard label="SHIO MATI" icon={MODE_META.shio.icon} meta={MODE_META.shio} onClick={() => navigate("shio")} />
-        <SubMenuCard label="MENU REKAP" icon={MODE_META.rekap.icon} meta={MODE_META.rekap} onClick={() => navigate("rekap")} wide />
+      <div className="grid grid-cols-1 gap-3">
+        <SubMenuCard label="ANGKA IKUT 2D" meta={MODE_META.ai} onClick={() => navigate("ai")} />
+        <SubMenuCard label="ANGKA MATI 4D" meta={MODE_META.mati} onClick={() => navigate("mati")} />
+        <SubMenuCard label="JUMLAH MATI 2D" meta={MODE_META.jumlah} onClick={() => navigate("jumlah")} />
+        <SubMenuCard label="SHIO MATI" meta={MODE_META.shio} onClick={() => navigate("shio")} />
+        <SubMenuCard label="MENU REKAP" meta={MODE_META.rekap} onClick={() => navigate("rekap")} />
       </div>
 
       <button onClick={() => navigate("/")} className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-[var(--border2)] bg-[var(--card)] p-4 text-[11px] font-black uppercase tracking-[3px] text-[var(--text-dim)] shadow-sm transition active:scale-95">
@@ -134,26 +159,37 @@ function AnalyzeList() {
   );
 }
 
-function SubMenuCard({ label, icon, meta, onClick, wide }: any) {
+function SubMenuCard({ label, meta, onClick }: any) {
   return (
     <button
       onClick={onClick}
-      className={`group flex min-h-[88px] w-full items-center gap-4 rounded-3xl border p-4 text-left transition active:scale-[0.985] ${wide ? "sm:col-span-2" : ""}`}
+      className="group relative flex min-h-[92px] w-full items-center gap-4 overflow-hidden rounded-3xl border border-white/10 bg-[#111824]/90 p-4 text-left shadow-[0_18px_45px_rgba(0,0,0,0.22)] transition active:scale-[0.985]"
       style={{
-        borderColor: meta.border,
-        background: `linear-gradient(135deg, #101826 0%, ${meta.bg} 100%)`,
+        boxShadow: `0 18px 45px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.04), 0 0 34px ${meta.glow}`,
       }}
     >
+      <div className="absolute inset-y-4 left-0 w-1 rounded-r-full" style={{ backgroundColor: meta.accent }} />
+      <div className="absolute right-[-42px] top-[-42px] h-24 w-24 rounded-full blur-2xl" style={{ backgroundColor: meta.glow }} />
+
       <div
-        className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl border font-['Orbitron'] text-[22px] font-black"
-        style={{ borderColor: meta.accent, backgroundColor: meta.bg, color: meta.accent }}
+        className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border bg-white/[0.035] font-['Orbitron'] text-[21px] font-black"
+        style={{ borderColor: `${meta.accent}70`, color: meta.accent }}
       >
-        {icon}
+        {meta.icon}
       </div>
-      <div className="min-w-0 flex-1">
-        <span className="block font-['Orbitron'] text-[13px] font-black uppercase tracking-[2px]" style={{ color: meta.accent }}>{label}</span>
+
+      <div className="relative min-w-0 flex-1">
+        <span className="block font-['Orbitron'] text-[12px] font-black uppercase tracking-[2.2px]" style={{ color: meta.accent }}>
+          {label}
+        </span>
+        <span className="mt-1 block text-[11px] font-semibold tracking-[0.2px] text-[var(--text-dim)]">
+          {meta.subtitle}
+        </span>
       </div>
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-white/8 text-[var(--text-dim)] transition group-active:text-[var(--gold)]">〉</div>
+
+      <div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/[0.06] text-[16px] text-[var(--text-dim)] transition group-active:text-[var(--gold)]">
+        ›
+      </div>
     </button>
   );
 }
