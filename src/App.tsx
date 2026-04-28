@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate, useLocation } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
 import {
-  Lock, Zap, ShieldCheck, LogOut, Search, RefreshCw, Crown, Sparkles, Smartphone, Home, Settings, KeyRound, ArrowRight, Database
+  Lock, Zap, ShieldCheck, LogOut, Search, RefreshCw, Crown, Sparkles, Smartphone, Home, KeyRound, ArrowRight, Database, MessageCircle
 } from "lucide-react";
 import AnalyzeMenu from "./pages/AnalyzeMenu";
 import AdminPage from "./pages/AdminPage";
@@ -31,7 +31,6 @@ function AppLayout() {
   const [markets, setMarkets] = useState<any[]>([]);
   const [systemSetting, setSystemSetting] = useState<any>({ runningText: "..." });
   const isAnalyzePage = location.pathname.startsWith("/analyze/");
-  const isAdmin = role === "MASTER";
 
   const getDeviceCode = () => {
     let code = localStorage.getItem("supreme_devcode");
@@ -147,7 +146,7 @@ function AppLayout() {
         </Routes>
       </main>
 
-      {!isAnalyzePage && <BottomNav isAdmin={isAdmin} currentPath={location.pathname} onNavigate={navigate} />}
+      {!isAnalyzePage && <BottomNav currentPath={location.pathname} onNavigate={navigate} />}
     </div>
   );
 }
@@ -202,9 +201,28 @@ function HeroHeader() {
   );
 }
 
+function formatTokenExpiry() {
+  try {
+    const token = localStorage.getItem("supreme_token");
+    if (!token) return "Masa aktif";
+    const payloadPart = token.split(".")[1];
+    if (!payloadPart) return "Masa aktif";
+    const normalized = payloadPart.replace(/-/g, "+").replace(/_/g, "/");
+    const payload = JSON.parse(atob(normalized));
+    if (!payload.exp) return "Masa aktif";
+    const expiredAt = new Date(payload.exp * 1000);
+    return expiredAt.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
+  } catch {
+    return "Masa aktif";
+  }
+}
+
 function StatusStrip({ role, deviceCode }: { role: string; deviceCode: string }) {
   const isMaster = role === "MASTER";
   const isPro = role === "PRO";
+  const isTrial = role === "TRIAL";
+  const roleLabel = isMaster ? "MASTER" : isPro ? "VIP" : isTrial ? "TRIAL" : role;
+  const roleSub = isTrial ? `Habis ${formatTokenExpiry()}` : "";
   return (
     <div className="mb-5 grid grid-cols-2 gap-3">
       <div className="premium-card flex min-h-[78px] items-center gap-3 p-4">
@@ -212,8 +230,8 @@ function StatusStrip({ role, deviceCode }: { role: string; deviceCode: string })
           <Crown size={19} />
         </div>
         <div className="min-w-0">
-          <p className="truncate font-['Orbitron'] text-[10px] font-black uppercase tracking-[2px] text-[var(--text)]">{isMaster ? "Master" : isPro ? "VIP Pro" : "Trial"}</p>
-          <p className="mt-1 text-[10px] text-[var(--text-dim)]">Akses aktif</p>
+          <p className="truncate font-['Orbitron'] text-[11px] font-black uppercase tracking-[2px] text-[var(--text)]">{roleLabel}</p>
+          {roleSub && <p className="mt-1 truncate text-[10px] text-[var(--text-dim)]">{roleSub}</p>}
         </div>
       </div>
       <div className="premium-card flex min-h-[78px] items-center gap-3 p-4">
@@ -286,18 +304,21 @@ function Dashboard({ markets, onRefresh }: { markets: any[]; onRefresh: () => vo
   );
 }
 
-function BottomNav({ isAdmin, currentPath, onNavigate }: { isAdmin: boolean; currentPath: string; onNavigate: any }) {
+function BottomNav({ currentPath, onNavigate }: { currentPath: string; onNavigate: any }) {
   const logout = () => {
     localStorage.removeItem("supreme_token");
     localStorage.removeItem("supreme_devcode");
     sessionStorage.setItem("supreme_skip_auto", "true");
     window.location.reload();
   };
+  const openReport = () => {
+    window.open("https://wa.me/6285792030642?text=Halo%2C%20saya%20ingin%20report%20bug%20atau%20kendala%20aplikasi%20Analisa%20Angka", "_blank", "noopener,noreferrer");
+  };
   return (
     <div className="fixed inset-x-0 bottom-4 z-40 mx-auto w-[calc(100%-2rem)] max-w-md">
       <div className="bottom-nav grid grid-cols-3 gap-1 rounded-[2rem] p-2">
         <button onClick={() => onNavigate("/")} className={`flex flex-col items-center gap-1 rounded-3xl px-3 py-3 text-[9px] font-black uppercase tracking-[1px] ${currentPath === "/" ? "bg-[var(--gold)] text-black" : "text-[var(--text-dim)]"}`}><Home size={17} /> Home</button>
-        <button onClick={() => isAdmin ? onNavigate("/admin") : onNavigate("/")} className={`flex flex-col items-center gap-1 rounded-3xl px-3 py-3 text-[9px] font-black uppercase tracking-[1px] ${currentPath === "/admin" ? "bg-[var(--cyan)] text-black" : "text-[var(--text-dim)]"}`}><Settings size={17} /> Admin</button>
+        <button onClick={openReport} className="flex flex-col items-center gap-1 rounded-3xl px-3 py-3 text-[9px] font-black uppercase tracking-[1px] text-[var(--cyan)]"><MessageCircle size={17} /> Report</button>
         <button onClick={logout} className="flex flex-col items-center gap-1 rounded-3xl px-3 py-3 text-[9px] font-black uppercase tracking-[1px] text-red-300"><LogOut size={17} /> Keluar</button>
       </div>
     </div>
