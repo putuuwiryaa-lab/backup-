@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate, useLocation } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
 import {
-  Lock, Zap, ShieldCheck, LogOut, Search, RefreshCw, Crown, Sparkles, Smartphone, Home, Settings, Activity, KeyRound, ArrowRight, Database
+  Lock, Zap, ShieldCheck, LogOut, Search, RefreshCw, Crown, Sparkles, Smartphone, Home, Settings, KeyRound, ArrowRight, Database
 } from "lucide-react";
 import AnalyzeMenu from "./pages/AnalyzeMenu";
 import AdminPage from "./pages/AdminPage";
@@ -123,7 +123,7 @@ function AppLayout() {
     <div className={`relative mx-auto flex min-h-screen w-full max-w-3xl flex-col px-4 sm:px-6 ${isAnalyzePage ? "pb-6 pt-4" : "pb-28 pt-5"}`}>
       {!isAnalyzePage && location.pathname !== "/admin" && (
         <>
-          <HeroHeader role={role} deviceCode={deviceCode} marketCount={markets.length} />
+          <HeroHeader />
           <StatusStrip role={role} deviceCode={deviceCode} />
         </>
       )}
@@ -180,7 +180,7 @@ function ExpiredScreen() {
   );
 }
 
-function HeroHeader({ role, deviceCode, marketCount }: { role: string; deviceCode: string; marketCount: number }) {
+function HeroHeader() {
   return (
     <header className="mb-4">
       <div className="premium-panel relative overflow-hidden p-5 sm:p-6">
@@ -191,29 +191,14 @@ function HeroHeader({ role, deviceCode, marketCount }: { role: string; deviceCod
               <Sparkles size={13} /> Supreme Dark Pro
             </div>
             <h1 className="font-['Orbitron'] text-[28px] font-black uppercase leading-none tracking-[5px] text-[var(--text)] sm:text-[36px]">Analisa Angka</h1>
-            <p className="mt-3 max-w-sm text-[12px] font-semibold uppercase tracking-[2px] text-[var(--text-dim)]">Pilih pasaran, jalankan mode, copy hasil.</p>
+            <p className="mt-3 max-w-sm text-[12px] font-semibold uppercase tracking-[2px] text-[var(--text-dim)]">Aplikasi berbasis matematis.</p>
           </div>
           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-3xl bg-[var(--gold)] shadow-lg shadow-yellow-900/20">
             <Crown className="h-7 w-7 text-black" />
           </div>
         </div>
-        <div className="relative mt-5 grid grid-cols-3 gap-2">
-          <MiniMetric label="Role" value={role} tone="gold" />
-          <MiniMetric label="Device" value={deviceCode} tone="cyan" />
-          <MiniMetric label="Market" value={String(marketCount)} tone="green" />
-        </div>
       </div>
     </header>
-  );
-}
-
-function MiniMetric({ label, value, tone }: { label: string; value: string; tone: "gold" | "cyan" | "green" }) {
-  const color = tone === "gold" ? "var(--gold)" : tone === "cyan" ? "var(--cyan)" : "var(--green)";
-  return (
-    <div className="rounded-2xl border border-white/8 bg-black/18 p-3 text-center">
-      <p className="text-[8px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">{label}</p>
-      <p className="mt-1 truncate font-['JetBrains_Mono'] text-[12px] font-black" style={{ color }}>{value}</p>
-    </div>
   );
 }
 
