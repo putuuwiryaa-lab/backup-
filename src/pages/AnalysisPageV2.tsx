@@ -137,7 +137,6 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
 
   const MainResultCard = ({ label, values, accent, shio = false }: any) => {
     const arr = safeArray(values);
-    const text = shio ? arr.map((s: number) => `${String(s).padStart(2, "0")} ${SHIO_NAMES[s] || ""}`.trim()).join(" ") : arr.join(" ");
     return (
       <div className="premium-panel result-glow relative overflow-hidden p-5 text-center">
         <div className="absolute -right-14 -top-14 h-40 w-40 rounded-full blur-3xl" style={{ backgroundColor: `${accent}22` }} />
@@ -148,9 +147,6 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
         <div className="relative mt-4">
           {shio ? <div className="flex flex-wrap justify-center gap-2">{arr.map((s: number) => <ShioChip key={s} value={s} />)}</div> : renderDigitPills(arr, accent, false)}
         </div>
-        <button onClick={() => copyText(text)} className="relative mt-5 flex w-full items-center justify-center gap-2 rounded-3xl p-4 text-[11px] font-black uppercase tracking-[3px] text-black active:scale-95" style={{ backgroundColor: accent }}>
-          <Copy size={16} /> Copy Hasil
-        </button>
       </div>
     );
   };
