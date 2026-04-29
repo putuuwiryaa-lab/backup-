@@ -16,19 +16,27 @@ export default function AnalyzeMenu() {
   const location = useLocation();
 
   useEffect(() => {
-    const isAnalyzeRoute = location.pathname.startsWith("/analyze/");
-    if (!isAnalyzeRoute) return;
-    const marker = `guard:${location.pathname}`;
-    if (history.state?.mobileBackGuard !== marker) history.pushState({ ...(history.state || {}), mobileBackGuard: marker }, "", location.pathname + location.search + location.hash);
+    if (!location.pathname.startsWith("/analyze/")) return;
+
+    const marker = `analyze-guard:${location.pathname}`;
+    const currentState = window.history.state || {};
+    if (currentState?.mobileBackGuard !== marker) {
+      window.history.pushState({ ...currentState, mobileBackGuard: marker }, "", window.location.href);
+    }
+
     const handleBack = () => {
-      const pathParts = location.pathname.split("/").filter(Boolean);
+      const pathParts = window.location.pathname.split("/").filter(Boolean);
+      if (pathParts[0] !== "analyze") return;
+
+      const market = pathParts[1];
       const hasModeDetail = pathParts.length >= 3;
-      if (hasModeDetail) navigate(`/analyze/${pathParts[1]}`, { replace: true });
+      if (hasModeDetail && market) navigate(`/analyze/${market}`, { replace: true });
       else navigate("/", { replace: true });
     };
+
     window.addEventListener("popstate", handleBack);
     return () => window.removeEventListener("popstate", handleBack);
-  }, [location.pathname, location.search, location.hash, navigate]);
+  }, [location.pathname, navigate]);
 
   return (
     <Routes>
