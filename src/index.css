@@ -106,6 +106,27 @@
   .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.16); border-radius: 999px; }
 }
 
+@layer utilities {
+  /* Align OFF SHIO in Menu Rekap with OFF KEP / OFF EKR / OFF JML rows */
+  .premium-panel .space-y-3 > .rounded-3xl:has(> span.mb-3.block) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    min-height: 74px;
+  }
+
+  .premium-panel .space-y-3 > .rounded-3xl:has(> span.mb-3.block) > span.mb-3.block {
+    margin-bottom: 0;
+    flex: 0 0 auto;
+  }
+
+  .premium-panel .space-y-3 > .rounded-3xl:has(> span.mb-3.block) > div {
+    flex: 1;
+    justify-content: flex-end;
+  }
+}
+
 @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes slideIn { from { opacity: 0; transform: translateX(-4px); } to { opacity: 1; transform: translateX(0); } }
 @keyframes riseIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
