@@ -169,7 +169,7 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
               <p className="text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Hasil Rekap</p>
               <h3 className="font-['Orbitron'] text-[18px] font-black uppercase tracking-[3px] text-[var(--text)]">Mode {isTop ? "Top" : "Invest"}</h3>
             </div>
-            <span className="rounded-full bg-[var(--blue-dim)] px-3 py-1 text-[10px] font-black text-[var(--blue)]">{lines.length} LINE</span>
+            <span className="rounded-full bg-[var(--gold-dim)] px-3 py-1 text-[10px] font-black text-[var(--gold)]">READY</span>
           </div>
           <div className="space-y-3">
             {rows.map(([label, value, emoji, color]: any) => (
@@ -183,7 +183,7 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
         </div>
 
         <div className="premium-panel space-y-3 p-4">
-          <div className="flex items-center justify-between"><span className="font-['Orbitron'] text-[12px] font-black uppercase tracking-[2px] text-[var(--text)]">Generate Lines</span><span className="rounded-full bg-[var(--gold-dim)] px-3 py-1 text-[10px] font-black text-[var(--gold)]">READY</span></div>
+          <div className="flex items-center justify-between"><span className="font-['Orbitron'] text-[12px] font-black uppercase tracking-[2px] text-[var(--text)]">Generate Lines</span><span className="rounded-full bg-[var(--blue-dim)] px-3 py-1 text-[10px] font-black text-[var(--blue)]">{lines.length} LINE</span></div>
           <div className="max-h-[260px] overflow-y-auto rounded-3xl border border-[var(--border2)] bg-black/30 p-4 font-['JetBrains_Mono'] text-[14px] font-bold leading-8 tracking-[2px] text-[var(--blue)] custom-scrollbar">{lines.join(" * ")}</div>
           <button onClick={() => copyText(lines.join("*"))} className="flex w-full items-center justify-center gap-2 rounded-3xl bg-[var(--blue)] p-4 font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px] text-black transition active:scale-95"><Copy size={16} /> Copy Semua</button>
         </div>
