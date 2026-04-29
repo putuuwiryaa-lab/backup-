@@ -131,7 +131,7 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
   const ResultRow = ({ label, values, accent, shio = false }: any) => (
     <div className="rounded-3xl border border-[var(--border2)] bg-black/20 p-4">
       <span className="mb-3 block font-['Orbitron'] text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">{label}</span>
-      {shio ? <div className="flex flex-wrap gap-2">{safeArray(values).map((s: number) => <ShioChip key={s} value={s} />)}</div> : renderDigitPills(safeArray(values), accent, true)}
+      {shio ? <div className="flex flex-wrap gap-2">{safeArray(values).map((s: any, i: number) => <ShioChip key={`${s}-${i}`} value={s} />)}</div> : renderDigitPills(safeArray(values), accent, true)}
     </div>
   );
 
@@ -145,7 +145,7 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
         </div>
         <h3 className="relative font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px] text-[var(--text-dim)]">{label}</h3>
         <div className="relative mt-4">
-          {shio ? <div className="flex flex-wrap justify-center gap-2">{arr.map((s: number) => <ShioChip key={s} value={s} />)}</div> : renderDigitPills(arr, accent, false)}
+          {shio ? <div className="flex flex-wrap justify-center gap-2">{arr.map((s: any, i: number) => <ShioChip key={`${s}-${i}`} value={s} />)}</div> : renderDigitPills(arr, accent, false)}
         </div>
       </div>
     );
@@ -261,6 +261,10 @@ function ResultHeader({ label, value, accent }: { label: string; value: string; 
   return <div className="premium-panel flex items-center justify-between gap-3 p-4"><span className="text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">{label}</span><span className="rounded-full px-3 py-1 text-[9px] font-black uppercase tracking-[1px]" style={{ backgroundColor: `${accent}1f`, color: accent }}>{value}</span></div>;
 }
 
-function ShioChip({ value }: { value: number }) {
-  return <span className="inline-flex items-center gap-1 rounded-2xl border border-[var(--cyan)]/35 bg-[var(--cyan-dim)] px-3 py-2 text-[11px] font-black text-[var(--cyan)]">{SHIO_EMOJI[value]} {value < 10 ? "0" + value : value} {SHIO_NAMES[value] || ""}</span>;
+function ShioChip({ value }: { value: any }) {
+  const normalized = Number(String(value ?? '').match(/\d+/)?.[0] ?? value);
+  const safeValue = Number.isFinite(normalized) && normalized >= 1 && normalized <= 12 ? normalized : 0;
+  const label = safeValue ? `${safeValue < 10 ? '0' + safeValue : safeValue} ${SHIO_NAMES[safeValue]}` : String(value ?? '-');
+  const emoji = safeValue ? SHIO_EMOJI[safeValue] : '🐾';
+  return <span className="inline-flex items-center gap-1 rounded-2xl border border-[var(--cyan)]/35 bg-[var(--cyan-dim)] px-3 py-2 text-[11px] font-black text-[var(--cyan)]">{emoji} {label}</span>;
 }
