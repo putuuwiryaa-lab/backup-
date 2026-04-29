@@ -34,6 +34,7 @@
   html {
     background: var(--bg);
     -webkit-tap-highlight-color: transparent;
+    overflow-x: hidden;
   }
 
   body {
@@ -42,6 +43,11 @@
     margin: 0;
     font-family: 'Space Grotesk', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
     background: #0b1220;
+    overflow-x: hidden;
+  }
+
+  *, *::before, *::after {
+    box-sizing: border-box;
   }
 
   button, input, textarea, select { font: inherit; }
@@ -153,5 +159,86 @@
   .blur-3xl {
     filter: none !important;
     opacity: 0.12 !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .app-container > div {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .premium-panel {
+    border-radius: 22px !important;
+  }
+
+  .premium-card {
+    border-radius: 20px !important;
+  }
+
+  header .premium-panel {
+    padding: 16px !important;
+  }
+
+  header h1 {
+    font-size: clamp(22px, 7.2vw, 30px) !important;
+    letter-spacing: 3px !important;
+    line-height: 1.05 !important;
+  }
+
+  header p {
+    font-size: 10px !important;
+    letter-spacing: 1.2px !important;
+  }
+
+  header .h-14.w-14 {
+    width: 46px !important;
+    height: 46px !important;
+    border-radius: 18px !important;
+  }
+
+  .grid.grid-cols-2.gap-3.pb-6 {
+    gap: 10px !important;
+  }
+
+  .grid.grid-cols-2.gap-3.pb-6 > button {
+    min-height: 108px !important;
+    padding: 12px !important;
+  }
+
+  .grid.grid-cols-2.gap-3.pb-6 > button span:first-child {
+    font-size: 11px !important;
+    letter-spacing: 1.3px !important;
+    line-height: 1.25 !important;
+  }
+
+  .grid.grid-cols-2.gap-3.pb-6 > button .font-\['JetBrains_Mono'\] {
+    font-size: 15px !important;
+  }
+
+  .bottom-nav {
+    border-radius: 24px !important;
+    padding: 6px !important;
+  }
+
+  .bottom-nav button {
+    padding: 9px 6px !important;
+    font-size: 8px !important;
+    letter-spacing: 0.8px !important;
+    border-radius: 18px !important;
+  }
+}
+
+@media (max-width: 340px) {
+  .grid.grid-cols-2.gap-3.pb-6 {
+    grid-template-columns: 1fr !important;
+  }
+
+  .mb-5.grid.grid-cols-2.gap-3 {
+    grid-template-columns: 1fr !important;
+  }
+
+  .bottom-nav button {
+    font-size: 7px !important;
   }
 }
