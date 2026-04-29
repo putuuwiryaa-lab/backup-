@@ -311,7 +311,9 @@ def evaluate_bbfs(bbfs8, result):
 def evaluate_ai(ai4, result):
     ai_set = set(str(x) for x in ai4)
 
-    for digit in result:
+    # AI dianggap MASUK hanya jika salah satu digit AI muncul di 2 digit belakang:
+    # result[2] = kepala, result[3] = ekor.
+    for digit in result[2:4]:
         if digit in ai_set:
             return "MASUK"
 
