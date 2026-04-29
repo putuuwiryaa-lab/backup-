@@ -178,7 +178,10 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
                 <span className="font-['Orbitron'] text-[13px] font-black tracking-[2px]" style={{ color }}>{value || "-"}</span>
               </div>
             ))}
-            <ResultRow label="OFF SHIO" values={result.offShio} accent="var(--cyan)" shio />
+            <div className="flex items-center justify-between gap-3 rounded-3xl border border-[var(--border2)] bg-black/20 p-3">
+              <div className="flex items-center gap-3"><span className="text-base">🐲</span><span className="text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">OFF SHIO</span></div>
+              <div className="flex flex-wrap justify-end gap-2">{safeArray(result.offShio).map((s: any, i: number) => <ShioChip key={`${s}-${i}`} value={s} />)}</div>
+            </div>
           </div>
         </div>
 
