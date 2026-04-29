@@ -33,6 +33,12 @@ def normalize_lines(value):
     return sorted(set(lines), key=lambda x: int(x))
 
 
+def get_payload_data(payload):
+    if isinstance(payload, dict) and isinstance(payload.get("data"), dict):
+        return payload["data"]
+    return payload
+
+
 def analyze_rekap(history, mode):
     param = 1 if mode == "invest" else 2
 
@@ -51,12 +57,13 @@ def analyze_rekap(history, mode):
     )
 
     response.raise_for_status()
-    payload = response.json()
+    raw_payload = response.json()
 
-    if not isinstance(payload, dict):
-        raise RuntimeError(f"Invalid response: {payload}")
+    if not isinstance(raw_payload, dict):
+        raise RuntimeError(f"Invalid response: {raw_payload}")
 
-    lines = normalize_lines(payload.get("lines"))
+    payload = get_payload_data(raw_payload)
+    lines = normalize_lines(payload.get("lines") if isinstance(payload, dict) else None)
 
     if not lines:
         raise RuntimeError(f"Empty rekap lines for mode={mode}")
