@@ -26,6 +26,30 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: python scraper_with_predictions.py
 
+      - name: Probe rekap analyze API
+        run: |
+          python - <<'PY'
+          import json, requests
+          data = [
+            '1234','5678','9012','3456','7890','1122','3344','5566','7788','9900',
+            '1357','2468','3579','4680','5791','6802','7913','8024','9135','0246'
+          ]
+          for param in [1, 2]:
+              r = requests.post('https://analisaangka.online/api/analyze', json={'type':'rekap','data':list(reversed(data)),'param':param}, timeout=25)
+              print('PROBE status', r.status_code, 'param', param)
+              try:
+                  p = r.json()
+              except Exception as e:
+                  print('PROBE json error', e, r.text[:300])
+                  continue
+              d = p.get('data') if isinstance(p, dict) and isinstance(p.get('data'), dict) else p
+              print('PROBE keys', list(p.keys()) if isinstance(p, dict) else 'not_dict')
+              print('PROBE data_keys', list(d.keys()) if isinstance(d, dict) else 'not_dict')
+              lines = d.get('lines') if isinstance(d, dict) else None
+              print('PROBE lines_count', len(lines) if isinstance(lines, list) else -1)
+              print('PROBE lines_sample', lines[:10] if isinstance(lines, list) else lines)
+          PY
+
       - name: Run rekap line evaluator
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
