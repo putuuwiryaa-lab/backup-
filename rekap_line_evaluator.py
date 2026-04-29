@@ -36,11 +36,15 @@ def normalize_lines(value):
 def analyze_rekap(history, mode):
     param = 1 if mode == "invest" else 2
 
+    # UI Analisa Angka mengirim data newest-first ke /api/analyze.
+    # Data di Supabase tersimpan oldest-first, jadi harus dibalik agar hasil rekap tidak kosong.
+    analyze_history = list(reversed(history))
+
     response = requests.post(
         ANALYZE_API_URL,
         json={
             "type": "rekap",
-            "data": history,
+            "data": analyze_history,
             "param": param,
         },
         timeout=25,
