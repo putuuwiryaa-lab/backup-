@@ -4,6 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 import {
   Lock, Zap, ShieldCheck, LogOut, Search, RefreshCw, Crown, Sparkles, Smartphone, Home, KeyRound, ArrowRight, Database, MessageCircle
 } from "lucide-react";
+import { Analytics } from "@vercel/analytics/react";
 import AnalyzeMenu from "./pages/AnalyzeMenu";
 import AdminPage from "./pages/AdminPage";
 
@@ -16,6 +17,7 @@ export default function App() {
     <Router>
       <div className="app-container min-h-screen text-[var(--text)] selection:bg-[var(--gold)] selection:text-black overflow-x-hidden">
         <AppLayout />
+        <Analytics />
       </div>
     </Router>
   );
