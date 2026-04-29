@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Copy, RefreshCw, Sparkles, Trophy, BarChart3 } from "lucide-react";
+import RekapHistory from "../components/RekapHistory";
 
 const SHIO_NAMES = ["", "Kuda", "Ular", "Naga", "Kelinci", "Harimau", "Kerbau", "Tikus", "Babi", "Anjing", "Ayam", "Monyet", "Kambing"];
 const SHIO_EMOJI = ["", "🐴", "🐍", "🐉", "🐰", "🐯", "🐂", "🐭", "🐷", "🐕", "🐔", "🐒", "🐐"];
@@ -153,6 +154,7 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
 
   const renderRekap = () => {
     const isTop = param === 2;
+    const mode = isTop ? "top" : "invest";
     const lines = safeArray(result.lines);
     const rows = [
       [isTop ? "AI TOP" : "AI CT", safeArray(result.ai).join(" "), "🔥", "var(--gold)"],
@@ -189,6 +191,7 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
           <div className="flex items-center justify-between"><span className="font-['Orbitron'] text-[12px] font-black uppercase tracking-[2px] text-[var(--text)]">Generate Lines</span><span className="rounded-full bg-[var(--blue-dim)] px-3 py-1 text-[10px] font-black text-[var(--blue)]">{lines.length} LINE</span></div>
           <div className="max-h-[260px] overflow-y-auto rounded-3xl border border-[var(--border2)] bg-black/30 p-4 font-['JetBrains_Mono'] text-[14px] font-bold leading-8 tracking-[2px] text-[var(--blue)] custom-scrollbar">{lines.join(" * ")}</div>
           <button onClick={() => copyText(lines.join("*"))} className="flex w-full items-center justify-center gap-2 rounded-3xl bg-[var(--blue)] p-4 font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px] text-black transition active:scale-95"><Copy size={16} /> Copy Semua</button>
+          <RekapHistory marketId={marketId} mode={mode} />
         </div>
       </div>
     );
