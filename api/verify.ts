@@ -1,38 +1,40 @@
 import jwt from "jsonwebtoken";
 
+function requireEnv(name: string) {
+  const value = process.env[name];
+  if (!value) throw new Error(`${name} belum diatur di environment variables`);
+  return value;
+}
+
 export default async function handler(req: any, res: any) {
-  // Hanya menerima method POST
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
   const { token, deviceCode } = req.body;
 
-  if (!token) {
-    return res.status(401).json({ valid: false, error: "Token tidak ditemukan" });
+  if (!token || !deviceCode) {
+    return res.status(401).json({ valid: false, error: "Token atau perangkat tidak ditemukan" });
   }
 
-  // Pastikan JWT_SECRET sudah di-set di environment variables
-  if (!process.env.JWT_SECRET) {
-    console.error("JWT_SECRET belum diatur di environment variables");
+  let JWT_SECRET = "";
+  try {
+    JWT_SECRET = requireEnv("JWT_SECRET");
+  } catch (e: any) {
+    console.error(e.message);
     return res.status(500).json({ valid: false, error: "Kesalahan konfigurasi server" });
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET) as any;
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
 
-    // (Opsional) Jika klien mengirim deviceCode, cocokkan dengan yang ada di token
-    if (deviceCode && decoded.deviceCode && decoded.deviceCode !== deviceCode) {
+    if (!decoded.deviceCode || decoded.deviceCode !== String(deviceCode)) {
       return res.status(401).json({ valid: false, error: "Token tidak cocok dengan perangkat" });
     }
 
-    // Token valid, kirim role
     return res.json({ valid: true, role: decoded.role });
   } catch (e: any) {
-    // Bisa karena expired atau invalid signature
-    const message = e.name === "TokenExpiredError" 
-      ? "Token sudah kadaluarsa" 
-      : "Token tidak valid";
+    const message = e.name === "TokenExpiredError" ? "Token sudah kadaluarsa" : "Token tidak valid";
     return res.status(401).json({ valid: false, error: message });
   }
 }
