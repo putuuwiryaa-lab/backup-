@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Routes, Route, useNavigate, useParams, useLocation } from "react-router-dom";
+import { Routes, Route, useNavigate, useParams } from "react-router-dom";
 import { RefreshCw, Cpu, ArrowLeft, Sparkles, Activity, ShieldAlert, Hash, Gauge, Trophy } from "lucide-react";
 import AnalysisPage from "./AnalysisPageV2";
 
@@ -12,32 +12,6 @@ const MODE_META: any = {
 };
 
 export default function AnalyzeMenu() {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  useEffect(() => {
-    if (!location.pathname.startsWith("/analyze/")) return;
-
-    const marker = `analyze-guard:${location.pathname}`;
-    const currentState = window.history.state || {};
-    if (currentState?.mobileBackGuard !== marker) {
-      window.history.pushState({ ...currentState, mobileBackGuard: marker }, "", window.location.href);
-    }
-
-    const handleBack = () => {
-      const pathParts = window.location.pathname.split("/").filter(Boolean);
-      if (pathParts[0] !== "analyze") return;
-
-      const market = pathParts[1];
-      const hasModeDetail = pathParts.length >= 3;
-      if (hasModeDetail && market) navigate(`/analyze/${market}`, { replace: true });
-      else navigate("/", { replace: true });
-    };
-
-    window.addEventListener("popstate", handleBack);
-    return () => window.removeEventListener("popstate", handleBack);
-  }, [location.pathname, navigate]);
-
   return (
     <Routes>
       <Route path="/" element={<AnalyzeList />} />
