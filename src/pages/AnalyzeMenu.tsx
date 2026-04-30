@@ -59,32 +59,32 @@ function AnalyzeList() {
 
   return (
     <div className="animate-[slideIn_0.22s_ease-out] pb-4">
-      <button onClick={() => navigate("/")} className="ghost-button mb-4 flex items-center gap-2 px-4 py-3 text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)] active:scale-95">
+      <button onClick={() => navigate("/")} className="ghost-button mb-3 flex items-center gap-2 px-4 py-3 text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)] active:scale-95">
         <ArrowLeft size={16} /> Beranda
       </button>
 
-      <div className="premium-panel relative mb-5 overflow-hidden p-5 sm:p-6">
-        <div className="absolute -right-12 -top-12 h-36 w-36 rounded-full bg-[var(--cyan-dim)] blur-2xl" />
+      <div className="premium-panel relative mb-4 overflow-hidden p-4 sm:p-5">
+        <div className="absolute -right-12 -top-12 h-28 w-28 rounded-full bg-[var(--cyan-dim)] blur-2xl" />
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[var(--gold)] via-[var(--cyan)] to-[var(--gold)]" />
         <div className="relative">
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-[var(--cyan-dim)] px-3 py-1 text-[10px] font-black uppercase tracking-[2px] text-[var(--cyan)]">
-            <Sparkles size={12} /> Market Selected
+          <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-[var(--cyan-dim)] px-3 py-1 text-[9px] font-black uppercase tracking-[2px] text-[var(--cyan)]">
+            <Sparkles size={11} /> Market Selected
           </div>
-          <h3 className="font-['Orbitron'] text-[30px] font-black uppercase leading-none tracking-[4px] text-[var(--text)] sm:text-[36px]">{marketName}</h3>
-          <div className="mt-5 rounded-3xl border border-white/10 bg-black/20 p-4">
-            <p className="text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Last Result</p>
-            <p className="mt-1 font-['JetBrains_Mono'] text-[24px] font-black tracking-[2px] text-[var(--cyan)]">{lastResult}</p>
+          <h3 className="font-['Orbitron'] text-[24px] font-black uppercase leading-tight tracking-[4px] text-[var(--text)] sm:text-[30px]">{marketName}</h3>
+          <div className="mt-3 rounded-3xl border border-white/10 bg-black/20 px-4 py-3">
+            <p className="text-[8px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Last Result</p>
+            <p className="mt-1 font-['JetBrains_Mono'] text-[20px] font-black tracking-[2px] text-[var(--cyan)]">{lastResult}</p>
           </div>
-          <button onClick={fetchData} disabled={refreshing} className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 p-3 text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)] active:scale-95 disabled:opacity-50">
-            <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} /> Refresh Data
+          <button onClick={fetchData} disabled={refreshing} className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 py-2.5 text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)] active:scale-95 disabled:opacity-50">
+            <RefreshCw size={13} className={refreshing ? "animate-spin" : ""} /> Refresh Data
           </button>
         </div>
       </div>
 
-      <div className="mb-4 flex items-center gap-4 px-1">
+      <div className="mb-3 flex items-center gap-4 px-1">
         <div className="h-px flex-1 bg-gradient-to-r from-transparent to-white/18" />
-        <div className="flex items-center gap-2 rounded-full bg-white/5 px-3 py-1 text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)] ring-1 ring-white/10">
-          <Cpu size={12} className="text-[var(--cyan)]" /> Select Mode
+        <div className="flex items-center gap-2 rounded-full bg-white/5 px-3 py-1 text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)] ring-1 ring-white/10">
+          <Cpu size={11} className="text-[var(--cyan)]" /> Select Mode
         </div>
         <div className="h-px flex-1 bg-gradient-to-l from-transparent to-white/18" />
       </div>
