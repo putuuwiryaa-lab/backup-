@@ -13,7 +13,11 @@ export default async function handler(req: any, res: any) {
   if (!token) return res.status(401).json({ error: "Unauthorized" });
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "fallback_secret") as any;
+    const decoded = if (!process.env.JWT_SECRET) {
+  return res.status(500).json({ error: "Kesalahan konfigurasi server" });
+}
+
+jwt.verify(token, process.env.JWT_SECRET) as any;
     if (decoded.role !== "MASTER") return res.status(403).json({ error: "Forbidden" });
   } catch {
     return res.status(401).json({ error: "Token invalid" });
