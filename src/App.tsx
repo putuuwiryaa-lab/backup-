@@ -79,7 +79,7 @@ function AppLayout() {
           const res = await fetch("/api/verify", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ token: savedToken })
+            body: JSON.stringify({ token: savedToken, deviceCode: code })
           });
           const json = await res.json();
           if (json.valid) {
