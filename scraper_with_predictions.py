@@ -1,6 +1,5 @@
 import os
 import time
-import math
 import random
 from supabase import create_client
 
@@ -15,17 +14,10 @@ SUPABASE_KEY = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-WEIGHTS = {
-    "markov": 0.40,
-    "recency": 0.35,
-    "momentum": 0.15,
-    "frequency": 0.07,
-    "gap": 0.03,
-}
-
-MARKOV_ALPHA = 0.35
-RECENCY_DECAY = 22
-MOMENTUM_WINDOW = 12
+# Pure Bayesian Markov engine.
+# Satu metode saja: prediksi digit berikutnya dari transisi historis multi-posisi.
+# Probabilitas tinggi dianggap paling kuat.
+MARKOV_ALPHA = 0.7
 MAX_EVALUATIONS_PER_MARKET = 14
 TOP_LINE_POSITION_LIMIT = 5
 
@@ -43,120 +35,50 @@ def parse_history(raw, limit=169):
     return tokens[-limit:]
 
 
-def normalize_scores(raw_scores):
-    if not raw_scores:
-        return {d: 0 for d in range(10)}
-
-    max_score = max(raw_scores.values()) or 1
-
-    normalized = {}
-    for d in range(10):
-        normalized[d] = raw_scores.get(d, 0) / max_score
-
-    return normalized
-
-
 def compute_position(results, pos_out):
     n = len(results)
     transitions = n - 1
-    scores = {d: 0 for d in range(10)}
 
-    # 1. Multi-source smoothed Markov
-    markov_raw = {d: 0 for d in range(10)}
-    total_source_strength = 0
+    if transitions <= 0:
+        probabilities = {d: 0.1 for d in range(10)}
+        sorted_digits = [str(d) for d in range(10)]
+        return sorted_digits, probabilities
 
+    combined_prob = {d: 0.0 for d in range(10)}
+    source_count = 0
+
+    # Multi-source Bayesian Markov:
+    # Setiap posisi pada result terakhir (AS/KOP/KEPALA/EKOR) menjadi pola sumber
+    # untuk memprediksi posisi target berikutnya.
     for pos_pat in range(4):
-        freq_map = {k: {} for k in range(10)}
+        transition_counts = {k: {d: 0 for d in range(10)} for k in range(10)}
+        transition_totals = {k: 0 for k in range(10)}
 
         for i in range(transitions):
-            pat = int(results[i][pos_pat])
-            nxt = int(results[i + 1][pos_out])
-            freq_map[pat][nxt] = freq_map[pat].get(nxt, 0) + 1
+            pattern_digit = int(results[i][pos_pat])
+            next_digit = int(results[i + 1][pos_out])
+            transition_counts[pattern_digit][next_digit] += 1
+            transition_totals[pattern_digit] += 1
 
-        last_pat = int(results[n - 1][pos_pat])
-        counter = freq_map.get(last_pat, {})
-        total = sum(counter.values())
-
-        candidate = {}
-        for d in range(10):
-            candidate[d] = (counter.get(d, 0) + MARKOV_ALPHA) / (total + MARKOV_ALPHA * 10)
-
-        sorted_candidate = sorted(candidate.items(), key=lambda x: x[1], reverse=True)
-        edge = sorted_candidate[0][1] - sorted_candidate[1][1]
-        source_strength = max(0.15, total * edge)
-        total_source_strength += source_strength
+        last_pattern_digit = int(results[-1][pos_pat])
+        total = transition_totals[last_pattern_digit]
+        denominator = total + MARKOV_ALPHA * 10
 
         for d in range(10):
-            markov_raw[d] += candidate[d] * source_strength
+            probability = (transition_counts[last_pattern_digit][d] + MARKOV_ALPHA) / denominator
+            combined_prob[d] += probability
 
-    if total_source_strength > 0:
-        for d in range(10):
-            markov_raw[d] /= total_source_strength
+        source_count += 1
 
-    markov_score = normalize_scores(markov_raw)
+    probabilities = {d: combined_prob[d] / source_count for d in range(10)}
 
-    # 2. Position recency
-    recency_raw = {d: 0 for d in range(10)}
+    # Normalisasi ke skala 0-10 untuk kompatibilitas downstream.
+    max_probability = max(probabilities.values()) or 1
+    normalized = {d: (probabilities[d] / max_probability) * 10 for d in range(10)}
 
-    for i in range(n):
-        digit = int(results[i][pos_out])
-        age = n - 1 - i
-        weight = math.exp(-age / RECENCY_DECAY)
-        recency_raw[digit] += weight
-
-    recency_score = normalize_scores(recency_raw)
-
-    # 3. Short momentum
-    momentum_raw = {d: 0 for d in range(10)}
-    start_momentum = max(0, n - MOMENTUM_WINDOW)
-
-    for i in range(start_momentum, n):
-        digit = int(results[i][pos_out])
-        age = n - 1 - i
-        weight = (MOMENTUM_WINDOW - age) / MOMENTUM_WINDOW
-        momentum_raw[digit] += max(weight, 0.1)
-
-    momentum_score = normalize_scores(momentum_raw)
-
-    # 4. Long-term frequency
-    frequency_raw = {d: 0 for d in range(10)}
-
-    for item in results:
-        frequency_raw[int(item[pos_out])] += 1
-
-    frequency_score = normalize_scores(frequency_raw)
-
-    # 5. Controlled gap
-    last_seen = {d: -1 for d in range(10)}
-    gap_raw = {d: 0 for d in range(10)}
-
-    for i, item in enumerate(results):
-        last_seen[int(item[pos_out])] = i
-
-    for d in range(10):
-        gap = n if last_seen[d] == -1 else (n - 1 - last_seen[d])
-        gap_raw[d] = math.log1p(gap) / math.log1p(n)
-
-    gap_score = normalize_scores(gap_raw)
-
-    # Final score
-    for d in range(10):
-        scores[d] += markov_score[d] * WEIGHTS["markov"]
-        scores[d] += recency_score[d] * WEIGHTS["recency"]
-        scores[d] += momentum_score[d] * WEIGHTS["momentum"]
-        scores[d] += frequency_score[d] * WEIGHTS["frequency"]
-        scores[d] += gap_score[d] * WEIGHTS["gap"]
-
-    max_score = max(scores.values()) or 1
-
-    normalized = {}
-    for d in range(10):
-        normalized[d] = (scores[d] / max_score) * 10
-
-    # Reverse extreme: skor rendah dianggap paling kuat
     sorted_digits = [
         str(digit)
-        for digit, score in sorted(normalized.items(), key=lambda x: x[1])
+        for digit, score in sorted(normalized.items(), key=lambda x: x[1], reverse=True)
     ]
 
     return sorted_digits, normalized
@@ -209,7 +131,7 @@ def run_engine(results):
         pos_digits.append(sorted_digits)
         pos_normalized.append(normalized)
 
-    # BBFS dan AI dari gabungan KEPALA + EKOR
+    # BBFS dan AI dari gabungan probabilitas KEPALA + EKOR.
     combined = {}
 
     for d in range(10):
@@ -217,7 +139,7 @@ def run_engine(results):
 
     strongest = [
         str(digit)
-        for digit, score in sorted(combined.items(), key=lambda x: x[1])
+        for digit, score in sorted(combined.items(), key=lambda x: x[1], reverse=True)
     ]
 
     bbfs8 = sorted(str(d) for d in strongest[:8])
