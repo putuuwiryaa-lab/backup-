@@ -48,19 +48,19 @@ def analyze_rekap(history, mode):
     analyze_history = list(reversed(history))
 
     headers = {}
-if INTERNAL_API_SECRET:
-    headers["x-internal-secret"] = INTERNAL_API_SECRET
+    if INTERNAL_API_SECRET:
+        headers["x-internal-secret"] = INTERNAL_API_SECRET
 
-response = requests.post(
-    ANALYZE_API_URL,
-    headers=headers,
-    json={
-        "type": "rekap",
-        "data": analyze_history,
-        "param": param,
-    },
-    timeout=25,
-)
+    response = requests.post(
+        ANALYZE_API_URL,
+        headers=headers,
+        json={
+            "type": "rekap",
+            "data": analyze_history,
+            "param": param,
+        },
+        timeout=25,
+    )
 
     response.raise_for_status()
     raw_payload = response.json()
