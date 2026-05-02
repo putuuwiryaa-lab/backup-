@@ -1,7 +1,10 @@
 import os
 import time
 import random
+import urllib3
 from supabase import create_client
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # scraper.py lama membaca SUPABASE_ANON_KEY saat di-import.
 # Karena workflow sekarang memakai SERVICE_ROLE, kita arahkan ANON_KEY ke SERVICE_ROLE agar import aman.
