@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate, useLocation } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
 import {
-  Lock, Zap, ShieldCheck, LogOut, Search, RefreshCw, Crown, Sparkles, Smartphone, Home, KeyRound, ArrowRight, Database, MessageCircle
+  Lock, Zap, ShieldCheck, LogOut, Search, RefreshCw, Crown, Sparkles, Smartphone, Home, KeyRound, ArrowRight, Database, MessageCircle, Star
 } from "lucide-react";
 import { Analytics } from "@vercel/analytics/react";
 import AnalyzeMenu from "./pages/AnalyzeMenu";
@@ -247,20 +247,52 @@ function StatusStrip({ role, deviceCode }: { role: string; deviceCode: string })
   );
 }
 
+const FAVORITES_STORAGE_KEY = "supreme_favorite_markets";
+
 function Dashboard({ markets, onRefresh }: { markets: any[]; onRefresh: () => void }) {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
+  const [favoriteIds, setFavoriteIds] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem(FAVORITES_STORAGE_KEY);
+      const parsed = saved ? JSON.parse(saved) : [];
+      return Array.isArray(parsed) ? parsed.map(String) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favoriteIds));
+  }, [favoriteIds]);
+
+  const favoriteSet = useMemo(() => new Set(favoriteIds), [favoriteIds]);
+
+  const toggleFavorite = (marketId: string) => {
+    setFavoriteIds((current) => {
+      if (current.includes(marketId)) return current.filter((id) => id !== marketId);
+      return [marketId, ...current];
+    });
+  };
+
   const filteredMarkets = useMemo(() => {
     const q = search.toLowerCase();
-    return markets.filter(m => m.id.toLowerCase().includes(q) || (m.name && m.name.toLowerCase().includes(q)));
-  }, [markets, search]);
+    return markets
+      .filter(m => m.id.toLowerCase().includes(q) || (m.name && m.name.toLowerCase().includes(q)))
+      .sort((a, b) => {
+        const aFav = favoriteSet.has(a.id);
+        const bFav = favoriteSet.has(b.id);
+        if (aFav !== bFav) return aFav ? -1 : 1;
+        return (a.order ?? 99) - (b.order ?? 99);
+      });
+  }, [markets, search, favoriteSet]);
 
   return (
     <div className="animate-[riseIn_0.35s_ease-out]">
       <div className="mb-3 flex items-center justify-between gap-3 px-1">
         <div>
           <h2 className="font-['Orbitron'] text-[15px] font-black uppercase tracking-[4px] text-[var(--text)]">Pilih Pasaran</h2>
-          <p className="mt-1 text-xs text-[var(--text-dim)]">Market aktif siap dianalisa.</p>
+          <p className="mt-1 text-xs text-[var(--text-dim)]">Market aktif siap dianalisa. Tap bintang untuk favorit.</p>
         </div>
         <button onClick={onRefresh} className="ghost-button flex h-12 w-12 items-center justify-center text-[var(--text-dim)] active:scale-95">
           <RefreshCw size={18} />
@@ -277,13 +309,35 @@ function Dashboard({ markets, onRefresh }: { markets: any[]; onRefresh: () => vo
           const title = m.name || m.id;
           const lastResult = m.lastResult || "----";
           const isReady = lastResult !== "----";
+          const isFavorite = favoriteSet.has(m.id);
           return (
-            <button key={m.id} onClick={() => navigate(`/analyze/${m.id}`)} className="premium-card group relative min-h-[122px] overflow-hidden p-4 text-left transition active:scale-[0.985]">
+            <div
+              key={m.id}
+              role="button"
+              tabIndex={0}
+              onClick={() => navigate(`/analyze/${m.id}`)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") navigate(`/analyze/${m.id}`);
+              }}
+              className="premium-card group relative min-h-[122px] cursor-pointer overflow-hidden p-4 text-left transition active:scale-[0.985]"
+            >
               <div className="absolute -right-7 -top-7 h-20 w-20 rounded-full bg-[var(--cyan-dim)] blur-xl transition group-active:bg-[var(--gold-dim)]" />
-              <div className="relative flex h-full flex-col justify-between gap-4">
+              <button
+                type="button"
+                aria-label={isFavorite ? `Hapus ${title} dari favorit` : `Tambahkan ${title} ke favorit`}
+                aria-pressed={isFavorite}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleFavorite(m.id);
+                }}
+                className={`absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-2xl border transition active:scale-95 ${isFavorite ? "border-[var(--gold)] bg-[var(--gold-dim)] text-[var(--gold)]" : "border-white/10 bg-black/20 text-[var(--text-dim)]"}`}
+              >
+                <Star size={16} fill={isFavorite ? "currentColor" : "none"} />
+              </button>
+              <div className="relative flex h-full flex-col justify-between gap-4 pr-8">
                 <div>
                   <span className="block truncate font-['Orbitron'] text-[13px] font-black uppercase tracking-[2px] text-[var(--text)]">{title}</span>
-                  <span className="mt-2 inline-flex rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[8px] font-black uppercase tracking-[1.5px] text-[var(--text-dim)]">{isReady ? "Ready" : "No Data"}</span>
+                  <span className="mt-2 inline-flex rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[8px] font-black uppercase tracking-[1.5px] text-[var(--text-dim)]">{isFavorite ? "Favorit" : isReady ? "Ready" : "No Data"}</span>
                 </div>
                 <div className="flex items-end justify-between gap-2">
                   <div>
@@ -293,7 +347,7 @@ function Dashboard({ markets, onRefresh }: { markets: any[]; onRefresh: () => vo
                   <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[var(--gold-dim)] text-[var(--gold)]"><ArrowRight size={17} /></div>
                 </div>
               </div>
-            </button>
+            </div>
           );
         }) : (
           <div className="col-span-2 rounded-3xl border border-dashed border-white/14 bg-white/5 py-12 text-center sm:col-span-3">
