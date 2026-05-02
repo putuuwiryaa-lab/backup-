@@ -10,7 +10,7 @@ const typeMeta: any = {
   ai: { accent: "var(--gold)", soft: "var(--gold-dim)", label: "ANGKA IKUT", formula: "25 RUMUS" },
   mati: { accent: "var(--red)", soft: "var(--red-dim)", label: "ANGKA MATI", formula: "50 RUMUS" },
   jumlah: { accent: "var(--purple)", soft: "var(--purple-dim)", label: "JUMLAH MATI", formula: "50 RUMUS" },
-  shio: { accent: "var(--cyan)", soft: "var(--cyan-dim)", label: "SHIO MATI", formula: "12 SHIO" },
+  shio: { accent: "var(--cyan)", soft: "var(--cyan-dim)", label: "SHIO MATI", formula: "50 RUMUS" },
   rekap: { accent: "var(--blue)", soft: "var(--blue-dim)", label: "MENU REKAP", formula: "LINE GENERATOR" },
 };
 
@@ -75,8 +75,8 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
   const renderParamSelector = () => {
     if (param !== 0) return null;
     const options: any = {
-      ai: { title: "PILIH JUMLAH DIGIT AI", values: [2, 4, 6, 8], labels: { 8: "BBFS" } },
-      mati: { title: "PILIH JUMLAH DIGIT OFF", values: [1, 2, 3] },
+      ai: { title: "PILIH JUMLAH DIGIT AI", values: [4, 6, 8], labels: { 8: "BBFS" } },
+      mati: { title: "PILIH JUMLAH DIGIT OFF", values: [1, 2, 3, 4] },
       jumlah: { title: "PILIH JUMLAH OFF", values: [1, 2] },
       shio: { title: "PILIH JUMLAH SHIO MATI", values: [1, 2] },
       rekap: { title: "PILIH MODE REKAP", values: [1, 2], labels: { 1: "INVEST", 2: "TOP" } },
@@ -221,7 +221,7 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
     const stats = safeArray(result.stats);
     const displayResult = safeArray(result.result);
     const active = result.elitCount ?? result.eliteTotal ?? stats.length;
-    const formulaTotal = type === "ai" ? 25 : type === "shio" ? 12 : 50;
+    const formulaTotal = type === "ai" ? 25 : 50;
 
     return (
       <div className="space-y-4 animate-[fadeIn_0.3s_ease-out]">
