@@ -385,6 +385,8 @@ function LayarKunci({ deviceCode, onAuthSuccess }: { deviceCode: string; onAuthS
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const activationMessage = encodeURIComponent(`Halo, saya minta PIN aktivasi Analisa Angka dengan ID ${deviceCode}`);
+  const activationUrl = `https://wa.me/6285792030642?text=${activationMessage}`;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -434,7 +436,7 @@ function LayarKunci({ deviceCode, onAuthSuccess }: { deviceCode: string; onAuthS
           </button>
         </form>
         <p className="mt-6 text-center text-[11px] text-[var(--text-dim)]">
-          <a href="https://wa.me/6285792030642?text=Halo%2C%20saya%20minta%20PIN%20aktivasi%20Analisa%20Angka" target="_blank" rel="noopener noreferrer" className="font-bold text-[var(--gold)] underline underline-offset-4">Hubungi Pembuat untuk Aktivasi PIN</a>
+          <a href={activationUrl} target="_blank" rel="noopener noreferrer" className="font-bold text-[var(--gold)] underline underline-offset-4">Hubungi Pembuat untuk Aktivasi PIN</a>
         </p>
       </div>
     </div>
