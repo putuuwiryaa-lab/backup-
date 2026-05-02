@@ -49,7 +49,7 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
         return;
       }
 
-      const data = String(currentMarket.history_data || "").split(/[\s\n\r\t,]+/).filter((token: string) => /^\d{4}$/.test(token)).reverse();
+      const data = String(currentMarket.history_data || "").split(/[\s\n\r\t,]+/).filter((token: string) => /^\d{4}$/.test(token));
       if (!data || data.length < 17) {
         setError("Data dari server kurang! Min 17 result.");
         setLoading(false);
