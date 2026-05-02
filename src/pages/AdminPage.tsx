@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Trash2, Lock, ChevronUp, ChevronDown, Settings, List, ShieldCheck, Plus, Save, Database } from "lucide-react";
+import { Trash2, Lock, ChevronUp, ChevronDown, Settings, List, ShieldCheck, Plus, Save, Database, AlertTriangle } from "lucide-react";
 import { supabase } from "../App";
+
+function normalizeHistoryInput(value: string) {
+  return String(value || "")
+    .split(/[\s\n\r\t,]+/)
+    .map((token) => token.trim())
+    .filter((token) => /^\d{4}$/.test(token))
+    .join("\n");
+}
 
 export default function AdminPage() {
   const [isAuthorized, setIsAuthorized] = useState(false);
@@ -19,6 +27,7 @@ export default function AdminPage() {
 
   const validResults = historyData.split(/[\s\n\r\t,]+/).filter((token) => /^\d{4}$/.test(token));
   const isDataEnough = validResults.length >= 17;
+  const lastResult = validResults[validResults.length - 1] || '-';
 
   const fetchMarkets = async () => {
     try {
@@ -76,14 +85,22 @@ export default function AdminPage() {
 
   const handleSave = async () => {
     if (!selectedMarket) return;
+    const normalizedHistoryData = normalizeHistoryInput(historyData);
+    const normalizedCount = normalizedHistoryData ? normalizedHistoryData.split("\n").length : 0;
+    if (normalizedCount < 17) {
+      setMessage(`Data ${selectedMarket} kurang dari 17 result valid`);
+      return;
+    }
+
     setLoading(true);
     setMessage('Menyimpan ke Database...');
     try {
-      const json = await callAdmin({ action: "save", marketId: selectedMarket, historyData });
+      const json = await callAdmin({ action: "save", marketId: selectedMarket, historyData: normalizedHistoryData });
       if (json.success) {
-        setMarketsList(prev => prev.map(m => m.id === selectedMarket ? { ...m, history_data: historyData } : m));
-        setMessage('Data ' + selectedMarket + ' berhasil disimpan');
-        setTimeout(() => setMessage(''), 3000);
+        setHistoryData(normalizedHistoryData);
+        setMarketsList(prev => prev.map(m => m.id === selectedMarket ? { ...m, history_data: normalizedHistoryData } : m));
+        setMessage(`Data ${selectedMarket} berhasil disimpan. Result terbaru: ${normalizedHistoryData.split("\n").slice(-1)[0]}`);
+        setTimeout(() => setMessage(''), 5000);
       } else setMessage("Error: " + json.error);
     } catch (e: any) {
       setMessage("Error: " + e.message);
@@ -173,8 +190,8 @@ export default function AdminPage() {
         <>
           <div className="mb-4 grid grid-cols-3 gap-2">
             <StatBox label="Market" value={String(marketsList.length)} color="var(--gold)" />
-            <StatBox label="Selected" value={selectedMarket || "-"} color="var(--cyan)" />
             <StatBox label="Result" value={String(validResults.length)} color={isDataEnough ? "var(--green)" : "var(--red)"} />
+            <StatBox label="Terbaru" value={lastResult} color="var(--cyan)" />
           </div>
 
           <div className="premium-panel mb-5 p-4">
@@ -202,11 +219,15 @@ export default function AdminPage() {
               <label className="block text-[10px] font-black uppercase tracking-[2px] text-[var(--cyan)]">Data History {selectedMarket}</label>
               <span className={`rounded-full px-3 py-1 text-[9px] font-black uppercase tracking-[1px] ${isDataEnough ? 'bg-emerald-400/12 text-emerald-300 ring-1 ring-emerald-300/25' : 'bg-red-500/10 text-red-300 ring-1 ring-red-400/25'}`}>{isDataEnough ? 'Cukup' : 'Min 17'}</span>
             </div>
-            <textarea value={historyData} onChange={(e) => setHistoryData(e.target.value)} className="soft-input h-[320px] w-full p-4 font-['JetBrains_Mono'] text-[12px] leading-6" placeholder={`Contoh:\n5832\n6553\n3585`} />
+            <div className="mb-3 rounded-3xl border border-[var(--gold)]/20 bg-[var(--gold-dim)] p-4 text-[11px] leading-5 text-[var(--gold)]">
+              <div className="mb-1 flex items-center gap-2 font-black uppercase tracking-[2px]"><AlertTriangle size={14} /> Urutan Wajib</div>
+              <p>Masukkan data seperti membaca buku: kiri/atas = lama, kanan/bawah = terbaru. Result paling akhir akan dipakai engine sebagai result terbaru.</p>
+            </div>
+            <textarea value={historyData} onChange={(e) => setHistoryData(e.target.value)} className="soft-input h-[320px] w-full p-4 font-['JetBrains_Mono'] text-[12px] leading-6" placeholder={`Contoh urutan benar:\n5832\n6553\n3585\n1234  ← terbaru`} />
           </div>
 
           <div className="mb-4 flex gap-3">
-            <button onClick={handleSave} disabled={loading || !selectedMarket} className="flex flex-1 items-center justify-center gap-2 rounded-3xl bg-[var(--green)] py-4 text-[11px] font-black uppercase tracking-[3px] text-black shadow-lg transition active:scale-95 disabled:opacity-50"><Save size={16} /> {loading ? 'Menyimpan...' : 'Save'}</button>
+            <button onClick={handleSave} disabled={loading || !selectedMarket} className="flex flex-1 items-center justify-center gap-2 rounded-3xl bg-[var(--green)] py-4 text-[11px] font-black uppercase tracking-[3px] text-black shadow-lg transition active:scale-95 disabled:opacity-50"><Save size={16} /> {loading ? 'Menyimpan...' : 'Save Bersih'}</button>
             <button onClick={handleDelete} disabled={loading || !selectedMarket} className="rounded-3xl border border-red-400/25 bg-red-500/10 px-5 py-4 text-[var(--red)] transition active:scale-95 disabled:opacity-50"><Trash2 size={18} /></button>
           </div>
         </>
@@ -235,7 +256,7 @@ export default function AdminPage() {
   );
 }
 
-function StatBox({ label, value, color }: { label: string; value: string; color: string }) {
+function StatBox({ label, value, color }: { label: string; value: string }) {
   return (
     <div className="premium-card p-3 text-center">
       <p className="text-[8px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">{label}</p>
