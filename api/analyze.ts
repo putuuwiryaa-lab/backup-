@@ -13,6 +13,11 @@ function getBearerToken(req: any) {
   return value.startsWith("Bearer ") ? value.slice(7).trim() : "";
 }
 
+function getHeaderValue(req: any, name: string) {
+  const value = req.headers[name] || req.headers[name.toLowerCase()];
+  return Array.isArray(value) ? value[0] : String(value || "").trim();
+}
+
 function sanitizeData(data: any) {
   if (!Array.isArray(data)) return null;
   const cleaned = data.map((item) => String(item || "").trim()).filter((item) => /^\d{4}$/.test(item));
@@ -33,13 +38,23 @@ export default async function handler(req: any, res: any) {
     return res.status(500).json({ error: "Kesalahan konfigurasi server" });
   }
 
-  const token = getBearerToken(req);
-  if (!token) return res.status(401).json({ error: "Unauthorized" });
+  const expectedInternalSecret = process.env.INTERNAL_API_SECRET;
+  const submittedInternalSecret = getHeaderValue(req, "x-internal-secret");
+  const isInternalRequest = Boolean(
+    expectedInternalSecret &&
+    submittedInternalSecret &&
+    submittedInternalSecret === expectedInternalSecret
+  );
 
-  try {
-    jwt.verify(token, JWT_SECRET);
-  } catch {
-    return res.status(401).json({ error: "Token invalid" });
+  if (!isInternalRequest) {
+    const token = getBearerToken(req);
+    if (!token) return res.status(401).json({ error: "Unauthorized" });
+
+    try {
+      jwt.verify(token, JWT_SECRET);
+    } catch {
+      return res.status(401).json({ error: "Token invalid" });
+    }
   }
 
   try {
