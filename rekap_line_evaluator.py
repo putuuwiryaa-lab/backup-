@@ -7,6 +7,7 @@ from supabase import create_client
 SUPABASE_URL = os.environ["SUPABASE_URL"]
 SUPABASE_KEY = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
 ANALYZE_API_URL = os.environ.get("ANALYZE_API_URL", "https://analisaangka.online/api/analyze")
+INTERNAL_API_SECRET = os.environ.get("INTERNAL_API_SECRET", "")
 MAX_KEEP = int(os.environ.get("MAX_REKAP_EVALUATIONS", "14"))
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
@@ -46,15 +47,20 @@ def analyze_rekap(history, mode):
     # Data di Supabase tersimpan oldest-first, jadi harus dibalik agar hasil rekap tidak kosong.
     analyze_history = list(reversed(history))
 
-    response = requests.post(
-        ANALYZE_API_URL,
-        json={
-            "type": "rekap",
-            "data": analyze_history,
-            "param": param,
-        },
-        timeout=25,
-    )
+    headers = {}
+if INTERNAL_API_SECRET:
+    headers["x-internal-secret"] = INTERNAL_API_SECRET
+
+response = requests.post(
+    ANALYZE_API_URL,
+    headers=headers,
+    json={
+        "type": "rekap",
+        "data": analyze_history,
+        "param": param,
+    },
+    timeout=25,
+)
 
     response.raise_for_status()
     raw_payload = response.json()
