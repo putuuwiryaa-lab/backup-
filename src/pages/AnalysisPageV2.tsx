@@ -87,11 +87,14 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
       <div className="premium-panel mt-4 p-4">
         <div className="mb-3 text-center text-[10px] font-black uppercase tracking-[3px]" style={{ color: meta.accent }}>{cfg.title}</div>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {cfg.values.map((n: number) => (
-            <button key={n} onClick={() => handleAnalyze(n)} className="rounded-3xl border p-5 text-center transition active:scale-95" style={{ borderColor: meta.accent, backgroundColor: meta.soft, color: meta.accent }}>
-              <span className="block font-['Orbitron'] text-xl font-black tracking-[2px]">{cfg.labels?.[n] || n}</span>
-            </button>
-          ))}
+          {cfg.values.map((n: number) => {
+            const isWideBBFS = type === "ai" && n === 8;
+            return (
+              <button key={n} onClick={() => handleAnalyze(n)} className={`${isWideBBFS ? "col-span-2 sm:col-span-4" : ""} rounded-3xl border p-5 text-center transition active:scale-95`} style={{ borderColor: meta.accent, backgroundColor: meta.soft, color: meta.accent }}>
+                <span className="block font-['Orbitron'] text-xl font-black tracking-[2px]">{cfg.labels?.[n] || n}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
     );
@@ -119,10 +122,10 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
     );
   };
 
-  const renderDigitPills = (items: any[], accent: string, compact = true) => (
-    <div className="flex flex-wrap justify-center gap-2">
+  const renderDigitPills = (items: any[], accent: string, compact = true, singleLine = false) => (
+    <div className={`${singleLine ? "flex flex-nowrap justify-center gap-1 overflow-x-auto pb-1" : "flex flex-wrap justify-center gap-2"}`}>
       {items.map((item: any, i: number) => (
-        <div key={i} className={`${compact ? "h-10 min-w-10 text-[16px]" : "h-13 min-w-13 text-[22px]"} flex items-center justify-center rounded-2xl border px-3 font-['Orbitron'] font-black`} style={{ borderColor: accent, backgroundColor: `${accent}14`, color: "var(--text)" }}>
+        <div key={i} className={`${singleLine ? "h-10 min-w-9 shrink-0 px-2 text-[16px]" : compact ? "h-10 min-w-10 px-3 text-[16px]" : "h-13 min-w-13 px-3 text-[22px]"} flex items-center justify-center rounded-2xl border font-['Orbitron'] font-black`} style={{ borderColor: accent, backgroundColor: `${accent}14`, color: "var(--text)" }}>
           {item}
         </div>
       ))}
@@ -136,7 +139,7 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
     </div>
   );
 
-  const MainResultCard = ({ label, values, accent, shio = false }: any) => {
+  const MainResultCard = ({ label, values, accent, shio = false, singleLine = false }: any) => {
     const arr = safeArray(values);
     return (
       <div className="premium-panel result-glow relative overflow-hidden p-5 text-center">
@@ -146,7 +149,7 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
         </div>
         <h3 className="relative font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px] text-[var(--text-dim)]">{label}</h3>
         <div className="relative mt-4">
-          {shio ? <div className="flex flex-wrap justify-center gap-2">{arr.map((s: any, i: number) => <ShioChip key={`${s}-${i}`} value={s} />)}</div> : renderDigitPills(arr, accent, false)}
+          {shio ? <div className="flex flex-wrap justify-center gap-2">{arr.map((s: any, i: number) => <ShioChip key={`${s}-${i}`} value={s} />)}</div> : renderDigitPills(arr, accent, false, singleLine)}
         </div>
       </div>
     );
@@ -222,10 +225,11 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
     const displayResult = safeArray(result.result);
     const active = result.elitCount ?? result.eliteTotal ?? stats.length;
     const formulaTotal = type === "ai" ? 25 : 50;
+    const isBBFSResult = type === "ai" && param === 8;
 
     return (
       <div className="space-y-4 animate-[fadeIn_0.3s_ease-out]">
-        <MainResultCard label={meta.label} values={displayResult} accent={meta.accent} shio={type === "shio"} />
+        <MainResultCard label={meta.label} values={displayResult} accent={meta.accent} shio={type === "shio"} singleLine={isBBFSResult} />
         <ResultHeader label="VALIDASI" value={`RUMUS ACTIVE ${active}/${formulaTotal}`} accent={meta.accent} />
         <div className="premium-panel p-4">
           <SectionTitle accent={meta.accent} title={`${meta.label} — ${meta.formula}`} />
