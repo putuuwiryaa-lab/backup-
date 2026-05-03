@@ -15,7 +15,7 @@ export default function AnalyzeMenu() {
   return (
     <Routes>
       <Route path="/" element={<AnalyzeList />} />
-      <Route path="/ai" element={<AnalysisWrapper type="ai" title="ANGKA IKUT 2D" />} />
+      <Route path="/ai" element={<AnalysisWrapper type="ai" title="ANGKA IKUT / BBFS" />} />
       <Route path="/mati" element={<AnalysisWrapper type="mati" title="ANGKA MATI 4D" />} />
       <Route path="/jumlah" element={<AnalysisWrapper type="jumlah" title="JUMLAH MATI 2D" />} />
       <Route path="/shio" element={<AnalysisWrapper type="shio" title="SHIO MATI" />} />
@@ -90,7 +90,7 @@ function AnalyzeList() {
       </div>
 
       <div className="grid grid-cols-1 gap-3">
-        <SubMenuCard label="ANGKA IKUT 2D" meta={MODE_META.ai} onClick={() => navigate("ai")} />
+        <SubMenuCard label="ANGKA IKUT / BBFS" meta={MODE_META.ai} onClick={() => navigate("ai")} />
         <SubMenuCard label="ANGKA MATI 4D" meta={MODE_META.mati} onClick={() => navigate("mati")} />
         <SubMenuCard label="JUMLAH MATI 2D" meta={MODE_META.jumlah} onClick={() => navigate("jumlah")} />
         <SubMenuCard label="SHIO MATI" meta={MODE_META.shio} onClick={() => navigate("shio")} />
