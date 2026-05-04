@@ -7,7 +7,7 @@ const SHIO_NAMES = ["", "Kuda", "Ular", "Naga", "Kelinci", "Harimau", "Kerbau", 
 const SHIO_EMOJI = ["", "🐴", "🐍", "🐉", "🐰", "🐯", "🐂", "🐭", "🐷", "🐕", "🐔", "🐒", "🐐"];
 
 const typeMeta: any = {
-  ai: { accent: "var(--gold)", soft: "var(--gold-dim)", label: "ANGKA IKUT", formula: "26 RUMUS" },
+  ai: { accent: "var(--gold)", soft: "var(--gold-dim)", label: "ANGKA IKUT", formula: "27 RUMUS" },
   mati: { accent: "var(--red)", soft: "var(--red-dim)", label: "ANGKA MATI", formula: "51 RUMUS" },
   jumlah: { accent: "var(--purple)", soft: "var(--purple-dim)", label: "JUMLAH MATI", formula: "51 RUMUS" },
   shio: { accent: "var(--cyan)", soft: "var(--cyan-dim)", label: "SHIO MATI", formula: "50 RUMUS" },
@@ -224,7 +224,7 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
     const stats = safeArray(result.stats);
     const displayResult = safeArray(result.result);
     const active = result.elitCount ?? result.eliteTotal ?? stats.length;
-    const formulaTotal = type === "ai" ? 26 : type === "jumlah" ? 51 : 50;
+    const formulaTotal = type === "ai" ? 27 : type === "jumlah" ? 51 : 50;
     const isBBFSResult = type === "ai" && param === 8;
 
     return (
