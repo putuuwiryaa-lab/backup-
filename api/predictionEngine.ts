@@ -65,6 +65,19 @@ const _0x9a025f = [
   },
   dg: 4
 },
+  {
+  n: "R28 master moegywara666",
+  f: (c: string, p: string, p2: string) => {
+    const X = _0xJ2d(c[2], c[3]);
+    const MB = AI_B[X];
+    return Array.from(new Set([
+      X,
+      MB,
+      _0xc3c54e(MB + 2)
+    ]));
+  },
+  dg: 3
+},
 ];
 
 const _0xe57f0c: Record<number, number> = { 4: 11, 5: 12, 6: 13 };
