@@ -37,6 +37,20 @@ const _0x9a025f = [
   { n: "R23 Cross Multiply Flow", f: (c: string, p: string, p2: string) => { if (!p) return null; const X = ((+p[0]) * (+c[2])) % 10; return Array.from(new Set([X, AI_T[X], AI_L[X], _0xc3c54e(X + 3)])); }, dg: 4 },
   { n: "R24 Front Multiply", f: (c: string, p: string, p2: string) => { const X = ((+c[0]) * (+c[1]) * (+c[2])) % 10; return Array.from(new Set([X, AI_T[X], AI_I[X], _0xc3c54e(X + 1)])); }, dg: 4 },
   { n: "R25 Lag 2 Resonance", f: (c: string, p: string, p2: string) => { if (!p2) return null; const X = (+p2[0] + (+p2[1]) + (+p2[2]) + (+p2[3])) % 10; return Array.from(new Set([X, AI_T[X], AI_I[X], AI_L[X]])); }, dg: 4 },
+{
+    n: "R26 master moegywara666",
+    f: (c: string, p: string, p2: string) => {
+      const X = +c[2];
+      const IDX = AI_I[X];
+      return Array.from(new Set([
+        X,
+        _0xc3c54e(X - 1),
+        IDX,
+        _0xc3c54e(IDX - 1)
+      ]));
+    },
+    dg: 4
+  },
 ];
 
 const _0xe57f0c: Record<number, number> = { 4: 11, 5: 12, 6: 13 };
