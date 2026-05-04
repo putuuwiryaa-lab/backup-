@@ -37,7 +37,7 @@ const _0x9a025f = [
   { n: "R23 Cross Multiply Flow", f: (c: string, p: string, p2: string) => { if (!p) return null; const X = ((+p[0]) * (+c[2])) % 10; return Array.from(new Set([X, AI_T[X], AI_L[X], _0xc3c54e(X + 3)])); }, dg: 4 },
   { n: "R24 Front Multiply", f: (c: string, p: string, p2: string) => { const X = ((+c[0]) * (+c[1]) * (+c[2])) % 10; return Array.from(new Set([X, AI_T[X], AI_I[X], _0xc3c54e(X + 1)])); }, dg: 4 },
   { n: "R25 Lag 2 Resonance", f: (c: string, p: string, p2: string) => { if (!p2) return null; const X = (+p2[0] + (+p2[1]) + (+p2[2]) + (+p2[3])) % 10; return Array.from(new Set([X, AI_T[X], AI_I[X], AI_L[X]])); }, dg: 4 },
-{
+  {
     n: "R26 master moegywara666",
     f: (c: string, p: string, p2: string) => {
       const X = +c[2];
@@ -51,6 +51,20 @@ const _0x9a025f = [
     },
     dg: 4
   },
+  {
+  n: "R27 master moegywara666",
+  f: (c: string, p: string, p2: string) => {
+    const A = +c[0];
+    const K = +c[1];
+    return Array.from(new Set([
+      _0xJ2d(A, K),
+      _0xc3c54e(A + 1),
+      _0xc3c54e(A + 2),
+      AI_I[A]
+    ]));
+  },
+  dg: 4
+},
 ];
 
 const _0xe57f0c: Record<number, number> = { 4: 11, 5: 12, 6: 13 };
