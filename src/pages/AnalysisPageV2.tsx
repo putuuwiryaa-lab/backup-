@@ -267,7 +267,7 @@ function SectionTitle({ title, accent }: { title: string; accent: string }) {
   return <div className="flex items-center gap-2"><BarChart3 size={16} style={{ color: accent }} /><span className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[2px] text-[var(--text)]">{title}</span></div>;
 }
 
-function ResultHeader({ label, value, accent }: { label: string; value: string }) {
+function ResultHeader({ label, value, accent }: { label: string; value: string; accent: string }) {
   return <div className="premium-panel flex items-center justify-between gap-3 p-4"><span className="text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">{label}</span><span className="rounded-full px-3 py-1 text-[9px] font-black uppercase tracking-[1px]" style={{ backgroundColor: `${accent}1f`, color: accent }}>{value}</span></div>;
 }
 
