@@ -7,9 +7,9 @@ const SHIO_NAMES = ["", "Kuda", "Ular", "Naga", "Kelinci", "Harimau", "Kerbau", 
 const SHIO_EMOJI = ["", "🐴", "🐍", "🐉", "🐰", "🐯", "🐂", "🐭", "🐷", "🐕", "🐔", "🐒", "🐐"];
 
 const typeMeta: any = {
-  ai: { accent: "var(--gold)", soft: "var(--gold-dim)", label: "ANGKA IKUT", formula: "25 RUMUS" },
-  mati: { accent: "var(--red)", soft: "var(--red-dim)", label: "ANGKA MATI", formula: "50 RUMUS" },
-  jumlah: { accent: "var(--purple)", soft: "var(--purple-dim)", label: "JUMLAH MATI", formula: "50 RUMUS" },
+  ai: { accent: "var(--gold)", soft: "var(--gold-dim)", label: "ANGKA IKUT", formula: "26 RUMUS" },
+  mati: { accent: "var(--red)", soft: "var(--red-dim)", label: "ANGKA MATI", formula: "51 RUMUS" },
+  jumlah: { accent: "var(--purple)", soft: "var(--purple-dim)", label: "JUMLAH MATI", formula: "51 RUMUS" },
   shio: { accent: "var(--cyan)", soft: "var(--cyan-dim)", label: "SHIO MATI", formula: "50 RUMUS" },
   rekap: { accent: "var(--blue)", soft: "var(--blue-dim)", label: "MENU REKAP", formula: "LINE GENERATOR" },
 };
@@ -209,7 +209,7 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
       const totalActive = POS.reduce((acc, p) => acc + statsFrom(result[p]).length, 0);
       return (
         <div className="space-y-4 animate-[fadeIn_0.3s_ease-out]">
-          <ResultHeader label="HASIL ANALISA" value={`RUMUS ACTIVE ${totalActive}/50`} accent={meta.accent} />
+          <ResultHeader label="HASIL ANALISA" value={`RUMUS ACTIVE ${totalActive}/51`} accent={meta.accent} />
           <div className="premium-panel space-y-3 p-4">
             {POS.map((p) => <ResultRow key={p} label={`OFF ${p}`} values={result[p]?.result} accent={meta.accent} />)}
           </div>
@@ -224,7 +224,7 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
     const stats = safeArray(result.stats);
     const displayResult = safeArray(result.result);
     const active = result.elitCount ?? result.eliteTotal ?? stats.length;
-    const formulaTotal = type === "ai" ? 25 : 50;
+    const formulaTotal = type === "ai" ? 26 : type === "jumlah" ? 51 : 50;
     const isBBFSResult = type === "ai" && param === 8;
 
     return (
@@ -267,7 +267,7 @@ function SectionTitle({ title, accent }: { title: string; accent: string }) {
   return <div className="flex items-center gap-2"><BarChart3 size={16} style={{ color: accent }} /><span className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[2px] text-[var(--text)]">{title}</span></div>;
 }
 
-function ResultHeader({ label, value, accent }: { label: string; value: string; accent: string }) {
+function ResultHeader({ label, value, accent }: { label: string; value: string }) {
   return <div className="premium-panel flex items-center justify-between gap-3 p-4"><span className="text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">{label}</span><span className="rounded-full px-3 py-1 text-[9px] font-black uppercase tracking-[1px]" style={{ backgroundColor: `${accent}1f`, color: accent }}>{value}</span></div>;
 }
 
