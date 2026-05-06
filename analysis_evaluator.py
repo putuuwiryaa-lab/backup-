@@ -160,7 +160,8 @@ def evaluate_snapshot(mode, param, snapshot_result, new_result):
             is_hit = target_set.issubset(digit_set)
         else:
             is_hit = bool(matched)
-        return is_hit, target_2d, {
+        status = "MASUK" if is_hit else "TIDAK MASUK"
+        return is_hit, target_2d, status, {
             "target_2d": target_2d,
             "digits": digits,
             "matched_digits": matched,
@@ -175,20 +176,33 @@ def evaluate_snapshot(mode, param, snapshot_result, new_result):
             ("EKOR", new_result[3]),
         ]
         detail = {}
-        is_hit = True
+        safe = {}
         for pos, target in positions:
             off_digits = normalize_digit_list((snapshot_result or {}).get(pos))
-            safe = target not in set(off_digits)
-            detail[pos] = {"target": target, "off": off_digits, "safe": safe}
-            if not safe:
-                is_hit = False
-        return is_hit, new_result, detail
+            is_safe = target not in set(off_digits)
+            safe[pos] = is_safe
+            detail[pos] = {"target": target, "off": off_digits, "safe": is_safe}
+
+        if safe["AS"] and safe["KOP"] and safe["KEPALA"] and safe["EKOR"]:
+            status = "4D"
+        elif safe["KOP"] and safe["KEPALA"] and safe["EKOR"]:
+            status = "3D"
+        elif safe["KEPALA"] and safe["EKOR"]:
+            status = "2D"
+        else:
+            status = "TIDAK MASUK"
+
+        is_hit = status != "TIDAK MASUK"
+        detail["status"] = status
+        detail["rule"] = "4d_as_kop_kepala_ekor_3d_kop_kepala_ekor_2d_kepala_ekor"
+        return is_hit, new_result, status, detail
 
     if mode == "jumlah":
         off_jumlah = normalize_digit_list(snapshot_result)
         target_sum = str(j2d(new_result[2], new_result[3]))
         is_hit = target_sum not in set(off_jumlah)
-        return is_hit, target_sum, {
+        status = "MASUK" if is_hit else "TIDAK MASUK"
+        return is_hit, target_sum, status, {
             "target_2d": target_2d,
             "target_sum_2d": target_sum,
             "off_jumlah": off_jumlah,
@@ -198,7 +212,8 @@ def evaluate_snapshot(mode, param, snapshot_result, new_result):
         off_shio = normalize_digit_list(snapshot_result)
         target_shio = calculate_shio(new_result)
         is_hit = target_shio not in set(off_shio)
-        return is_hit, target_shio, {
+        status = "MASUK" if is_hit else "TIDAK MASUK"
+        return is_hit, target_shio, status, {
             "target_2d": target_2d,
             "target_shio": target_shio,
             "off_shio": off_shio,
@@ -225,7 +240,7 @@ def save_evaluation(market_id, market_name, mode, param, snapshot, new_result):
         return False
 
     snapshot_result = snapshot.get("result")
-    is_hit, target, detail = evaluate_snapshot(mode, param, snapshot_result, new_result)
+    is_hit, target, status, detail = evaluate_snapshot(mode, param, snapshot_result, new_result)
 
     row = {
         "market_id": market_id,
@@ -235,6 +250,7 @@ def save_evaluation(market_id, market_name, mode, param, snapshot, new_result):
         "from_result": from_result,
         "new_result": new_result,
         "is_hit": is_hit,
+        "status": status,
         "target": target,
         "result_snapshot": snapshot_result,
         "detail": detail,
@@ -244,7 +260,7 @@ def save_evaluation(market_id, market_name, mode, param, snapshot, new_result):
     supabase.table("analysis_evaluations").insert(row).execute()
     print(
         f"ANALYSIS EVAL OK: {market_id} {mode} {param} "
-        f"{from_result}->{new_result} {'MASUK' if is_hit else 'TIDAK MASUK'}"
+        f"{from_result}->{new_result} {status}"
     )
     return True
 
