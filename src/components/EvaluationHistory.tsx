@@ -27,7 +27,7 @@ export default function EvaluationHistory({
       try {
         const { data, error } = await supabase
           .from("analysis_evaluations")
-          .select("id,from_result,new_result,is_hit,evaluated_at")
+          .select("id,from_result,new_result,is_hit,status,evaluated_at")
           .eq("market_id", marketId)
           .eq("mode", mode)
           .eq("param", param)
@@ -68,16 +68,19 @@ export default function EvaluationHistory({
         <span className="text-[9px] font-black uppercase tracking-[1px] text-[var(--text-dim)]">Terbaru</span>
       </div>
       <div className="grid grid-cols-2 gap-2">
-        {rows.map((row) => (
-          <div key={row.id} className="rounded-3xl border border-[var(--border2)] bg-black/25 p-3 text-center">
-            <div className="font-['JetBrains_Mono'] text-[12px] font-black tracking-[1px] text-[var(--text)]">
-              {row.from_result} → {row.new_result}
+        {rows.map((row) => {
+          const label = row.status || (row.is_hit ? "MASUK" : "TIDAK MASUK");
+          return (
+            <div key={row.id} className="rounded-3xl border border-[var(--border2)] bg-black/25 p-3 text-center">
+              <div className="font-['JetBrains_Mono'] text-[12px] font-black tracking-[1px] text-[var(--text)]">
+                {row.from_result} → {row.new_result}
+              </div>
+              <div className={`mt-2 rounded-full px-2 py-1 text-[9px] font-black uppercase tracking-[1px] ${row.is_hit ? "bg-[var(--green-dim)] text-[var(--green)]" : "bg-[var(--red-dim)] text-[var(--red)]"}`}>
+                {label}
+              </div>
             </div>
-            <div className={`mt-2 rounded-full px-2 py-1 text-[9px] font-black uppercase tracking-[1px] ${row.is_hit ? "bg-[var(--green-dim)] text-[var(--green)]" : "bg-[var(--red-dim)] text-[var(--red)]"}`}>
-              {row.is_hit ? "MASUK" : "TIDAK MASUK"}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
