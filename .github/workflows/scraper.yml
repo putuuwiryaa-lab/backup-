@@ -33,3 +33,11 @@ jobs:
           ANALYZE_API_URL: https://analisaangka.online/api/analyze
           INTERNAL_API_SECRET: ${{ secrets.INTERNAL_API_SECRET }}
         run: python rekap_line_evaluator.py
+
+      - name: Run analysis evaluator
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          ANALYZE_API_URL: https://analisaangka.online/api/analyze
+          INTERNAL_API_SECRET: ${{ secrets.INTERNAL_API_SECRET }}
+        run: python analysis_evaluator.py
