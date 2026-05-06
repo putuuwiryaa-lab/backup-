@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Copy, RefreshCw, Sparkles, Trophy, BarChart3 } from "lucide-react";
 import RekapHistory from "../components/RekapHistory";
+import EvaluationHistory from "../components/EvaluationHistory";
 
 const SHIO_NAMES = ["", "Kuda", "Ular", "Naga", "Kelinci", "Harimau", "Kerbau", "Tikus", "Babi", "Anjing", "Ayam", "Monyet", "Kambing"];
 const SHIO_EMOJI = ["", "🐴", "🐍", "🐉", "🐰", "🐯", "🐂", "🐭", "🐷", "🐕", "🐔", "🐒", "🐐"];
@@ -13,6 +14,8 @@ const typeMeta: any = {
   shio: { accent: "var(--cyan)", soft: "var(--cyan-dim)", label: "SHIO MATI", formula: "50 RUMUS" },
   rekap: { accent: "var(--blue)", soft: "var(--blue-dim)", label: "MENU REKAP", formula: "LINE GENERATOR" },
 };
+
+const evaluationModes = new Set(["ai", "mati", "jumlah", "shio"]);
 
 export default function AnalysisPageV2({ type, title, icon, marketId }: { type: string; title: string; icon: string; marketId: string }) {
   const navigate = useNavigate();
@@ -155,6 +158,15 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
     );
   };
 
+  const renderEvaluationHistory = () => {
+    if (!evaluationModes.has(type) || !param || param === 0) return null;
+    return (
+      <div className="premium-panel space-y-3 p-4">
+        <EvaluationHistory marketId={marketId} mode={type as any} param={param} />
+      </div>
+    );
+  };
+
   const renderRekap = () => {
     const isTop = param === 2;
     const mode = isTop ? "top" : "invest";
@@ -213,6 +225,7 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
           <div className="premium-panel space-y-3 p-4">
             {POS.map((p) => <ResultRow key={p} label={`OFF ${p}`} values={result[p]?.result} accent={meta.accent} />)}
           </div>
+          {renderEvaluationHistory()}
           <div className="premium-panel space-y-5 p-4">
             <SectionTitle accent={meta.accent} title="Detail Validasi" />
             {POS.map((p) => <section key={p} className="space-y-3"><div className="flex items-center gap-3"><div className="h-px flex-1 bg-white/10" /><span className="font-['Orbitron'] text-[10px] font-black uppercase tracking-[3px]" style={{ color: meta.accent }}>{p}</span><div className="h-px flex-1 bg-white/10" /></div>{renderStatsList(statsFrom(result[p]), meta.accent)}</section>)}
@@ -235,6 +248,7 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
           <SectionTitle accent={meta.accent} title={`${meta.label} — ${meta.formula}`} />
           <div className="mt-4">{renderStatsList(stats, meta.accent)}</div>
         </div>
+        {renderEvaluationHistory()}
       </div>
     );
   };
