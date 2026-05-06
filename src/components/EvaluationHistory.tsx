@@ -69,7 +69,8 @@ export default function EvaluationHistory({
       </div>
       <div className="grid grid-cols-2 gap-2">
         {rows.map((row) => {
-          const label = row.status || (row.is_hit ? "MASUK" : "ZONK");
+          const rawLabel = row.status || (row.is_hit ? "MASUK" : "ZONK");
+          const label = rawLabel === "TIDAK MASUK" ? "ZONK" : rawLabel;
           return (
             <div key={row.id} className="rounded-3xl border border-[var(--border2)] bg-black/25 p-3 text-center">
               <div className="font-['JetBrains_Mono'] text-[12px] font-black tracking-[1px] text-[var(--text)]">
