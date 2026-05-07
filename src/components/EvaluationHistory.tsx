@@ -7,6 +7,28 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 type EvaluationMode = "ai" | "mati" | "jumlah" | "shio";
 
+function labelFromMatiDetail(detail: any) {
+  const asSafe = Boolean(detail?.AS?.safe);
+  const kopSafe = Boolean(detail?.KOP?.safe);
+  const kepalaSafe = Boolean(detail?.KEPALA?.safe);
+  const ekorSafe = Boolean(detail?.EKOR?.safe);
+
+  if (asSafe && kopSafe && kepalaSafe && ekorSafe) return "4D";
+  if (kopSafe && kepalaSafe && ekorSafe) return "3D";
+  if (kepalaSafe && ekorSafe) return "2D";
+  return "ZONK";
+}
+
+function displayLabel(row: any, mode: EvaluationMode) {
+  if (mode === "mati") {
+    if (["4D", "3D", "2D", "ZONK"].includes(row.status)) return row.status;
+    return labelFromMatiDetail(row.detail);
+  }
+
+  const rawLabel = row.status || (row.is_hit ? "MASUK" : "ZONK");
+  return rawLabel === "TIDAK MASUK" ? "ZONK" : rawLabel;
+}
+
 export default function EvaluationHistory({
   marketId,
   mode,
@@ -27,7 +49,7 @@ export default function EvaluationHistory({
       try {
         const { data, error } = await supabase
           .from("analysis_evaluations")
-          .select("id,from_result,new_result,is_hit,status,evaluated_at")
+          .select("id,from_result,new_result,is_hit,status,detail,evaluated_at")
           .eq("market_id", marketId)
           .eq("mode", mode)
           .eq("param", param)
@@ -69,14 +91,14 @@ export default function EvaluationHistory({
       </div>
       <div className="grid grid-cols-3 gap-2">
         {rows.map((row) => {
-          const rawLabel = row.status || (row.is_hit ? "MASUK" : "ZONK");
-          const label = rawLabel === "TIDAK MASUK" ? "ZONK" : rawLabel;
+          const label = displayLabel(row, mode);
+          const isSuccess = label !== "ZONK";
           return (
             <div key={row.id} className="rounded-3xl border border-[var(--border2)] bg-black/25 p-2 text-center">
               <div className="font-['JetBrains_Mono'] text-[10px] font-black tracking-[0.5px] text-[var(--text)] sm:text-[11px]">
                 {row.from_result} → {row.new_result}
               </div>
-              <div className={`mt-2 rounded-full px-1.5 py-1 text-[8px] font-black uppercase tracking-[0.5px] ${row.is_hit ? "bg-[var(--green-dim)] text-[var(--green)]" : "bg-[var(--red-dim)] text-[var(--red)]"}`}>
+              <div className={`mt-2 rounded-full px-1.5 py-1 text-[8px] font-black uppercase tracking-[0.5px] ${isSuccess ? "bg-[var(--green-dim)] text-[var(--green)]" : "bg-[var(--red-dim)] text-[var(--red)]"}`}>
                 {label}
               </div>
             </div>
