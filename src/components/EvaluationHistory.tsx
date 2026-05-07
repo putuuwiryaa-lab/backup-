@@ -67,16 +67,16 @@ export default function EvaluationHistory({
         <span className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[2px] text-[var(--text)]">Riwayat Evaluasi</span>
         <span className="text-[9px] font-black uppercase tracking-[1px] text-[var(--text-dim)]">Terbaru</span>
       </div>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-3 gap-2">
         {rows.map((row) => {
           const rawLabel = row.status || (row.is_hit ? "MASUK" : "ZONK");
           const label = rawLabel === "TIDAK MASUK" ? "ZONK" : rawLabel;
           return (
-            <div key={row.id} className="rounded-3xl border border-[var(--border2)] bg-black/25 p-3 text-center">
-              <div className="font-['JetBrains_Mono'] text-[12px] font-black tracking-[1px] text-[var(--text)]">
+            <div key={row.id} className="rounded-3xl border border-[var(--border2)] bg-black/25 p-2 text-center">
+              <div className="font-['JetBrains_Mono'] text-[10px] font-black tracking-[0.5px] text-[var(--text)] sm:text-[11px]">
                 {row.from_result} → {row.new_result}
               </div>
-              <div className={`mt-2 rounded-full px-2 py-1 text-[9px] font-black uppercase tracking-[1px] ${row.is_hit ? "bg-[var(--green-dim)] text-[var(--green)]" : "bg-[var(--red-dim)] text-[var(--red)]"}`}>
+              <div className={`mt-2 rounded-full px-1.5 py-1 text-[8px] font-black uppercase tracking-[0.5px] ${row.is_hit ? "bg-[var(--green-dim)] text-[var(--green)]" : "bg-[var(--red-dim)] text-[var(--red)]"}`}>
                 {label}
               </div>
             </div>
