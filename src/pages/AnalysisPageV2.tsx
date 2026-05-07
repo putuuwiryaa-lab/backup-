@@ -125,8 +125,8 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
     );
   };
 
-  const renderDigitPills = (items: any[], accent: string, compact = true, singleLine = false) => (
-    <div className={`${singleLine ? "flex flex-nowrap justify-end gap-1 overflow-x-auto pb-1" : "flex flex-wrap justify-end gap-2"}`}>
+  const renderDigitPills = (items: any[], accent: string, compact = true, singleLine = false, center = false) => (
+    <div className={`${singleLine ? `flex flex-nowrap ${center ? "justify-center" : "justify-end"} gap-1 overflow-x-auto pb-1` : `flex flex-wrap ${center ? "justify-center" : "justify-end"} gap-2`}`}>
       {items.map((item: any, i: number) => (
         <div key={i} className={`${singleLine ? "h-10 min-w-9 shrink-0 px-2 text-[16px]" : compact ? "h-10 min-w-10 px-3 text-[16px]" : "h-13 min-w-13 px-3 text-[22px]"} flex items-center justify-center rounded-2xl border font-['Orbitron'] font-black`} style={{ borderColor: accent, backgroundColor: `${accent}14`, color: "var(--text)" }}>
           {item}
@@ -144,7 +144,7 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
     </div>
   );
 
-  const MainResultCard = ({ label, values, accent, shio = false, singleLine = false }: any) => {
+  const MainResultCard = ({ label, values, accent, shio = false, singleLine = false, stacked = false }: any) => {
     const arr = safeArray(values);
     return (
       <div className="premium-panel result-glow relative overflow-hidden p-5">
@@ -152,12 +152,21 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
         <div className="relative mb-4 inline-flex items-center gap-2 rounded-full px-3 py-1 text-[9px] font-black uppercase tracking-[2px]" style={{ backgroundColor: `${accent}1f`, color: accent }}>
           <Trophy size={12} /> Hasil Utama
         </div>
-        <div className="relative flex items-center justify-between gap-3 rounded-3xl border border-[var(--border2)] bg-black/20 p-4">
-          <h3 className="shrink-0 font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px] text-[var(--text-dim)]">{label}</h3>
-          <div className="min-w-0 flex-1">
-            {shio ? <div className="flex flex-wrap justify-end gap-2">{arr.map((s: any, i: number) => <ShioChip key={`${s}-${i}`} value={s} />)}</div> : renderDigitPills(arr, accent, false, singleLine)}
+        {stacked ? (
+          <div className="relative rounded-3xl border border-[var(--border2)] bg-black/20 p-4 text-center">
+            <h3 className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px] text-[var(--text-dim)]">{label}</h3>
+            <div className="mt-4">
+              {shio ? <div className="flex flex-wrap justify-center gap-2">{arr.map((s: any, i: number) => <ShioChip key={`${s}-${i}`} value={s} />)}</div> : renderDigitPills(arr, accent, false, singleLine, true)}
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="relative flex items-center justify-between gap-3 rounded-3xl border border-[var(--border2)] bg-black/20 p-4">
+            <h3 className="shrink-0 font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px] text-[var(--text-dim)]">{label}</h3>
+            <div className="min-w-0 flex-1">
+              {shio ? <div className="flex flex-wrap justify-end gap-2">{arr.map((s: any, i: number) => <ShioChip key={`${s}-${i}`} value={s} />)}</div> : renderDigitPills(arr, accent, false, singleLine)}
+            </div>
+          </div>
+        )}
       </div>
     );
   };
@@ -249,7 +258,7 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
 
     return (
       <div className="space-y-4 animate-[fadeIn_0.3s_ease-out]">
-        <MainResultCard label={meta.label} values={displayResult} accent={meta.accent} shio={type === "shio"} singleLine={isBBFSResult} />
+        <MainResultCard label={meta.label} values={displayResult} accent={meta.accent} shio={type === "shio"} singleLine={isBBFSResult} stacked={type === "ai"} />
         <ResultHeader label="VALIDASI" value={`RUMUS ACTIVE ${active}/${formulaTotal}`} accent={meta.accent} />
         <div className="premium-panel p-4">
           <SectionTitle accent={meta.accent} title="Detail Validasi" />
