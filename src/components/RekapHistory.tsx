@@ -63,7 +63,7 @@ export default function RekapHistory({ marketId, mode }: { marketId: string; mod
               {row.from_result} → {row.new_result}
             </div>
             <div className={`mt-2 rounded-full px-1.5 py-1 text-[8px] font-black uppercase tracking-[0.5px] ${row.is_hit ? "bg-[var(--green-dim)] text-[var(--green)]" : "bg-[var(--red-dim)] text-[var(--red)]"}`}>
-              {row.is_hit ? "MASUK" : "TIDAK MASUK"}
+              {row.is_hit ? "MASUK" : "ZONK"}
             </div>
           </div>
         ))}
