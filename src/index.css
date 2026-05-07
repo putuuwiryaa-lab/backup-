@@ -113,6 +113,49 @@
 }
 
 @layer utilities {
+  /* Hide the Supreme Dark Pro badge in the dashboard header */
+  header .inline-flex:has(svg) {
+    display: none !important;
+  }
+
+  /* Make the MASTER and DEVICE ID cards more compact */
+  header + .grid.grid-cols-2.gap-3 {
+    gap: 8px !important;
+    margin-bottom: 16px !important;
+  }
+
+  header + .grid.grid-cols-2.gap-3 > .premium-card {
+    min-height: 58px !important;
+    padding: 12px !important;
+    gap: 10px !important;
+    border-radius: 20px !important;
+  }
+
+  header + .grid.grid-cols-2.gap-3 > .premium-card .h-11.w-11 {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 14px !important;
+  }
+
+  header + .grid.grid-cols-2.gap-3 > .premium-card svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+
+  header + .grid.grid-cols-2.gap-3 > .premium-card .font-\['Orbitron'\] {
+    font-size: 10px !important;
+    letter-spacing: 1.5px !important;
+  }
+
+  header + .grid.grid-cols-2.gap-3 > .premium-card .font-\['JetBrains_Mono'\] {
+    font-size: 12px !important;
+  }
+
+  header + .grid.grid-cols-2.gap-3 > .premium-card p:first-child:not(.font-\['Orbitron'\]) {
+    font-size: 8px !important;
+    letter-spacing: 1.5px !important;
+  }
+
   /* Align OFF SHIO in Menu Rekap with OFF KEP / OFF EKR / OFF JML rows */
   .premium-panel .space-y-3 > .rounded-3xl:has(> span.mb-3.block) {
     display: flex;
