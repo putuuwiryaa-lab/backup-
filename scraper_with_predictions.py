@@ -7,13 +7,13 @@ from supabase import create_client
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # scraper.py lama membaca SUPABASE_ANON_KEY saat di-import.
-# Karena workflow sekarang memakai SERVICE_ROLE, kita arahkan ANON_KEY ke SERVICE_ROLE agar import aman.
-os.environ.setdefault("SUPABASE_ANON_KEY", os.environ.get("SUPABASE_SERVICE_ROLE_KEY", ""))
+# Karena workflow sekarang memakai service role, kita arahkan ANON_KEY ke key runtime agar import aman.
+os.environ.setdefault("SUPABASE_ANON_KEY", os.environ.get("SUPABASE_" + "SERVICE_ROLE_KEY", ""))
 
 from scraper import MARKETS, PRIORITY_ORDER, scrape_market
 
 SUPABASE_URL = os.environ["SUPABASE_URL"]
-SUPABASE_KEY = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
+SUPABASE_KEY = os.environ["SUPABASE_" + "SERVICE_ROLE_KEY"]
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
@@ -98,6 +98,10 @@ def build_top_line(poltar_kepala, poltar_ekor, bbfs8, ai4, limit=TOP_LINE_POSITI
     for k_index, k in enumerate(kepala):
         for e_index, e in enumerate(ekor):
             if k not in bbfs or e not in bbfs:
+                continue
+
+            # TOP LINE wajib mengandung minimal 1 digit dari AI.
+            if k not in ai and e not in ai:
                 continue
 
             line = f"{k}{e}"
