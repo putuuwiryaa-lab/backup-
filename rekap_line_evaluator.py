@@ -45,7 +45,7 @@ def analyze_rekap(history, mode):
 
     # UI Analisa Angka mengirim data newest-first ke /api/analyze.
     # Data di Supabase tersimpan oldest-first, jadi harus dibalik agar hasil rekap tidak kosong.
-    analyze_history = list(reversed(history))
+    analyze_history = history
 
     headers = {}
     if INTERNAL_API_SECRET:
