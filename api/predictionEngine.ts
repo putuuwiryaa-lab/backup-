@@ -92,6 +92,18 @@ const _0x9a025f = [
   },
   dg: 5
 },
+{
+    n: "R30 Cosmic Chain",
+    f: (c: string, p: string, p2: string) => {
+      const X = (+c[0] + +c[2]) % 10;
+      const MB = AI_B[X];
+      const IDX = AI_I[MB];
+      const ML = AI_L[IDX];
+      return Array.from(new Set([X, MB, IDX, ML]));
+    },
+    dg: 4
+  },
+];
 ];
 
 const _0xe57f0c: Record<number, number> = { 4: 11, 5: 12, 6: 13 };
