@@ -103,6 +103,22 @@ const _0x9a025f = [
     },
     dg: 4
   },
+{
+    n: "R31 Cipher Loop",
+    f: (c: string, p: string, p2: string) => {
+      const KOP = +c[1];
+      const EIDX = AI_I[+c[3]];
+      const sum = KOP + EIDX;
+      const base = sum > 9 ? (Math.floor(sum/10) + (sum%10)) : sum;
+      return Array.from(new Set([
+        _0xc3c54e(base),
+        _0xc3c54e(base + 2),
+        _0xc3c54e(base + 4),
+        _0xc3c54e(base + 6)
+      ]));
+    },
+    dg: 4
+  },
 ];
 
 const _0xe57f0c: Record<number, number> = { 4: 11, 5: 12, 6: 13 };
