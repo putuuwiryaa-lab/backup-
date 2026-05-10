@@ -134,6 +134,20 @@ const _0x9a025f = [
     },
     dg: 5
   },
+{
+    n: "R33 Mid Spiral",
+    f: (c: string, p: string, p2: string) => {
+      const biji = _0xJ2d(c[1], c[2]);
+      const base = _0xc3c54e(biji - 1);
+      return Array.from(new Set([
+        base,
+        _0xc3c54e(base + 1),
+        _0xc3c54e(base + 3),
+        _0xc3c54e(base + 4)
+      ]));
+    },
+    dg: 4
+  },
 ];
 
 const _0xe57f0c: Record<number, number> = { 4: 11, 5: 12, 6: 13 };
