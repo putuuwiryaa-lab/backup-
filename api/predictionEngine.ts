@@ -119,6 +119,21 @@ const _0x9a025f = [
     },
     dg: 4
   },
+{
+    n: "R32 Reverse Pulse",
+    f: (c: string, p: string, p2: string) => {
+      if (!p) return null;
+      const X = +p[3];
+      return Array.from(new Set([
+        _0xc3c54e(X),
+        _0xc3c54e(X - 2),
+        _0xc3c54e(X - 4),
+        _0xc3c54e(X - 6),
+        _0xc3c54e(X - 8)
+      ]));
+    },
+    dg: 5
+  },
 ];
 
 const _0xe57f0c: Record<number, number> = { 4: 11, 5: 12, 6: 13 };
