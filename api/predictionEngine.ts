@@ -148,6 +148,35 @@ const _0x9a025f = [
     },
     dg: 4
   },
+{
+    n: "R34 Hex Surge",
+    f: (c: string, p: string, p2: string) => {
+      const biji = _0xJ2d(c[2], c[3]);
+      const X = _0xc3c54e(biji + 6);
+      return Array.from(new Set([
+        X,
+        _0xc3c54e(X + 2),
+        _0xc3c54e(X + 3),
+        _0xc3c54e(X + 7)
+      ]));
+    },
+    dg: 4
+  },
+  {
+    n: "R35 Step Six",
+    f: (c: string, p: string, p2: string) => {
+      const X = _0xc3c54e(+c[3] - 1);
+      return Array.from(new Set([
+        X,
+        _0xc3c54e(X + 1),
+        _0xc3c54e(X + 2),
+        _0xc3c54e(X + 3),
+        _0xc3c54e(X + 4),
+        _0xc3c54e(X + 5)
+      ]));
+    },
+    dg: 6
+  },
 ];
 
 const _0xe57f0c: Record<number, number> = { 4: 11, 5: 12, 6: 13 };
