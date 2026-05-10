@@ -104,7 +104,6 @@ const _0x9a025f = [
     dg: 4
   },
 ];
-];
 
 const _0xe57f0c: Record<number, number> = { 4: 11, 5: 12, 6: 13 };
 
