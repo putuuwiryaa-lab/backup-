@@ -8,8 +8,8 @@ const SHIO_NAMES = ["", "Kuda", "Ular", "Naga", "Kelinci", "Harimau", "Kerbau", 
 const SHIO_EMOJI = ["", "🐴", "🐍", "🐉", "🐰", "🐯", "🐂", "🐭", "🐷", "🐕", "🐔", "🐒", "🐐"];
 
 const typeMeta: any = {
-  ai: { accent: "var(--gold)", soft: "var(--gold-dim)", label: "ANGKA IKUT", formula: "28 RUMUS" },
-  mati: { accent: "var(--red)", soft: "var(--red-dim)", label: "ANGKA MATI", formula: "51 RUMUS" },
+  ai: { accent: "var(--gold)", soft: "var(--gold-dim)", label: "ANGKA IKUT", formula: "35 RUMUS" },
+  mati: { accent: "var(--red)", soft: "var(--red-dim)", label: "ANGKA MATI", formula: "53 RUMUS" },
   jumlah: { accent: "var(--purple)", soft: "var(--purple-dim)", label: "JUMLAH MATI", formula: "51 RUMUS" },
   shio: { accent: "var(--cyan)", soft: "var(--cyan-dim)", label: "SHIO MATI", formula: "50 RUMUS" },
   rekap: { accent: "var(--blue)", soft: "var(--blue-dim)", label: "MENU REKAP", formula: "LINE GENERATOR" },
@@ -237,7 +237,7 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
       const totalActive = POS.reduce((acc, p) => acc + statsFrom(result[p]).length, 0);
       return (
         <div className="space-y-4 animate-[fadeIn_0.3s_ease-out]">
-          <ResultHeader label="HASIL ANALISA" value={`RUMUS ACTIVE ${totalActive}/51`} accent={meta.accent} />
+          <ResultHeader label="HASIL ANALISA" value={`RUMUS ACTIVE ${totalActive}/53`} accent={meta.accent} />
           <div className="premium-panel space-y-3 p-4">
             {POS.map((p) => <ResultRow key={p} label={`OFF ${p}`} values={result[p]?.result} accent={meta.accent} />)}
           </div>
@@ -253,7 +253,7 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
     const stats = safeArray(result.stats);
     const displayResult = safeArray(result.result);
     const active = result.elitCount ?? result.eliteTotal ?? stats.length;
-    const formulaTotal = type === "ai" ? 28 : type === "jumlah" ? 51 : 50;
+    const formulaTotal = type === "ai" ? 35 : type === "jumlah" ? 51 : 50;
     const isBBFSResult = type === "ai" && param === 8;
 
     return (
