@@ -91,9 +91,9 @@ def analyze_mode(history, mode, param):
     if INTERNAL_API_SECRET:
         headers["x-internal-secret"] = INTERNAL_API_SECRET
 
-    # UI mengirim history newest-first ke /api/analyze.
-    # Supabase menyimpan oldest-first, jadi dibalik agar konsisten dengan UI.
-    analyze_history = list(reversed(history))
+    # predictionEngine mengharapkan oldest-first (D[D.length-1] = terbaru)
+    # Supabase sudah oldest-first, tidak perlu dibalik
+    analyze_history = history
 
     response = requests.post(
         ANALYZE_API_URL,
