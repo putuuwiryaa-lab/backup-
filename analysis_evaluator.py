@@ -211,12 +211,14 @@ def evaluate_snapshot(mode, param, snapshot_result, new_result):
     if mode == "shio":
         off_shio = normalize_digit_list(snapshot_result)
         target_shio = calculate_shio(new_result)
-        is_hit = target_shio not in set(off_shio)
-        status = "MASUK" if is_hit else "TIDAK MASUK"
-        return is_hit, target_shio, status, {
+        is_safe = target_shio not in set(off_shio)
+        status = "MASUK" if is_safe else "TIDAK MASUK"
+        return is_safe, target_shio, status, {
             "target_2d": target_2d,
             "target_shio": target_shio,
             "off_shio": off_shio,
+            "safe": is_safe,
+            "rule": "shio_mati_masuk_if_result_not_in_off_shio",
         }
 
     raise RuntimeError(f"Unknown mode={mode}")
