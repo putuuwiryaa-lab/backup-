@@ -138,7 +138,7 @@ def run_engine(results):
         pos_digits.append(sorted_digits)
         pos_normalized.append(normalized)
 
-    # BBFS dan AI dari gabungan probabilitas KEPALA + EKOR.
+    # BBFS, AI4, dan AI6 dari gabungan probabilitas KEPALA + EKOR.
     combined = {}
 
     for d in range(10):
@@ -151,6 +151,7 @@ def run_engine(results):
 
     bbfs8 = sorted(str(d) for d in strongest[:8])
     ai4 = sorted(str(d) for d in strongest[:4])
+    ai6 = sorted(str(d) for d in strongest[:6])
 
     top_line = build_top_line(
         poltar_kepala=pos_digits[2],
@@ -163,6 +164,7 @@ def run_engine(results):
     return {
         "bbfs8": bbfs8,
         "ai4": ai4,
+        "ai6": ai6,
         "poltar_as": pos_digits[0],
         "poltar_kop": pos_digits[1],
         "poltar_kepala": pos_digits[2],
@@ -206,6 +208,7 @@ def save_prediction_snapshot(market_id, market_name, base_result, prediction):
         "base_result": base_result,
         "bbfs8": prediction["bbfs8"],
         "ai4": prediction["ai4"],
+        "ai6": prediction["ai6"],
         "poltar_as": prediction["poltar_as"],
         "poltar_kop": prediction["poltar_kop"],
         "poltar_kepala": prediction["poltar_kepala"],
@@ -237,8 +240,8 @@ def evaluate_bbfs(bbfs8, result):
     return "ZONK"
 
 
-def evaluate_ai(ai4, result):
-    ai_set = set(str(x) for x in ai4)
+def evaluate_ai(ai_digits, result):
+    ai_set = set(str(x) for x in ai_digits)
 
     # AI dianggap MASUK hanya jika salah satu digit AI muncul di 2 digit belakang:
     # result[2] = kepala, result[3] = ekor.
@@ -283,6 +286,7 @@ def save_evaluation(market_id, market_name, old_snapshot, new_result):
 
     bbfs8 = normalize_json_list(old_snapshot.get("bbfs8"))
     ai4 = normalize_json_list(old_snapshot.get("ai4"))
+    ai6 = normalize_json_list(old_snapshot.get("ai6"))
 
     poltar_as = normalize_json_list(old_snapshot.get("poltar_as"))
     poltar_kop = normalize_json_list(old_snapshot.get("poltar_kop"))
@@ -296,6 +300,7 @@ def save_evaluation(market_id, market_name, old_snapshot, new_result):
         "new_result": new_result,
         "bbfs_status": evaluate_bbfs(bbfs8, new_result),
         "ai_status": evaluate_ai(ai4, new_result),
+        "ai6_status": evaluate_ai(ai6, new_result),
         "rank_as": find_rank(poltar_as, new_result[0]),
         "rank_kop": find_rank(poltar_kop, new_result[1]),
         "rank_kepala": find_rank(poltar_kepala, new_result[2]),
@@ -307,7 +312,7 @@ def save_evaluation(market_id, market_name, old_snapshot, new_result):
     print(
         f"EVALUATION OK: {market_name} "
         f"{from_result}->{new_result} "
-        f"BBFS={row['bbfs_status']} AI={row['ai_status']} "
+        f"BBFS={row['bbfs_status']} AI={row['ai_status']} AI6={row['ai6_status']} "
         f"AS=#{row['rank_as']} KOP=#{row['rank_kop']} "
         f"KEPALA=#{row['rank_kepala']} EKOR=#{row['rank_ekor']}"
     )
