@@ -175,7 +175,7 @@ function ExpiredScreen() {
       <div className="premium-panel max-w-sm p-8">
         <h2 className="mb-4 font-['Orbitron'] text-[var(--red)] tracking-[4px]">ACCOUNT EXPIRED</h2>
         <p className="mb-6 text-sm text-[var(--text-dim)]">Masa trial akun anda telah berakhir. Hubungi Admin untuk aktivasi VIP.</p>
-        <button onClick={() => { localStorage.removeItem("supreme_token"); localStorage.removeItem("supreme_devcode"); window.location.reload(); }} className="w-full rounded-2xl bg-[var(--red)] p-4 text-[12px] font-black tracking-[2px] text-white">REFRESH</button>
+        <button onClick={() => { localStorage.removeItem("supreme_token");  window.location.reload(); }} className="w-full rounded-2xl bg-[var(--red)] p-4 text-[12px] font-black tracking-[2px] text-white">REFRESH</button>
       </div>
     </div>
   );
@@ -363,7 +363,7 @@ function Dashboard({ markets, onRefresh }: { markets: any[]; onRefresh: () => vo
 function BottomNav({ currentPath, onNavigate }: { currentPath: string; onNavigate: any }) {
   const logout = () => {
     localStorage.removeItem("supreme_token");
-    localStorage.removeItem("supreme_devcode");
+    // supreme_devcode TIDAK dihapus → device ID tetap sama
     sessionStorage.setItem("supreme_skip_auto", "true");
     window.location.reload();
   };
