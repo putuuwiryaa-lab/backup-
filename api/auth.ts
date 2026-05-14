@@ -90,7 +90,46 @@ export default async function handler(req: any, res: any) {
 
   record.count = 0;
 
-  const expiresIn = role === "TRIAL" ? "14d" : role === "PRO" ? "60d" : "365d";
+  // Logika expiry TRIAL dari aktivasi pertama
+  if (role === "TRIAL") {
+    const { createClient } = await import("@supabase/supabase-js");
+    const supabase = createClient(
+      requireEnv("VITE_SUPABASE_URL"),
+      requireEnv("SUPABASE_SERVICE_ROLE_KEY") // pakai service role, bukan anon key
+    );
+
+    const TRIAL_DAYS = 14;
+
+    // Ambil aktivasi pertama
+    const { data: existing } = await supabase
+      .from("trial_activations")
+      .select("activated_at")
+      .eq("device_code", devIdStr)
+      .single();
+
+    let activatedAt: Date;
+
+    if (existing) {
+      activatedAt = new Date(existing.activated_at);
+    } else {
+      // Pertama kali login TRIAL → simpan
+      activatedAt = new Date();
+      await supabase.from("trial_activations").insert({ device_code: devIdStr, activated_at: activatedAt });
+    }
+
+    const expiredAt = new Date(activatedAt.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
+    const sisaMs = expiredAt.getTime() - Date.now();
+
+    if (sisaMs <= 0) {
+      return res.status(403).json({ success: false, error: "Trial kamu sudah habis! Hubungi Admin untuk aktivasi VIP." });
+    }
+
+    const sisaDetik = Math.floor(sisaMs / 1000);
+    const token = jwt.sign({ role, deviceCode: devIdStr }, JWT_SECRET, { expiresIn: sisaDetik });
+    return res.json({ success: true, role, token });
+  }
+
+  // PRO dan MASTER
+  const expiresIn = role === "PRO" ? "60d" : "365d";
   const token = jwt.sign({ role, deviceCode: devIdStr }, JWT_SECRET, { expiresIn });
   return res.json({ success: true, role, token });
-}
