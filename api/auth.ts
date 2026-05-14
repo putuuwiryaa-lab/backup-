@@ -133,3 +133,4 @@ export default async function handler(req: any, res: any) {
   const expiresIn = role === "PRO" ? "60d" : "365d";
   const token = jwt.sign({ role, deviceCode: devIdStr }, JWT_SECRET, { expiresIn });
   return res.json({ success: true, role, token });
+}
