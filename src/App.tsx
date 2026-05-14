@@ -88,7 +88,6 @@ function AppLayout() {
           } else {
             localStorage.removeItem("supreme_token");
             setAuthStatus("LOCKED");
-            window.location.reload();
           }
         } catch {
           setAuthStatus("LOCKED");
