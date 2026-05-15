@@ -8,7 +8,6 @@ SUPABASE_URL = os.environ["SUPABASE_URL"]
 SUPABASE_KEY = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
 ANALYZE_API_URL = os.environ.get("ANALYZE_API_URL", "https://analisaangka.online/api/analyze")
 INTERNAL_API_SECRET = os.environ.get("INTERNAL_API_SECRET", "")
-MAX_KEEP = int(os.environ.get("MAX_ANALYSIS_EVALUATIONS", "14"))
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
@@ -91,8 +90,6 @@ def analyze_mode(history, mode, param):
     if INTERNAL_API_SECRET:
         headers["x-internal-secret"] = INTERNAL_API_SECRET
 
-    # predictionEngine mengharapkan oldest-first (D[D.length-1] = terbaru)
-    # Supabase sudah oldest-first, tidak perlu dibalik
     analyze_history = history
 
     response = requests.post(
@@ -267,25 +264,6 @@ def save_evaluation(market_id, market_name, mode, param, snapshot, new_result):
     return True
 
 
-def cleanup_old_evaluations(market_id, mode, param):
-    result = (
-        supabase
-        .table("analysis_evaluations")
-        .select("id")
-        .eq("market_id", market_id)
-        .eq("mode", mode)
-        .eq("param", param)
-        .order("evaluated_at", desc=True)
-        .execute()
-    )
-    rows = result.data or []
-    if len(rows) <= MAX_KEEP:
-        return
-    for row in rows[MAX_KEEP:]:
-        supabase.table("analysis_evaluations").delete().eq("id", row["id"]).execute()
-    print(f"ANALYSIS CLEANUP OK: {market_id} {mode} {param} hapus {len(rows[MAX_KEEP:])} data lama")
-
-
 def process_market(market):
     market_id = market.get("id")
     market_name = market.get("name") or market_id
@@ -314,7 +292,6 @@ def process_market(market):
 
             if snapshot and snapshot.get("base_result") != latest_result:
                 save_evaluation(market_id, market_name, mode, param, snapshot, latest_result)
-                cleanup_old_evaluations(market_id, mode, param)
 
             if not snapshot or snapshot.get("base_result") != latest_result:
                 save_snapshot(market_id, market_name, mode, param, latest_result, result, payload)
@@ -337,3 +314,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+        
