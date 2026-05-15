@@ -6,8 +6,6 @@ from supabase import create_client
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-# scraper.py lama membaca SUPABASE_ANON_KEY saat di-import.
-# Karena workflow sekarang memakai service role, kita arahkan ANON_KEY ke key runtime agar import aman.
 os.environ.setdefault("SUPABASE_ANON_KEY", os.environ.get("SUPABASE_" + "SERVICE_ROLE_KEY", ""))
 
 from scraper import MARKETS, PRIORITY_ORDER, scrape_market
@@ -17,11 +15,7 @@ SUPABASE_KEY = os.environ["SUPABASE_" + "SERVICE_ROLE_KEY"]
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# Pure Bayesian Markov engine.
-# Satu metode saja: prediksi digit berikutnya dari transisi historis multi-posisi.
-# Probabilitas tinggi dianggap paling kuat.
 MARKOV_ALPHA = 0.7
-MAX_EVALUATIONS_PER_MARKET = 14
 TOP_LINE_POSITION_LIMIT = 5
 
 
@@ -50,9 +44,6 @@ def compute_position(results, pos_out):
     combined_prob = {d: 0.0 for d in range(10)}
     source_count = 0
 
-    # Multi-source Bayesian Markov:
-    # Setiap posisi pada result terakhir (AS/KOP/KEPALA/EKOR) menjadi pola sumber
-    # untuk memprediksi posisi target berikutnya.
     for pos_pat in range(4):
         transition_counts = {k: {d: 0 for d in range(10)} for k in range(10)}
         transition_totals = {k: 0 for k in range(10)}
@@ -75,7 +66,6 @@ def compute_position(results, pos_out):
 
     probabilities = {d: combined_prob[d] / source_count for d in range(10)}
 
-    # Normalisasi ke skala 0-10 untuk kompatibilitas downstream.
     max_probability = max(probabilities.values()) or 1
     normalized = {d: (probabilities[d] / max_probability) * 10 for d in range(10)}
 
@@ -100,7 +90,6 @@ def build_top_line(poltar_kepala, poltar_ekor, bbfs8, ai4, limit=TOP_LINE_POSITI
             if k not in bbfs or e not in bbfs:
                 continue
 
-            # TOP LINE wajib mengandung minimal 1 digit dari AI.
             if k not in ai and e not in ai:
                 continue
 
@@ -124,8 +113,6 @@ def build_top_line(poltar_kepala, poltar_ekor, bbfs8, ai4, limit=TOP_LINE_POSITI
 
     lines = [item["line"] for item in unique.values()]
 
-    # Final urut numerik kecil ke besar.
-    # Contoh: 46, 02, 05 -> 02, 05, 46
     return sorted(lines, key=lambda x: int(x))
 
 
@@ -138,7 +125,6 @@ def run_engine(results):
         pos_digits.append(sorted_digits)
         pos_normalized.append(normalized)
 
-    # BBFS, AI4, dan AI6 dari gabungan probabilitas KEPALA + EKOR.
     combined = {}
 
     for d in range(10):
@@ -243,8 +229,6 @@ def evaluate_bbfs(bbfs8, result):
 def evaluate_ai(ai_digits, result):
     ai_set = set(str(x) for x in ai_digits)
 
-    # AI dianggap MASUK hanya jika salah satu digit AI muncul di 2 digit belakang:
-    # result[2] = kepala, result[3] = ekor.
     for digit in result[2:4]:
         if digit in ai_set:
             return "MASUK"
@@ -320,29 +304,6 @@ def save_evaluation(market_id, market_name, old_snapshot, new_result):
     return True
 
 
-def cleanup_old_evaluations(market_id):
-    result = (
-        supabase
-        .table("prediction_evaluations")
-        .select("id")
-        .eq("market_id", market_id)
-        .order("evaluated_at", desc=True)
-        .execute()
-    )
-
-    rows = result.data or []
-
-    if len(rows) <= MAX_EVALUATIONS_PER_MARKET:
-        return
-
-    old_rows = rows[MAX_EVALUATIONS_PER_MARKET:]
-
-    for row in old_rows:
-        supabase.table("prediction_evaluations").delete().eq("id", row["id"]).execute()
-
-    print(f"CLEANUP OK: {market_id} hapus {len(old_rows)} evaluasi lama")
-
-
 def process_prediction_flow(market_id, market_name, history_data):
     results = parse_history(history_data, 169)
 
@@ -353,10 +314,8 @@ def process_prediction_flow(market_id, market_name, history_data):
     latest_result = results[-1]
     old_snapshot = get_existing_snapshot(market_id)
 
-    # Hitung prediksi baru berdasarkan history terbaru
     new_prediction = run_engine(results)
 
-    # Kalau belum ada snapshot, buat snapshot awal saja
     if not old_snapshot:
         save_prediction_snapshot(
             market_id=market_id,
@@ -369,12 +328,10 @@ def process_prediction_flow(market_id, market_name, history_data):
 
     old_base_result = old_snapshot.get("base_result")
 
-    # Kalau result belum berubah, jangan evaluasi dan jangan overwrite
     if old_base_result == latest_result:
         print(f"NO CHANGE: {market_name} result masih {latest_result}")
         return True
 
-    # Kalau result berubah, evaluasi snapshot lama terhadap result baru
     save_evaluation(
         market_id=market_id,
         market_name=market_name,
@@ -382,9 +339,6 @@ def process_prediction_flow(market_id, market_name, history_data):
         new_result=latest_result,
     )
 
-    cleanup_old_evaluations(market_id)
-
-    # Setelah evaluasi, simpan snapshot baru untuk result berikutnya
     save_prediction_snapshot(
         market_id=market_id,
         market_name=market_name,
@@ -441,3 +395,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+        
