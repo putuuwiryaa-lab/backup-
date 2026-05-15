@@ -8,7 +8,6 @@ SUPABASE_URL = os.environ["SUPABASE_URL"]
 SUPABASE_KEY = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
 ANALYZE_API_URL = os.environ.get("ANALYZE_API_URL", "https://analisaangka.online/api/analyze")
 INTERNAL_API_SECRET = os.environ.get("INTERNAL_API_SECRET", "")
-MAX_KEEP = int(os.environ.get("MAX_REKAP_EVALUATIONS", "14"))
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
@@ -43,8 +42,6 @@ def get_payload_data(payload):
 def analyze_rekap(history, mode):
     param = 1 if mode == "invest" else 2
 
-    # UI Analisa Angka mengirim data newest-first ke /api/analyze.
-    # Data di Supabase tersimpan oldest-first, jadi harus dibalik agar hasil rekap tidak kosong.
     analyze_history = history
 
     headers = {}
@@ -150,30 +147,6 @@ def save_evaluation(market_id, market_name, mode, snapshot, new_result):
     return True
 
 
-def cleanup_old_evaluations(market_id, mode):
-    result = (
-        supabase
-        .table("rekap_line_evaluations")
-        .select("id")
-        .eq("market_id", market_id)
-        .eq("mode", mode)
-        .order("evaluated_at", desc=True)
-        .execute()
-    )
-
-    rows = result.data or []
-
-    if len(rows) <= MAX_KEEP:
-        return
-
-    old_rows = rows[MAX_KEEP:]
-
-    for row in old_rows:
-        supabase.table("rekap_line_evaluations").delete().eq("id", row["id"]).execute()
-
-    print(f"REKAP CLEANUP OK: {market_id} {mode} hapus {len(old_rows)} data lama")
-
-
 def process_market(market):
     market_id = market.get("id")
     market_name = market.get("name") or market_id
@@ -206,8 +179,6 @@ def process_market(market):
                 snapshot=snapshot,
                 new_result=latest_result,
             )
-
-            cleanup_old_evaluations(market_id, mode)
 
         if not snapshot or snapshot.get("base_result") != latest_result:
             save_snapshot(
@@ -244,3 +215,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+        
