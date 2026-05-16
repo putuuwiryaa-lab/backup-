@@ -1,37 +1,196 @@
-/* Responsive fixes for analysis result cards on narrow mobile browsers */
+/* Global responsive polish for the whole app.
+   Goal: stable layout on small Android browsers, large phones, and desktop-width mobile views. */
 
-/* Prevent result content from being clipped by panel/card wrappers. */
+html {
+  font-size: clamp(13px, 3.55vw, 16px);
+  overflow-x: hidden;
+}
+
+body,
+#root,
+.app-container {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+img,
+svg,
+canvas,
+video {
+  max-width: 100%;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  max-width: 100%;
+}
+
+/* Main app shell */
+.app-container > .relative.mx-auto {
+  width: 100% !important;
+  max-width: min(48rem, 100vw) !important;
+  padding-left: clamp(0.75rem, 3.5vw, 1.5rem) !important;
+  padding-right: clamp(0.75rem, 3.5vw, 1.5rem) !important;
+}
+
+.app-container main,
+.app-container main > div {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Cards and panels: keep the same visual style but scale spacing/radius. */
+.premium-panel,
+.premium-card,
+.glass-card,
+.ghost-button,
+.primary-button,
+.soft-input {
+  max-width: 100%;
+}
+
+.premium-panel,
+.premium-card,
+.glass-card {
+  border-radius: clamp(1.25rem, 5.5vw, 1.75rem) !important;
+}
+
+.premium-panel {
+  padding: clamp(0.875rem, 3.8vw, 1.5rem) !important;
+}
+
+.premium-card {
+  padding: clamp(0.75rem, 3.2vw, 1rem) !important;
+}
+
+/* Prevent decorative glows from causing horizontal overflow. */
+.absolute.-right-12,
+.absolute.-right-14,
+.absolute.-right-7 {
+  max-width: 40vw;
+  pointer-events: none;
+}
+
+/* Dashboard header and status cards. */
+header .premium-panel {
+  overflow: hidden !important;
+}
+
+header h1 {
+  font-size: clamp(1.45rem, 7vw, 2.25rem) !important;
+  letter-spacing: clamp(0.13rem, 1.1vw, 0.32rem) !important;
+  line-height: 1.08 !important;
+  overflow-wrap: anywhere;
+}
+
+header p {
+  font-size: clamp(0.62rem, 2.8vw, 0.8rem) !important;
+  letter-spacing: clamp(0.06rem, 0.45vw, 0.13rem) !important;
+  line-height: 1.4 !important;
+}
+
+.mb-5.grid.grid-cols-2.gap-3 {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: clamp(0.5rem, 2.6vw, 0.75rem) !important;
+}
+
+.mb-5.grid.grid-cols-2.gap-3 > .premium-card {
+  min-width: 0 !important;
+  min-height: clamp(3.75rem, 18vw, 4.875rem) !important;
+}
+
+.mb-5.grid.grid-cols-2.gap-3 > .premium-card p {
+  max-width: 100%;
+}
+
+/* Dashboard search and market list. */
+.soft-input {
+  min-width: 0;
+  height: clamp(3rem, 13vw, 3.75rem) !important;
+  font-size: clamp(0.85rem, 3.4vw, 0.98rem) !important;
+}
+
+.grid.grid-cols-2.gap-3.pb-6 {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: clamp(0.55rem, 2.5vw, 0.9rem) !important;
+}
+
+.grid.grid-cols-2.gap-3.pb-6 > .premium-card {
+  min-width: 0 !important;
+  min-height: clamp(6.4rem, 31vw, 7.75rem) !important;
+  overflow: hidden !important;
+}
+
+.grid.grid-cols-2.gap-3.pb-6 > .premium-card span,
+.grid.grid-cols-2.gap-3.pb-6 > .premium-card p {
+  min-width: 0;
+}
+
+.grid.grid-cols-2.gap-3.pb-6 > .premium-card .font-\['Orbitron'\] {
+  font-size: clamp(0.68rem, 3.2vw, 0.82rem) !important;
+  letter-spacing: clamp(0.06rem, 0.55vw, 0.13rem) !important;
+  line-height: 1.25 !important;
+}
+
+.grid.grid-cols-2.gap-3.pb-6 > .premium-card .font-\['JetBrains_Mono'\] {
+  font-size: clamp(0.9rem, 4vw, 1.08rem) !important;
+}
+
+/* Bottom nav: keep within viewport even when browser has its own bottom toolbar. */
+.fixed.inset-x-0.bottom-4.z-40 {
+  bottom: max(0.75rem, env(safe-area-inset-bottom)) !important;
+  width: min(calc(100vw - 1.5rem), 28rem) !important;
+}
+
+.bottom-nav {
+  border-radius: clamp(1.3rem, 6vw, 2rem) !important;
+  padding: clamp(0.35rem, 1.7vw, 0.5rem) !important;
+}
+
+.bottom-nav button {
+  min-width: 0 !important;
+  padding: clamp(0.5rem, 2.4vw, 0.75rem) clamp(0.3rem, 1.8vw, 0.75rem) !important;
+  font-size: clamp(0.46rem, 2.15vw, 0.58rem) !important;
+  letter-spacing: clamp(0.025rem, 0.25vw, 0.06rem) !important;
+  border-radius: clamp(1rem, 4.8vw, 1.5rem) !important;
+}
+
+.bottom-nav svg {
+  width: clamp(0.95rem, 4.4vw, 1.1rem) !important;
+  height: clamp(0.95rem, 4.4vw, 1.1rem) !important;
+}
+
+/* Analysis page header: avoid BBFS / AI title clipping. */
+.premium-panel.relative.mb-4 {
+  overflow: hidden !important;
+}
+
+.premium-panel.relative.mb-4 h2 {
+  max-width: 100%;
+  font-size: clamp(1rem, 5vw, 1.35rem) !important;
+  letter-spacing: clamp(0.11rem, 1vw, 0.25rem) !important;
+  line-height: 1.2 !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  overflow-wrap: anywhere;
+}
+
+.premium-panel.relative.mb-4 .font-\['Orbitron'\].text-\[13px\] {
+  font-size: clamp(0.72rem, 3.4vw, 0.86rem) !important;
+  letter-spacing: clamp(0.08rem, 0.85vw, 0.25rem) !important;
+  word-break: break-word;
+}
+
+/* Result cards: AI, BBFS, mati, jumlah, shio, rekap. */
 .premium-panel.result-glow {
   overflow: visible !important;
 }
 
-/* Header title inside analysis page: avoid hard truncation on small screens. */
-.premium-panel.relative.mb-4 h2 {
-  max-width: 100%;
-  font-size: clamp(1rem, 5vw, 1.35rem) !important;
-  letter-spacing: clamp(0.12rem, 1vw, 0.25rem) !important;
-  line-height: 1.2 !important;
-}
-
-@media (max-width: 420px) {
-  .premium-panel.relative.mb-4 {
-    padding: 1rem !important;
-  }
-
-  .premium-panel.relative.mb-4 > .relative.mb-4 {
-    align-items: flex-start !important;
-    gap: 0.75rem !important;
-  }
-
-  .premium-panel.relative.mb-4 .h-15.w-15 {
-    width: 3.5rem !important;
-    height: 3.5rem !important;
-    min-width: 3.5rem !important;
-  }
-}
-
-/* Main AI / BBFS result box. The old flex/nowrap layout could overflow or clip
-   when the phone/browser viewport was narrower than expected. */
 .premium-panel.result-glow > .relative.rounded-3xl {
   overflow: hidden !important;
   padding: clamp(0.875rem, 3.6vw, 1rem) !important;
@@ -41,6 +200,7 @@
   overflow-wrap: anywhere;
   line-height: 1.35 !important;
   letter-spacing: clamp(0.12rem, 1vw, 0.18rem) !important;
+  font-size: clamp(0.68rem, 3.2vw, 0.82rem) !important;
 }
 
 /* Stack-mode main result digits: ANGKA IKUT / BBFS. */
@@ -67,8 +227,136 @@
   line-height: 1 !important;
 }
 
-/* BBFS can contain 8 digits, so use smaller cells on very narrow phones. */
+/* Row-style result digits used by other modes. */
+.premium-panel .flex.min-h-\[72px\] {
+  min-width: 0 !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+}
+
+.premium-panel .flex.min-h-\[72px\] > span {
+  max-width: 100%;
+  line-height: 1.25 !important;
+}
+
+.premium-panel .flex.min-h-\[72px\] .flex.flex-wrap,
+.premium-panel .flex.min-h-\[72px\] .flex.flex-nowrap {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(2.35rem, max-content)) !important;
+  justify-content: end !important;
+  gap: 0.45rem !important;
+  overflow: visible !important;
+  padding-bottom: 0 !important;
+  max-width: 100%;
+}
+
+.premium-panel .flex.min-h-\[72px\] .flex.flex-wrap > div,
+.premium-panel .flex.min-h-\[72px\] .flex.flex-nowrap > div {
+  min-width: 2.35rem !important;
+  height: 2.5rem !important;
+  padding-left: 0.65rem !important;
+  padding-right: 0.65rem !important;
+}
+
+/* Validation header and detail rows. */
+.premium-panel.flex.items-center.justify-between.gap-3.p-4 {
+  min-width: 0 !important;
+  flex-wrap: wrap !important;
+  row-gap: 0.5rem !important;
+}
+
+.premium-panel.flex.items-center.justify-between.gap-3.p-4 > span:first-child {
+  min-width: 0;
+  line-height: 1.3 !important;
+}
+
+.premium-panel.flex.items-center.justify-between.gap-3.p-4 > span:last-child {
+  flex-shrink: 0;
+  font-size: clamp(0.52rem, 2.3vw, 0.62rem) !important;
+}
+
+.premium-panel .grid.grid-cols-\[auto_1fr_auto\] {
+  grid-template-columns: auto minmax(0, 1fr) auto !important;
+  gap: clamp(0.45rem, 2.2vw, 0.75rem) !important;
+  padding: clamp(0.62rem, 2.8vw, 0.85rem) !important;
+  border-radius: clamp(1rem, 5vw, 1.5rem) !important;
+}
+
+.premium-panel .grid.grid-cols-\[auto_1fr_auto\] .truncate {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  line-height: 1.3 !important;
+}
+
+/* Rekap line generator should wrap/scroll vertically, not force page width. */
+.custom-scrollbar {
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+}
+
+/* Login screen. */
+.flex.min-h-screen.flex-col.items-center.justify-center.p-5,
+.flex.min-h-screen.items-center.justify-center.p-8 {
+  padding: clamp(1rem, 4vw, 2rem) !important;
+}
+
+.flex.min-h-screen.flex-col.items-center.justify-center.p-5 .premium-panel,
+.flex.min-h-screen.items-center.justify-center.p-8 .premium-panel {
+  width: min(100%, 24rem) !important;
+}
+
+/* Large phones/tablets get a cleaner centered app width. */
+@media (min-width: 640px) {
+  .app-container > .relative.mx-auto {
+    max-width: 44rem !important;
+  }
+
+  .grid.grid-cols-2.gap-3.pb-6 {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+/* Normal small-phone tuning. */
+@media (max-width: 420px) {
+  .app-container > .relative.mx-auto {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  .premium-panel,
+  .premium-card {
+    border-radius: 1.35rem !important;
+  }
+
+  .premium-panel.relative.mb-4 {
+    padding: 1rem !important;
+  }
+
+  .premium-panel.relative.mb-4 > .relative.mb-4 {
+    align-items: flex-start !important;
+    gap: 0.75rem !important;
+  }
+
+  .premium-panel.relative.mb-4 .h-15.w-15 {
+    width: 3.5rem !important;
+    height: 3.5rem !important;
+    min-width: 3.5rem !important;
+  }
+
+  .grid.grid-cols-2.gap-3.pb-6 > .premium-card {
+    min-height: 6.6rem !important;
+  }
+}
+
+/* Very narrow phones: reduce digit size and let dashboard become one column. */
 @media (max-width: 360px) {
+  .grid.grid-cols-2.gap-3.pb-6 {
+    grid-template-columns: 1fr !important;
+  }
+
   .premium-panel.result-glow > .relative.rounded-3xl > .mt-4 > div {
     grid-template-columns: repeat(auto-fit, minmax(2.6rem, 1fr)) !important;
     gap: 0.45rem !important;
@@ -78,23 +366,24 @@
     height: clamp(2.85rem, 13vw, 3.5rem) !important;
     font-size: clamp(1.05rem, 6vw, 1.4rem) !important;
   }
+
+  .mb-5.grid.grid-cols-2.gap-3 {
+    grid-template-columns: 1fr !important;
+  }
 }
 
-/* Row-style result digits used by other modes. */
-.premium-panel .flex.min-h-\[72px\] .flex.flex-wrap,
-.premium-panel .flex.min-h-\[72px\] .flex.flex-nowrap {
-  display: grid !important;
-  grid-template-columns: repeat(auto-fit, minmax(2.35rem, max-content)) !important;
-  justify-content: end !important;
-  gap: 0.45rem !important;
-  overflow: visible !important;
-  padding-bottom: 0 !important;
-}
+/* Extra narrow embedded browsers. */
+@media (max-width: 320px) {
+  html {
+    font-size: 12.5px;
+  }
 
-.premium-panel .flex.min-h-\[72px\] .flex.flex-wrap > div,
-.premium-panel .flex.min-h-\[72px\] .flex.flex-nowrap > div {
-  min-width: 2.35rem !important;
-  height: 2.5rem !important;
-  padding-left: 0.65rem !important;
-  padding-right: 0.65rem !important;
+  .app-container > .relative.mx-auto {
+    padding-left: 0.55rem !important;
+    padding-right: 0.55rem !important;
+  }
+
+  .bottom-nav button {
+    font-size: 0.42rem !important;
+  }
 }
