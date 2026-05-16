@@ -1,0 +1,286 @@
+/* UI/UX polish layer: premium dark analytical style.
+   This file intentionally overrides visuals only; app logic stays untouched. */
+
+:root {
+  --polish-bg: #070b13;
+  --polish-card: #111827;
+  --polish-card-elevated: #172235;
+  --polish-card-inner: #0c1422;
+  --polish-border: rgba(255, 255, 255, 0.085);
+  --polish-border-strong: rgba(255, 255, 255, 0.14);
+  --polish-text: #f4f7fb;
+  --polish-muted: #94a3b8;
+  --polish-muted-2: #6f7f95;
+  --polish-gold: #f3c14b;
+  --polish-gold-soft: rgba(243, 193, 75, 0.12);
+  --polish-cyan: #28d7ff;
+  --polish-cyan-soft: rgba(40, 215, 255, 0.10);
+  --polish-red: #ff647c;
+  --polish-red-soft: rgba(255, 100, 124, 0.10);
+  --polish-radius-panel: clamp(1.55rem, 6vw, 2rem);
+  --polish-radius-card: clamp(1.2rem, 5vw, 1.65rem);
+  --polish-radius-chip: clamp(0.75rem, 3vw, 1rem);
+}
+
+body {
+  background: radial-gradient(circle at top center, rgba(243, 193, 75, 0.045), transparent 34%), linear-gradient(180deg, #0b1220 0%, var(--polish-bg) 68%) !important;
+}
+
+.app-container {
+  color: var(--polish-text) !important;
+  background: linear-gradient(180deg, #0d1524 0%, #08101c 54%, var(--polish-bg) 100%) !important;
+}
+
+/* Typography rhythm */
+.font-\['Orbitron'\] {
+  text-rendering: geometricPrecision;
+}
+
+.tracking-\[4px\] {
+  letter-spacing: clamp(0.09rem, 0.75vw, 0.18rem) !important;
+}
+
+.tracking-\[3px\] {
+  letter-spacing: clamp(0.075rem, 0.65vw, 0.15rem) !important;
+}
+
+.tracking-\[2px\] {
+  letter-spacing: clamp(0.055rem, 0.5vw, 0.11rem) !important;
+}
+
+.tracking-\[1px\] {
+  letter-spacing: 0.045rem !important;
+}
+
+/* Surfaces */
+.premium-panel,
+.premium-card,
+.glass-card {
+  background: linear-gradient(180deg, rgba(23, 34, 53, 0.98) 0%, rgba(15, 23, 38, 0.98) 100%) !important;
+  border: 1px solid var(--polish-border) !important;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22) !important;
+}
+
+.premium-panel {
+  border-radius: var(--polish-radius-panel) !important;
+}
+
+.premium-card,
+.glass-card {
+  border-radius: var(--polish-radius-card) !important;
+}
+
+.result-glow {
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.025) !important;
+}
+
+/* Header polish */
+header .premium-panel,
+.premium-panel.relative.mb-4 {
+  border-color: rgba(243, 193, 75, 0.14) !important;
+  background: linear-gradient(180deg, rgba(23, 34, 53, 0.99) 0%, rgba(14, 22, 36, 0.99) 100%) !important;
+}
+
+header h1,
+.premium-panel.relative.mb-4 h2 {
+  color: var(--polish-text) !important;
+  letter-spacing: clamp(0.12rem, 0.85vw, 0.2rem) !important;
+  line-height: 1.12 !important;
+}
+
+.premium-panel.relative.mb-4 h2 {
+  font-size: clamp(1.15rem, 4.85vw, 1.55rem) !important;
+  white-space: normal !important;
+}
+
+header p,
+.premium-panel.relative.mb-4 .text-\[9px\],
+.premium-panel.relative.mb-4 .text-\[10px\] {
+  color: var(--polish-muted) !important;
+}
+
+/* Badges */
+.inline-flex.rounded-full,
+.rounded-full.bg-\[var\(--gold-dim\)\],
+.rounded-full.bg-\[var\(--blue-dim\)\] {
+  border: 1px solid rgba(243, 193, 75, 0.14);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+/* Inputs and buttons */
+.soft-input {
+  background: rgba(7, 11, 19, 0.72) !important;
+  border-color: var(--polish-border-strong) !important;
+  border-radius: clamp(1.15rem, 4.5vw, 1.45rem) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03) !important;
+}
+
+.soft-input:focus {
+  border-color: rgba(40, 215, 255, 0.46) !important;
+  box-shadow: 0 0 0 2px rgba(40, 215, 255, 0.08) !important;
+}
+
+.primary-button {
+  background: linear-gradient(180deg, #ffd978 0%, var(--polish-gold) 100%) !important;
+  color: #111827 !important;
+  border-radius: clamp(1.1rem, 4.5vw, 1.45rem) !important;
+  box-shadow: 0 10px 24px rgba(243, 193, 75, 0.16) !important;
+}
+
+.ghost-button {
+  background: rgba(255, 255, 255, 0.055) !important;
+  border-color: var(--polish-border) !important;
+  border-radius: clamp(1.1rem, 4.5vw, 1.45rem) !important;
+}
+
+/* Dashboard market cards */
+.grid.grid-cols-2.gap-3.pb-6 > .premium-card {
+  background: linear-gradient(180deg, rgba(18, 28, 45, 0.98) 0%, rgba(12, 20, 34, 0.98) 100%) !important;
+  border-color: rgba(255, 255, 255, 0.075) !important;
+}
+
+.grid.grid-cols-2.gap-3.pb-6 > .premium-card:active {
+  transform: scale(0.985);
+}
+
+.grid.grid-cols-2.gap-3.pb-6 > .premium-card span:first-child {
+  color: var(--polish-text) !important;
+}
+
+/* Result hero card */
+.premium-panel.result-glow > .relative.rounded-3xl {
+  background: linear-gradient(180deg, rgba(9, 15, 25, 0.92) 0%, rgba(12, 20, 34, 0.88) 100%) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  border-radius: clamp(1.35rem, 5.6vw, 1.85rem) !important;
+}
+
+.premium-panel.result-glow > .relative.rounded-3xl > h3 {
+  color: rgba(244, 247, 251, 0.58) !important;
+  font-size: clamp(0.66rem, 2.8vw, 0.78rem) !important;
+  letter-spacing: clamp(0.12rem, 0.75vw, 0.18rem) !important;
+  font-weight: 800 !important;
+}
+
+/* Keep numeric chips the focal point, not the container decoration. */
+.premium-panel.result-glow > .relative.rounded-3xl > .mt-4 > div > div,
+.main-digit-chip {
+  background: rgba(12, 20, 34, 0.95) !important;
+  border-color: rgba(243, 193, 75, 0.82) !important;
+  color: var(--polish-text) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045), 0 6px 18px rgba(0, 0, 0, 0.18) !important;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+}
+
+/* Validation header */
+.premium-panel.flex.items-center.justify-between.gap-3.p-4 {
+  background: linear-gradient(180deg, rgba(20, 31, 50, 0.98) 0%, rgba(14, 22, 36, 0.98) 100%) !important;
+  border-color: rgba(255, 255, 255, 0.075) !important;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18) !important;
+}
+
+.premium-panel.flex.items-center.justify-between.gap-3.p-4 > span:first-child {
+  color: var(--polish-muted) !important;
+  font-weight: 800 !important;
+}
+
+.premium-panel.flex.items-center.justify-between.gap-3.p-4 > span:last-child {
+  background: transparent !important;
+  color: var(--polish-gold) !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* Detail validasi */
+.premium-panel .grid.grid-cols-\[auto_1fr_auto\] {
+  background: rgba(7, 11, 19, 0.32) !important;
+  border-color: rgba(255, 255, 255, 0.095) !important;
+}
+
+.premium-panel .grid.grid-cols-\[auto_1fr_auto\] > span:first-child {
+  background: rgba(243, 193, 75, 0.08) !important;
+  border-color: rgba(243, 193, 75, 0.58) !important;
+  color: var(--polish-gold) !important;
+  font-size: clamp(0.42rem, 1.8vw, 0.5rem) !important;
+  letter-spacing: 0.045rem !important;
+}
+
+.premium-panel .grid.grid-cols-\[auto_1fr_auto\] .truncate {
+  font-family: 'Space Grotesk', system-ui, sans-serif !important;
+  color: rgba(244, 247, 251, 0.88) !important;
+  font-size: clamp(0.66rem, 2.7vw, 0.78rem) !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.045rem !important;
+}
+
+.premium-panel .grid.grid-cols-\[auto_1fr_auto\] .h-1\.5 {
+  height: 0.42rem !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.premium-panel .grid.grid-cols-\[auto_1fr_auto\] .h-full {
+  background: linear-gradient(90deg, #e8b73f 0%, #ffd86f 100%) !important;
+}
+
+.premium-panel .grid.grid-cols-\[auto_1fr_auto\] > span:last-child {
+  color: var(--polish-gold) !important;
+  font-size: clamp(0.6rem, 2.3vw, 0.72rem) !important;
+}
+
+/* Rekap rows */
+.premium-panel.result-glow .space-y-3 > .rounded-3xl,
+.premium-panel .space-y-3 > .rounded-3xl {
+  border-color: rgba(255, 255, 255, 0.09) !important;
+  background: rgba(7, 11, 19, 0.32) !important;
+}
+
+.custom-scrollbar {
+  background: rgba(7, 11, 19, 0.42) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Bottom navigation */
+.bottom-nav {
+  background: rgba(8, 13, 24, 0.96) !important;
+  border-color: rgba(255, 255, 255, 0.11) !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.34) !important;
+}
+
+.bottom-nav button {
+  transition: transform 0.16s ease, background-color 0.16s ease, color 0.16s ease;
+}
+
+.bottom-nav button:active {
+  transform: scale(0.96);
+}
+
+/* Reduce heavy decorative blur on mobile to keep UI clean and fast. */
+@media (max-width: 768px) {
+  .blur-xl,
+  .blur-2xl,
+  .blur-3xl {
+    filter: blur(18px) !important;
+    opacity: 0.16 !important;
+  }
+
+  .premium-panel,
+  .premium-card,
+  .glass-card,
+  .result-glow {
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.20) !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .premium-panel.result-glow > .relative.mb-4.inline-flex,
+  .premium-panel.result-glow > .relative.mb-4.inline-flex + * {
+    max-width: 100%;
+  }
+
+  .premium-panel.result-glow > .relative.rounded-3xl {
+    padding: 0.875rem !important;
+  }
+
+  .premium-panel .grid.grid-cols-\[auto_1fr_auto\] {
+    align-items: center !important;
+  }
+}
