@@ -362,3 +362,56 @@ header .inline-flex,
     background: radial-gradient(circle at top center, rgba(94, 234, 212, 0.14), transparent 28%), linear-gradient(180deg, #0b171c 0%, #071014 70%, #04090b 100%) !important;
   }
 }
+
+/* Midnight Teal tuning pass: calmer hero, clearer cards, softer nav */
+header h1,
+.premium-panel.relative.mb-4 h2 {
+  letter-spacing: clamp(0.11rem, 0.76vw, 0.18rem) !important;
+  font-size: clamp(1.82rem, 7.4vw, 2.45rem) !important;
+}
+
+header .premium-panel,
+.premium-panel.relative.mb-4 {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(94, 234, 212, 0.11), transparent 44%),
+    linear-gradient(135deg, rgba(17, 39, 47, 0.98), rgba(8, 19, 23, 0.99)) !important;
+}
+
+.soft-input {
+  background: rgba(11, 28, 34, 0.92) !important;
+  border-color: rgba(210, 245, 245, 0.14) !important;
+}
+
+.mb-5.grid.grid-cols-2.gap-3 > .premium-card,
+.grid.grid-cols-2.gap-3.pb-6 > .premium-card {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(94, 234, 212, 0.035), transparent 45%),
+    linear-gradient(180deg, rgba(18, 40, 49, 0.99), rgba(11, 26, 32, 0.99)) !important;
+  border-color: rgba(210, 245, 245, 0.105) !important;
+}
+
+.grid.grid-cols-2.gap-3.pb-6 > .premium-card .bg-\[var\(--gold-dim\)\],
+.grid.grid-cols-2.gap-3.pb-6 > .premium-card button[style*="gold"],
+.grid.grid-cols-2.gap-3.pb-6 > .premium-card .rounded-full[style*="gold"] {
+  background: rgba(94, 234, 212, 0.105) !important;
+  color: var(--theme-teal-bright) !important;
+  border-color: rgba(94, 234, 212, 0.18) !important;
+}
+
+.grid.grid-cols-2.gap-3.pb-6 > .premium-card svg.text-\[var\(--gold\)\],
+.grid.grid-cols-2.gap-3.pb-6 > .premium-card .text-\[var\(--gold\)\] {
+  color: var(--theme-accent-bright) !important;
+}
+
+.bottom-nav {
+  background: rgba(6, 15, 18, 0.92) !important;
+  border-color: rgba(210, 245, 245, 0.105) !important;
+  box-shadow: 0 14px 30px rgba(0,0,0,0.32) !important;
+}
+
+.bottom-nav button.bg-\[var\(--gold\)\],
+.bottom-nav button:first-child.bg-\[var\(--gold\)\] {
+  background: linear-gradient(180deg, rgba(140, 247, 232, 0.96), rgba(94, 234, 212, 0.90)) !important;
+  color: #061014 !important;
+  box-shadow: 0 8px 20px rgba(94, 234, 212, 0.16) !important;
+}
