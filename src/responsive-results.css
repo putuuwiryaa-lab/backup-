@@ -43,7 +43,7 @@ textarea {
   max-width: 100%;
 }
 
-/* Cards and panels: keep the same visual style but scale spacing/radius. */
+/* Cards and panels */
 .premium-panel,
 .premium-card,
 .glass-card,
@@ -164,7 +164,7 @@ header p {
   height: clamp(0.95rem, 4.4vw, 1.1rem) !important;
 }
 
-/* Analysis page header: avoid BBFS / AI title clipping. */
+/* Analysis page header: avoid title clipping. */
 .premium-panel.relative.mb-4 {
   overflow: hidden !important;
 }
@@ -203,59 +203,65 @@ header p {
   font-size: clamp(0.68rem, 3.2vw, 0.82rem) !important;
 }
 
-/* Stack-mode main result digits: ANGKA IKUT / BBFS. */
-.premium-panel.result-glow > .relative.rounded-3xl > .mt-4 > div {
-  display: grid !important;
-  grid-template-columns: repeat(auto-fit, minmax(3.05rem, 1fr)) !important;
-  justify-content: center !important;
+/* Single-row responsive digit chips. This applies to AI, BBFS, and other numeric menus. */
+.premium-panel.result-glow > .relative.rounded-3xl > .mt-4 > div,
+.premium-panel .flex.min-h-\[72px\] .flex.flex-wrap,
+.premium-panel .flex.min-h-\[72px\] .flex.flex-nowrap {
+  display: flex !important;
+  flex-wrap: nowrap !important;
   align-items: center !important;
-  gap: clamp(0.5rem, 2.4vw, 0.75rem) !important;
+  justify-content: center !important;
+  gap: clamp(0.28rem, 1.45vw, 0.7rem) !important;
   width: 100% !important;
   max-width: 100% !important;
-  overflow: visible !important;
-  padding-bottom: 0 !important;
+  min-width: 0 !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  padding-bottom: 0.15rem !important;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.premium-panel.result-glow > .relative.rounded-3xl > .mt-4 > div::-webkit-scrollbar,
+.premium-panel .flex.min-h-\[72px\] .flex.flex-wrap::-webkit-scrollbar,
+.premium-panel .flex.min-h-\[72px\] .flex.flex-nowrap::-webkit-scrollbar {
+  display: none;
 }
 
 .premium-panel.result-glow > .relative.rounded-3xl > .mt-4 > div > div {
-  width: 100% !important;
-  min-width: 0 !important;
-  height: clamp(3.25rem, 14vw, 4.25rem) !important;
+  flex: 0 1 clamp(2.1rem, 10.5vw, 4.05rem) !important;
+  width: clamp(2.1rem, 10.5vw, 4.05rem) !important;
+  min-width: clamp(2.1rem, 10.5vw, 4.05rem) !important;
+  height: clamp(2.7rem, 12.6vw, 4.2rem) !important;
   padding-left: 0 !important;
   padding-right: 0 !important;
-  border-radius: clamp(1rem, 4vw, 1.35rem) !important;
-  font-size: clamp(1.25rem, 6.5vw, 1.75rem) !important;
+  border-radius: clamp(0.82rem, 3.6vw, 1.35rem) !important;
+  font-size: clamp(1.1rem, 5.6vw, 1.75rem) !important;
   line-height: 1 !important;
-}
-
-/* Row-style result digits used by other modes. */
-.premium-panel .flex.min-h-\[72px\] {
-  min-width: 0 !important;
-  flex-wrap: wrap !important;
-  align-items: center !important;
-}
-
-.premium-panel .flex.min-h-\[72px\] > span {
-  max-width: 100%;
-  line-height: 1.25 !important;
-}
-
-.premium-panel .flex.min-h-\[72px\] .flex.flex-wrap,
-.premium-panel .flex.min-h-\[72px\] .flex.flex-nowrap {
-  display: grid !important;
-  grid-template-columns: repeat(auto-fit, minmax(2.35rem, max-content)) !important;
-  justify-content: end !important;
-  gap: 0.45rem !important;
-  overflow: visible !important;
-  padding-bottom: 0 !important;
-  max-width: 100%;
 }
 
 .premium-panel .flex.min-h-\[72px\] .flex.flex-wrap > div,
 .premium-panel .flex.min-h-\[72px\] .flex.flex-nowrap > div {
-  min-width: 2.35rem !important;
-  height: 2.5rem !important;
-  padding-left: 0.65rem !important;
-  padding-right: 0.65rem !important;
+  flex: 0 1 clamp(1.85rem, 8.8vw, 2.75rem) !important;
+  min-width: clamp(1.85rem, 8.8vw, 2.75rem) !important;
+  height: clamp(2.15rem, 9.4vw, 2.75rem) !important;
+  padding-left: 0.35rem !important;
+  padding-right: 0.35rem !important;
+  font-size: clamp(0.95rem, 4.4vw, 1.1rem) !important;
+}
+
+/* Row-style result containers used by other modes. */
+.premium-panel .flex.min-h-\[72px\] {
+  min-width: 0 !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  gap: clamp(0.5rem, 2.2vw, 0.75rem) !important;
+}
+
+.premium-panel .flex.min-h-\[72px\] > span {
+  max-width: 42%;
+  min-width: 4.5rem;
+  line-height: 1.25 !important;
 }
 
 /* Validation header and detail rows. */
@@ -351,20 +357,19 @@ header p {
   }
 }
 
-/* Very narrow phones: reduce digit size and let dashboard become one column. */
+/* Very narrow phones. Keep chips one row, but reduce size more aggressively. */
 @media (max-width: 360px) {
   .grid.grid-cols-2.gap-3.pb-6 {
     grid-template-columns: 1fr !important;
   }
 
-  .premium-panel.result-glow > .relative.rounded-3xl > .mt-4 > div {
-    grid-template-columns: repeat(auto-fit, minmax(2.6rem, 1fr)) !important;
-    gap: 0.45rem !important;
-  }
-
   .premium-panel.result-glow > .relative.rounded-3xl > .mt-4 > div > div {
-    height: clamp(2.85rem, 13vw, 3.5rem) !important;
-    font-size: clamp(1.05rem, 6vw, 1.4rem) !important;
+    flex-basis: clamp(1.86rem, 9.8vw, 2.35rem) !important;
+    width: clamp(1.86rem, 9.8vw, 2.35rem) !important;
+    min-width: clamp(1.86rem, 9.8vw, 2.35rem) !important;
+    height: clamp(2.45rem, 12vw, 2.9rem) !important;
+    font-size: clamp(0.98rem, 5.4vw, 1.25rem) !important;
+    border-radius: 0.9rem !important;
   }
 
   .mb-5.grid.grid-cols-2.gap-3 {
@@ -381,6 +386,10 @@ header p {
   .app-container > .relative.mx-auto {
     padding-left: 0.55rem !important;
     padding-right: 0.55rem !important;
+  }
+
+  .premium-panel.result-glow > .relative.rounded-3xl > .mt-4 > div {
+    justify-content: flex-start !important;
   }
 
   .bottom-nav button {
