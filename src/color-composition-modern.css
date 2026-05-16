@@ -1,0 +1,353 @@
+/* Modern soft color composition layer.
+   Direction: clean premium, softer, less neon, not fully dark.
+   This file overrides color only as much as possible. */
+
+:root {
+  --bg: #eef2f7;
+  --bg2: #e8edf4;
+  --card: #ffffff;
+  --card2: #f8fafc;
+  --surface: #ffffff;
+  --surface2: #eef3f8;
+  --border: rgba(15, 23, 42, 0.09);
+  --border2: rgba(15, 23, 42, 0.14);
+  --text: #142033;
+  --text-dim: #64748b;
+  --gold: #b8872f;
+  --gold-dim: rgba(184, 135, 47, 0.13);
+  --cyan: #0f8ea8;
+  --cyan-dim: rgba(15, 142, 168, 0.11);
+  --red: #d84b5f;
+  --red-dim: rgba(216, 75, 95, 0.11);
+  --green: #22965f;
+  --green-dim: rgba(34, 150, 95, 0.12);
+  --purple: #8067d8;
+  --purple-dim: rgba(128, 103, 216, 0.11);
+  --blue: #3469b8;
+  --blue-dim: rgba(52, 105, 184, 0.11);
+  --ink: #142033;
+
+  --modern-bg: #eef2f7;
+  --modern-bg-soft: #f6f3ed;
+  --modern-panel: rgba(255, 255, 255, 0.86);
+  --modern-panel-solid: #ffffff;
+  --modern-card: #f8fafc;
+  --modern-card-2: #eef3f8;
+  --modern-line: rgba(15, 23, 42, 0.10);
+  --modern-line-strong: rgba(15, 23, 42, 0.16);
+  --modern-text: #142033;
+  --modern-muted: #64748b;
+  --modern-soft: #94a3b8;
+  --modern-gold: #b8872f;
+  --modern-gold-bright: #d6a64a;
+  --modern-teal: #0f8ea8;
+  --modern-green: #22965f;
+  --modern-red: #d84b5f;
+  --modern-purple: #8067d8;
+}
+
+html,
+body,
+#root,
+.app-container {
+  background:
+    radial-gradient(circle at 12% -8%, rgba(214, 166, 74, 0.20), transparent 34%),
+    radial-gradient(circle at 100% 8%, rgba(15, 142, 168, 0.16), transparent 30%),
+    linear-gradient(180deg, #f7f3ea 0%, #eef2f7 42%, #e7edf5 100%) !important;
+  color: var(--modern-text) !important;
+}
+
+.app-container {
+  color: var(--modern-text) !important;
+}
+
+/* Primary surfaces */
+.premium-panel,
+.premium-card,
+.glass-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(248,250,252,0.90) 100%) !important;
+  border: 1px solid var(--modern-line) !important;
+  box-shadow:
+    0 18px 44px rgba(15, 23, 42, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.86) !important;
+  color: var(--modern-text) !important;
+}
+
+/* Text reset from previous dark layers */
+.text-\[var\(--text\)\],
+.font-\['Orbitron'\],
+.font-\['JetBrains_Mono'\] {
+  color: inherit;
+}
+
+.text-\[var\(--text-dim\)\] {
+  color: var(--modern-muted) !important;
+}
+
+/* Analysis / dashboard headers */
+header .premium-panel,
+.premium-panel.relative.mb-4 {
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.94), rgba(248,250,252,0.88)),
+    radial-gradient(circle at 100% 0%, rgba(214, 166, 74, 0.18), transparent 48%) !important;
+  border-color: rgba(184, 135, 47, 0.22) !important;
+}
+
+header h1,
+.premium-panel.relative.mb-4 h2 {
+  color: var(--modern-text) !important;
+  text-shadow: none !important;
+}
+
+header p,
+.premium-panel.relative.mb-4 .text-\[9px\],
+.premium-panel.relative.mb-4 .text-\[10px\] {
+  color: var(--modern-muted) !important;
+}
+
+.premium-panel.relative.mb-4 .h-15.w-15,
+header .h-14.w-14 {
+  background: linear-gradient(180deg, rgba(214, 166, 74, 0.20), rgba(184, 135, 47, 0.11)) !important;
+  border-color: rgba(184, 135, 47, 0.32) !important;
+  color: var(--modern-gold) !important;
+  box-shadow: none !important;
+}
+
+.premium-panel.relative.mb-4 .inline-flex,
+header .inline-flex,
+.rounded-full.bg-\[var\(--gold-dim\)\],
+.rounded-full.bg-\[var\(--blue-dim\)\] {
+  background: rgba(184, 135, 47, 0.11) !important;
+  border-color: rgba(184, 135, 47, 0.20) !important;
+  color: var(--modern-gold) !important;
+}
+
+.premium-panel.relative.mb-4 .relative.rounded-3xl.bg-black\/25 {
+  background: rgba(255, 255, 255, 0.66) !important;
+  border: 1px solid rgba(15, 23, 42, 0.08) !important;
+  color: var(--modern-text) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.80) !important;
+}
+
+/* Inputs */
+.soft-input {
+  background: rgba(255, 255, 255, 0.72) !important;
+  border-color: rgba(15, 23, 42, 0.12) !important;
+  color: var(--modern-text) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.75), 0 8px 24px rgba(15,23,42,0.05) !important;
+}
+
+.soft-input::placeholder {
+  color: var(--modern-soft) !important;
+}
+
+.soft-input:focus {
+  border-color: rgba(15, 142, 168, 0.42) !important;
+  box-shadow: 0 0 0 3px rgba(15, 142, 168, 0.10), inset 0 1px 0 rgba(255,255,255,0.85) !important;
+}
+
+/* Buttons */
+.primary-button {
+  background: linear-gradient(180deg, #d6a64a 0%, #b8872f 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 14px 28px rgba(184, 135, 47, 0.18) !important;
+}
+
+.ghost-button {
+  background: rgba(255,255,255,0.62) !important;
+  border-color: rgba(15,23,42,0.10) !important;
+  color: var(--modern-muted) !important;
+  box-shadow: 0 8px 24px rgba(15,23,42,0.06) !important;
+}
+
+/* Dashboard market cards */
+.grid.grid-cols-2.gap-3.pb-6 > .premium-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(248,250,252,0.86)) !important;
+  border-color: rgba(15,23,42,0.09) !important;
+}
+
+.grid.grid-cols-2.gap-3.pb-6 > .premium-card .font-\['Orbitron'\],
+.grid.grid-cols-2.gap-3.pb-6 > .premium-card span:first-child {
+  color: var(--modern-text) !important;
+}
+
+.grid.grid-cols-2.gap-3.pb-6 > .premium-card .text-\[var\(--cyan\)\],
+.grid.grid-cols-2.gap-3.pb-6 > .premium-card .font-\['JetBrains_Mono'\] {
+  color: var(--modern-teal) !important;
+}
+
+.grid.grid-cols-2.gap-3.pb-6 > .premium-card .bg-\[var\(--gold-dim\)\] {
+  background: rgba(184, 135, 47, 0.12) !important;
+  color: var(--modern-gold) !important;
+}
+
+/* Result hero */
+.premium-panel.result-glow {
+  background: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(248,250,252,0.90)) !important;
+  border-color: rgba(184, 135, 47, 0.18) !important;
+}
+
+.premium-panel.result-glow > .relative.mb-4.inline-flex,
+.premium-panel.result-glow > .relative.mb-4.inline-flex * {
+  color: var(--modern-gold) !important;
+}
+
+.premium-panel.result-glow > .relative.rounded-3xl {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(184, 135, 47, 0.08), transparent 54%),
+    linear-gradient(180deg, rgba(255,255,255,0.76), rgba(238,243,248,0.64)) !important;
+  border: 1px solid rgba(15,23,42,0.10) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.80) !important;
+}
+
+.premium-panel.result-glow > .relative.rounded-3xl > h3 {
+  color: rgba(20, 32, 51, 0.58) !important;
+}
+
+/* Digit chips */
+.premium-panel.result-glow > .relative.rounded-3xl > .mt-4 > div > div,
+.main-digit-chip {
+  background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%) !important;
+  border: 1.5px solid rgba(184, 135, 47, 0.68) !important;
+  color: var(--modern-text) !important;
+  box-shadow:
+    0 8px 20px rgba(15,23,42,0.10),
+    inset 0 1px 0 rgba(255,255,255,0.90) !important;
+  text-shadow: none !important;
+}
+
+/* Validation header */
+.premium-panel.flex.items-center.justify-between.gap-3.p-4 {
+  background: rgba(255,255,255,0.80) !important;
+  border-color: rgba(15,23,42,0.08) !important;
+  color: var(--modern-text) !important;
+}
+
+.premium-panel.flex.items-center.justify-between.gap-3.p-4 > span:first-child {
+  color: var(--modern-muted) !important;
+}
+
+.premium-panel.flex.items-center.justify-between.gap-3.p-4 > span:last-child {
+  color: var(--modern-gold) !important;
+  background: transparent !important;
+}
+
+/* Detail validation rows */
+.premium-panel .grid.grid-cols-\[auto_1fr_auto\] {
+  background: rgba(255,255,255,0.62) !important;
+  border: 1px solid rgba(15,23,42,0.08) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.70) !important;
+}
+
+.premium-panel .grid.grid-cols-\[auto_1fr_auto\] > span:first-child {
+  background: rgba(184, 135, 47, 0.10) !important;
+  border-color: rgba(184, 135, 47, 0.36) !important;
+  color: var(--modern-gold) !important;
+}
+
+.premium-panel .grid.grid-cols-\[auto_1fr_auto\] .truncate {
+  color: var(--modern-text) !important;
+}
+
+.premium-panel .grid.grid-cols-\[auto_1fr_auto\] .h-1\.5 {
+  background: rgba(15,23,42,0.10) !important;
+}
+
+.premium-panel .grid.grid-cols-\[auto_1fr_auto\] .h-full {
+  background: linear-gradient(90deg, #b8872f, #d6a64a) !important;
+}
+
+.premium-panel .grid.grid-cols-\[auto_1fr_auto\] > span:last-child {
+  color: var(--modern-gold) !important;
+}
+
+/* Rekap rows */
+.premium-panel.result-glow .space-y-3 > .rounded-3xl,
+.premium-panel .space-y-3 > .rounded-3xl {
+  background: rgba(255,255,255,0.62) !important;
+  border-color: rgba(15,23,42,0.09) !important;
+  color: var(--modern-text) !important;
+}
+
+.custom-scrollbar {
+  background: rgba(255,255,255,0.64) !important;
+  border-color: rgba(15,23,42,0.10) !important;
+  color: var(--modern-teal) !important;
+}
+
+/* Bottom nav */
+.bottom-nav {
+  background: rgba(255,255,255,0.86) !important;
+  border-color: rgba(15,23,42,0.12) !important;
+  box-shadow: 0 18px 38px rgba(15,23,42,0.14) !important;
+  backdrop-filter: blur(18px) !important;
+}
+
+.bottom-nav button {
+  color: var(--modern-muted) !important;
+}
+
+.bottom-nav button.bg-\[var\(--gold\)\],
+.bottom-nav button:first-child.bg-\[var\(--gold\)\] {
+  background: linear-gradient(180deg, #d6a64a, #b8872f) !important;
+  color: #ffffff !important;
+}
+
+.bottom-nav button.text-\[var\(--cyan\)\] {
+  color: var(--modern-teal) !important;
+}
+
+.bottom-nav button.text-red-300 {
+  color: var(--modern-red) !important;
+}
+
+/* Error / status colors */
+.text-\[var\(--gold\)\],
+.text-\[var\(--gold\)\] * {
+  color: var(--modern-gold) !important;
+}
+
+.text-\[var\(--cyan\)\],
+.text-\[var\(--cyan\)\] * {
+  color: var(--modern-teal) !important;
+}
+
+.text-red-300,
+.text-red-200,
+.text-\[var\(--red\)\] {
+  color: var(--modern-red) !important;
+}
+
+.bg-red-500\/10,
+.border-red-400\/30,
+.border-red-400\/25 {
+  background-color: rgba(216,75,95,0.09) !important;
+  border-color: rgba(216,75,95,0.22) !important;
+}
+
+/* Login screen */
+.flex.min-h-screen.flex-col.items-center.justify-center.p-5 .premium-panel {
+  background: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(248,250,252,0.88)) !important;
+  color: var(--modern-text) !important;
+}
+
+.flex.min-h-screen.flex-col.items-center.justify-center.p-5 h2,
+.flex.min-h-screen.flex-col.items-center.justify-center.p-5 p {
+  color: var(--modern-text) !important;
+}
+
+/* Keep overlays less muddy on soft theme */
+.blur-xl,
+.blur-2xl,
+.blur-3xl {
+  opacity: 0.18 !important;
+}
+
+@media (max-width: 420px) {
+  html,
+  body,
+  #root,
+  .app-container {
+    background: linear-gradient(180deg, #f8f3ea 0%, #eef2f7 48%, #e8edf4 100%) !important;
+  }
+}
