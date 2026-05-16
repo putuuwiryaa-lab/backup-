@@ -4,6 +4,7 @@ import App from './App.tsx';
 import './index.css';
 import './responsive-results.css';
 import './fit-result-chips.css';
+import './ui-polish.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
