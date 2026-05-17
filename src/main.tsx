@@ -4,8 +4,7 @@ import App from './App.tsx';
 import './index.css';
 import './responsive-results.css';
 import './fit-result-chips.css';
-import './theme-mature-bronze.css';
-import './theme-hierarchy.css';
+import './theme.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
