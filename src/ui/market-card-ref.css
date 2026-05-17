@@ -1,39 +1,44 @@
 /* Compact market card final polish
-   Reference: simple two-column card with integrated centered market name strip + centered result.
+   Reference: simple two-column card with flush integrated market name strip + centered result.
 */
 
-.market-card-compact {
-  min-height: 82px !important;
+.market-card-compact,
+.market-card-compact.premium-card {
+  min-height: 72px !important;
   display: flex !important;
   flex-direction: column !important;
   justify-content: flex-start !important;
+  align-items: stretch !important;
   padding: 0 !important;
-  background: rgba(11, 8, 24, 0.96) !important;
-  border-color: rgba(181, 123, 238, 0.16) !important;
-  border-radius: 1rem !important;
+  background: rgba(10, 7, 21, 0.97) !important;
+  border: 1px solid rgba(181, 123, 238, 0.22) !important;
+  border-radius: 0.86rem !important;
   overflow: hidden !important;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18) !important;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.16) !important;
 }
 
 .market-name-strip {
   width: 100% !important;
-  min-height: 1.82rem !important;
+  min-height: 1.5rem !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  padding: 0.28rem 0.55rem !important;
-  background: linear-gradient(135deg, rgba(124, 77, 255, 0.26), rgba(240, 98, 146, 0.18)) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.055) !important;
+  padding: 0.18rem 0.42rem !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  background: linear-gradient(135deg, rgba(124, 77, 255, 0.34), rgba(240, 98, 146, 0.24)) !important;
+  border-bottom: 1px solid rgba(181, 123, 238, 0.16) !important;
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.035) !important;
 }
 
 .market-card-compact .market-name {
   width: 100% !important;
   padding: 0 !important;
   text-align: center !important;
-  font-size: 0.64rem !important;
-  line-height: 1.12 !important;
-  letter-spacing: 0.075rem !important;
-  color: rgba(240, 234, 250, 0.92) !important;
+  font-size: 0.56rem !important;
+  line-height: 1.08 !important;
+  letter-spacing: 0.07rem !important;
+  color: rgba(246, 239, 255, 0.94) !important;
   text-shadow: none !important;
 }
 
@@ -41,7 +46,7 @@
   width: 100% !important;
   flex: 1 1 auto !important;
   margin: 0 !important;
-  padding: 0.46rem 0.55rem 0.58rem !important;
+  padding: 0.28rem 0.42rem 0.36rem !important;
   justify-content: center !important;
   align-items: center !important;
 }
@@ -53,10 +58,10 @@
 .market-card-compact .market-last-value {
   width: 100% !important;
   text-align: center !important;
-  font-size: 1.28rem !important;
+  font-size: 1.12rem !important;
   line-height: 1 !important;
-  letter-spacing: 0.15rem !important;
-  color: #f6c45f !important;
+  letter-spacing: 0.13rem !important;
+  color: #f5c466 !important;
   text-shadow: none !important;
 }
 
@@ -66,27 +71,28 @@
 }
 
 @media (max-width: 420px) {
-  .market-card-compact {
-    min-height: 76px !important;
-    border-radius: 0.92rem !important;
+  .market-card-compact,
+  .market-card-compact.premium-card {
+    min-height: 66px !important;
+    border-radius: 0.78rem !important;
   }
 
   .market-name-strip {
-    min-height: 1.68rem !important;
-    padding: 0.24rem 0.48rem !important;
+    min-height: 1.38rem !important;
+    padding: 0.16rem 0.34rem !important;
   }
 
   .market-card-compact .market-name {
-    font-size: 0.59rem !important;
-    letter-spacing: 0.062rem !important;
+    font-size: 0.52rem !important;
+    letter-spacing: 0.058rem !important;
   }
 
   .market-card-compact .market-result-row {
-    padding: 0.4rem 0.5rem 0.5rem !important;
+    padding: 0.24rem 0.38rem 0.32rem !important;
   }
 
   .market-card-compact .market-last-value {
-    font-size: 1.14rem !important;
-    letter-spacing: 0.13rem !important;
+    font-size: 1.02rem !important;
+    letter-spacing: 0.115rem !important;
   }
 }
