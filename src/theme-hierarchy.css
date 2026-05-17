@@ -1,0 +1,228 @@
+/* Color hierarchy layer
+   Goal: reduce teal spread. Neutral surfaces, teal for data, champagne for actions. */
+
+:root {
+  --hier-bg: #071014;
+  --hier-surface: #0e1a23;
+  --hier-surface-2: #122331;
+  --hier-surface-3: #172b3a;
+  --hier-inner: #071116;
+  --hier-line: rgba(205, 226, 232, 0.09);
+  --hier-line-strong: rgba(205, 226, 232, 0.15);
+  --hier-text: #f2f7f8;
+  --hier-muted: #91a6ae;
+  --hier-soft: #61757d;
+  --hier-data: #70eadc;
+  --hier-data-bright: #9af8ee;
+  --hier-data-soft: rgba(112, 234, 220, 0.12);
+  --hier-action: #d8ad58;
+  --hier-action-bright: #f1cf7a;
+  --hier-action-soft: rgba(216, 173, 88, 0.13);
+}
+
+/* Keep the atmosphere dark, but reduce colored wash. */
+html,
+body,
+#root,
+.app-container {
+  background:
+    radial-gradient(circle at 50% -12%, rgba(112, 234, 220, 0.09), transparent 28%),
+    radial-gradient(circle at 105% 12%, rgba(216, 173, 88, 0.055), transparent 26%),
+    linear-gradient(180deg, #0a151b 0%, #071014 64%, #04090b 100%) !important;
+}
+
+/* Neutral surface system: panels should not all look like teal blocks. */
+.premium-panel,
+.premium-card,
+.glass-card {
+  background: linear-gradient(180deg, rgba(18, 35, 49, 0.98), rgba(10, 21, 29, 0.99)) !important;
+  border-color: var(--hier-line) !important;
+  color: var(--hier-text) !important;
+}
+
+/* Hero: brand accent, but calmer than result/data. */
+header .premium-panel,
+.premium-panel.relative.mb-4 {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(112, 234, 220, 0.075), transparent 46%),
+    linear-gradient(135deg, rgba(18, 37, 50, 0.99), rgba(8, 18, 25, 0.99)) !important;
+  border-color: rgba(205, 226, 232, 0.11) !important;
+}
+
+header h1,
+.premium-panel.relative.mb-4 h2 {
+  color: var(--hier-text) !important;
+}
+
+header p,
+.premium-panel.relative.mb-4 .text-\[9px\],
+.premium-panel.relative.mb-4 .text-\[10px\] {
+  color: var(--hier-muted) !important;
+}
+
+/* Icon/crown remains premium action accent, not teal. */
+header .h-14.w-14,
+.premium-panel.relative.mb-4 .h-15.w-15 {
+  background: linear-gradient(180deg, rgba(216, 173, 88, 0.18), rgba(216, 173, 88, 0.08)) !important;
+  border-color: rgba(216, 173, 88, 0.30) !important;
+  color: var(--hier-action-bright) !important;
+}
+
+/* Small informational badges use muted teal only. */
+header .inline-flex,
+.premium-panel.relative.mb-4 .inline-flex {
+  background: rgba(112, 234, 220, 0.08) !important;
+  border-color: rgba(112, 234, 220, 0.14) !important;
+  color: var(--hier-data-bright) !important;
+}
+
+/* Search/input: neutral, not a teal slab. */
+.soft-input {
+  background: rgba(7, 17, 22, 0.94) !important;
+  border-color: var(--hier-line-strong) !important;
+  color: var(--hier-text) !important;
+}
+
+.soft-input::placeholder {
+  color: var(--hier-soft) !important;
+}
+
+.soft-input:focus {
+  border-color: rgba(112, 234, 220, 0.36) !important;
+  box-shadow: 0 0 0 3px rgba(112, 234, 220, 0.08) !important;
+}
+
+/* Dashboard and market cards: neutral dark slate. */
+.mb-5.grid.grid-cols-2.gap-3 > .premium-card,
+.grid.grid-cols-2.gap-3.pb-6 > .premium-card {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(255, 255, 255, 0.018), transparent 48%),
+    linear-gradient(180deg, rgba(18, 35, 49, 0.99), rgba(9, 20, 28, 0.99)) !important;
+  border-color: rgba(205, 226, 232, 0.095) !important;
+}
+
+.grid.grid-cols-2.gap-3.pb-6 > .premium-card span:first-child,
+.grid.grid-cols-2.gap-3.pb-6 > .premium-card .font-\['Orbitron'\] {
+  color: var(--hier-text) !important;
+}
+
+/* Data/result numbers are the clearest teal elements. */
+.grid.grid-cols-2.gap-3.pb-6 > .premium-card .font-\['JetBrains_Mono'\],
+.grid.grid-cols-2.gap-3.pb-6 > .premium-card .text-\[var\(--cyan\)\],
+.text-\[var\(--cyan\)],
+.text-\[var\(--cyan\)] * {
+  color: var(--hier-data-bright) !important;
+}
+
+/* READY badge: low emphasis. */
+.grid.grid-cols-2.gap-3.pb-6 > .premium-card .inline-flex,
+.grid.grid-cols-2.gap-3.pb-6 > .premium-card .rounded-full {
+  background: rgba(205, 226, 232, 0.055) !important;
+  border-color: rgba(205, 226, 232, 0.10) !important;
+  color: var(--hier-muted) !important;
+}
+
+/* Action buttons/arrows: champagne. This separates action from data. */
+.grid.grid-cols-2.gap-3.pb-6 > .premium-card .bg-\[var\(--gold-dim\)],
+.text-\[var\(--gold\)],
+.text-\[var\(--gold\)] * {
+  color: var(--hier-action-bright) !important;
+}
+
+.primary-button {
+  background: linear-gradient(180deg, var(--hier-action-bright), var(--hier-action)) !important;
+  color: #071014 !important;
+  box-shadow: 0 12px 24px rgba(216, 173, 88, 0.18) !important;
+}
+
+/* Result card: surface neutral, digits/data teal. */
+.premium-panel.result-glow {
+  background: linear-gradient(180deg, rgba(18, 35, 49, 0.99), rgba(10, 21, 29, 0.99)) !important;
+  border-color: rgba(205, 226, 232, 0.10) !important;
+}
+
+.premium-panel.result-glow > .relative.mb-4.inline-flex,
+.premium-panel.result-glow > .relative.mb-4.inline-flex * {
+  color: var(--hier-action-bright) !important;
+}
+
+.premium-panel.result-glow > .relative.rounded-3xl {
+  background:
+    radial-gradient(circle at top center, rgba(112, 234, 220, 0.045), transparent 54%),
+    linear-gradient(180deg, rgba(7, 17, 22, 0.98), rgba(4, 10, 13, 0.98)) !important;
+  border-color: rgba(205, 226, 232, 0.085) !important;
+}
+
+.premium-panel.result-glow > .relative.rounded-3xl > .mt-4 > div > div,
+.main-digit-chip {
+  background: linear-gradient(180deg, #102230, #071116) !important;
+  border-color: rgba(112, 234, 220, 0.48) !important;
+  color: var(--hier-text) !important;
+}
+
+/* Validation rows: neutral row, data progress teal, score champagne. */
+.premium-panel.flex.items-center.justify-between.gap-3.p-4,
+.premium-panel .grid.grid-cols-\[auto_1fr_auto\],
+.premium-panel.result-glow .space-y-3 > .rounded-3xl,
+.premium-panel .space-y-3 > .rounded-3xl {
+  background: rgba(7, 17, 22, 0.78) !important;
+  border-color: rgba(205, 226, 232, 0.085) !important;
+}
+
+.premium-panel.flex.items-center.justify-between.gap-3.p-4 > span:last-child,
+.premium-panel .grid.grid-cols-\[auto_1fr_auto\] > span:last-child {
+  color: var(--hier-action-bright) !important;
+}
+
+.premium-panel .grid.grid-cols-\[auto_1fr_auto\] .h-full {
+  background: linear-gradient(90deg, var(--hier-data), var(--hier-data-bright)) !important;
+}
+
+.premium-panel .grid.grid-cols-\[auto_1fr_auto\] > span:first-child {
+  background: var(--hier-action-soft) !important;
+  border-color: rgba(216, 173, 88, 0.32) !important;
+  color: var(--hier-action-bright) !important;
+}
+
+/* Bottom nav: active is action/champagne; report remains data teal; danger remains red. */
+.bottom-nav {
+  background: rgba(4, 10, 13, 0.94) !important;
+  border-color: rgba(205, 226, 232, 0.11) !important;
+  box-shadow: 0 14px 30px rgba(0,0,0,0.34) !important;
+}
+
+.bottom-nav button {
+  color: var(--hier-muted) !important;
+}
+
+.bottom-nav button.bg-\[var\(--gold\)],
+.bottom-nav button:first-child.bg-\[var\(--gold\)] {
+  background: linear-gradient(180deg, var(--hier-action-bright), var(--hier-action)) !important;
+  color: #071014 !important;
+  box-shadow: 0 8px 20px rgba(216, 173, 88, 0.16) !important;
+}
+
+.bottom-nav button.text-\[var\(--cyan\)] {
+  color: var(--hier-data-bright) !important;
+}
+
+.bottom-nav button.text-red-300 {
+  color: #ff8a95 !important;
+}
+
+.custom-scrollbar {
+  background: rgba(7, 17, 22, 0.82) !important;
+  border-color: rgba(205, 226, 232, 0.10) !important;
+  color: var(--hier-data-bright) !important;
+}
+
+@media (max-width: 420px) {
+  html,
+  body,
+  #root,
+  .app-container {
+    background:
+      radial-gradient(circle at top center, rgba(112, 234, 220, 0.09), transparent 27%),
+      linear-gradient(180deg, #0a151b 0%, #071014 70%, #04090b 100%) !important;
+  }
+}
