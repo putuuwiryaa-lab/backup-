@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate, useLocation } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
 import {
-  Lock, Zap, ShieldCheck, LogOut, Search, RefreshCw, Crown, Sparkles, Smartphone, Home, KeyRound, ArrowRight, Database, MessageCircle, Star
+  Lock, Zap, ShieldCheck, LogOut, Search, RefreshCw, Crown, Sparkles, Smartphone, Home, KeyRound, Database, MessageCircle
 } from "lucide-react";
 import { Analytics } from "@vercel/analytics/react";
 import AnalyzeMenu from "./pages/AnalyzeMenu";
@@ -244,52 +244,23 @@ function StatusStrip({ role, deviceCode }: { role: string; deviceCode: string })
   );
 }
 
-const FAVORITES_STORAGE_KEY = "supreme_favorite_markets";
-
 function Dashboard({ markets, onRefresh }: { markets: any[]; onRefresh: () => void }) {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
-  const [favoriteIds, setFavoriteIds] = useState<string[]>(() => {
-    try {
-      const saved = localStorage.getItem(FAVORITES_STORAGE_KEY);
-      const parsed = saved ? JSON.parse(saved) : [];
-      return Array.isArray(parsed) ? parsed.map(String) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  useEffect(() => {
-    localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favoriteIds));
-  }, [favoriteIds]);
-
-  const favoriteSet = useMemo(() => new Set(favoriteIds), [favoriteIds]);
-
-  const toggleFavorite = (marketId: string) => {
-    setFavoriteIds((current) => {
-      if (current.includes(marketId)) return current.filter((id) => id !== marketId);
-      return [marketId, ...current];
-    });
-  };
 
   const filteredMarkets = useMemo(() => {
     const q = search.toLowerCase();
     return markets
       .filter(m => m.id.toLowerCase().includes(q) || (m.name && m.name.toLowerCase().includes(q)))
-      .sort((a, b) => {
-        const aFav = favoriteSet.has(a.id);
-        const bFav = favoriteSet.has(b.id);
-        if (aFav !== bFav) return aFav ? -1 : 1;
-        return (a.order ?? 99) - (b.order ?? 99);
-      });
-  }, [markets, search, favoriteSet]);
+      .sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
+  }, [markets, search]);
 
   return (
     <div className="dashboard-page animate-[riseIn_0.35s_ease-out]">
       <div className="market-section-title mb-3 flex items-center justify-between gap-3 px-1">
         <div>
           <h2 className="font-['Orbitron'] text-[15px] font-black uppercase tracking-[4px] text-[var(--text)]">Pilih Pasaran</h2>
-          <p className="mt-1 text-xs text-[var(--text-dim)]">Market aktif siap dianalisa. Tap bintang untuk favorit.</p>
+          <p className="mt-1 text-xs text-[var(--text-dim)]">Pilih market untuk mulai analisa.</p>
         </div>
         <button onClick={onRefresh} className="ghost-button flex h-12 w-12 items-center justify-center text-[var(--text-dim)] active:scale-95">
           <RefreshCw size={18} />
@@ -301,12 +272,10 @@ function Dashboard({ markets, onRefresh }: { markets: any[]; onRefresh: () => vo
         <input type="text" placeholder="Cari pasaran..." value={search} onChange={(e) => setSearch(e.target.value)} className="soft-input h-15 w-full pl-13 pr-4 text-[15px] font-bold placeholder:text-[var(--text-dim)]" />
       </div>
 
-      <div className="market-grid grid grid-cols-2 gap-3 pb-6 sm:grid-cols-3">
+      <div className="market-grid market-grid-compact grid grid-cols-2 gap-3 pb-6 sm:grid-cols-3">
         {filteredMarkets.length > 0 ? filteredMarkets.map((m) => {
           const title = m.name || m.id;
           const lastResult = m.lastResult || "----";
-          const isReady = lastResult !== "----";
-          const isFavorite = favoriteSet.has(m.id);
           return (
             <div
               key={m.id}
@@ -316,32 +285,12 @@ function Dashboard({ markets, onRefresh }: { markets: any[]; onRefresh: () => vo
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") navigate(`/analyze/${m.id}`);
               }}
-              className="market-card premium-card group relative min-h-[122px] cursor-pointer overflow-hidden p-4 text-left transition active:scale-[0.985]"
+              className="market-card market-card-compact premium-card cursor-pointer overflow-hidden text-left transition active:scale-[0.985]"
             >
-              <button
-                type="button"
-                aria-label={isFavorite ? `Hapus ${title} dari favorit` : `Tambahkan ${title} ke favorit`}
-                aria-pressed={isFavorite}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleFavorite(m.id);
-                }}
-                className={`absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-2xl border transition active:scale-95 ${isFavorite ? "border-[var(--gold)] bg-[var(--gold-dim)] text-[var(--gold)]" : "border-white/10 bg-black/20 text-[var(--text-dim)]"}`}
-              >
-                <Star size={16} fill={isFavorite ? "currentColor" : "none"} />
-              </button>
-              <div className="relative flex h-full flex-col justify-between gap-4 pr-8">
-                <div>
-                  <span className="block truncate font-['Orbitron'] text-[13px] font-black uppercase tracking-[2px] text-[var(--text)]">{title}</span>
-                  <span className="mt-2 inline-flex rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[8px] font-black uppercase tracking-[1.5px] text-[var(--text-dim)]">{isFavorite ? "Favorit" : isReady ? "Ready" : "No Data"}</span>
-                </div>
-                <div className="flex items-end justify-between gap-2">
-                  <div>
-                    <p className="text-[8px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Last</p>
-                    <p className="font-['JetBrains_Mono'] text-[17px] font-black tracking-[1px] text-[var(--cyan)]">{lastResult}</p>
-                  </div>
-                  <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[var(--gold-dim)] text-[var(--gold)]"><ArrowRight size={17} /></div>
-                </div>
+              <span className="market-name block truncate font-['Orbitron'] text-[12px] font-black uppercase tracking-[2px] text-[var(--text)]">{title}</span>
+              <div className="market-result-row mt-3 flex items-end justify-between gap-2">
+                <span className="market-last-label text-[8px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Last</span>
+                <span className="market-last-value font-['JetBrains_Mono'] text-[18px] font-black tracking-[1px] text-[var(--cyan)]">{lastResult}</span>
               </div>
             </div>
           );
