@@ -1,0 +1,144 @@
+/* Performance + hierarchy polish
+   Purpose:
+   - lighter glass blur for low-end phones
+   - less even violet/pink distribution
+   - quieter panel animation
+   - restrained digit glow
+*/
+
+:root {
+  --glass-bg: rgba(255, 255, 255, 0.042);
+  --glass-bg-soft: rgba(255, 255, 255, 0.032);
+  --glass-border: rgba(255, 255, 255, 0.085);
+  --glass-blur: 10px;
+  --glass-saturate: 145%;
+}
+
+/* Background keeps identity, but reduced color wash. */
+.app-container,
+body {
+  background:
+    radial-gradient(ellipse 75% 52% at 12% 8%, rgba(124,77,255,0.18) 0%, transparent 58%),
+    radial-gradient(ellipse 56% 42% at 88% 10%, rgba(240,98,146,0.12) 0%, transparent 52%),
+    linear-gradient(180deg, #110e22 0%, #0d0a1a 64%, #080514 100%) !important;
+}
+
+/* Most surfaces should be neutral glass, not violet everywhere. */
+.premium-panel,
+.premium-card,
+.glass-card {
+  background: var(--glass-bg) !important;
+  border-color: var(--glass-border) !important;
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)) !important;
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)) !important;
+  box-shadow: 0 14px 28px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.055) !important;
+  animation: none !important;
+}
+
+/* Header keeps the brand color, but more controlled. */
+header .premium-panel,
+.premium-panel.relative.mb-4 {
+  background:
+    radial-gradient(ellipse at 100% 0%, rgba(124,77,255,0.12), transparent 48%),
+    var(--glass-bg) !important;
+  border-color: rgba(181,123,238,0.16) !important;
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)) !important;
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)) !important;
+}
+
+/* Market cards: neutral surface; data remains violet. */
+.mb-5.grid.grid-cols-2.gap-3 > .premium-card,
+.grid.grid-cols-2.gap-3.pb-6 > .premium-card {
+  background: var(--glass-bg-soft) !important;
+  border-color: rgba(255,255,255,0.08) !important;
+  backdrop-filter: blur(8px) saturate(135%) !important;
+  -webkit-backdrop-filter: blur(8px) saturate(135%) !important;
+}
+
+/* Pills are subtle, not all-purple blocks. */
+.grid.grid-cols-2.gap-3.pb-6 > .premium-card .inline-flex,
+.grid.grid-cols-2.gap-3.pb-6 > .premium-card .rounded-full,
+header .inline-flex,
+.premium-panel.relative.mb-4 .inline-flex {
+  background: rgba(255,255,255,0.045) !important;
+  border-color: rgba(255,255,255,0.09) !important;
+  color: var(--text-dim) !important;
+}
+
+/* Result area may carry the accent, but still restrained. */
+.premium-panel.result-glow {
+  background: rgba(255,255,255,0.045) !important;
+  border-color: rgba(181,123,238,0.14) !important;
+}
+
+.premium-panel.result-glow > .relative.rounded-3xl {
+  background:
+    radial-gradient(circle at top center, rgba(124,77,255,0.04), transparent 54%),
+    rgba(10,7,20,0.88) !important;
+}
+
+/* Digit chips: no constant pulse on every chip. */
+.premium-panel.result-glow > .relative.rounded-3xl > .mt-4 > div > div,
+.main-digit-chip {
+  box-shadow: 0 7px 16px rgba(124,77,255,0.12), inset 0 1px 0 rgba(255,255,255,0.055) !important;
+  animation: riseIn 0.24s ease both !important;
+}
+
+/* Keep a very subtle glow only when users press/touch chips or cards. */
+.premium-panel.result-glow > .relative.rounded-3xl > .mt-4 > div > div:active,
+.main-digit-chip:active {
+  animation: glowPulse 1.6s ease 1 !important;
+}
+
+/* Validation rows: reduce colored density. */
+.premium-panel.flex.items-center.justify-between.gap-3.p-4,
+.premium-panel .grid.grid-cols-\[auto_1fr_auto\],
+.premium-panel.result-glow .space-y-3 > .rounded-3xl,
+.premium-panel .space-y-3 > .rounded-3xl {
+  background: rgba(10,7,20,0.64) !important;
+  border-color: rgba(255,255,255,0.075) !important;
+}
+
+/* Bottom nav remains glass but lighter to render. */
+.bottom-nav {
+  background: rgba(10,7,20,0.82) !important;
+  backdrop-filter: blur(12px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(150%) !important;
+  box-shadow: 0 10px 22px rgba(0,0,0,0.30) !important;
+}
+
+.bottom-nav button.bg-\[var\(--gold\)],
+.bottom-nav button:first-child.bg-\[var\(--gold\)] {
+  background: linear-gradient(135deg, rgba(124,77,255,0.24), rgba(240,98,146,0.14)) !important;
+  box-shadow: 0 5px 14px rgba(124,77,255,0.16) !important;
+}
+
+/* Mobile: reduce blur further, but do not disable glass. */
+@media (max-width: 768px) {
+  :root {
+    --glass-blur: 7px;
+    --glass-saturate: 125%;
+  }
+
+  .premium-panel,
+  .premium-card,
+  .glass-card,
+  .bottom-nav,
+  .soft-input,
+  .flex.min-h-screen.flex-col.items-center.justify-center.p-5 .premium-panel,
+  .flex.min-h-screen.items-center.justify-center.p-8 .premium-panel {
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)) !important;
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)) !important;
+  }
+}
+
+@media (max-width: 420px) {
+  html,
+  body,
+  #root,
+  .app-container {
+    background:
+      radial-gradient(ellipse at top center, rgba(124,77,255,0.14), transparent 38%),
+      linear-gradient(180deg, #110e22 0%, #0d0a1a 70%, #080514 100%) !important;
+  }
+}
