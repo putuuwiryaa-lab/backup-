@@ -33,25 +33,62 @@ body {
   animation: none !important;
 }
 
-/* Header keeps brand, but no heavy wash. */
+/* Header becomes a distinct hero, separated from market cards. */
+header {
+  margin-bottom: 1.05rem !important;
+}
+
 header .premium-panel,
 .premium-panel.relative.mb-4 {
   background:
-    radial-gradient(ellipse at 100% 0%, rgba(124,77,255,0.08), transparent 46%),
-    var(--glass-bg) !important;
-  border-color: rgba(181,123,238,0.13) !important;
+    radial-gradient(ellipse at 100% 0%, rgba(124,77,255,0.13), transparent 46%),
+    rgba(255,255,255,0.055) !important;
+  border-color: rgba(181,123,238,0.18) !important;
   backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)) !important;
   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)) !important;
+  box-shadow: 0 10px 22px rgba(0,0,0,0.24), inset 0 1px 0 rgba(255,255,255,0.055) !important;
 }
 
-/* Market cards: flat, readable, cheap to render. */
+/* Status strip should read as secondary, not the same as the hero. */
+header + .grid.grid-cols-2.gap-3 {
+  margin-bottom: 2.1rem !important;
+}
+
+header + .grid.grid-cols-2.gap-3 > .premium-card {
+  background: rgba(255,255,255,0.028) !important;
+  border-color: rgba(255,255,255,0.065) !important;
+  box-shadow: 0 5px 12px rgba(0,0,0,0.16) !important;
+}
+
+/* Section text after status gets visual space. */
+main h1,
+main h2,
+main h3,
+main .font-\['Orbitron'\] {
+  text-shadow: none !important;
+}
+
+/* Search is a divider between controls and market cards. */
+.soft-input {
+  background: rgba(10,7,20,0.72) !important;
+  border-color: rgba(255,255,255,0.095) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.035) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Market cards: flat, darker, and clearly below the header hierarchy. */
 .mb-5.grid.grid-cols-2.gap-3 > .premium-card,
 .grid.grid-cols-2.gap-3.pb-6 > .premium-card {
-  background: var(--glass-bg-soft) !important;
-  border-color: rgba(255,255,255,0.075) !important;
+  background: rgba(16,11,32,0.72) !important;
+  border-color: rgba(255,255,255,0.070) !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   box-shadow: 0 6px 14px rgba(0,0,0,0.18) !important;
+}
+
+.grid.grid-cols-2.gap-3.pb-6 {
+  margin-top: 0.4rem !important;
 }
 
 /* Pills are neutral and cheap. */
@@ -105,11 +142,6 @@ header .inline-flex,
 .ghost-button,
 .primary-button {
   box-shadow: none !important;
-}
-
-.soft-input {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
 }
 
 /* Bottom nav: no blur on phones, very low cost on desktop. */
@@ -173,5 +205,17 @@ header .inline-flex,
     background:
       radial-gradient(ellipse at top center, rgba(124,77,255,0.10), transparent 36%),
       linear-gradient(180deg, #110e22 0%, #0d0a1a 70%, #080514 100%) !important;
+  }
+
+  header {
+    margin-bottom: 0.9rem !important;
+  }
+
+  header + .grid.grid-cols-2.gap-3 {
+    margin-bottom: 1.8rem !important;
+  }
+
+  .grid.grid-cols-2.gap-3.pb-6 {
+    margin-top: 0.35rem !important;
   }
 }
