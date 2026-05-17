@@ -1,0 +1,71 @@
+/* Compact market card final polish
+   Reference: simple two-column card with market name + result only.
+*/
+
+.market-card-compact {
+  min-height: 76px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  padding: 0.78rem 0.82rem !important;
+  background: rgba(8, 6, 17, 0.96) !important;
+  border-color: rgba(255, 255, 255, 0.07) !important;
+}
+
+.market-card-compact .market-name {
+  padding-right: 1.75rem !important;
+  font-size: 0.68rem !important;
+  letter-spacing: 0.09rem !important;
+  color: rgba(240, 234, 250, 0.94) !important;
+}
+
+.market-card-compact .market-result-row {
+  margin-top: 0.55rem !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+.market-card-compact .market-last-label {
+  display: none !important;
+}
+
+.market-card-compact .market-last-value {
+  width: 100% !important;
+  text-align: center !important;
+  font-size: 1.25rem !important;
+  letter-spacing: 0.12rem !important;
+  color: #f48fb1 !important;
+}
+
+.market-card-compact.market-card-favorite {
+  border-color: rgba(240, 98, 146, 0.24) !important;
+  background: rgba(15, 8, 27, 0.98) !important;
+}
+
+.market-favorite-btn {
+  width: 1.55rem !important;
+  height: 1.55rem !important;
+  border-radius: 0.65rem !important;
+  background: rgba(0, 0, 0, 0.16) !important;
+}
+
+.market-favorite-btn svg {
+  width: 0.78rem !important;
+  height: 0.78rem !important;
+}
+
+@media (max-width: 420px) {
+  .market-card-compact {
+    min-height: 72px !important;
+    padding: 0.72rem 0.76rem !important;
+  }
+
+  .market-card-compact .market-name {
+    font-size: 0.64rem !important;
+    letter-spacing: 0.075rem !important;
+  }
+
+  .market-card-compact .market-last-value {
+    font-size: 1.16rem !important;
+  }
+}
