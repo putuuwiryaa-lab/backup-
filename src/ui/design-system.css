@@ -1,0 +1,6 @@
+/* UI Design System Entry
+   Visual source is currently consolidated in ../design-system.css.
+   This entry keeps all visual imports under src/ui/ while preserving the stable stylesheet.
+*/
+
+@import "../design-system.css";
