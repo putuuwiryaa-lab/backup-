@@ -29,26 +29,26 @@
 
 .market-name-strip {
   width: 100% !important;
-  min-height: 1.6rem !important;
-  height: 1.6rem !important;
+  min-height: 1.7rem !important;
+  height: 1.7rem !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  padding: 0.18rem 0.48rem !important;
+  padding: 0.2rem 0.48rem !important;
   margin: 0 !important;
   border-radius: 0 !important;
-  background: linear-gradient(135deg, rgba(124, 77, 255, 0.34), rgba(240, 98, 146, 0.24)) !important;
-  border-bottom: 1px solid rgba(181, 123, 238, 0.16) !important;
-  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.035) !important;
+  background: linear-gradient(135deg, rgba(124, 77, 255, 0.30), rgba(240, 98, 146, 0.20)) !important;
+  border-bottom: 1px solid rgba(181, 123, 238, 0.14) !important;
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.03) !important;
 }
 
 .market-card-compact .market-name {
   width: 100% !important;
   padding: 0 !important;
   text-align: center !important;
-  font-size: 0.59rem !important;
+  font-size: 0.62rem !important;
   line-height: 1.1 !important;
-  letter-spacing: 0.07rem !important;
+  letter-spacing: 0.068rem !important;
   color: rgba(246, 239, 255, 0.94) !important;
   text-shadow: none !important;
 }
@@ -57,7 +57,7 @@
   width: 100% !important;
   flex: 1 1 auto !important;
   margin: 0 !important;
-  padding: 0.5rem 0.46rem 0.34rem !important;
+  padding: 0.42rem 0.46rem 0.34rem !important;
   justify-content: center !important;
   align-items: center !important;
 }
@@ -69,9 +69,9 @@
 .market-card-compact .market-last-value {
   width: 100% !important;
   text-align: center !important;
-  font-size: 1.2rem !important;
+  font-size: 1.14rem !important;
   line-height: 1 !important;
-  letter-spacing: 0.14rem !important;
+  letter-spacing: 0.13rem !important;
   color: #f5c466 !important;
   text-shadow: none !important;
 }
@@ -99,22 +99,22 @@
   }
 
   .market-name-strip {
-    min-height: 1.45rem !important;
-    height: 1.45rem !important;
-    padding: 0.16rem 0.38rem !important;
+    min-height: 1.58rem !important;
+    height: 1.58rem !important;
+    padding: 0.18rem 0.38rem !important;
   }
 
   .market-card-compact .market-name {
-    font-size: 0.54rem !important;
-    letter-spacing: 0.058rem !important;
+    font-size: 0.56rem !important;
+    letter-spacing: 0.054rem !important;
   }
 
   .market-card-compact .market-result-row {
-    padding: 0.46rem 0.38rem 0.28rem !important;
+    padding: 0.36rem 0.38rem 0.3rem !important;
   }
 
   .market-card-compact .market-last-value {
-    font-size: 1.08rem !important;
-    letter-spacing: 0.12rem !important;
+    font-size: 1.02rem !important;
+    letter-spacing: 0.11rem !important;
   }
 }
