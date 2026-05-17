@@ -95,9 +95,9 @@
   --blue-dim: rgba(192,132,252,0.13);
   --ink: #0d0a1a;
 
-  --radius-panel: clamp(1.25rem, 5.5vw, 1.75rem);
-  --radius-card: clamp(1.05rem, 4.5vw, 1.45rem);
-  --radius-chip: clamp(0.82rem, 3.2vw, 1.35rem);
+  --radius-panel: clamp(1.5rem, 6.5vw, 2rem);
+  --radius-card: clamp(1.25rem, 5.5vw, 1.65rem);
+  --radius-chip: clamp(1rem, 4vw, 1.4rem);
 
   --theme-bg: var(--bg);
   --theme-bg-soft: var(--bg2);
@@ -221,10 +221,11 @@ textarea { max-width: 100%; }
     border-radius: var(--radius-panel) !important;
     backdrop-filter: blur(18px) saturate(180%) !important;
     -webkit-backdrop-filter: blur(18px) saturate(180%) !important;
+    animation: riseIn 0.4s ease both;
   }
 
-  .premium-panel { padding: clamp(0.875rem, 3.8vw, 1.5rem) !important; }
-  .premium-card { padding: clamp(0.75rem, 3.2vw, 1rem) !important; }
+  .premium-panel { padding: clamp(1rem, 4.5vw, 1.75rem) !important; }
+  .premium-card { padding: clamp(0.875rem, 3.8vw, 1.25rem) !important; }
 
   .soft-input {
     min-width: 0;
@@ -236,12 +237,14 @@ textarea { max-width: 100%; }
     border-radius: var(--radius-card) !important;
     outline: none;
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 10px 24px rgba(0,0,0,0.16) !important;
+    transition: all 0.25s ease;
   }
 
   .soft-input::placeholder { color: var(--text-soft) !important; }
   .soft-input:focus {
     border-color: rgba(181,123,238,0.50) !important;
     box-shadow: 0 0 0 3px rgba(124,77,255,0.13), inset 0 1px 0 rgba(255,255,255,0.04) !important;
+    transition: all 0.25s ease;
   }
 
   .primary-button {
@@ -249,7 +252,10 @@ textarea { max-width: 100%; }
     color: #fff !important;
     border-radius: var(--radius-card) !important;
     box-shadow: 0 12px 24px rgba(124,77,255,0.30) !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
   }
+
+  .primary-button:active { transform: scale(0.97); }
 
   .ghost-button {
     background: rgba(255,255,255,0.05) !important;
@@ -265,15 +271,19 @@ textarea { max-width: 100%; }
     box-shadow: 0 14px 30px rgba(0,0,0,0.34) !important;
     backdrop-filter: blur(24px) saturate(200%) !important;
     -webkit-backdrop-filter: blur(24px) saturate(200%) !important;
-    border-radius: clamp(1.3rem, 6vw, 2rem) !important;
-    padding: clamp(0.35rem, 1.7vw, 0.5rem) !important;
+    border-radius: clamp(1.5rem, 7vw, 2.25rem) !important;
+    padding: clamp(0.5rem, 2vw, 0.65rem) !important;
+    animation: fadeIn 0.5s ease both;
   }
 
   .result-glow { box-shadow: 0 14px 30px rgba(124,77,255,0.18) !important; }
 
-  .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+  .custom-scrollbar::-webkit-scrollbar { width: 4px; }
   .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-  .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(181,123,238,0.22); border-radius: 999px; }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(181,123,238,0.35), rgba(240,98,146,0.25));
+    border-radius: 999px;
+  }
 }
 
 .absolute.-right-12,
@@ -347,10 +357,15 @@ header .inline-flex,
   word-break: break-word;
 }
 
+.premium-panel.relative.mb-4 > .relative.mb-4 {
+  align-items: center !important;
+  gap: clamp(0.875rem, 4vw, 1.25rem) !important;
+}
+
 /* Dashboard */
 .mb-5.grid.grid-cols-2.gap-3 {
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  gap: clamp(0.5rem, 2.6vw, 0.75rem) !important;
+  gap: clamp(0.65rem, 3vw, 1rem) !important;
 }
 
 .mb-5.grid.grid-cols-2.gap-3 > .premium-card {
@@ -360,7 +375,8 @@ header .inline-flex,
 
 .grid.grid-cols-2.gap-3.pb-6 {
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  gap: clamp(0.55rem, 2.5vw, 0.9rem) !important;
+  gap: clamp(0.65rem, 3vw, 1rem) !important;
+  align-items: stretch !important;
 }
 
 .mb-5.grid.grid-cols-2.gap-3 > .premium-card,
@@ -453,7 +469,7 @@ header .inline-flex,
   flex-wrap: nowrap !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: clamp(0.28rem, 1.25vw, 0.7rem) !important;
+  gap: clamp(0.35rem, 1.5vw, 0.75rem) !important;
   overflow: hidden !important;
   padding: 0 !important;
   scrollbar-width: none;
@@ -470,11 +486,11 @@ header .inline-flex,
   width: auto !important;
   min-width: 0 !important;
   max-width: 4.35rem !important;
-  height: clamp(2.55rem, 11.4vw, 4.15rem) !important;
+  height: clamp(2.75rem, 12.5vw, 4.5rem) !important;
   padding: 0 !important;
   aspect-ratio: auto !important;
   border-radius: var(--radius-chip) !important;
-  font-size: clamp(1.08rem, 5.15vw, 1.75rem) !important;
+  font-size: clamp(1.15rem, 5.5vw, 1.85rem) !important;
   line-height: 1 !important;
   box-sizing: border-box !important;
   background: linear-gradient(135deg, rgba(124,77,255,0.20), rgba(13,10,26,0.95)) !important;
@@ -482,6 +498,7 @@ header .inline-flex,
   color: var(--text) !important;
   box-shadow: 0 8px 20px rgba(124,77,255,0.18), inset 0 1px 0 rgba(255,255,255,0.06) !important;
   text-shadow: none !important;
+  animation: riseIn 0.35s ease both, glowPulse 3s ease infinite;
 }
 
 .premium-panel .flex.min-h-\[72px\] {
@@ -500,7 +517,7 @@ header .inline-flex,
 .premium-panel .flex.min-h-\[72px\] .flex.flex-wrap,
 .premium-panel .flex.min-h-\[72px\] .flex.flex-nowrap {
   justify-content: flex-end !important;
-  gap: clamp(0.22rem, 1vw, 0.5rem) !important;
+  gap: clamp(0.35rem, 1.5vw, 0.75rem) !important;
 }
 
 .premium-panel .flex.min-h-\[72px\] .flex.flex-wrap > div,
@@ -508,9 +525,9 @@ header .inline-flex,
   flex: 1 1 0 !important;
   min-width: 0 !important;
   max-width: 2.85rem !important;
-  height: clamp(2.05rem, 8.8vw, 2.65rem) !important;
+  height: clamp(2.1rem, 9.5vw, 2.8rem) !important;
   padding: 0 !important;
-  font-size: clamp(0.88rem, 3.9vw, 1.1rem) !important;
+  font-size: clamp(0.9rem, 4.2vw, 1.15rem) !important;
   box-sizing: border-box !important;
 }
 
@@ -528,6 +545,8 @@ header .inline-flex,
   min-width: 0 !important;
   flex-wrap: wrap !important;
   row-gap: 0.5rem !important;
+  align-items: center !important;
+  gap: clamp(0.6rem, 2.5vw, 1rem) !important;
 }
 
 .premium-panel.flex.items-center.justify-between.gap-3.p-4 > span:first-child {
@@ -546,9 +565,10 @@ header .inline-flex,
 
 .premium-panel .grid.grid-cols-\[auto_1fr_auto\] {
   grid-template-columns: auto minmax(0, 1fr) auto !important;
-  gap: clamp(0.45rem, 2.2vw, 0.75rem) !important;
+  gap: clamp(0.6rem, 2.5vw, 1rem) !important;
   padding: clamp(0.62rem, 2.8vw, 0.85rem) !important;
-  border-radius: clamp(1rem, 5vw, 1.5rem) !important;
+  border-radius: clamp(1.1rem, 5vw, 1.45rem) !important;
+  align-items: center !important;
 }
 
 .premium-panel .grid.grid-cols-\[auto_1fr_auto\] > span:first-child {
@@ -602,6 +622,7 @@ header .inline-flex,
   letter-spacing: clamp(0.025rem, 0.25vw, 0.06rem) !important;
   border-radius: clamp(1rem, 4.8vw, 1.5rem) !important;
   color: var(--text-dim) !important;
+  gap: clamp(0.25rem, 1.5vw, 0.5rem) !important;
 }
 
 .bottom-nav svg {
@@ -614,6 +635,8 @@ header .inline-flex,
   background: linear-gradient(135deg, rgba(124,77,255,0.30), rgba(240,98,146,0.20)) !important;
   color: var(--cyan-bright) !important;
   box-shadow: 0 6px 18px rgba(124,77,255,0.22) !important;
+  transform: scale(1.04);
+  transition: transform 0.2s ease;
 }
 .bottom-nav button.text-\[var\(--cyan\)] { color: var(--cyan-bright) !important; }
 .bottom-nav button.text-red-300 { color: #ff6b8a !important; }
@@ -693,10 +716,39 @@ header .inline-flex,
   }
 }
 
-@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes slideIn { from { opacity: 0; transform: translateX(-4px); } to { opacity: 1; transform: translateX(0); } }
-@keyframes riseIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); filter: blur(4px); }
+  to   { opacity: 1; transform: translateY(0);   filter: blur(0px); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-8px); filter: blur(3px); }
+  to   { opacity: 1; transform: translateX(0);    filter: blur(0px); }
+}
+
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-5px); }
+  40%       { transform: translateX(5px); }
+  60%       { transform: translateX(-3px); }
+  80%       { transform: translateX(3px); }
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(124,77,255,0); }
+  50%       { box-shadow: 0 0 18px 4px rgba(124,77,255,0.18); }
+}
+
+@keyframes shimmer {
+  from { background-position: -200% center; }
+  to   { background-position:  200% center; }
+}
+
 .animate-shake { animation: shake 0.2s ease-in-out 0s 2; }
 
 .blur-xl,
@@ -748,7 +800,7 @@ header .inline-flex,
 
   header .premium-panel,
   .premium-panel.relative.mb-4 {
-    padding: 1rem !important;
+    padding: 1.1rem 1.25rem !important;
   }
 
   header h1 {
@@ -775,7 +827,7 @@ header .inline-flex,
     gap: 0.75rem !important;
   }
 
-  .grid.grid-cols-2.gap-3.pb-6 { gap: 10px !important; }
+  .grid.grid-cols-2.gap-3.pb-6 { gap: 8px !important; }
   .grid.grid-cols-2.gap-3.pb-6 > button,
   .grid.grid-cols-2.gap-3.pb-6 > .premium-card {
     min-height: 108px !important;
@@ -792,11 +844,11 @@ header .inline-flex,
 
   .bottom-nav {
     border-radius: 24px !important;
-    padding: 6px !important;
+    padding: 7px !important;
   }
 
   .bottom-nav button {
-    padding: 9px 6px !important;
+    padding: 10px 6px !important;
     font-size: 8px !important;
     letter-spacing: 0.8px !important;
     border-radius: 18px !important;
