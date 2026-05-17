@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate, useLocation } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
 import {
-  Lock, Zap, ShieldCheck, LogOut, Search, RefreshCw, Crown, Sparkles, Smartphone, Home, KeyRound, Database, MessageCircle, Star
+  Lock, Zap, ShieldCheck, LogOut, Search, RefreshCw, Crown, Sparkles, Smartphone, Home, KeyRound, Database, MessageCircle
 } from "lucide-react";
 import { Analytics } from "@vercel/analytics/react";
 import AnalyzeMenu from "./pages/AnalyzeMenu";
@@ -244,45 +244,16 @@ function StatusStrip({ role, deviceCode }: { role: string; deviceCode: string })
   );
 }
 
-const FAVORITES_STORAGE_KEY = "supreme_favorite_markets";
-
 function Dashboard({ markets, onRefresh }: { markets: any[]; onRefresh: () => void }) {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
-  const [favoriteIds, setFavoriteIds] = useState<string[]>(() => {
-    try {
-      const saved = localStorage.getItem(FAVORITES_STORAGE_KEY);
-      const parsed = saved ? JSON.parse(saved) : [];
-      return Array.isArray(parsed) ? parsed.map(String) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  useEffect(() => {
-    localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favoriteIds));
-  }, [favoriteIds]);
-
-  const favoriteSet = useMemo(() => new Set(favoriteIds), [favoriteIds]);
-
-  const toggleFavorite = (marketId: string) => {
-    setFavoriteIds((current) => {
-      if (current.includes(marketId)) return current.filter((id) => id !== marketId);
-      return [marketId, ...current];
-    });
-  };
 
   const filteredMarkets = useMemo(() => {
     const q = search.toLowerCase();
     return markets
       .filter(m => m.id.toLowerCase().includes(q) || (m.name && m.name.toLowerCase().includes(q)))
-      .sort((a, b) => {
-        const aFav = favoriteSet.has(a.id);
-        const bFav = favoriteSet.has(b.id);
-        if (aFav !== bFav) return aFav ? -1 : 1;
-        return (a.order ?? 99) - (b.order ?? 99);
-      });
-  }, [markets, search, favoriteSet]);
+      .sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
+  }, [markets, search]);
 
   return (
     <div className="dashboard-page animate-[riseIn_0.35s_ease-out]">
@@ -305,7 +276,6 @@ function Dashboard({ markets, onRefresh }: { markets: any[]; onRefresh: () => vo
         {filteredMarkets.length > 0 ? filteredMarkets.map((m) => {
           const title = m.name || m.id;
           const lastResult = m.lastResult || "----";
-          const isFavorite = favoriteSet.has(m.id);
           return (
             <div
               key={m.id}
@@ -315,23 +285,12 @@ function Dashboard({ markets, onRefresh }: { markets: any[]; onRefresh: () => vo
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") navigate(`/analyze/${m.id}`);
               }}
-              className={`market-card market-card-compact premium-card relative cursor-pointer overflow-hidden text-left transition active:scale-[0.985] ${isFavorite ? "market-card-favorite" : ""}`}
+              className="market-card market-card-compact premium-card relative cursor-pointer overflow-hidden text-center transition active:scale-[0.985]"
             >
-              <button
-                type="button"
-                aria-label={isFavorite ? `Hapus ${title} dari favorit` : `Tambahkan ${title} ke favorit`}
-                aria-pressed={isFavorite}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleFavorite(m.id);
-                }}
-                className={`market-favorite-btn absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-xl border transition active:scale-95 ${isFavorite ? "border-[var(--gold)] bg-[var(--gold-dim)] text-[var(--gold)]" : "border-white/10 bg-black/10 text-[var(--text-dim)]"}`}
-              >
-                <Star size={13} fill={isFavorite ? "currentColor" : "none"} />
-              </button>
-              <span className="market-name block truncate pr-7 font-['Orbitron'] text-[12px] font-black uppercase tracking-[2px] text-[var(--text)]">{title}</span>
-              <div className="market-result-row mt-3 flex items-end justify-between gap-2">
-                <span className="market-last-label text-[8px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Last</span>
+              <div className="market-name-strip">
+                <span className="market-name block truncate font-['Orbitron'] text-[12px] font-black uppercase tracking-[2px] text-[var(--text)]">{title}</span>
+              </div>
+              <div className="market-result-row flex flex-1 items-center justify-center">
                 <span className="market-last-value font-['JetBrains_Mono'] text-[18px] font-black tracking-[1px] text-[var(--cyan)]">{lastResult}</span>
               </div>
             </div>
@@ -350,7 +309,6 @@ function Dashboard({ markets, onRefresh }: { markets: any[]; onRefresh: () => vo
 function BottomNav({ currentPath, onNavigate }: { currentPath: string; onNavigate: any }) {
   const logout = () => {
     localStorage.removeItem("supreme_token");
-    // supreme_devcode TIDAK dihapus → device ID tetap sama
     sessionStorage.setItem("supreme_skip_auto", "true");
     window.location.reload();
   };
