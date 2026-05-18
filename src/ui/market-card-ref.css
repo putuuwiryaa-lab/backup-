@@ -87,7 +87,7 @@ header p {
   display: none !important;
 }
 
-/* Bottom nav: active state no longer dominates the full bar. */
+/* Bottom nav: darker active state, because this file is loaded last. */
 .bottom-nav {
   align-items: center !important;
   gap: 0.35rem !important;
@@ -103,9 +103,17 @@ header p {
 .bottom-nav button.bg-\[var\(--gold\)],
 .bottom-nav button:first-child.bg-\[var\(--gold\)] {
   transform: none !important;
-  background: rgba(240, 98, 146, 0.78) !important;
+  background: #8f2f58 !important;
+  color: #f4d7e4 !important;
   border-radius: 1.25rem !important;
   box-shadow: none !important;
+}
+
+.bottom-nav button.bg-\[var\(--gold\)] svg,
+.bottom-nav button:first-child.bg-\[var\(--gold\)] svg,
+.bottom-nav button.bg-\[var\(--gold\)] span,
+.bottom-nav button:first-child.bg-\[var\(--gold\)] span {
+  color: #f4d7e4 !important;
 }
 
 @media (max-width: 420px) {
