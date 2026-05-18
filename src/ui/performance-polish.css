@@ -118,10 +118,17 @@ header .inline-flex,
 
 .bottom-nav button.bg-\[var\(--gold\)],
 .bottom-nav button:first-child.bg-\[var\(--gold\)] {
-  background: #e95689 !important;
-  color: #110916 !important;
+  background: #8f2f58 !important;
+  color: #f4d7e4 !important;
   transform: none !important;
   box-shadow: none !important;
+}
+
+.bottom-nav button.bg-\[var\(--gold\)] svg,
+.bottom-nav button:first-child.bg-\[var\(--gold\)] svg,
+.bottom-nav button.bg-\[var\(--gold\)] span,
+.bottom-nav button:first-child.bg-\[var\(--gold\)] span {
+  color: #f4d7e4 !important;
 }
 
 @media (max-width: 768px) {
