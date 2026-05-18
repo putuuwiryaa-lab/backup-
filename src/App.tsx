@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate, useLocation } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
 import {
-  Lock, Zap, ShieldCheck, LogOut, Search, RefreshCw, Crown, Sparkles, Smartphone, Home, KeyRound, Database, MessageCircle
+  Lock, Zap, ShieldCheck, Search, RefreshCw, Crown, Sparkles, Smartphone, KeyRound, Database, MessageCircle
 } from "lucide-react";
 import { Analytics } from "@vercel/analytics/react";
 import AnalyzeMenu from "./pages/AnalyzeMenu";
@@ -25,7 +25,6 @@ export default function App() {
 
 function AppLayout() {
   const location = useLocation();
-  const navigate = useNavigate();
   const [deviceCode, setDeviceCode] = useState("");
   const [authStatus, setAuthStatus] = useState<"LOADING" | "LOCKED" | "READY" | "EXPIRED">("LOADING");
   const [authStage, setAuthStage] = useState("Menyiapkan aplikasi...");
@@ -119,7 +118,7 @@ function AppLayout() {
   if (authStatus === "EXPIRED") return <ExpiredScreen />;
 
   return (
-    <div className={`relative mx-auto flex min-h-screen w-full max-w-3xl flex-col px-4 sm:px-6 ${isAnalyzePage ? "pb-6 pt-4" : "pb-28 pt-5"}`}>
+    <div className={`relative mx-auto flex min-h-screen w-full max-w-3xl flex-col px-4 sm:px-6 ${isAnalyzePage ? "pb-6 pt-4" : "pb-20 pt-5"}`}>
       {!isAnalyzePage && location.pathname !== "/admin" && (
         <>
           <HeroHeader />
@@ -146,7 +145,7 @@ function AppLayout() {
         </Routes>
       </main>
 
-      {!isAnalyzePage && <BottomNav currentPath={location.pathname} onNavigate={navigate} />}
+      {!isAnalyzePage && <ReportButton />}
     </div>
   );
 }
@@ -306,23 +305,21 @@ function Dashboard({ markets, onRefresh }: { markets: any[]; onRefresh: () => vo
   );
 }
 
-function BottomNav({ currentPath, onNavigate }: { currentPath: string; onNavigate: any }) {
-  const logout = () => {
-    localStorage.removeItem("supreme_token");
-    sessionStorage.setItem("supreme_skip_auto", "true");
-    window.location.reload();
-  };
+function ReportButton() {
   const openReport = () => {
-    window.open("https://wa.me/6285792030642?text=Halo%2C%20saya%20ingin%20report%20bug%20atau%20kendala%20aplikasi%20Analisa%20Angka", "_blank", "noopener,noreferrer");
+    window.open("https://wa.me/6285792030642?text=Halo%2C%20saya%20ingin%20melaporkan%20masalah%20pada%20aplikasi%20Analisa%20Angka", "_blank", "noopener,noreferrer");
   };
+
   return (
-    <div className="fixed inset-x-0 bottom-4 z-40 mx-auto w-[calc(100%-2rem)] max-w-md">
-      <div className="bottom-nav grid grid-cols-3 gap-1 rounded-[2rem] p-2">
-        <button onClick={() => onNavigate("/")} className={`flex flex-col items-center gap-1 rounded-3xl px-3 py-3 text-[9px] font-black uppercase tracking-[1px] ${currentPath === "/" ? "bg-[var(--gold)] text-black" : "text-[var(--text-dim)]"}`}><Home size={17} /> Home</button>
-        <button onClick={openReport} className="flex flex-col items-center gap-1 rounded-3xl px-3 py-3 text-[9px] font-black uppercase tracking-[1px] text-[var(--cyan)]"><MessageCircle size={17} /> Report</button>
-        <button onClick={logout} className="flex flex-col items-center gap-1 rounded-3xl px-3 py-3 text-[9px] font-black uppercase tracking-[1px] text-red-300"><LogOut size={17} /> Keluar</button>
-      </div>
-    </div>
+    <button
+      type="button"
+      onClick={openReport}
+      className="report-floating-button fixed bottom-4 right-4 z-40 flex h-11 items-center gap-2 rounded-full border px-4 text-[10px] font-black uppercase tracking-[1.4px] active:scale-95"
+      aria-label="Laporkan Masalah"
+    >
+      <MessageCircle size={16} />
+      <span>Laporkan Masalah</span>
+    </button>
   );
 }
 
