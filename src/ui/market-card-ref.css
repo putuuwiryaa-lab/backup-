@@ -89,23 +89,23 @@ header p {
 
 /* Floating report action. Bottom navigation is no longer rendered. */
 .report-floating-button {
-  background: #151025 !important;
-  border-color: rgba(181, 123, 238, 0.24) !important;
-  color: #d9c8ff !important;
+  background: #2a1630 !important;
+  border-color: rgba(240, 98, 146, 0.52) !important;
+  color: #fff4f8 !important;
   box-shadow: none !important;
   text-shadow: none !important;
 }
 
 .report-floating-button svg,
 .report-floating-button span {
-  color: #d9c8ff !important;
+  color: #fff4f8 !important;
   opacity: 1 !important;
   filter: none !important;
   text-shadow: none !important;
 }
 
 .report-floating-button:active {
-  background: #20183a !important;
+  background: #3a1d42 !important;
 }
 
 .bottom-nav {
