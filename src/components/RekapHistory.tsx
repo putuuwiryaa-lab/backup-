@@ -4,7 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
-const REKAP_HISTORY_LIMIT = 15;
+const REKAP_HISTORY_LIMIT = 9;
 
 export default function RekapHistory({ marketId, mode }: { marketId: string; mode: "invest" | "top" }) {
   const [rows, setRows] = useState<any[]>([]);
@@ -55,7 +55,7 @@ export default function RekapHistory({ marketId, mode }: { marketId: string; mod
     <div className="space-y-3">
       <div className="flex items-center justify-between px-1">
         <span className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[2px] text-[var(--text)]">Riwayat Evaluasi</span>
-        <span className="text-[9px] font-black uppercase tracking-[1px] text-[var(--text-dim)]">15 Terbaru</span>
+        <span className="text-[9px] font-black uppercase tracking-[1px] text-[var(--text-dim)]">9 Terbaru</span>
       </div>
       <div className="grid grid-cols-3 gap-2">
         {rows.map((row) => (
