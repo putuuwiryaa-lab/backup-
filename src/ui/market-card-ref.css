@@ -1,5 +1,5 @@
 /* Compact market card final polish
-   Strong visible pass: proportional card, balanced strip/result, calmer bottom nav.
+   Strong visible pass: proportional card, balanced strip/result, single report action.
 */
 
 /* Header subtitle: give the hero title more breathing room. */
@@ -87,42 +87,29 @@ header p {
   display: none !important;
 }
 
-/* Bottom nav: active item is readable and non-glowing. */
-.bottom-nav {
-  align-items: center !important;
-  gap: 0.35rem !important;
-  padding: 0.5rem !important;
-}
-
-.bottom-nav button {
-  min-height: 3.05rem !important;
-  border-radius: 1.15rem !important;
-  padding: 0.54rem 0.35rem !important;
-  color: #b7a8c9 !important;
-  background: transparent !important;
+/* Floating report action. Bottom navigation is no longer rendered. */
+.report-floating-button {
+  background: #151025 !important;
+  border-color: rgba(181, 123, 238, 0.24) !important;
+  color: #d9c8ff !important;
   box-shadow: none !important;
   text-shadow: none !important;
 }
 
-.bottom-nav button.bg-\[var\(--gold\)],
-.bottom-nav button:first-child.bg-\[var\(--gold\)] {
-  transform: none !important;
-  background: #2a1630 !important;
-  color: #fff4f8 !important;
-  border: 1px solid rgba(240, 98, 146, 0.42) !important;
-  border-radius: 1.15rem !important;
-  box-shadow: none !important;
-  text-shadow: none !important;
-}
-
-.bottom-nav button.bg-\[var\(--gold\)] svg,
-.bottom-nav button:first-child.bg-\[var\(--gold\)] svg,
-.bottom-nav button.bg-\[var\(--gold\)] span,
-.bottom-nav button:first-child.bg-\[var\(--gold\)] span {
-  color: #fff4f8 !important;
+.report-floating-button svg,
+.report-floating-button span {
+  color: #d9c8ff !important;
   opacity: 1 !important;
   filter: none !important;
   text-shadow: none !important;
+}
+
+.report-floating-button:active {
+  background: #20183a !important;
+}
+
+.bottom-nav {
+  display: none !important;
 }
 
 @media (max-width: 420px) {
@@ -167,14 +154,12 @@ header p {
     letter-spacing: 0.11rem !important;
   }
 
-  .bottom-nav {
-    padding: 0.42rem !important;
-    gap: 0.25rem !important;
-  }
-
-  .bottom-nav button {
-    min-height: 2.85rem !important;
-    padding: 0.48rem 0.25rem !important;
-    border-radius: 1rem !important;
+  .report-floating-button {
+    right: 0.9rem !important;
+    bottom: 0.9rem !important;
+    height: 2.55rem !important;
+    padding: 0 0.85rem !important;
+    font-size: 0.58rem !important;
+    letter-spacing: 0.08rem !important;
   }
 }
