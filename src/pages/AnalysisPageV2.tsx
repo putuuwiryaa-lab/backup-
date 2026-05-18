@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Copy, RefreshCw, Sparkles, Trophy, BarChart3 } from "lucide-react";
+import { ArrowLeft, Copy, RefreshCw, Sparkles, Trophy, BarChart3, ChevronDown, ChevronUp } from "lucide-react";
 import RekapHistory from "../components/RekapHistory";
 import EvaluationHistory from "../components/EvaluationHistory";
 
@@ -23,6 +23,7 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState("");
+  const [detailValidationOpen, setDetailValidationOpen] = useState(true);
   const meta = typeMeta[type] || typeMeta.ai;
 
   const safeArray = (value: any) => Array.isArray(value) ? value : value === undefined || value === null ? [] : [value];
@@ -41,6 +42,7 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
     setLoading(true);
     setError("");
     setResult(null);
+    setDetailValidationOpen(true);
 
     try {
       const resMarkets = await fetch("/api/markets");
@@ -242,8 +244,11 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
             {POS.map((p) => <ResultRow key={p} label={`OFF ${p}`} values={result[p]?.result} accent={meta.accent} />)}
           </div>
           <div className="premium-panel space-y-5 p-4">
-            <SectionTitle accent={meta.accent} title="Detail Validasi" />
-            {POS.map((p) => <section key={p} className="space-y-3"><div className="flex items-center gap-3"><div className="h-px flex-1 bg-white/10" /><span className="font-['Orbitron'] text-[10px] font-black uppercase tracking-[3px]" style={{ color: meta.accent }}>{p}</span><div className="h-px flex-1 bg-white/10" /></div>{renderStatsList(statsFrom(result[p]), meta.accent)}</section>)}
+            <div className="flex items-center justify-between gap-3">
+              <SectionTitle accent={meta.accent} title="Detail Validasi" />
+              <DetailToggle open={detailValidationOpen} accent={meta.accent} onClick={() => setDetailValidationOpen((open) => !open)} />
+            </div>
+            {detailValidationOpen && POS.map((p) => <section key={p} className="space-y-3"><div className="flex items-center gap-3"><div className="h-px flex-1 bg-white/10" /><span className="font-['Orbitron'] text-[10px] font-black uppercase tracking-[3px]" style={{ color: meta.accent }}>{p}</span><div className="h-px flex-1 bg-white/10" /></div>{renderStatsList(statsFrom(result[p]), meta.accent)}</section>)}
           </div>
           {renderEvaluationHistory()}
         </div>
@@ -261,8 +266,11 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
         <MainResultCard label={meta.label} values={displayResult} accent={meta.accent} shio={type === "shio"} singleLine={isBBFSResult} stacked={type === "ai"} />
         <ResultHeader label="VALIDASI" value={`RUMUS ACTIVE ${active}/${formulaTotal}`} accent={meta.accent} />
         <div className="premium-panel p-4">
-          <SectionTitle accent={meta.accent} title="Detail Validasi" />
-          <div className="mt-4">{renderStatsList(stats, meta.accent)}</div>
+          <div className="flex items-center justify-between gap-3">
+            <SectionTitle accent={meta.accent} title="Detail Validasi" />
+            <DetailToggle open={detailValidationOpen} accent={meta.accent} onClick={() => setDetailValidationOpen((open) => !open)} />
+          </div>
+          {detailValidationOpen && <div className="mt-4">{renderStatsList(stats, meta.accent)}</div>}
         </div>
         {renderEvaluationHistory()}
       </div>
@@ -295,6 +303,21 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
 
 function SectionTitle({ title, accent }: { title: string; accent: string }) {
   return <div className="flex items-center gap-2"><BarChart3 size={16} style={{ color: accent }} /><span className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[2px] text-[var(--text)]">{title}</span></div>;
+}
+
+function DetailToggle({ open, accent, onClick }: { open: boolean; accent: string; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[9px] font-black uppercase tracking-[1px] active:scale-95"
+      style={{ borderColor: `${accent}55`, backgroundColor: `${accent}18`, color: accent }}
+      aria-label={open ? "Tutup Detail Validasi" : "Buka Detail Validasi"}
+    >
+      {open ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+      {open ? "Tutup" : "Buka"}
+    </button>
+  );
 }
 
 function ResultHeader({ label, value, accent }: { label: string; value: string; accent: string }) {
