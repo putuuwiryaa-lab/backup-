@@ -6,7 +6,7 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 type EvaluationMode = "ai" | "mati" | "jumlah" | "shio";
-const EVALUATION_HISTORY_LIMIT = 15;
+const EVALUATION_HISTORY_LIMIT = 9;
 
 function labelFromMatiDetail(detail: any) {
   const asSafe = Boolean(detail?.AS?.safe);
@@ -88,7 +88,7 @@ export default function EvaluationHistory({
     <div className="space-y-3">
       <div className="flex items-center justify-between px-1">
         <span className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[2px] text-[var(--text)]">Riwayat Evaluasi</span>
-        <span className="text-[9px] font-black uppercase tracking-[1px] text-[var(--text-dim)]">15 Terbaru</span>
+        <span className="text-[9px] font-black uppercase tracking-[1px] text-[var(--text-dim)]">9 Terbaru</span>
       </div>
       <div className="grid grid-cols-3 gap-2">
         {rows.map((row) => {
