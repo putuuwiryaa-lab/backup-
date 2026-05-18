@@ -1,296 +1,135 @@
-/* Performance + hierarchy polish
-   Purpose:
-   - reduce rendering cost on low-end phones
-   - keep violet/pink identity without heavy glass
-   - remove repeated animation/glow work
+/* Ultra-light performance mode
+   No glass, no blur, no heavy shadows, no decorative glow, no animations.
 */
 
 :root {
-  --glass-bg: rgba(255, 255, 255, 0.040);
-  --glass-bg-soft: rgba(255, 255, 255, 0.030);
-  --glass-border: rgba(255, 255, 255, 0.080);
-  --glass-blur: 4px;
-  --glass-saturate: 115%;
+  --glass-bg: rgba(18, 14, 32, 0.98);
+  --glass-bg-soft: rgba(15, 11, 27, 0.98);
+  --glass-border: rgba(255, 255, 255, 0.075);
+  --glass-blur: 0px;
+  --glass-saturate: 100%;
 }
 
-/* Much lighter background: fewer layers, less overdraw. */
-.app-container,
-body {
-  background:
-    radial-gradient(ellipse 70% 45% at 18% 0%, rgba(124,77,255,0.12) 0%, transparent 56%),
-    linear-gradient(180deg, #110e22 0%, #0d0a1a 68%, #080514 100%) !important;
+*,
+*::before,
+*::after {
+  animation: none !important;
+  transition: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  text-shadow: none !important;
 }
 
-/* Surfaces: near-flat translucent glass, low blur, low shadow. */
+html,
+body,
+#root,
+.app-container {
+  background: #0d0a1a !important;
+}
+
 .premium-panel,
 .premium-card,
-.glass-card {
-  background: var(--glass-bg) !important;
-  border-color: var(--glass-border) !important;
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)) !important;
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)) !important;
-  box-shadow: 0 8px 18px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.045) !important;
-  animation: none !important;
-}
-
-/* Explicit dashboard hierarchy. */
-.hero-header {
-  margin-bottom: 1.05rem !important;
-}
-
-.hero-card {
-  background:
-    linear-gradient(135deg, rgba(41,30,78,0.96), rgba(22,16,42,0.98)) !important;
-  border-color: rgba(255,255,255,0.13) !important;
-  box-shadow: 0 10px 22px rgba(0,0,0,0.26), inset 0 1px 0 rgba(255,255,255,0.06) !important;
+.glass-card,
+.hero-card,
+.status-strip > .premium-card,
+.market-card,
+.market-card-compact,
+.soft-input,
+.ghost-button,
+.primary-button,
+.bottom-nav,
+.premium-panel.result-glow,
+.premium-panel.result-glow > .relative.rounded-3xl,
+.premium-panel .space-y-3 > .rounded-3xl,
+.premium-panel.result-glow .space-y-3 > .rounded-3xl,
+.premium-panel.flex.items-center.justify-between.gap-3.p-4,
+.premium-panel .grid.grid-cols-\[auto_1fr_auto\] {
+  background: #151025 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: none !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
 
-.hero-orb,
-.market-card-orb {
-  display: none !important;
+.hero-card {
+  background: #18122d !important;
 }
 
-.hero-crown {
-  background: linear-gradient(135deg, rgba(124,77,255,0.28), rgba(240,98,146,0.20)) !important;
-  border: 1px solid rgba(255,255,255,0.12) !important;
-  color: var(--cyan-bright) !important;
+.status-strip > .premium-card,
+.market-card,
+.market-card-compact,
+.soft-input {
+  background: #120d22 !important;
+}
+
+.hero-crown,
+.hero-badge,
+header .inline-flex,
+.premium-panel.relative.mb-4 .inline-flex,
+.grid.grid-cols-2.gap-3.pb-6 > .premium-card .inline-flex,
+.grid.grid-cols-2.gap-3.pb-6 > .premium-card .rounded-full {
+  background: #20183a !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
   box-shadow: none !important;
-  filter: none !important;
 }
 
 .hero-crown svg {
   color: var(--cyan-bright) !important;
-  stroke-width: 2.4 !important;
   filter: none !important;
 }
 
-.hero-badge {
-  background: rgba(255,255,255,0.05) !important;
-  border-color: rgba(255,255,255,0.09) !important;
-  color: var(--text-dim) !important;
-}
-
-.status-strip {
-  margin-bottom: 2.15rem !important;
-}
-
-.status-strip > .premium-card {
-  background: rgba(14,10,28,0.82) !important;
-  border-color: rgba(255,255,255,0.065) !important;
-  box-shadow: 0 5px 12px rgba(0,0,0,0.16) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-.dashboard-page {
-  padding-top: 0.15rem !important;
+.blur,
+.blur-sm,
+.blur-md,
+.blur-lg,
+.blur-xl,
+.blur-2xl,
+.blur-3xl,
+.hero-orb,
+.market-card-orb {
+  display: none !important;
 }
 
 .market-section-title {
   margin-bottom: 0.9rem !important;
 }
 
-.market-section-title h2 {
-  letter-spacing: 0.28rem !important;
-}
-
 .market-search {
   margin-bottom: 1rem !important;
 }
 
-.market-grid {
-  margin-top: 0.15rem !important;
-}
-
-/* Compact market card redesign: name + last result only. */
-.market-grid-compact {
-  gap: 0.65rem !important;
-}
-
-.market-card-compact {
-  min-height: 82px !important;
-  padding: 0.85rem 0.9rem !important;
-  border-radius: 1.25rem !important;
-  background: rgba(9,7,18,0.94) !important;
-  border-color: rgba(255,255,255,0.06) !important;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.16) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-.market-card-compact:active {
-  background: rgba(18,12,36,0.96) !important;
-}
-
-.market-card-compact .market-name {
-  font-size: 0.72rem !important;
-  line-height: 1.25 !important;
-  letter-spacing: 0.11rem !important;
-  color: rgba(240,234,250,0.92) !important;
-}
-
-.market-result-row {
-  margin-top: 0.65rem !important;
-}
-
-.market-last-label {
-  color: rgba(168,152,200,0.60) !important;
-}
-
-.market-last-value {
-  font-size: 1.05rem !important;
-  color: var(--cyan-bright) !important;
-  text-shadow: none !important;
-}
-
-.market-card {
-  background: rgba(12,9,24,0.92) !important;
-  border-color: rgba(255,255,255,0.075) !important;
-  box-shadow: 0 6px 14px rgba(0,0,0,0.18) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-.market-card .bg-\[var\(--gold-dim\)\] {
-  background: rgba(240,98,146,0.16) !important;
-}
-
-/* Legacy selectors kept as fallback. */
-header {
-  margin-bottom: 1.05rem !important;
-}
-
-header .premium-panel,
-.premium-panel.relative.mb-4 {
-  border-color: rgba(181,123,238,0.13) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-header + .grid.grid-cols-2.gap-3 {
-  margin-bottom: 2.1rem !important;
-}
-
-header + .grid.grid-cols-2.gap-3 > .premium-card {
-  background: rgba(14,10,28,0.82) !important;
-  border-color: rgba(255,255,255,0.065) !important;
-  box-shadow: 0 5px 12px rgba(0,0,0,0.16) !important;
-}
-
-main h1,
-main h2,
-main h3,
-main .font-\['Orbitron'\] {
-  text-shadow: none !important;
-}
-
-/* Search is a divider between controls and market cards. */
-.soft-input {
-  background: rgba(10,7,20,0.78) !important;
-  border-color: rgba(255,255,255,0.095) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.035) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-/* Market cards: flat, darker, and clearly below the header hierarchy. */
-.mb-5.grid.grid-cols-2.gap-3 > .premium-card,
-.grid.grid-cols-2.gap-3.pb-6 > .premium-card {
-  background: rgba(12,9,24,0.92) !important;
-  border-color: rgba(255,255,255,0.070) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  box-shadow: 0 6px 14px rgba(0,0,0,0.18) !important;
-}
-
+.market-grid,
 .grid.grid-cols-2.gap-3.pb-6 {
-  margin-top: 0.4rem !important;
+  margin-top: 0.25rem !important;
 }
 
-/* Pills are neutral and cheap. */
-.grid.grid-cols-2.gap-3.pb-6 > .premium-card .inline-flex,
-.grid.grid-cols-2.gap-3.pb-6 > .premium-card .rounded-full,
-header .inline-flex,
-.premium-panel.relative.mb-4 .inline-flex {
-  background: rgba(255,255,255,0.040) !important;
-  border-color: rgba(255,255,255,0.080) !important;
-  color: var(--text-dim) !important;
-}
-
-/* Result area: keep accent, reduce blur/shadow. */
-.premium-panel.result-glow {
-  background: rgba(255,255,255,0.040) !important;
-  border-color: rgba(181,123,238,0.12) !important;
-  box-shadow: 0 8px 18px rgba(0,0,0,0.22) !important;
-}
-
-.premium-panel.result-glow > .relative.rounded-3xl {
-  background: rgba(10,7,20,0.86) !important;
-  border-color: rgba(255,255,255,0.075) !important;
-}
-
-/* Digit chips: no glow, no repeated animation. */
-.premium-panel.result-glow > .relative.rounded-3xl > .mt-4 > div > div,
-.main-digit-chip {
-  background: rgba(18,12,36,0.92) !important;
-  border-color: rgba(181,123,238,0.32) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.045) !important;
-  animation: none !important;
-}
-
-.premium-panel.result-glow > .relative.rounded-3xl > .mt-4 > div > div:active,
-.main-digit-chip:active {
-  animation: none !important;
-}
-
-/* Validation rows: flat. */
-.premium-panel.flex.items-center.justify-between.gap-3.p-4,
-.premium-panel .grid.grid-cols-\[auto_1fr_auto\],
-.premium-panel.result-glow .space-y-3 > .rounded-3xl,
-.premium-panel .space-y-3 > .rounded-3xl {
-  background: rgba(10,7,20,0.62) !important;
-  border-color: rgba(255,255,255,0.070) !important;
+.main-digit-chip,
+.premium-panel.result-glow > .relative.rounded-3xl > .mt-4 > div > div {
+  background: #18122d !important;
+  border-color: rgba(181, 123, 238, 0.24) !important;
   box-shadow: none !important;
 }
 
-/* Inputs/buttons: reduce shadow. */
-.soft-input,
-.ghost-button,
-.primary-button {
-  box-shadow: none !important;
-}
-
-/* Bottom nav: no blur on phones, very low cost on desktop. */
 .bottom-nav {
-  background: rgba(10,7,20,0.88) !important;
-  backdrop-filter: blur(4px) saturate(115%) !important;
-  -webkit-backdrop-filter: blur(4px) saturate(115%) !important;
-  box-shadow: 0 8px 18px rgba(0,0,0,0.24) !important;
-  animation: none !important;
+  background: #090713 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
 .bottom-nav button.bg-\[var\(--gold\)],
 .bottom-nav button:first-child.bg-\[var\(--gold\)] {
-  background: rgba(240,98,146,0.86) !important;
-  box-shadow: none !important;
+  background: #e95689 !important;
+  color: #110916 !important;
   transform: none !important;
+  box-shadow: none !important;
 }
 
-/* Disable decorative blur objects. */
-.blur-xl,
-.blur-2xl,
-.blur-3xl {
-  filter: none !important;
-  opacity: 0.055 !important;
-}
-
-/* Mobile: zero backdrop-filter on repeated surfaces. */
 @media (max-width: 768px) {
-  :root {
-    --glass-blur: 0px;
-    --glass-saturate: 100%;
+  html,
+  body,
+  #root,
+  .app-container {
+    background: #0d0a1a !important;
   }
 
   .premium-panel,
@@ -304,14 +143,7 @@ header .inline-flex,
   .flex.min-h-screen.items-center.justify-center.p-8 .premium-panel {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
-  }
-
-  .premium-panel,
-  .premium-card,
-  .glass-card,
-  .bottom-nav,
-  .result-glow {
-    box-shadow: 0 5px 12px rgba(0,0,0,0.18) !important;
+    box-shadow: none !important;
   }
 }
 
@@ -320,9 +152,7 @@ header .inline-flex,
   body,
   #root,
   .app-container {
-    background:
-      radial-gradient(ellipse at top center, rgba(124,77,255,0.10), transparent 36%),
-      linear-gradient(180deg, #110e22 0%, #0d0a1a 70%, #080514 100%) !important;
+    background: #0d0a1a !important;
   }
 
   .hero-header,
@@ -337,29 +167,5 @@ header .inline-flex,
 
   .market-search {
     margin-bottom: 1rem !important;
-  }
-
-  .market-grid,
-  .grid.grid-cols-2.gap-3.pb-6 {
-    margin-top: 0.25rem !important;
-  }
-
-  .market-grid-compact {
-    gap: 0.55rem !important;
-  }
-
-  .market-card-compact {
-    min-height: 76px !important;
-    padding: 0.75rem 0.8rem !important;
-    border-radius: 1.1rem !important;
-  }
-
-  .market-card-compact .market-name {
-    font-size: 0.68rem !important;
-    letter-spacing: 0.095rem !important;
-  }
-
-  .market-last-value {
-    font-size: 1rem !important;
   }
 }
