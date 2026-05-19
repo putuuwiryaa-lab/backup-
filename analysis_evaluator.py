@@ -12,11 +12,18 @@ INTERNAL_API_SECRET = os.environ.get("INTERNAL_API_SECRET", "")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 MODES = {
-    "ai": [4, 6, 8],
-    "mati": [1, 2, 3, 4],
-    "jumlah": [1, 2],
-    "shio": [1, 2],
+    "ai": [2, 4, 6, 8],
+    "mati": [1, 2, 3],
+    "jumlah": [1, 2, 3],
+    "shio": [1, 2, 3],
 }
+
+MATI_POSITIONS = [
+    ("as", "AS", 0),
+    ("kop", "KOP", 1),
+    ("kepala", "KEPALA", 2),
+    ("ekor", "EKOR", 3),
+]
 
 SHIO_TABLE = {}
 for shio, values in [
@@ -59,7 +66,6 @@ def get_payload_data(payload):
 def normalize_digit_list(value):
     if not isinstance(value, list):
         return []
-
     output = []
     for item in value:
         text = str(item).strip()
@@ -89,19 +95,15 @@ def analyze_mode(history, mode, param):
     headers = {}
     if INTERNAL_API_SECRET:
         headers["x-internal-secret"] = INTERNAL_API_SECRET
-
-    analyze_history = history
-
     response = requests.post(
         ANALYZE_API_URL,
         headers=headers,
-        json={"type": mode, "data": analyze_history, "param": param},
+        json={"type": mode, "data": history, "param": param},
         timeout=25,
     )
     response.raise_for_status()
     raw_payload = response.json()
     payload = get_payload_data(raw_payload)
-
     if mode == "mati":
         result = normalize_mati_result(payload)
         if not any(result.values()):
@@ -110,7 +112,6 @@ def analyze_mode(history, mode, param):
         result = normalize_simple_result(payload)
         if not result:
             raise RuntimeError(f"Empty {mode} result param={param}")
-
     return payload, result
 
 
@@ -134,10 +135,7 @@ def save_snapshot(market_id, market_name, mode, param, base_result, result, payl
         "payload": payload,
         "updated_at": now_iso(),
     }
-    supabase.table("analysis_snapshots").upsert(
-        row,
-        on_conflict="market_id,mode,param",
-    ).execute()
+    supabase.table("analysis_snapshots").upsert(row, on_conflict="market_id,mode,param").execute()
 
 
 def calculate_shio(new_result):
@@ -145,18 +143,56 @@ def calculate_shio(new_result):
     return str(SHIO_TABLE.get(two_digit, SHIO_TABLE.get(two_digit % 100, 1)))
 
 
+def evaluate_mati_all(snapshot_result, new_result):
+    safe = {}
+    detail = {}
+    for position_key, position_label, index in MATI_POSITIONS:
+        target = new_result[index]
+        off_digits = normalize_digit_list((snapshot_result or {}).get(position_label))
+        is_safe = target not in set(off_digits)
+        safe[position_label] = is_safe
+        detail[position_label] = {
+            "position": position_key,
+            "target": target,
+            "off": off_digits,
+            "safe": is_safe,
+        }
+    if safe["AS"] and safe["KOP"] and safe["KEPALA"] and safe["EKOR"]:
+        status = "4D"
+    elif safe["KOP"] and safe["KEPALA"] and safe["EKOR"]:
+        status = "3D"
+    elif safe["KEPALA"] and safe["EKOR"]:
+        status = "2D"
+    else:
+        status = "TIDAK MASUK"
+    detail["status"] = status
+    detail["rule"] = "legacy_all_position_summary"
+    return status != "TIDAK MASUK", new_result, status, detail
+
+
+def evaluate_mati_position(snapshot_result, new_result, position_key, position_label, index):
+    target = new_result[index]
+    off_digits = normalize_digit_list((snapshot_result or {}).get(position_label))
+    is_hit = target not in set(off_digits)
+    status = "MASUK" if is_hit else "TIDAK MASUK"
+    return is_hit, target, status, {
+        "position": position_key,
+        "position_label": position_label,
+        "target": target,
+        "off": off_digits,
+        "safe": is_hit,
+        "rule": "angka_mati_position_masuk_if_actual_digit_not_in_off_digits",
+    }
+
+
 def evaluate_snapshot(mode, param, snapshot_result, new_result):
     target_2d = new_result[-2:]
-
     if mode == "ai":
         digits = normalize_digit_list(snapshot_result)
         target_set = set(target_2d)
         digit_set = set(digits)
         matched = sorted(target_set.intersection(digit_set), key=lambda x: int(x))
-        if param == 8:
-            is_hit = target_set.issubset(digit_set)
-        else:
-            is_hit = bool(matched)
+        is_hit = target_set.issubset(digit_set) if param == 8 else bool(matched)
         status = "MASUK" if is_hit else "TIDAK MASUK"
         return is_hit, target_2d, status, {
             "target_2d": target_2d,
@@ -164,88 +200,42 @@ def evaluate_snapshot(mode, param, snapshot_result, new_result):
             "matched_digits": matched,
             "rule": "bbfs_all_2d_digits" if param == 8 else "ai_any_2d_digit",
         }
-
     if mode == "mati":
-        positions = [
-            ("AS", new_result[0]),
-            ("KOP", new_result[1]),
-            ("KEPALA", new_result[2]),
-            ("EKOR", new_result[3]),
-        ]
-        detail = {}
-        safe = {}
-        for pos, target in positions:
-            off_digits = normalize_digit_list((snapshot_result or {}).get(pos))
-            is_safe = target not in set(off_digits)
-            safe[pos] = is_safe
-            detail[pos] = {"target": target, "off": off_digits, "safe": is_safe}
-
-        if safe["AS"] and safe["KOP"] and safe["KEPALA"] and safe["EKOR"]:
-            status = "4D"
-        elif safe["KOP"] and safe["KEPALA"] and safe["EKOR"]:
-            status = "3D"
-        elif safe["KEPALA"] and safe["EKOR"]:
-            status = "2D"
-        else:
-            status = "TIDAK MASUK"
-
-        is_hit = status != "TIDAK MASUK"
-        detail["status"] = status
-        detail["rule"] = "4d_as_kop_kepala_ekor_3d_kop_kepala_ekor_2d_kepala_ekor"
-        return is_hit, new_result, status, detail
-
+        return evaluate_mati_all(snapshot_result, new_result)
     if mode == "jumlah":
         off_jumlah = normalize_digit_list(snapshot_result)
         target_sum = str(j2d(new_result[2], new_result[3]))
         is_hit = target_sum not in set(off_jumlah)
         status = "MASUK" if is_hit else "TIDAK MASUK"
-        return is_hit, target_sum, status, {
-            "target_2d": target_2d,
-            "target_sum_2d": target_sum,
-            "off_jumlah": off_jumlah,
-        }
-
+        return is_hit, target_sum, status, {"target_2d": target_2d, "target_sum_2d": target_sum, "off_jumlah": off_jumlah}
     if mode == "shio":
         off_shio = normalize_digit_list(snapshot_result)
         target_shio = calculate_shio(new_result)
         is_safe = target_shio not in set(off_shio)
         status = "MASUK" if is_safe else "TIDAK MASUK"
-        return is_safe, target_shio, status, {
-            "target_2d": target_2d,
-            "target_shio": target_shio,
-            "off_shio": off_shio,
-            "safe": is_safe,
-            "rule": "shio_mati_masuk_if_result_not_in_off_shio",
-        }
-
+        return is_safe, target_shio, status, {"target_2d": target_2d, "target_shio": target_shio, "off_shio": off_shio, "safe": is_safe, "rule": "shio_mati_masuk_if_result_not_in_off_shio"}
     raise RuntimeError(f"Unknown mode={mode}")
 
 
-def save_evaluation(market_id, market_name, mode, param, snapshot, new_result):
-    from_result = str(snapshot.get("base_result") or "")
-    if not from_result or from_result == new_result:
-        return False
-
+def insert_evaluation_row(market_id, market_name, mode, param, position, from_result, new_result, is_hit, target, status, snapshot_result, detail):
     duplicate = get_one(
         "analysis_evaluations",
         market_id=market_id,
         mode=mode,
         param=param,
+        position=position,
         from_result=from_result,
         new_result=new_result,
     )
     if duplicate:
-        print(f"ANALYSIS EVAL SKIP DUPLICATE: {market_id} {mode} {param} {from_result}->{new_result}")
+        print(f"ANALYSIS EVAL SKIP DUPLICATE: {market_id} {mode} {param} {position} {from_result}->{new_result}")
         return False
-
-    snapshot_result = snapshot.get("result")
-    is_hit, target, status, detail = evaluate_snapshot(mode, param, snapshot_result, new_result)
-
     row = {
         "market_id": market_id,
         "market_name": market_name,
         "mode": mode,
         "param": param,
+        "position": position,
         "from_result": from_result,
         "new_result": new_result,
         "is_hit": is_hit,
@@ -255,50 +245,49 @@ def save_evaluation(market_id, market_name, mode, param, snapshot, new_result):
         "detail": detail,
         "evaluated_at": now_iso(),
     }
-
     supabase.table("analysis_evaluations").insert(row).execute()
-    print(
-        f"ANALYSIS EVAL OK: {market_id} {mode} {param} "
-        f"{from_result}->{new_result} {status}"
-    )
+    print(f"ANALYSIS EVAL OK: {market_id} {mode} {param} {position} {from_result}->{new_result} {status}")
     return True
+
+
+def save_evaluation(market_id, market_name, mode, param, snapshot, new_result):
+    from_result = str(snapshot.get("base_result") or "")
+    if not from_result or from_result == new_result:
+        return False
+    snapshot_result = snapshot.get("result")
+    if mode == "mati":
+        saved = False
+        for position_key, position_label, index in MATI_POSITIONS:
+            is_hit, target, status, detail = evaluate_mati_position(snapshot_result, new_result, position_key, position_label, index)
+            saved = insert_evaluation_row(market_id, market_name, mode, param, position_key, from_result, new_result, is_hit, target, status, snapshot_result, detail) or saved
+        return saved
+    is_hit, target, status, detail = evaluate_snapshot(mode, param, snapshot_result, new_result)
+    return insert_evaluation_row(market_id, market_name, mode, param, "all", from_result, new_result, is_hit, target, status, snapshot_result, detail)
 
 
 def process_market(market):
     market_id = market.get("id")
     market_name = market.get("name") or market_id
     history = parse_history(market.get("history_data"))
-
     if not market_id or len(history) < 17:
         print(f"ANALYSIS SKIP: {market_id or '-'} data kurang ({len(history)})")
         return False
-
     latest_result = history[-1]
-
     for mode, params in MODES.items():
         for param in params:
-            snapshot = get_one(
-                "analysis_snapshots",
-                market_id=market_id,
-                mode=mode,
-                param=param,
-            )
-
+            snapshot = get_one("analysis_snapshots", market_id=market_id, mode=mode, param=param)
             try:
                 payload, result = analyze_mode(history, mode, param)
             except Exception as error:
                 print(f"ANALYSIS ERROR: {market_id} {mode} {param} {error}")
                 continue
-
             if snapshot and snapshot.get("base_result") != latest_result:
                 save_evaluation(market_id, market_name, mode, param, snapshot, latest_result)
-
             if not snapshot or snapshot.get("base_result") != latest_result:
                 save_snapshot(market_id, market_name, mode, param, latest_result, result, payload)
                 print(f"ANALYSIS SNAPSHOT OK: {market_id} {mode} {param} base={latest_result}")
             else:
                 print(f"ANALYSIS NO CHANGE: {market_id} {mode} {param} result masih {latest_result}")
-
     return True
 
 
@@ -314,4 +303,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-        
