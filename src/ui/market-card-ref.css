@@ -2,6 +2,39 @@
    Strong visible pass: proportional card, balanced strip/result, single report action.
 */
 
+/* Force stable typography across WebView/devices. */
+:root {
+  --app-font-ui: 'Outfit', 'Inter', 'Segoe UI', Arial, Helvetica, sans-serif;
+  --app-font-display: 'Syne', 'Outfit', 'Inter', 'Segoe UI', Arial, Helvetica, sans-serif;
+  --app-font-mono: 'DM Mono', 'Roboto Mono', 'Courier New', monospace;
+}
+
+.app-container,
+.app-container * {
+  font-family: var(--app-font-ui) !important;
+}
+
+.app-container [class*="font-['Orbitron']"],
+.app-container [class*="font-['Space_Grotesk']"],
+.app-container h1,
+.app-container h2,
+.app-container h3,
+.app-container .market-name,
+.app-container .market-section-title,
+.app-container .market-name-strip,
+.app-container .primary-button,
+.app-container .ghost-button,
+.app-container .report-floating-button {
+  font-family: var(--app-font-display) !important;
+}
+
+.app-container [class*="font-['JetBrains_Mono']"],
+.app-container [class*="font-['DM_Mono']"],
+.app-container .market-last-value,
+.app-container .custom-scrollbar {
+  font-family: var(--app-font-mono) !important;
+}
+
 /* Header subtitle: give the hero title more breathing room. */
 .hero-card p,
 header p {
