@@ -1,7 +1,6 @@
 import { Copy } from "lucide-react";
 import RekapHistory from "../RekapHistory";
 import { safeArray } from "../../lib/analysis/utils";
-import { ShioChip } from "./Shared";
 
 export default function RekapResult({ result, param, marketId, meta }: {
   result: any;
@@ -19,11 +18,13 @@ export default function RekapResult({ result, param, marketId, meta }: {
     ...(safeArray(result.offKepala).length ? [["OFF KEP", safeArray(result.offKepala).join(" . "), "🎯", "#ff647c"]] : []),
     ...(safeArray(result.offEkor).length ? [["OFF EKR", safeArray(result.offEkor).join(" . "), "🎯", "#ff647c"]] : []),
     ...(safeArray(result.offJumlah).length ? [["OFF JML", safeArray(result.offJumlah).join(" . "), "🔢", "#b58cff"]] : []),
+    ...(safeArray(result.offShio).length ? [["OFF SHIO", safeArray(result.offShio).map((s: any) => String(s).padStart(2, "0")).join(" . "), "🐲", "#28d7ff"]] : []),
   ] : [
     [isTop ? "AI TOP" : "AI CT", safeArray(result.ai).join(" "), "🔥", "#f3c14b"],
     ["OFF KEP", safeArray(result.offKepala).join(" . "), "🎯", "#ff647c"],
     ["OFF EKR", safeArray(result.offEkor).join(" . "), "🎯", "#ff647c"],
     ["OFF JML", safeArray(result.offJumlah).join(" . "), "🔢", "#b58cff"],
+    ...(safeArray(result.offShio).length ? [["OFF SHIO", safeArray(result.offShio).map((s: any) => String(s).padStart(2, "0")).join(" . "), "🐲", "#28d7ff"]] : []),
   ];
 
   return (
@@ -43,12 +44,6 @@ export default function RekapResult({ result, param, marketId, meta }: {
               <span className="min-w-0 text-right font-['Orbitron'] text-[13px] font-black tracking-[2px]" style={{ color }}>{value || "-"}</span>
             </div>
           ))}
-          {safeArray(result.offShio).length > 0 && (
-            <div className="flex items-center justify-between gap-3 rounded-3xl border border-[var(--border2)] bg-black/20 p-3">
-              <div className="flex shrink-0 items-center gap-3"><span className="text-base">🐲</span><span className="text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">OFF SHIO</span></div>
-              <div className="flex flex-wrap justify-end gap-2">{safeArray(result.offShio).map((s: any, i: number) => <ShioChip key={`${s}-${i}`} value={s} />)}</div>
-            </div>
-          )}
         </div>
       </div>
 
