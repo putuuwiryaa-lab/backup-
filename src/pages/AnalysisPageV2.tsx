@@ -260,10 +260,11 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
     const active = result.elitCount ?? result.eliteTotal ?? stats.length;
     const formulaTotal = type === "ai" ? 35 : type === "jumlah" ? 51 : 50;
     const isBBFSResult = type === "ai" && param === 8;
+    const resultLabel = isBBFSResult ? "BBFS" : meta.label;
 
     return (
       <div className="space-y-4 animate-[fadeIn_0.3s_ease-out]">
-        <MainResultCard label={meta.label} values={displayResult} accent={meta.accent} shio={type === "shio"} singleLine={isBBFSResult} stacked={type === "ai"} />
+        <MainResultCard label={resultLabel} values={displayResult} accent={meta.accent} shio={type === "shio"} singleLine={isBBFSResult} stacked={type === "ai"} />
         <ResultHeader label="VALIDASI" value={`RUMUS ACTIVE ${active}/${formulaTotal}`} accent={meta.accent} />
         <div className="premium-panel p-4">
           <div className="flex items-center justify-between gap-3">
