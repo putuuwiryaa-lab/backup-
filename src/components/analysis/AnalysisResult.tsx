@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Trophy } from "lucide-react";
 import EvaluationHistory from "../EvaluationHistory";
 import { evaluationModes } from "../../lib/analysis/constants";
@@ -72,6 +73,43 @@ function MainResultCard({ label, values, accent, shio = false, singleLine = fals
   );
 }
 
+function MatiEvaluationTabs({ marketId, param, accent, soft }: { marketId: string; param: number; accent: string; soft: string }) {
+  const [activePosition, setActivePosition] = useState<"as" | "kop" | "kepala" | "ekor">("as");
+  const tabs = [
+    { key: "as", label: "AS" },
+    { key: "kop", label: "KOP" },
+    { key: "kepala", label: "KEPALA" },
+    { key: "ekor", label: "EKOR" },
+  ] as const;
+  const activeLabel = tabs.find((tab) => tab.key === activePosition)?.label || "AS";
+
+  return (
+    <div className="premium-panel space-y-3 p-4">
+      <div className="flex items-center justify-between px-1">
+        <span className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[2px] text-[var(--text)]">Riwayat Evaluasi</span>
+        <span className="text-[9px] font-black uppercase tracking-[1px] text-[var(--text-dim)]">Per Posisi</span>
+      </div>
+      <div className="grid grid-cols-4 gap-2">
+        {tabs.map((tab) => {
+          const active = activePosition === tab.key;
+          return (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => setActivePosition(tab.key)}
+              className="rounded-2xl border px-2 py-3 text-[9px] font-black uppercase tracking-[1px] transition active:scale-95"
+              style={{ borderColor: active ? accent : "rgba(255,255,255,0.14)", backgroundColor: active ? soft : "rgba(255,255,255,0.04)", color: active ? accent : "var(--text-dim)" }}
+            >
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
+      <EvaluationHistory marketId={marketId} mode="mati" param={param} position={activePosition} title={`Riwayat ${activeLabel}`} />
+    </div>
+  );
+}
+
 export default function AnalysisResult({ type, result, param, marketId, meta, detailValidationOpen, setDetailValidationOpen, angkaJadiOpen, setAngkaJadiOpen }: {
   type: string;
   result: any;
@@ -95,7 +133,7 @@ export default function AnalysisResult({ type, result, param, marketId, meta, de
           {detailValidationOpen && POS.map((p) => <section key={p} className="space-y-3"><div className="flex items-center gap-3"><div className="h-px flex-1 bg-white/10" /><span className="font-['Orbitron'] text-[10px] font-black uppercase tracking-[3px]" style={{ color: meta.accent }}>{p}</span><div className="h-px flex-1 bg-white/10" /></div><StatsList stats={statsFrom(result[p])} accent={meta.accent} /></section>)}
         </div>
         <AngkaJadiPanel type={type} result={result} open={angkaJadiOpen} setOpen={setAngkaJadiOpen} meta={meta} />
-        {evaluationModes.has(type) && param !== 0 && <div className="premium-panel space-y-3 p-4"><EvaluationHistory marketId={marketId} mode={type as any} param={param || 1} /></div>}
+        {param !== 0 && <MatiEvaluationTabs marketId={marketId} param={param || 1} accent={meta.accent} soft={meta.soft} />}
       </div>
     );
   }
