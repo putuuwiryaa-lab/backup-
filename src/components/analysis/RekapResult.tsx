@@ -13,7 +13,7 @@ export default function RekapResult({ result, param, marketId, meta }: {
   const mode = isTop ? "top" : "invest";
   const lines = safeArray(result.lines);
   const rows = isCustom ? [
-    ["AI", safeArray(result.ai).join(" "), "🔥", "#f3c14b"],
+    ...(safeArray(result.ai).length ? [["AI", safeArray(result.ai).join(" "), "🔥", "#f3c14b"]] : []),
     ...(safeArray(result.bbfs).length ? [["BBFS", safeArray(result.bbfs).join(" "), "✨", "#f3c14b"]] : []),
     ...(safeArray(result.offKepala).length ? [["OFF KEP", safeArray(result.offKepala).join(" . "), "🎯", "#ff647c"]] : []),
     ...(safeArray(result.offEkor).length ? [["OFF EKR", safeArray(result.offEkor).join(" . "), "🎯", "#ff647c"]] : []),
@@ -41,7 +41,7 @@ export default function RekapResult({ result, param, marketId, meta }: {
           {rows.map(([label, value, emoji, color]: any) => (
             <div key={label} className="flex items-center justify-between gap-3 rounded-3xl border border-[var(--border2)] bg-black/20 p-3">
               <div className="flex shrink-0 items-center gap-3"><span className="text-base">{emoji}</span><span className="text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">{label}</span></div>
-              <span className="min-w-0 text-right font-['Orbitron'] text-[13px] font-black tracking-[2px]" style={{ color }}>{value || "-"}</span>
+              <span className="min-w-0 text-right font-['Orbitron'] text-[13px] font-black tracking-[2px]" style={{ color }}>{value}</span>
             </div>
           ))}
         </div>
