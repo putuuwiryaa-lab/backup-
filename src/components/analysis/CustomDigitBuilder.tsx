@@ -8,8 +8,10 @@ export default function CustomDigitBuilder({
   setCustomAiDigit,
   customIncludeBBFS,
   setCustomIncludeBBFS,
-  customOffDigitCount,
-  setCustomOffDigitCount,
+  customOffKepalaCount,
+  setCustomOffKepalaCount,
+  customOffEkorCount,
+  setCustomOffEkorCount,
   customOffJumlahCount,
   setCustomOffJumlahCount,
   customOffShioCount,
@@ -22,8 +24,10 @@ export default function CustomDigitBuilder({
   setCustomAiDigit: (value: 2 | 4 | 6) => void;
   customIncludeBBFS: boolean;
   setCustomIncludeBBFS: (fn: (value: boolean) => boolean) => void;
-  customOffDigitCount: number | null;
-  setCustomOffDigitCount: (value: number | null) => void;
+  customOffKepalaCount: number | null;
+  setCustomOffKepalaCount: (value: number | null) => void;
+  customOffEkorCount: number | null;
+  setCustomOffEkorCount: (value: number | null) => void;
   customOffJumlahCount: number | null;
   setCustomOffJumlahCount: (value: number | null) => void;
   customOffShioCount: number | null;
@@ -65,9 +69,16 @@ export default function CustomDigitBuilder({
       </section>
 
       <section className="space-y-2">
-        <MiniLabel>Angka Mati Kepala/Ekor</MiniLabel>
+        <MiniLabel>Angka Mati Kepala</MiniLabel>
         <div className="grid grid-cols-3 gap-2">
-          {[1, 2, 3].map((n) => optionButton(customOffDigitCount === n, String(n), () => setCustomOffDigitCount(customOffDigitCount === n ? null : n)))}
+          {[1, 2, 3].map((n) => optionButton(customOffKepalaCount === n, String(n), () => setCustomOffKepalaCount(customOffKepalaCount === n ? null : n)))}
+        </div>
+      </section>
+
+      <section className="space-y-2">
+        <MiniLabel>Angka Mati Ekor</MiniLabel>
+        <div className="grid grid-cols-3 gap-2">
+          {[1, 2, 3].map((n) => optionButton(customOffEkorCount === n, String(n), () => setCustomOffEkorCount(customOffEkorCount === n ? null : n)))}
         </div>
       </section>
 
