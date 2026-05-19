@@ -18,8 +18,8 @@ export default function CustomDigitBuilder({
 }: {
   show: boolean;
   meta: { accent: string; soft: string };
-  customAiDigit: 4 | 6 | null;
-  setCustomAiDigit: (value: 4 | 6) => void;
+  customAiDigit: 2 | 4 | 6 | null;
+  setCustomAiDigit: (value: 2 | 4 | 6) => void;
   customIncludeBBFS: boolean;
   setCustomIncludeBBFS: (fn: (value: boolean) => boolean) => void;
   customOffDigitCount: number | null;
@@ -52,7 +52,8 @@ export default function CustomDigitBuilder({
 
       <section className="space-y-2">
         <MiniLabel>AI</MiniLabel>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-3 gap-2">
+          {optionButton(customAiDigit === 2, "2 Digit", () => setCustomAiDigit(2))}
           {optionButton(customAiDigit === 4, "4 Digit", () => setCustomAiDigit(4))}
           {optionButton(customAiDigit === 6, "6 Digit", () => setCustomAiDigit(6))}
         </div>
