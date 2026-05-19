@@ -9,25 +9,32 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const RECOMMENDATION_SAMPLE_SIZE = 15;
 const RECOMMENDATION_MIN_SAMPLE = 10;
-const RECOMMENDATION_FULL_SAMPLE_WINS = 12;
+const RECOMMENDATION_FULL_SAMPLE_WINS = 11;
 const RECOMMENDATION_PARTIAL_WIN_RATE = 0.8;
 
-type RecommendedMap = Record<string, boolean>;
+type RecommendedMap = Record<string, "thumb" | "fire">;
 
 function isSuccessStatus(row: any) {
   return row?.status !== "TIDAK MASUK" && row?.status !== "ZONK" && row?.is_hit !== false;
 }
 
+function scoreParam(rows: any[], param: number) {
+  const sample = rows.filter((row) => Number(row.param) === param).slice(0, RECOMMENDATION_SAMPLE_SIZE);
+  if (sample.length < RECOMMENDATION_MIN_SAMPLE) return null;
+  const wins = sample.filter(isSuccessStatus).length;
+  const isPerfect = sample.length >= RECOMMENDATION_SAMPLE_SIZE && wins === RECOMMENDATION_SAMPLE_SIZE;
+  const isRecommended = sample.length >= RECOMMENDATION_SAMPLE_SIZE
+    ? wins >= RECOMMENDATION_FULL_SAMPLE_WINS
+    : wins / sample.length >= RECOMMENDATION_PARTIAL_WIN_RATE;
+  if (!isRecommended) return null;
+  return { param, badge: isPerfect ? "fire" as const : "thumb" as const };
+}
+
 function pickRecommendation(rows: any[], params: number[], prefer: "low" | "high") {
-  const goodParams = params.filter((param) => {
-    const sample = rows.filter((row) => Number(row.param) === param).slice(0, RECOMMENDATION_SAMPLE_SIZE);
-    if (sample.length < RECOMMENDATION_MIN_SAMPLE) return false;
-    const wins = sample.filter(isSuccessStatus).length;
-    if (sample.length >= RECOMMENDATION_SAMPLE_SIZE) return wins >= RECOMMENDATION_FULL_SAMPLE_WINS;
-    return wins / sample.length >= RECOMMENDATION_PARTIAL_WIN_RATE;
-  });
-  if (!goodParams.length) return null;
-  return prefer === "low" ? Math.min(...goodParams) : Math.max(...goodParams);
+  const scored = params.map((param) => scoreParam(rows, param)).filter(Boolean) as Array<{ param: number; badge: "thumb" | "fire" }>;
+  if (!scored.length) return null;
+  const selectedParam = prefer === "low" ? Math.min(...scored.map((item) => item.param)) : Math.max(...scored.map((item) => item.param));
+  return scored.find((item) => item.param === selectedParam) || null;
 }
 
 async function loadRows(marketId: string, mode: string, position: string, params: number[]) {
@@ -101,12 +108,12 @@ export default function CustomDigitBuilder({
         const jumlahPick = pickRecommendation(jumlahRows, [1, 2, 3], "high");
         const shioPick = pickRecommendation(shioRows, [1, 2, 3], "high");
         const bbfsPick = pickRecommendation(bbfsRows, [8], "low");
-        if (aiPick) next[`ai-${aiPick}`] = true;
-        if (bbfsPick) next.bbfs = true;
-        if (kepalaPick) next[`kepala-${kepalaPick}`] = true;
-        if (ekorPick) next[`ekor-${ekorPick}`] = true;
-        if (jumlahPick) next[`jumlah-${jumlahPick}`] = true;
-        if (shioPick) next[`shio-${shioPick}`] = true;
+        if (aiPick) next[`ai-${aiPick.param}`] = aiPick.badge;
+        if (bbfsPick) next.bbfs = bbfsPick.badge;
+        if (kepalaPick) next[`kepala-${kepalaPick.param}`] = kepalaPick.badge;
+        if (ekorPick) next[`ekor-${ekorPick.param}`] = ekorPick.badge;
+        if (jumlahPick) next[`jumlah-${jumlahPick.param}`] = jumlahPick.badge;
+        if (shioPick) next[`shio-${shioPick.param}`] = shioPick.badge;
         if (active) setRecommended(next);
       } catch {
         if (active) setRecommended({});
@@ -116,12 +123,13 @@ export default function CustomDigitBuilder({
     return () => { active = false; };
   }, [show, marketId]);
 
-  const thumbs = useMemo(() => recommended, [recommended]);
+  const badges = useMemo(() => recommended, [recommended]);
 
   if (!show) return null;
 
   const optionButton = (active: boolean, label: string, onClick: () => void, extraClass = "", recommendKey?: string) => {
-    const isRecommended = recommendKey ? Boolean(thumbs[recommendKey]) : false;
+    const badge = recommendKey ? badges[recommendKey] : undefined;
+    const isRecommended = Boolean(badge);
     return (
       <button
         type="button"
@@ -129,7 +137,7 @@ export default function CustomDigitBuilder({
         className={`${extraClass} relative rounded-3xl border p-4 text-center transition active:scale-95`}
         style={{ borderColor: active ? meta.accent : isRecommended ? `${meta.accent}88` : "rgba(255,255,255,0.14)", backgroundColor: active ? meta.soft : "rgba(255,255,255,0.04)", color: active ? meta.accent : "var(--text-dim)" }}
       >
-        {isRecommended && <span className="absolute right-3 top-2 text-[15px] leading-none">👍</span>}
+        {badge && <span className="absolute right-3 top-2 text-[15px] leading-none">{badge === "fire" ? "🔥" : "👍"}</span>}
         <span className="block font-['Orbitron'] text-[13px] font-black uppercase tracking-[2px]">{label}</span>
       </button>
     );
