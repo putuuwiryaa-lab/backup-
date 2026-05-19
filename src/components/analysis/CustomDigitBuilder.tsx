@@ -9,29 +9,65 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const RECOMMENDATION_SAMPLE_SIZE = 15;
 const RECOMMENDATION_MIN_SAMPLE = 10;
-const RECOMMENDATION_FULL_SAMPLE_WINS = 11;
-const RECOMMENDATION_PARTIAL_WIN_RATE = 0.8;
 
+const AI_WIN_THRESHOLDS: Record<number, number> = {
+  2: 7,
+  4: 11,
+  6: 12,
+  8: 12,
+};
+
+const OFF_WIN_THRESHOLDS: Record<number, number> = {
+  1: 12,
+  2: 11,
+  3: 10,
+};
+
+const PARTIAL_AI_WIN_RATES: Record<number, number> = {
+  2: 7 / 15,
+  4: 11 / 15,
+  6: 12 / 15,
+  8: 12 / 15,
+};
+
+const PARTIAL_OFF_WIN_RATES: Record<number, number> = {
+  1: 12 / 15,
+  2: 11 / 15,
+  3: 10 / 15,
+};
+
+type RecommendationGroup = "ai" | "off";
 type RecommendedMap = Record<string, "thumb" | "fire">;
 
 function isSuccessStatus(row: any) {
   return row?.status !== "TIDAK MASUK" && row?.status !== "ZONK" && row?.is_hit !== false;
 }
 
-function scoreParam(rows: any[], param: number) {
+function getFullThreshold(group: RecommendationGroup, param: number) {
+  return group === "ai" ? AI_WIN_THRESHOLDS[param] : OFF_WIN_THRESHOLDS[param];
+}
+
+function getPartialWinRate(group: RecommendationGroup, param: number) {
+  return group === "ai" ? PARTIAL_AI_WIN_RATES[param] : PARTIAL_OFF_WIN_RATES[param];
+}
+
+function scoreParam(rows: any[], param: number, group: RecommendationGroup) {
   const sample = rows.filter((row) => Number(row.param) === param).slice(0, RECOMMENDATION_SAMPLE_SIZE);
   if (sample.length < RECOMMENDATION_MIN_SAMPLE) return null;
   const wins = sample.filter(isSuccessStatus).length;
   const isPerfect = sample.length >= RECOMMENDATION_SAMPLE_SIZE && wins === RECOMMENDATION_SAMPLE_SIZE;
+  const fullThreshold = getFullThreshold(group, param);
+  const partialWinRate = getPartialWinRate(group, param);
+  if (!fullThreshold || !partialWinRate) return null;
   const isRecommended = sample.length >= RECOMMENDATION_SAMPLE_SIZE
-    ? wins >= RECOMMENDATION_FULL_SAMPLE_WINS
-    : wins / sample.length >= RECOMMENDATION_PARTIAL_WIN_RATE;
+    ? wins >= fullThreshold
+    : wins / sample.length >= partialWinRate;
   if (!isRecommended) return null;
   return { param, badge: isPerfect ? "fire" as const : "thumb" as const };
 }
 
-function pickRecommendation(rows: any[], params: number[], prefer: "low" | "high") {
-  const scored = params.map((param) => scoreParam(rows, param)).filter(Boolean) as Array<{ param: number; badge: "thumb" | "fire" }>;
+function pickRecommendation(rows: any[], params: number[], prefer: "low" | "high", group: RecommendationGroup) {
+  const scored = params.map((param) => scoreParam(rows, param, group)).filter(Boolean) as Array<{ param: number; badge: "thumb" | "fire" }>;
   if (!scored.length) return null;
   const selectedParam = prefer === "low" ? Math.min(...scored.map((item) => item.param)) : Math.max(...scored.map((item) => item.param));
   return scored.find((item) => item.param === selectedParam) || null;
@@ -102,12 +138,12 @@ export default function CustomDigitBuilder({
           loadRows(marketId, "shio", "all", [1, 2, 3]),
         ]);
         const next: RecommendedMap = {};
-        const aiPick = pickRecommendation(aiRows, [2, 4, 6], "low");
-        const kepalaPick = pickRecommendation(kepalaRows, [1, 2, 3], "high");
-        const ekorPick = pickRecommendation(ekorRows, [1, 2, 3], "high");
-        const jumlahPick = pickRecommendation(jumlahRows, [1, 2, 3], "high");
-        const shioPick = pickRecommendation(shioRows, [1, 2, 3], "high");
-        const bbfsPick = pickRecommendation(bbfsRows, [8], "low");
+        const aiPick = pickRecommendation(aiRows, [2, 4, 6], "low", "ai");
+        const kepalaPick = pickRecommendation(kepalaRows, [1, 2, 3], "high", "off");
+        const ekorPick = pickRecommendation(ekorRows, [1, 2, 3], "high", "off");
+        const jumlahPick = pickRecommendation(jumlahRows, [1, 2, 3], "high", "off");
+        const shioPick = pickRecommendation(shioRows, [1, 2, 3], "high", "off");
+        const bbfsPick = pickRecommendation(bbfsRows, [8], "low", "ai");
         if (aiPick) next[`ai-${aiPick.param}`] = aiPick.badge;
         if (bbfsPick) next.bbfs = bbfsPick.badge;
         if (kepalaPick) next[`kepala-${kepalaPick.param}`] = kepalaPick.badge;
