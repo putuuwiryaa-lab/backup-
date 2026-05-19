@@ -16,7 +16,7 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
   const [error, setError] = useState("");
   const [detailValidationOpen, setDetailValidationOpen] = useState(false);
   const [angkaJadiOpen, setAngkaJadiOpen] = useState(false);
-  const [customAiDigit, setCustomAiDigit] = useState<4 | 6 | null>(null);
+  const [customAiDigit, setCustomAiDigit] = useState<2 | 4 | 6 | null>(null);
   const [customIncludeBBFS, setCustomIncludeBBFS] = useState(false);
   const [customOffDigitCount, setCustomOffDigitCount] = useState<number | null>(null);
   const [customOffJumlahCount, setCustomOffJumlahCount] = useState<number | null>(null);
