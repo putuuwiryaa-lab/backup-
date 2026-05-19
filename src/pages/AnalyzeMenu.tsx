@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Routes, Route, useNavigate, useParams } from "react-router-dom";
 import { Cpu, ArrowLeft, Activity, ShieldAlert, Hash, Gauge, Trophy } from "lucide-react";
-import AnalysisPage from "./AnalysisPageV2";
+import AnalysisPage from "./AnalysisPageV3";
 
 const MODE_META: any = {
   ai: { icon: "✦", lucide: Activity, accent: "#f3c14b", glow: "rgba(243, 193, 75, 0.16)" },
