@@ -7,7 +7,7 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 type EvaluationMode = "ai" | "mati" | "jumlah" | "shio";
 type EvaluationPosition = "all" | "as" | "kop" | "kepala" | "ekor";
-const EVALUATION_HISTORY_LIMIT = 9;
+const EVALUATION_HISTORY_LIMIT = 15;
 
 function labelFromMatiDetail(detail: any) {
   if (detail?.position) return detail?.safe ? "MASUK" : "ZONK";
@@ -87,7 +87,7 @@ export default function EvaluationHistory({
     <div className="space-y-3">
       <div className="flex items-center justify-between px-1">
         <span className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[2px] text-[var(--text)]">{title}</span>
-        <span className="text-[9px] font-black uppercase tracking-[1px] text-[var(--text-dim)]">9 Terbaru</span>
+        <span className="text-[9px] font-black uppercase tracking-[1px] text-[var(--text-dim)]">15 Terbaru</span>
       </div>
       <div className="grid grid-cols-3 gap-2">
         {rows.map((row) => {
