@@ -12,28 +12,28 @@ const RECOMMENDATION_MIN_SAMPLE = 10;
 
 const AI_WIN_THRESHOLDS: Record<number, number> = {
   2: 7,
-  4: 11,
-  6: 12,
-  8: 12,
+  4: 10,
+  6: 13,
+  8: 11,
 };
 
 const OFF_WIN_THRESHOLDS: Record<number, number> = {
-  1: 12,
-  2: 11,
-  3: 10,
+  1: 13,
+  2: 12,
+  3: 11,
 };
 
 const PARTIAL_AI_WIN_RATES: Record<number, number> = {
   2: 7 / 15,
-  4: 11 / 15,
-  6: 12 / 15,
-  8: 12 / 15,
+  4: 10 / 15,
+  6: 13 / 15,
+  8: 11 / 15,
 };
 
 const PARTIAL_OFF_WIN_RATES: Record<number, number> = {
-  1: 12 / 15,
-  2: 11 / 15,
-  3: 10 / 15,
+  1: 13 / 15,
+  2: 12 / 15,
+  3: 11 / 15,
 };
 
 type RecommendationGroup = "ai" | "off";
