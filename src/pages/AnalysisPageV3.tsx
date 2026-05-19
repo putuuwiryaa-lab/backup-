@@ -66,21 +66,22 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
   };
 
   const handleCustomDigitGenerate = async () => {
-    if (!customAiDigit) {
-      setError("Pilih AI 4 Digit atau 6 Digit dulu.");
+    const hasAnyFilter = Boolean(customAiDigit || customIncludeBBFS || customOffDigitCount || customOffJumlahCount || customOffShioCount);
+    if (!hasAnyFilter) {
+      setError("Pilih minimal satu filter dulu.");
       return;
     }
 
     resetBeforeAnalyze();
     try {
       const data = await getMarketData();
-      const aiData = await postAnalyze("ai", data, customAiDigit);
+      const aiData = customAiDigit ? await postAnalyze("ai", data, customAiDigit) : null;
       const bbfsData = customIncludeBBFS ? await postAnalyze("ai", data, 8) : null;
       const matiData = customOffDigitCount ? await postAnalyze("mati", data, customOffDigitCount) : null;
       const jumlahData = customOffJumlahCount ? await postAnalyze("jumlah", data, customOffJumlahCount) : null;
       const shioData = customOffShioCount ? await postAnalyze("shio", data, customOffShioCount) : null;
 
-      const ai = toNumberList(aiData.result);
+      const ai = customAiDigit ? toNumberList(aiData?.result) : [];
       const bbfs = customIncludeBBFS ? toNumberList(bbfsData?.result) : [];
       const offKepala = customOffDigitCount ? toNumberList(matiData?.KEPALA?.result) : [];
       const offEkor = customOffDigitCount ? toNumberList(matiData?.EKOR?.result) : [];
