@@ -8,11 +8,11 @@ const SHIO_NAMES = ["", "Kuda", "Ular", "Naga", "Kelinci", "Harimau", "Kerbau", 
 const SHIO_EMOJI = ["", "🐴", "🐍", "🐉", "🐰", "🐯", "🐂", "🐭", "🐷", "🐕", "🐔", "🐒", "🐐"];
 
 const typeMeta: any = {
-  ai: { accent: "var(--gold)", soft: "var(--gold-dim)", label: "ANGKA IKUT", formula: "35 RUMUS" },
-  mati: { accent: "var(--red)", soft: "var(--red-dim)", label: "ANGKA MATI", formula: "53 RUMUS" },
-  jumlah: { accent: "var(--purple)", soft: "var(--purple-dim)", label: "JUMLAH MATI", formula: "51 RUMUS" },
-  shio: { accent: "var(--cyan)", soft: "var(--cyan-dim)", label: "SHIO MATI", formula: "50 RUMUS" },
-  rekap: { accent: "var(--blue)", soft: "var(--blue-dim)", label: "MENU REKAP", formula: "LINE GENERATOR" },
+  ai: { accent: "#f3c14b", soft: "rgba(243, 193, 75, 0.16)", label: "ANGKA IKUT", formula: "35 RUMUS" },
+  mati: { accent: "#ff647c", soft: "rgba(255, 100, 124, 0.16)", label: "ANGKA MATI", formula: "53 RUMUS" },
+  jumlah: { accent: "#b58cff", soft: "rgba(181, 140, 255, 0.16)", label: "JUMLAH MATI", formula: "51 RUMUS" },
+  shio: { accent: "#28d7ff", soft: "rgba(40, 215, 255, 0.14)", label: "SHIO MATI", formula: "50 RUMUS" },
+  rekap: { accent: "#6ea8ff", soft: "rgba(110, 168, 255, 0.16)", label: "MENU REKAP", formula: "LINE GENERATOR" },
 };
 
 const evaluationModes = new Set(["ai", "mati", "jumlah", "shio"]);
@@ -187,10 +187,10 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
     const mode = isTop ? "top" : "invest";
     const lines = safeArray(result.lines);
     const rows = [
-      [isTop ? "AI TOP" : "AI CT", safeArray(result.ai).join(" "), "🔥", "var(--gold)"],
-      ["OFF KEP", safeArray(result.offKepala).join(" . "), "🎯", "var(--red)"],
-      ["OFF EKR", safeArray(result.offEkor).join(" . "), "🎯", "var(--red)"],
-      ["OFF JML", safeArray(result.offJumlah).join(" . "), "🔢", "var(--purple)"],
+      [isTop ? "AI TOP" : "AI CT", safeArray(result.ai).join(" "), "🔥", "#f3c14b"],
+      ["OFF KEP", safeArray(result.offKepala).join(" . "), "🎯", "#ff647c"],
+      ["OFF EKR", safeArray(result.offEkor).join(" . "), "🎯", "#ff647c"],
+      ["OFF JML", safeArray(result.offJumlah).join(" . "), "🔢", "#b58cff"],
     ];
 
     return (
@@ -201,7 +201,7 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
               <p className="text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Hasil Rekap</p>
               <h3 className="font-['Orbitron'] text-[18px] font-black uppercase tracking-[3px] text-[var(--text)]">Mode {isTop ? "Top" : "Invest"}</h3>
             </div>
-            <span className="rounded-full bg-[var(--gold-dim)] px-3 py-1 text-[10px] font-black text-[var(--gold)]">READY</span>
+            <span className="rounded-full px-3 py-1 text-[10px] font-black" style={{ backgroundColor: meta.soft, color: meta.accent }}>READY</span>
           </div>
           <div className="space-y-3">
             {rows.map(([label, value, emoji, color]: any) => (
@@ -218,9 +218,9 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
         </div>
 
         <div className="premium-panel space-y-3 p-4">
-          <div className="flex items-center justify-between"><span className="font-['Orbitron'] text-[12px] font-black uppercase tracking-[2px] text-[var(--text)]">Generate Lines</span><span className="rounded-full bg-[var(--blue-dim)] px-3 py-1 text-[10px] font-black text-[var(--blue)]">{lines.length} LINE</span></div>
-          <div className="max-h-[260px] overflow-y-auto rounded-3xl border border-[var(--border2)] bg-black/30 p-4 font-['JetBrains_Mono'] text-[14px] font-bold leading-8 tracking-[2px] text-[var(--blue)] custom-scrollbar">{lines.join(" * ")}</div>
-          <button onClick={() => copyText(lines.join("*"))} className="flex w-full items-center justify-center gap-2 rounded-3xl bg-[var(--blue)] p-4 font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px] text-black transition active:scale-95"><Copy size={16} /> Copy Semua</button>
+          <div className="flex items-center justify-between"><span className="font-['Orbitron'] text-[12px] font-black uppercase tracking-[2px] text-[var(--text)]">Generate Lines</span><span className="rounded-full px-3 py-1 text-[10px] font-black" style={{ backgroundColor: meta.soft, color: meta.accent }}>{lines.length} LINE</span></div>
+          <div className="max-h-[260px] overflow-y-auto rounded-3xl border border-[var(--border2)] bg-black/30 p-4 font-['JetBrains_Mono'] text-[14px] font-bold leading-8 tracking-[2px] custom-scrollbar" style={{ color: meta.accent }}>{lines.join(" * ")}</div>
+          <button onClick={() => copyText(lines.join("*"))} className="flex w-full items-center justify-center gap-2 rounded-3xl p-4 font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px] text-black transition active:scale-95" style={{ backgroundColor: meta.accent }}><Copy size={16} /> Copy Semua</button>
         </div>
 
         <div className="premium-panel space-y-3 p-4">
@@ -290,11 +290,11 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
             <h2 className="truncate font-['Orbitron'] text-[18px] font-black uppercase tracking-[4px] text-[var(--text)]">{title}</h2>
           </div>
         </div>
-        <div className="relative rounded-3xl bg-black/25 p-4 text-center ring-1 ring-white/10"><span className="mr-3 text-[10px] font-black uppercase tracking-[3px] text-[var(--gold)]">Pasaran:</span><span className="font-['Orbitron'] text-[13px] font-black uppercase tracking-[4px] text-[var(--text)]">{marketId}</span></div>
+        <div className="relative rounded-3xl bg-black/25 p-4 text-center ring-1 ring-white/10"><span className="mr-3 text-[10px] font-black uppercase tracking-[3px]" style={{ color: meta.accent }}>Pasaran:</span><span className="font-['Orbitron'] text-[13px] font-black uppercase tracking-[4px] text-[var(--text)]">{marketId}</span></div>
       </div>
       {!result && !loading && param !== 0 && <button onClick={() => handleAnalyze()} className="primary-button mb-4 flex w-full items-center justify-center gap-3 p-5 font-['Orbitron'] text-[12px] font-black uppercase tracking-[4px] transition active:scale-95"><RefreshCw size={18} /> Mulai Analisa</button>}
       {renderParamSelector()}
-      {loading && <div className="premium-panel my-4 flex flex-col items-center justify-center gap-4 p-8 text-center"><div className="h-12 w-12 animate-spin rounded-full border-4 border-t-[var(--gold)] border-white/10" /><div className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px] text-[var(--text-dim)]">Memproses Analisa</div></div>}
+      {loading && <div className="premium-panel my-4 flex flex-col items-center justify-center gap-4 p-8 text-center"><div className="h-12 w-12 animate-spin rounded-full border-4 border-white/10" style={{ borderTopColor: meta.accent }} /><div className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px] text-[var(--text-dim)]">Memproses Analisa</div></div>}
       {error && <div className="my-4 rounded-3xl border border-red-400/30 bg-red-500/10 p-4 text-center text-[12px] font-bold text-red-300">{error}</div>}
       {renderResult()}
     </div>
@@ -329,5 +329,5 @@ function ShioChip({ value }: { value: any }) {
   const safeValue = Number.isFinite(normalized) && normalized >= 1 && normalized <= 12 ? normalized : 0;
   const label = safeValue ? `${safeValue < 10 ? '0' + safeValue : safeValue} ${SHIO_NAMES[safeValue]}` : String(value ?? '-');
   const emoji = safeValue ? SHIO_EMOJI[safeValue] : '🐾';
-  return <span className="inline-flex items-center gap-1 rounded-2xl border border-[var(--cyan)]/35 bg-[var(--cyan-dim)] px-3 py-2 text-[11px] font-black text-[var(--cyan)]">{emoji} {label}</span>;
+  return <span className="inline-flex items-center gap-1 rounded-2xl border px-3 py-2 text-[11px] font-black" style={{ borderColor: "rgba(40,215,255,0.35)", backgroundColor: "rgba(40,215,255,0.14)", color: "#28d7ff" }}>{emoji} {label}</span>;
 }
