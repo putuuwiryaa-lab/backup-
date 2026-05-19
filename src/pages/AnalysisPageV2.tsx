@@ -23,7 +23,7 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState("");
-  const [detailValidationOpen, setDetailValidationOpen] = useState(true);
+  const [detailValidationOpen, setDetailValidationOpen] = useState(false);
   const meta = typeMeta[type] || typeMeta.ai;
 
   const safeArray = (value: any) => Array.isArray(value) ? value : value === undefined || value === null ? [] : [value];
@@ -42,7 +42,7 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
     setLoading(true);
     setError("");
     setResult(null);
-    setDetailValidationOpen(true);
+    setDetailValidationOpen(false);
 
     try {
       const resMarkets = await fetch("/api/markets");
