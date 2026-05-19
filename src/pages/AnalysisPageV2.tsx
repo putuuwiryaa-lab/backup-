@@ -33,6 +33,20 @@ const typeMeta: any = {
 const evaluationModes = new Set(["ai", "mati", "jumlah", "shio"]);
 const angkaJadiModes = new Set(["mati", "jumlah", "shio"]);
 
+type LineSection = { label: string; lines: string[] };
+
+type RekapCustomResult = {
+  custom: true;
+  ai: number[];
+  bbfs: number[];
+  includeBBFS: boolean;
+  offKepala: number[];
+  offEkor: number[];
+  offJumlah: number[];
+  offShio: number[];
+  lines: string[];
+};
+
 export default function AnalysisPageV2({ type, title, icon, marketId }: { type: string; title: string; icon: string; marketId: string }) {
   const navigate = useNavigate();
   const [param, setParam] = useState<number | null>(null);
@@ -41,6 +55,11 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
   const [error, setError] = useState("");
   const [detailValidationOpen, setDetailValidationOpen] = useState(false);
   const [angkaJadiOpen, setAngkaJadiOpen] = useState(false);
+  const [customAiDigit, setCustomAiDigit] = useState<4 | 6 | null>(null);
+  const [customIncludeBBFS, setCustomIncludeBBFS] = useState(false);
+  const [customOffDigitCount, setCustomOffDigitCount] = useState<number | null>(null);
+  const [customOffJumlahCount, setCustomOffJumlahCount] = useState<number | null>(null);
+  const [customOffShioCount, setCustomOffShioCount] = useState<number | null>(null);
   const meta = typeMeta[type] || typeMeta.ai;
 
   const safeArray = (value: any) => Array.isArray(value) ? value : value === undefined || value === null ? [] : [value];
@@ -48,10 +67,13 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
   const copyText = (text: string) => navigator.clipboard?.writeText(text);
   const format2D = (n: number | string) => String(n).padStart(2, "0");
   const normalDigitList = (value: any) => Array.from(new Set(safeArray(value).map((v: any) => String(v)).filter((v: string) => /^\d$/.test(v))));
+  const toNumberList = (value: any) => Array.from(new Set(safeArray(value).map((v: any) => Number(v)).filter((v: number) => Number.isFinite(v))));
+
   const j2d = (a: number, b: number) => {
     const s = a + b;
     return s >= 10 ? s - 9 : s;
   };
+
   const shioOf2D = (n: number) => {
     for (const [shio, list] of Object.entries(SHIO_2D)) {
       if (list.includes(n)) return Number(shio);
@@ -59,8 +81,31 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
     return 1;
   };
 
+  const getMarketData = async () => {
+    const resMarkets = await fetch("/api/markets");
+    const allMarkets = await resMarkets.json();
+    const currentMarket = allMarkets.find((m: any) => m.id === marketId);
+    if (!currentMarket) throw new Error(`Data histori ${marketId} belum disetup oleh Admin!`);
+
+    const data = String(currentMarket.history_data || "").split(/[\s\n\r\t,]+/).filter((token: string) => /^\d{4}$/.test(token));
+    if (!data || data.length < 17) throw new Error("Data dari server kurang! Min 17 result.");
+    return data;
+  };
+
+  const postAnalyze = async (analysisType: string, data: string[], analysisParam: number) => {
+    const token = localStorage.getItem("supreme_token");
+    const res = await fetch("/api/analyze", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+      body: JSON.stringify({ type: analysisType, data, param: analysisParam }),
+    });
+    const json = await res.json();
+    if (json.success || json.data) return json.data || json;
+    throw new Error(json.error || "Gagal memproses analisa");
+  };
+
   const buildAngkaJadi = () => {
-    if (!result || !angkaJadiModes.has(type)) return { sections: [] as { label: string; lines: string[] }[] };
+    if (!result || !angkaJadiModes.has(type)) return { sections: [] as LineSection[] };
 
     if (type === "mati") {
       const jadi = (pos: string) => {
@@ -113,37 +158,80 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
     setAngkaJadiOpen(false);
 
     try {
-      const resMarkets = await fetch("/api/markets");
-      const allMarkets = await resMarkets.json();
-      const currentMarket = allMarkets.find((m: any) => m.id === marketId);
-      if (!currentMarket) {
-        setError(`Data histori ${marketId} belum disetup oleh Admin!`);
-        setLoading(false);
-        return;
-      }
-
-      const data = String(currentMarket.history_data || "").split(/[\s\n\r\t,]+/).filter((token: string) => /^\d{4}$/.test(token));
-      if (!data || data.length < 17) {
-        setError("Data dari server kurang! Min 17 result.");
-        setLoading(false);
-        return;
-      }
-
-      const token = localStorage.getItem("supreme_token");
-      const res = await fetch("/api/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-        body: JSON.stringify({ type, data, param: selectedParam }),
-      });
-      const json = await res.json();
-      if (json.success || json.data) setResult(json.data || json);
-      else if (json.error) setError(json.error);
-      else setResult(json);
+      const data = await getMarketData();
+      const dataResult = await postAnalyze(type, data, selectedParam);
+      setResult(dataResult);
     } catch (e: any) {
-      setError("Error koneksi server: " + e.message);
+      setError(e.message || "Error koneksi server");
     }
     setLoading(false);
   };
+
+  const handleCustomRekapGenerate = async () => {
+    if (!customAiDigit) {
+      setError("Pilih AI 4 Digit atau 6 Digit dulu.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    setResult(null);
+
+    try {
+      const data = await getMarketData();
+      const aiData = await postAnalyze("ai", data, customAiDigit);
+      const bbfsData = customIncludeBBFS ? await postAnalyze("ai", data, 8) : null;
+      const matiData = customOffDigitCount ? await postAnalyze("mati", data, customOffDigitCount) : null;
+      const jumlahData = customOffJumlahCount ? await postAnalyze("jumlah", data, customOffJumlahCount) : null;
+      const shioData = customOffShioCount ? await postAnalyze("shio", data, customOffShioCount) : null;
+
+      const AI = toNumberList(aiData.result);
+      const BBFS = customIncludeBBFS ? toNumberList(bbfsData?.result) : [];
+      const LK = customOffDigitCount ? toNumberList(matiData?.KEPALA?.result) : [];
+      const LE = customOffDigitCount ? toNumberList(matiData?.EKOR?.result) : [];
+      const LJ = customOffJumlahCount ? toNumberList(jumlahData?.result) : [];
+      const LS = customOffShioCount ? toNumberList(shioData?.result) : [];
+
+      const lines: string[] = [];
+      for (let k = 0; k <= 9; k++) {
+        for (let e = 0; e <= 9; e++) {
+          if (!AI.includes(k) && !AI.includes(e)) continue;
+          if (customIncludeBBFS && (!BBFS.includes(k) || !BBFS.includes(e))) continue;
+          if (LK.includes(k) || LE.includes(e)) continue;
+          if (LJ.includes(j2d(k, e))) continue;
+          if (LS.includes(shioOf2D(k * 10 + e))) continue;
+          lines.push(`${k}${e}`);
+        }
+      }
+
+      const customResult: RekapCustomResult = {
+        custom: true,
+        ai: AI,
+        bbfs: BBFS,
+        includeBBFS: customIncludeBBFS,
+        offKepala: LK,
+        offEkor: LE,
+        offJumlah: LJ,
+        offShio: LS,
+        lines,
+      };
+      setResult(customResult);
+    } catch (e: any) {
+      setError(e.message || "Gagal generate custom line");
+    }
+    setLoading(false);
+  };
+
+  const renderOptionButton = (active: boolean, label: string, onClick: () => void, extraClass = "") => (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`${extraClass} rounded-3xl border p-4 text-center transition active:scale-95`}
+      style={{ borderColor: active ? meta.accent : "rgba(255,255,255,0.14)", backgroundColor: active ? meta.soft : "rgba(255,255,255,0.04)", color: active ? meta.accent : "var(--text-dim)" }}
+    >
+      <span className="block font-['Orbitron'] text-[13px] font-black uppercase tracking-[2px]">{label}</span>
+    </button>
+  );
 
   const renderParamSelector = () => {
     if (param !== 0) return null;
@@ -168,7 +256,60 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
               </button>
             );
           })}
+          {type === "rekap" && (
+            <button onClick={() => { setParam(3); setResult(null); setError(""); }} className="col-span-2 rounded-3xl border p-5 text-center transition active:scale-95 sm:col-span-4" style={{ borderColor: meta.accent, backgroundColor: meta.soft, color: meta.accent }}>
+              <span className="block font-['Orbitron'] text-xl font-black tracking-[2px]">ATUR LINE</span>
+            </button>
+          )}
         </div>
+      </div>
+    );
+  };
+
+  const renderCustomRekapBuilder = () => {
+    if (type !== "rekap" || param !== 3 || result) return null;
+    return (
+      <div className="premium-panel mt-4 space-y-4 p-4">
+        <div className="text-center">
+          <div className="text-[10px] font-black uppercase tracking-[3px]" style={{ color: meta.accent }}>Atur Line</div>
+          <p className="mt-2 text-[10px] font-semibold uppercase tracking-[1.5px] text-[var(--text-dim)]">Pilih filter yang mau dipakai, lalu generate.</p>
+        </div>
+
+        <section className="space-y-2">
+          <div className="text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">AI</div>
+          <div className="grid grid-cols-2 gap-2">
+            {renderOptionButton(customAiDigit === 4, "4 Digit", () => setCustomAiDigit(4))}
+            {renderOptionButton(customAiDigit === 6, "6 Digit", () => setCustomAiDigit(6))}
+          </div>
+        </section>
+
+        <section className="space-y-2">
+          <div className="text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">BBFS</div>
+          {renderOptionButton(customIncludeBBFS, "Include BBFS", () => setCustomIncludeBBFS((v) => !v), "w-full")}
+        </section>
+
+        <section className="space-y-2">
+          <div className="text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Angka Mati Kepala/Ekor</div>
+          <div className="grid grid-cols-4 gap-2">
+            {[1, 2, 3, 4].map((n) => renderOptionButton(customOffDigitCount === n, String(n), () => setCustomOffDigitCount(customOffDigitCount === n ? null : n)))}
+          </div>
+        </section>
+
+        <section className="space-y-2">
+          <div className="text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Jumlah Mati</div>
+          <div className="grid grid-cols-2 gap-2">
+            {[1, 2].map((n) => renderOptionButton(customOffJumlahCount === n, String(n), () => setCustomOffJumlahCount(customOffJumlahCount === n ? null : n)))}
+          </div>
+        </section>
+
+        <section className="space-y-2">
+          <div className="text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Shio Mati</div>
+          <div className="grid grid-cols-2 gap-2">
+            {[1, 2].map((n) => renderOptionButton(customOffShioCount === n, String(n), () => setCustomOffShioCount(customOffShioCount === n ? null : n)))}
+          </div>
+        </section>
+
+        <button onClick={handleCustomRekapGenerate} className="primary-button flex w-full items-center justify-center gap-3 p-5 font-['Orbitron'] text-[12px] font-black uppercase tracking-[4px] transition active:scale-95"><RefreshCw size={18} /> Generate</button>
       </div>
     );
   };
@@ -285,9 +426,16 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
 
   const renderRekap = () => {
     const isTop = param === 2;
+    const isCustom = Boolean(result?.custom);
     const mode = isTop ? "top" : "invest";
     const lines = safeArray(result.lines);
-    const rows = [
+    const rows = isCustom ? [
+      ["AI", safeArray(result.ai).join(" "), "🔥", "#f3c14b"],
+      ...(safeArray(result.bbfs).length ? [["BBFS", safeArray(result.bbfs).join(" "), "✨", "#f3c14b"]] : []),
+      ...(safeArray(result.offKepala).length ? [["OFF KEP", safeArray(result.offKepala).join(" . "), "🎯", "#ff647c"]] : []),
+      ...(safeArray(result.offEkor).length ? [["OFF EKR", safeArray(result.offEkor).join(" . "), "🎯", "#ff647c"]] : []),
+      ...(safeArray(result.offJumlah).length ? [["OFF JML", safeArray(result.offJumlah).join(" . "), "🔢", "#b58cff"]] : []),
+    ] : [
       [isTop ? "AI TOP" : "AI CT", safeArray(result.ai).join(" "), "🔥", "#f3c14b"],
       ["OFF KEP", safeArray(result.offKepala).join(" . "), "🎯", "#ff647c"],
       ["OFF EKR", safeArray(result.offEkor).join(" . "), "🎯", "#ff647c"],
@@ -300,7 +448,7 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
               <p className="text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Hasil Rekap</p>
-              <h3 className="font-['Orbitron'] text-[18px] font-black uppercase tracking-[3px] text-[var(--text)]">Mode {isTop ? "Top" : "Invest"}</h3>
+              <h3 className="font-['Orbitron'] text-[18px] font-black uppercase tracking-[3px] text-[var(--text)]">Mode {isCustom ? "Atur Line" : isTop ? "Top" : "Invest"}</h3>
             </div>
             <span className="rounded-full px-3 py-1 text-[10px] font-black" style={{ backgroundColor: meta.soft, color: meta.accent }}>READY</span>
           </div>
@@ -311,10 +459,12 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
                 <span className="min-w-0 text-right font-['Orbitron'] text-[13px] font-black tracking-[2px]" style={{ color }}>{value || "-"}</span>
               </div>
             ))}
-            <div className="flex items-center justify-between gap-3 rounded-3xl border border-[var(--border2)] bg-black/20 p-3">
-              <div className="flex shrink-0 items-center gap-3"><span className="text-base">🐲</span><span className="text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">OFF SHIO</span></div>
-              <div className="flex flex-wrap justify-end gap-2">{safeArray(result.offShio).map((s: any, i: number) => <ShioChip key={`${s}-${i}`} value={s} />)}</div>
-            </div>
+            {safeArray(result.offShio).length > 0 && (
+              <div className="flex items-center justify-between gap-3 rounded-3xl border border-[var(--border2)] bg-black/20 p-3">
+                <div className="flex shrink-0 items-center gap-3"><span className="text-base">🐲</span><span className="text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">OFF SHIO</span></div>
+                <div className="flex flex-wrap justify-end gap-2">{safeArray(result.offShio).map((s: any, i: number) => <ShioChip key={`${s}-${i}`} value={s} />)}</div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -324,9 +474,11 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
           <button onClick={() => copyText(lines.join("*"))} className="flex w-full items-center justify-center gap-2 rounded-3xl p-4 font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px] text-black transition active:scale-95" style={{ backgroundColor: meta.accent }}><Copy size={16} /> Copy Semua</button>
         </div>
 
-        <div className="premium-panel space-y-3 p-4">
-          <RekapHistory marketId={marketId} mode={mode} />
-        </div>
+        {!isCustom && (
+          <div className="premium-panel space-y-3 p-4">
+            <RekapHistory marketId={marketId} mode={mode} />
+          </div>
+        )}
       </div>
     );
   };
@@ -381,6 +533,8 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
     );
   };
 
+  const isRekapCustom = type === "rekap" && param === 3;
+
   return (
     <div className={`analysis-mode-${type} animate-[fadeIn_0.35s_ease-out] pb-8`}>
       <button onClick={() => navigate(-1)} className="ghost-button mb-4 flex items-center gap-2 px-4 py-3 text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)] transition active:scale-95"><ArrowLeft size={16} /> Kembali</button>
@@ -396,8 +550,9 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
         </div>
         <div className="relative rounded-3xl bg-black/25 p-4 text-center ring-1 ring-white/10"><span className="mr-3 text-[10px] font-black uppercase tracking-[3px]" style={{ color: meta.accent }}>Pasaran:</span><span className="font-['Orbitron'] text-[13px] font-black uppercase tracking-[4px] text-[var(--text)]">{marketId}</span></div>
       </div>
-      {!result && !loading && param !== 0 && <button onClick={() => handleAnalyze()} className="primary-button mb-4 flex w-full items-center justify-center gap-3 p-5 font-['Orbitron'] text-[12px] font-black uppercase tracking-[4px] transition active:scale-95"><RefreshCw size={18} /> Mulai Analisa</button>}
+      {!result && !loading && param !== 0 && !isRekapCustom && <button onClick={() => handleAnalyze()} className="primary-button mb-4 flex w-full items-center justify-center gap-3 p-5 font-['Orbitron'] text-[12px] font-black uppercase tracking-[4px] transition active:scale-95"><RefreshCw size={18} /> Mulai Analisa</button>}
       {renderParamSelector()}
+      {renderCustomRekapBuilder()}
       {loading && <div className="premium-panel my-4 flex flex-col items-center justify-center gap-4 p-8 text-center"><div className="h-12 w-12 animate-spin rounded-full border-4 border-white/10" style={{ borderTopColor: meta.accent }} /><div className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px] text-[var(--text-dim)]">Memproses Analisa</div></div>}
       {error && <div className="my-4 rounded-3xl border border-red-400/30 bg-red-500/10 p-4 text-center text-[12px] font-bold text-red-300">{error}</div>}
       {renderResult()}
