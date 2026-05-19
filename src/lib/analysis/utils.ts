@@ -72,9 +72,10 @@ export const buildCustomDigitLines = ({ ai, bbfs, includeBBFS, offKepala, offEko
   offShio: number[];
 }) => {
   const lines: string[] = [];
+  const useAI = ai.length > 0;
   for (let k = 0; k <= 9; k++) {
     for (let e = 0; e <= 9; e++) {
-      if (!ai.includes(k) && !ai.includes(e)) continue;
+      if (useAI && !ai.includes(k) && !ai.includes(e)) continue;
       if (includeBBFS && (!bbfs.includes(k) || !bbfs.includes(e))) continue;
       if (offKepala.includes(k) || offEkor.includes(e)) continue;
       if (offJumlah.includes(jumlah2D(k, e))) continue;
