@@ -49,7 +49,7 @@ type RekapCustomResult = {
 
 export default function AnalysisPageV2({ type, title, icon, marketId }: { type: string; title: string; icon: string; marketId: string }) {
   const navigate = useNavigate();
-  const [param, setParam] = useState<number | null>(null);
+  const [param, setParam] = useState<number | null>(0);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState("");
