@@ -245,6 +245,7 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
     if (!result || !angkaJadiModes.has(type)) return null;
     const data = buildAngkaJadi();
     const copyPayload = data.lines.join(" * ");
+    const showSummaryRows = type !== "shio";
 
     return (
       <div className="premium-panel space-y-3 p-4">
@@ -254,16 +255,18 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
         </div>
         {angkaJadiOpen && (
           <div className="space-y-3 pt-1">
-            <div className="space-y-2">
-              {data.rows.map((row: any) => (
-                <div key={row.label} className="flex items-center justify-between gap-3 rounded-3xl border border-[var(--border2)] bg-black/20 p-3">
-                  <span className="shrink-0 text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">{row.label}</span>
-                  <div className="flex flex-wrap justify-end gap-1.5">
-                    {row.jadi.map((item: any) => type === "shio" ? <ShioChip key={item} value={item} /> : <span key={item} className="rounded-xl border px-2.5 py-1 text-[10px] font-black" style={{ borderColor: `${meta.accent}66`, color: meta.accent, backgroundColor: `${meta.accent}16` }}>{item}</span>)}
+            {showSummaryRows && (
+              <div className="space-y-2">
+                {data.rows.map((row: any) => (
+                  <div key={row.label} className="flex items-center justify-between gap-3 rounded-3xl border border-[var(--border2)] bg-black/20 p-3">
+                    <span className="shrink-0 text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">{row.label}</span>
+                    <div className="flex flex-wrap justify-end gap-1.5">
+                      {row.jadi.map((item: any) => <span key={item} className="rounded-xl border px-2.5 py-1 text-[10px] font-black" style={{ borderColor: `${meta.accent}66`, color: meta.accent, backgroundColor: `${meta.accent}16` }}>{item}</span>)}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
             <div className="rounded-3xl border border-[var(--border2)] bg-black/20 p-4">
               <div className="mb-3 flex items-center justify-between gap-3">
                 <span className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[2px] text-[var(--text)]">{data.label}</span>
@@ -282,7 +285,7 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
     if (!evaluationModes.has(type) || !param || param === 0) return null;
     return (
       <div className="premium-panel space-y-3 p-4">
-        <EvaluationHistory marketId={marketId} mode={type as any} param={param} />
+        <EvaluationHistory marketId={marketId} mode={type as any} />
       </div>
     );
   };
