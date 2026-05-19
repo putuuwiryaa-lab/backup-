@@ -52,11 +52,12 @@ function ResultRow({ label, values, accent, shio = false }: any) {
 
 function MainResultCard({ label, values, accent, shio = false, singleLine = false, stacked = false }: any) {
   const arr = safeArray(values);
+  const useStacked = stacked || shio;
   return (
     <div className="premium-panel result-glow relative overflow-hidden p-5">
       <div className="absolute -right-14 -top-14 h-40 w-40 rounded-full blur-3xl" style={{ backgroundColor: `${accent}22` }} />
       <div className="relative mb-4 inline-flex items-center gap-2 rounded-full px-3 py-1 text-[9px] font-black uppercase tracking-[2px]" style={{ backgroundColor: `${accent}1f`, color: accent }}><Trophy size={12} /> Hasil Utama</div>
-      {stacked ? (
+      {useStacked ? (
         <div className="relative rounded-3xl border border-[var(--border2)] bg-black/20 p-4 text-center">
           <h3 className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px] text-[var(--text-dim)]">{label}</h3>
           <div className="mt-4">{shio ? <div className="flex flex-wrap justify-center gap-2">{arr.map((s: any, i: number) => <ShioChip key={`${s}-${i}`} value={s} />)}</div> : <DigitPills items={arr} accent={accent} compact={false} singleLine={singleLine} center />}</div>
@@ -64,7 +65,7 @@ function MainResultCard({ label, values, accent, shio = false, singleLine = fals
       ) : (
         <div className="relative flex items-center justify-between gap-3 rounded-3xl border border-[var(--border2)] bg-black/20 p-4">
           <h3 className="shrink-0 font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px] text-[var(--text-dim)]">{label}</h3>
-          <div className="min-w-0 flex-1">{shio ? <div className="flex flex-wrap justify-end gap-2">{arr.map((s: any, i: number) => <ShioChip key={`${s}-${i}`} value={s} />)}</div> : <DigitPills items={arr} accent={accent} compact={false} singleLine={singleLine} />}</div>
+          <div className="min-w-0 flex-1"><DigitPills items={arr} accent={accent} compact={false} singleLine={singleLine} /></div>
         </div>
       )}
     </div>
