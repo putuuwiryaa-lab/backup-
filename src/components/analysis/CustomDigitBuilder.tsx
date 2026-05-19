@@ -9,8 +9,8 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const RECOMMENDATION_SAMPLE_SIZE = 15;
 const RECOMMENDATION_MIN_SAMPLE = 10;
-const RECOMMENDATION_FULL_SAMPLE_WINS = 11;
-const RECOMMENDATION_PARTIAL_WIN_RATE = 0.75;
+const RECOMMENDATION_FULL_SAMPLE_WINS = 12;
+const RECOMMENDATION_PARTIAL_WIN_RATE = 0.8;
 
 type RecommendedMap = Record<string, boolean>;
 
