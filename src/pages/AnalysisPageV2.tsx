@@ -6,6 +6,21 @@ import EvaluationHistory from "../components/EvaluationHistory";
 
 const SHIO_NAMES = ["", "Kuda", "Ular", "Naga", "Kelinci", "Harimau", "Kerbau", "Tikus", "Babi", "Anjing", "Ayam", "Monyet", "Kambing"];
 const SHIO_EMOJI = ["", "🐴", "🐍", "🐉", "🐰", "🐯", "🐂", "🐭", "🐷", "🐕", "🐔", "🐒", "🐐"];
+const DIGITS = Array.from({ length: 10 }, (_, i) => String(i));
+const SHIO_2D: Record<number, number[]> = {
+  1: [1, 13, 25, 37, 49, 61, 73, 85, 97],
+  2: [2, 14, 26, 38, 50, 62, 74, 86, 98],
+  3: [3, 15, 27, 39, 51, 63, 75, 87, 99],
+  4: [4, 16, 28, 40, 52, 64, 76, 88, 0],
+  5: [5, 17, 29, 41, 53, 65, 77, 89],
+  6: [6, 18, 30, 42, 54, 66, 78, 90],
+  7: [7, 19, 31, 43, 55, 67, 79, 91],
+  8: [8, 20, 32, 44, 56, 68, 80, 92],
+  9: [9, 21, 33, 45, 57, 69, 81, 93],
+  10: [10, 22, 34, 46, 58, 70, 82, 94],
+  11: [11, 23, 35, 47, 59, 71, 83, 95],
+  12: [12, 24, 36, 48, 60, 72, 84, 96],
+};
 
 const typeMeta: any = {
   ai: { accent: "#f3c14b", soft: "rgba(243, 193, 75, 0.16)", label: "ANGKA IKUT", formula: "35 RUMUS" },
@@ -16,6 +31,7 @@ const typeMeta: any = {
 };
 
 const evaluationModes = new Set(["ai", "mati", "jumlah", "shio"]);
+const angkaJadiModes = new Set(["mati", "jumlah", "shio"]);
 
 export default function AnalysisPageV2({ type, title, icon, marketId }: { type: string; title: string; icon: string; marketId: string }) {
   const navigate = useNavigate();
@@ -24,11 +40,62 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState("");
   const [detailValidationOpen, setDetailValidationOpen] = useState(false);
+  const [angkaJadiOpen, setAngkaJadiOpen] = useState(false);
   const meta = typeMeta[type] || typeMeta.ai;
 
   const safeArray = (value: any) => Array.isArray(value) ? value : value === undefined || value === null ? [] : [value];
   const statsFrom = (value: any) => Array.isArray(value?.stats) ? value.stats : [];
   const copyText = (text: string) => navigator.clipboard?.writeText(text);
+  const format2D = (n: number | string) => String(n).padStart(2, "0");
+  const normalDigitList = (value: any) => Array.from(new Set(safeArray(value).map((v: any) => String(v)).filter((v: string) => /^\d$/.test(v))));
+  const j2d = (a: number, b: number) => {
+    const s = a + b;
+    return s >= 10 ? s - 9 : s;
+  };
+  const shioOf2D = (n: number) => {
+    for (const [shio, list] of Object.entries(SHIO_2D)) {
+      if (list.includes(n)) return Number(shio);
+    }
+    return 1;
+  };
+
+  const buildAngkaJadi = () => {
+    if (!result || !angkaJadiModes.has(type)) return { lines: [] as string[], rows: [] as any[], label: "ANGKA JADI" };
+
+    if (type === "mati") {
+      const POS = ["AS", "KOP", "KEPALA", "EKOR"];
+      const rows = POS.map((pos) => {
+        const off = normalDigitList(result[pos]?.result);
+        const jadi = DIGITS.filter((d) => !off.includes(d));
+        return { label: pos, off, jadi };
+      });
+      const [as, kop, kepala, ekor] = rows.map((r) => r.jadi.length ? r.jadi : DIGITS);
+      const lines: string[] = [];
+      as.forEach((a: string) => kop.forEach((k: string) => kepala.forEach((h: string) => ekor.forEach((e: string) => lines.push(`${a}${k}${h}${e}`)))));
+      return { lines, rows, label: "ANGKA JADI 4D" };
+    }
+
+    if (type === "jumlah") {
+      const off = normalDigitList(result.result);
+      const rows = [{ label: "JUMLAH JADI", off, jadi: DIGITS.filter((d) => !off.includes(d)) }];
+      const lines: string[] = [];
+      for (let k = 0; k <= 9; k++) {
+        for (let e = 0; e <= 9; e++) {
+          if (!off.includes(String(j2d(k, e)))) lines.push(`${k}${e}`);
+        }
+      }
+      return { lines, rows, label: "ANGKA JADI 2D" };
+    }
+
+    const offShio = Array.from(new Set(safeArray(result.result).map((v: any) => Number(String(v).match(/\d+/)?.[0] ?? v)).filter((v: number) => Number.isFinite(v) && v >= 1 && v <= 12)));
+    const jadiShio = Array.from({ length: 12 }, (_, i) => i + 1).filter((s) => !offShio.includes(s));
+    const rows = [{ label: "SHIO JADI", off: offShio, jadi: jadiShio }];
+    const lines: string[] = [];
+    for (let n = 0; n <= 99; n++) {
+      if (!offShio.includes(shioOf2D(n))) lines.push(format2D(n));
+    }
+    return { lines, rows, label: "ANGKA JADI 2D" };
+  };
 
   const handleAnalyze = async (p?: number) => {
     if (!p && param === null) {
@@ -43,6 +110,7 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
     setError("");
     setResult(null);
     setDetailValidationOpen(false);
+    setAngkaJadiOpen(false);
 
     try {
       const resMarkets = await fetch("/api/markets");
@@ -173,6 +241,43 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
     );
   };
 
+  const renderAngkaJadiPanel = () => {
+    if (!result || !angkaJadiModes.has(type)) return null;
+    const data = buildAngkaJadi();
+    const copyPayload = data.lines.join(" * ");
+
+    return (
+      <div className="premium-panel space-y-3 p-4">
+        <div className="flex items-center justify-between gap-3">
+          <SectionTitle accent={meta.accent} title="Angka Jadi" />
+          <DetailToggle open={angkaJadiOpen} accent={meta.accent} onClick={() => setAngkaJadiOpen((open) => !open)} />
+        </div>
+        {angkaJadiOpen && (
+          <div className="space-y-3 pt-1">
+            <div className="space-y-2">
+              {data.rows.map((row: any) => (
+                <div key={row.label} className="flex items-center justify-between gap-3 rounded-3xl border border-[var(--border2)] bg-black/20 p-3">
+                  <span className="shrink-0 text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">{row.label}</span>
+                  <div className="flex flex-wrap justify-end gap-1.5">
+                    {row.jadi.map((item: any) => type === "shio" ? <ShioChip key={item} value={item} /> : <span key={item} className="rounded-xl border px-2.5 py-1 text-[10px] font-black" style={{ borderColor: `${meta.accent}66`, color: meta.accent, backgroundColor: `${meta.accent}16` }}>{item}</span>)}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="rounded-3xl border border-[var(--border2)] bg-black/20 p-4">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <span className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[2px] text-[var(--text)]">{data.label}</span>
+                <span className="rounded-full px-3 py-1 text-[9px] font-black uppercase tracking-[1px]" style={{ backgroundColor: meta.soft, color: meta.accent }}>{data.lines.length} LINE</span>
+              </div>
+              <div className="max-h-[260px] overflow-y-auto rounded-3xl border border-[var(--border2)] bg-black/30 p-4 font-['JetBrains_Mono'] text-[14px] font-bold leading-8 tracking-[2px] custom-scrollbar" style={{ color: meta.accent }}>{copyPayload || "-"}</div>
+              <button onClick={() => copyText(copyPayload)} className="mt-3 flex w-full items-center justify-center gap-2 rounded-3xl p-4 font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px] text-black transition active:scale-95" style={{ backgroundColor: meta.accent }}><Copy size={16} /> Copy Semua</button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const renderEvaluationHistory = () => {
     if (!evaluationModes.has(type) || !param || param === 0) return null;
     return (
@@ -250,6 +355,7 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
             </div>
             {detailValidationOpen && POS.map((p) => <section key={p} className="space-y-3"><div className="flex items-center gap-3"><div className="h-px flex-1 bg-white/10" /><span className="font-['Orbitron'] text-[10px] font-black uppercase tracking-[3px]" style={{ color: meta.accent }}>{p}</span><div className="h-px flex-1 bg-white/10" /></div>{renderStatsList(statsFrom(result[p]), meta.accent)}</section>)}
           </div>
+          {renderAngkaJadiPanel()}
           {renderEvaluationHistory()}
         </div>
       );
@@ -273,6 +379,7 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
           </div>
           {detailValidationOpen && <div className="mt-4">{renderStatsList(stats, meta.accent)}</div>}
         </div>
+        {renderAngkaJadiPanel()}
         {renderEvaluationHistory()}
       </div>
     );
@@ -313,7 +420,7 @@ function DetailToggle({ open, accent, onClick }: { open: boolean; accent: string
       onClick={onClick}
       className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[9px] font-black uppercase tracking-[1px] active:scale-95"
       style={{ borderColor: `${accent}55`, backgroundColor: `${accent}18`, color: accent }}
-      aria-label={open ? "Tutup Detail Validasi" : "Buka Detail Validasi"}
+      aria-label={open ? "Tutup" : "Buka"}
     >
       {open ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
       {open ? "Tutup" : "Buka"}
