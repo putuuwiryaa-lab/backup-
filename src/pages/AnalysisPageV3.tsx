@@ -129,6 +129,7 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
 
       <CustomDigitBuilder
         show={type === "rekap" && param === 3 && !result}
+        marketId={marketId}
         meta={meta}
         customAiDigit={customAiDigit}
         setCustomAiDigit={setCustomAiDigit}
