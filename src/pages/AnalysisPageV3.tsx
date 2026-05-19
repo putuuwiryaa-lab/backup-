@@ -18,7 +18,8 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
   const [angkaJadiOpen, setAngkaJadiOpen] = useState(false);
   const [customAiDigit, setCustomAiDigit] = useState<2 | 4 | 6 | null>(null);
   const [customIncludeBBFS, setCustomIncludeBBFS] = useState(false);
-  const [customOffDigitCount, setCustomOffDigitCount] = useState<number | null>(null);
+  const [customOffKepalaCount, setCustomOffKepalaCount] = useState<number | null>(null);
+  const [customOffEkorCount, setCustomOffEkorCount] = useState<number | null>(null);
   const [customOffJumlahCount, setCustomOffJumlahCount] = useState<number | null>(null);
   const [customOffShioCount, setCustomOffShioCount] = useState<number | null>(null);
   const meta = typeMeta[type] || typeMeta.ai;
@@ -66,7 +67,7 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
   };
 
   const handleCustomDigitGenerate = async () => {
-    const hasAnyFilter = Boolean(customAiDigit || customIncludeBBFS || customOffDigitCount || customOffJumlahCount || customOffShioCount);
+    const hasAnyFilter = Boolean(customAiDigit || customIncludeBBFS || customOffKepalaCount || customOffEkorCount || customOffJumlahCount || customOffShioCount);
     if (!hasAnyFilter) {
       setError("Pilih minimal satu filter dulu.");
       return;
@@ -77,14 +78,15 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
       const data = await getMarketData();
       const aiData = customAiDigit ? await postAnalyze("ai", data, customAiDigit) : null;
       const bbfsData = customIncludeBBFS ? await postAnalyze("ai", data, 8) : null;
-      const matiData = customOffDigitCount ? await postAnalyze("mati", data, customOffDigitCount) : null;
+      const matiKepalaData = customOffKepalaCount ? await postAnalyze("mati", data, customOffKepalaCount) : null;
+      const matiEkorData = customOffEkorCount ? await postAnalyze("mati", data, customOffEkorCount) : null;
       const jumlahData = customOffJumlahCount ? await postAnalyze("jumlah", data, customOffJumlahCount) : null;
       const shioData = customOffShioCount ? await postAnalyze("shio", data, customOffShioCount) : null;
 
       const ai = customAiDigit ? toNumberList(aiData?.result) : [];
       const bbfs = customIncludeBBFS ? toNumberList(bbfsData?.result) : [];
-      const offKepala = customOffDigitCount ? toNumberList(matiData?.KEPALA?.result) : [];
-      const offEkor = customOffDigitCount ? toNumberList(matiData?.EKOR?.result) : [];
+      const offKepala = customOffKepalaCount ? toNumberList(matiKepalaData?.KEPALA?.result) : [];
+      const offEkor = customOffEkorCount ? toNumberList(matiEkorData?.EKOR?.result) : [];
       const offJumlah = customOffJumlahCount ? toNumberList(jumlahData?.result) : [];
       const offShio = customOffShioCount ? toNumberList(shioData?.result) : [];
       const lines = buildCustomDigitLines({ ai, bbfs, includeBBFS: customIncludeBBFS, offKepala, offEkor, offJumlah, offShio });
@@ -132,8 +134,10 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
         setCustomAiDigit={setCustomAiDigit}
         customIncludeBBFS={customIncludeBBFS}
         setCustomIncludeBBFS={setCustomIncludeBBFS}
-        customOffDigitCount={customOffDigitCount}
-        setCustomOffDigitCount={setCustomOffDigitCount}
+        customOffKepalaCount={customOffKepalaCount}
+        setCustomOffKepalaCount={setCustomOffKepalaCount}
+        customOffEkorCount={customOffEkorCount}
+        setCustomOffEkorCount={setCustomOffEkorCount}
         customOffJumlahCount={customOffJumlahCount}
         setCustomOffJumlahCount={setCustomOffJumlahCount}
         customOffShioCount={customOffShioCount}
