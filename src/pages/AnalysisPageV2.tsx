@@ -60,41 +60,41 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
   };
 
   const buildAngkaJadi = () => {
-    if (!result || !angkaJadiModes.has(type)) return { lines: [] as string[], rows: [] as any[], label: "ANGKA JADI" };
+    if (!result || !angkaJadiModes.has(type)) return { sections: [] as { label: string; lines: string[] }[] };
 
     if (type === "mati") {
-      const POS = ["AS", "KOP", "KEPALA", "EKOR"];
-      const rows = POS.map((pos) => {
+      const jadi = (pos: string) => {
         const off = normalDigitList(result[pos]?.result);
-        const jadi = DIGITS.filter((d) => !off.includes(d));
-        return { label: pos, off, jadi };
-      });
-      const [as, kop, kepala, ekor] = rows.map((r) => r.jadi.length ? r.jadi : DIGITS);
-      const lines: string[] = [];
-      as.forEach((a: string) => kop.forEach((k: string) => kepala.forEach((h: string) => ekor.forEach((e: string) => lines.push(`${a}${k}${h}${e}`)))));
-      return { lines, rows, label: "ANGKA JADI 4D" };
+        const allowed = DIGITS.filter((d) => !off.includes(d));
+        return allowed.length ? allowed : DIGITS;
+      };
+      const kop = jadi("KOP");
+      const kepala = jadi("KEPALA");
+      const ekor = jadi("EKOR");
+      const lines3D: string[] = [];
+      const lines2D: string[] = [];
+      kop.forEach((k: string) => kepala.forEach((h: string) => ekor.forEach((e: string) => lines3D.push(`${k}${h}${e}`))));
+      kepala.forEach((h: string) => ekor.forEach((e: string) => lines2D.push(`${h}${e}`)));
+      return { sections: [{ label: "ANGKA JADI 3D", lines: lines3D }, { label: "ANGKA JADI 2D", lines: lines2D }] };
     }
 
     if (type === "jumlah") {
       const off = normalDigitList(result.result);
-      const rows = [{ label: "JUMLAH JADI", off, jadi: DIGITS.filter((d) => !off.includes(d)) }];
       const lines: string[] = [];
       for (let k = 0; k <= 9; k++) {
         for (let e = 0; e <= 9; e++) {
           if (!off.includes(String(j2d(k, e)))) lines.push(`${k}${e}`);
         }
       }
-      return { lines, rows, label: "ANGKA JADI 2D" };
+      return { sections: [{ label: "ANGKA JADI 2D", lines }] };
     }
 
     const offShio = Array.from(new Set(safeArray(result.result).map((v: any) => Number(String(v).match(/\d+/)?.[0] ?? v)).filter((v: number) => Number.isFinite(v) && v >= 1 && v <= 12)));
-    const jadiShio = Array.from({ length: 12 }, (_, i) => i + 1).filter((s) => !offShio.includes(s));
-    const rows = [{ label: "SHIO JADI", off: offShio, jadi: jadiShio }];
     const lines: string[] = [];
     for (let n = 0; n <= 99; n++) {
       if (!offShio.includes(shioOf2D(n))) lines.push(format2D(n));
     }
-    return { lines, rows, label: "ANGKA JADI 2D" };
+    return { sections: [{ label: "ANGKA JADI 2D", lines }] };
   };
 
   const handleAnalyze = async (p?: number) => {
@@ -241,11 +241,23 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
     );
   };
 
+  const renderLineBox = (label: string, lines: string[]) => {
+    const copyPayload = lines.join(" * ");
+    return (
+      <div key={label} className="rounded-3xl border border-[var(--border2)] bg-black/20 p-4">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <span className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[2px] text-[var(--text)]">{label}</span>
+          <span className="rounded-full px-3 py-1 text-[9px] font-black uppercase tracking-[1px]" style={{ backgroundColor: meta.soft, color: meta.accent }}>{lines.length} LINE</span>
+        </div>
+        <div className="max-h-[260px] overflow-y-auto rounded-3xl border border-[var(--border2)] bg-black/30 p-4 font-['JetBrains_Mono'] text-[14px] font-bold leading-8 tracking-[2px] custom-scrollbar" style={{ color: meta.accent }}>{copyPayload || "-"}</div>
+        <button onClick={() => copyText(copyPayload)} className="mt-3 flex w-full items-center justify-center gap-2 rounded-3xl p-4 font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px] text-black transition active:scale-95" style={{ backgroundColor: meta.accent }}><Copy size={16} /> Copy Semua</button>
+      </div>
+    );
+  };
+
   const renderAngkaJadiPanel = () => {
     if (!result || !angkaJadiModes.has(type)) return null;
     const data = buildAngkaJadi();
-    const copyPayload = data.lines.join(" * ");
-    const showSummaryRows = type !== "shio";
 
     return (
       <div className="premium-panel space-y-3 p-4">
@@ -255,26 +267,7 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
         </div>
         {angkaJadiOpen && (
           <div className="space-y-3 pt-1">
-            {showSummaryRows && (
-              <div className="space-y-2">
-                {data.rows.map((row: any) => (
-                  <div key={row.label} className="flex items-center justify-between gap-3 rounded-3xl border border-[var(--border2)] bg-black/20 p-3">
-                    <span className="shrink-0 text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">{row.label}</span>
-                    <div className="flex flex-wrap justify-end gap-1.5">
-                      {row.jadi.map((item: any) => <span key={item} className="rounded-xl border px-2.5 py-1 text-[10px] font-black" style={{ borderColor: `${meta.accent}66`, color: meta.accent, backgroundColor: `${meta.accent}16` }}>{item}</span>)}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-            <div className="rounded-3xl border border-[var(--border2)] bg-black/20 p-4">
-              <div className="mb-3 flex items-center justify-between gap-3">
-                <span className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[2px] text-[var(--text)]">{data.label}</span>
-                <span className="rounded-full px-3 py-1 text-[9px] font-black uppercase tracking-[1px]" style={{ backgroundColor: meta.soft, color: meta.accent }}>{data.lines.length} LINE</span>
-              </div>
-              <div className="max-h-[260px] overflow-y-auto rounded-3xl border border-[var(--border2)] bg-black/30 p-4 font-['JetBrains_Mono'] text-[14px] font-bold leading-8 tracking-[2px] custom-scrollbar" style={{ color: meta.accent }}>{copyPayload || "-"}</div>
-              <button onClick={() => copyText(copyPayload)} className="mt-3 flex w-full items-center justify-center gap-2 rounded-3xl p-4 font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px] text-black transition active:scale-95" style={{ backgroundColor: meta.accent }}><Copy size={16} /> Copy Semua</button>
-            </div>
+            {data.sections.map((section) => renderLineBox(section.label, section.lines))}
           </div>
         )}
       </div>
@@ -285,7 +278,7 @@ export default function AnalysisPageV2({ type, title, icon, marketId }: { type: 
     if (!evaluationModes.has(type) || !param || param === 0) return null;
     return (
       <div className="premium-panel space-y-3 p-4">
-        <EvaluationHistory marketId={marketId} mode={type as any} />
+        <EvaluationHistory marketId={marketId} mode={type as any} param={param} />
       </div>
     );
   };
