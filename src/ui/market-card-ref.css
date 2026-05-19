@@ -266,6 +266,57 @@ header p {
   border-color: var(--mode-border-soft) !important;
 }
 
+/* Long screenshot stability: prevent Android/WebView stitching duplicates. */
+.analysis-mode-ai,
+.analysis-mode-mati,
+.analysis-mode-jumlah,
+.analysis-mode-shio,
+.analysis-mode-rekap,
+.analysis-mode-ai *,
+.analysis-mode-mati *,
+.analysis-mode-jumlah *,
+.analysis-mode-shio *,
+.analysis-mode-rekap * {
+  animation: none !important;
+  transition-property: background-color, border-color, color, opacity !important;
+  transform: none !important;
+}
+
+.analysis-mode-ai .premium-panel,
+.analysis-mode-mati .premium-panel,
+.analysis-mode-jumlah .premium-panel,
+.analysis-mode-shio .premium-panel,
+.analysis-mode-rekap .premium-panel,
+.analysis-mode-ai .premium-card,
+.analysis-mode-mati .premium-card,
+.analysis-mode-jumlah .premium-card,
+.analysis-mode-shio .premium-card,
+.analysis-mode-rekap .premium-card,
+.analysis-mode-ai .result-glow,
+.analysis-mode-mati .result-glow,
+.analysis-mode-jumlah .result-glow,
+.analysis-mode-shio .result-glow,
+.analysis-mode-rekap .result-glow {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
+  contain: layout paint !important;
+  isolation: isolate !important;
+}
+
+.analysis-mode-ai .absolute.blur-3xl,
+.analysis-mode-mati .absolute.blur-3xl,
+.analysis-mode-jumlah .absolute.blur-3xl,
+.analysis-mode-shio .absolute.blur-3xl,
+.analysis-mode-rekap .absolute.blur-3xl,
+.analysis-mode-ai .absolute.blur-2xl,
+.analysis-mode-mati .absolute.blur-2xl,
+.analysis-mode-jumlah .absolute.blur-2xl,
+.analysis-mode-shio .absolute.blur-2xl,
+.analysis-mode-rekap .absolute.blur-2xl {
+  display: none !important;
+}
+
 /* Floating report action. Bottom navigation is no longer rendered. */
 .report-floating-button {
   background: #2a1630 !important;
