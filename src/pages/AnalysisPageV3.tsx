@@ -10,7 +10,7 @@ import { buildCustomDigitLines, toNumberList } from "../lib/analysis/utils";
 
 export default function AnalysisPageV3({ type, title, icon, marketId }: { type: string; title: string; icon: string; marketId: string }) {
   const navigate = useNavigate();
-  const [param, setParam] = useState<number | null>(0);
+  const [param, setParam] = useState<number | null>(type === "rekap" ? 3 : 0);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState("");
