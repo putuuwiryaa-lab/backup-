@@ -9,22 +9,25 @@ export default function ParamSelector({ type, param, meta, onAnalyze, onCustomDi
 
   const options: any = {
     ai: { title: "PILIH JUMLAH DIGIT AI", values: [4, 6, 8], labels: { 8: "BBFS" } },
-    mati: { title: "PILIH JUMLAH DIGIT OFF", values: [1, 2, 3] },
-    jumlah: { title: "PILIH JUMLAH OFF", values: [1, 2, 3] },
-    shio: { title: "PILIH JUMLAH SHIO MATI", values: [1, 2, 3] },
+    mati: { title: "PILIH JUMLAH DIGIT OFF", values: [1, 2, 3], hints: { 1: "RINGAN", 2: "SEIMBANG", 3: "KETAT" } },
+    jumlah: { title: "PILIH JUMLAH OFF", values: [1, 2, 3], hints: { 1: "RINGAN", 2: "SEIMBANG", 3: "KETAT" } },
+    shio: { title: "PILIH JUMLAH SHIO MATI", values: [1, 2, 3], hints: { 1: "RINGAN", 2: "SEIMBANG", 3: "KETAT" } },
     rekap: { title: "PILIH MODE REKAP", values: [1, 2], labels: { 1: "INVEST", 2: "TOP" } },
   };
   const cfg = options[type] || options.ai;
+  const isThreeDigitMode = type === "mati" || type === "jumlah" || type === "shio";
 
   return (
     <div className="premium-panel mt-4 p-4">
       <div className="mb-3 text-center text-[10px] font-black uppercase tracking-[3px]" style={{ color: meta.accent }}>{cfg.title}</div>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+      <div className={`grid gap-2 ${isThreeDigitMode ? "grid-cols-3" : "grid-cols-2 sm:grid-cols-4"}`}>
         {cfg.values.map((n: number) => {
           const isWideBBFS = type === "ai" && n === 8;
+          const hint = cfg.hints?.[n];
           return (
-            <button key={n} onClick={() => onAnalyze(n)} className={`${isWideBBFS ? "col-span-2 sm:col-span-4" : ""} rounded-3xl border p-5 text-center transition active:scale-95`} style={{ borderColor: meta.accent, backgroundColor: meta.soft, color: meta.accent }}>
+            <button key={n} onClick={() => onAnalyze(n)} className={`${isWideBBFS ? "col-span-2 sm:col-span-4" : ""} rounded-3xl border ${isThreeDigitMode ? "min-h-[92px] p-3" : "p-5"} text-center transition active:scale-95`} style={{ borderColor: meta.accent, backgroundColor: meta.soft, color: meta.accent }}>
               <span className="block font-['Orbitron'] text-xl font-black tracking-[2px]">{cfg.labels?.[n] || n}</span>
+              {hint && <span className="mt-2 block text-[8px] font-black uppercase tracking-[1.4px] opacity-80">{hint}</span>}
             </button>
           );
         })}
