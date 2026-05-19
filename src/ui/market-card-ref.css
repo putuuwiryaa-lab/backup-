@@ -87,40 +87,68 @@ header p {
   display: none !important;
 }
 
-/* Mode color identity for analysis detail pages. */
+/* Mode color identity for analysis detail pages. No color-mix: safer on mobile WebView. */
 .analysis-mode-ai {
   --mode-accent: #f3c14b;
-  --mode-soft: rgba(243, 193, 75, 0.13);
-  --mode-panel: rgba(35, 27, 18, 0.98);
-  --mode-panel-2: rgba(25, 19, 15, 0.98);
+  --mode-soft: rgba(243, 193, 75, 0.16);
+  --mode-panel: #211a11;
+  --mode-panel-2: #17120e;
+  --mode-border: rgba(243, 193, 75, 0.34);
+  --mode-border-soft: rgba(243, 193, 75, 0.22);
+  --mode-inner: #151008;
+  --mode-text: #ffe19a;
 }
 
 .analysis-mode-mati {
   --mode-accent: #ff647c;
-  --mode-soft: rgba(255, 100, 124, 0.13);
-  --mode-panel: rgba(34, 19, 30, 0.98);
-  --mode-panel-2: rgba(24, 14, 24, 0.98);
+  --mode-soft: rgba(255, 100, 124, 0.16);
+  --mode-panel: #24131e;
+  --mode-panel-2: #180e18;
+  --mode-border: rgba(255, 100, 124, 0.36);
+  --mode-border-soft: rgba(255, 100, 124, 0.22);
+  --mode-inner: #160b13;
+  --mode-text: #ffb0bd;
 }
 
 .analysis-mode-jumlah {
   --mode-accent: #b58cff;
-  --mode-soft: rgba(181, 140, 255, 0.13);
-  --mode-panel: rgba(29, 20, 43, 0.98);
-  --mode-panel-2: rgba(19, 14, 31, 0.98);
+  --mode-soft: rgba(181, 140, 255, 0.16);
+  --mode-panel: #1f1730;
+  --mode-panel-2: #130e1f;
+  --mode-border: rgba(181, 140, 255, 0.36);
+  --mode-border-soft: rgba(181, 140, 255, 0.22);
+  --mode-inner: #120b1d;
+  --mode-text: #d8c3ff;
 }
 
 .analysis-mode-shio {
   --mode-accent: #28d7ff;
-  --mode-soft: rgba(40, 215, 255, 0.12);
-  --mode-panel: rgba(14, 29, 39, 0.98);
-  --mode-panel-2: rgba(10, 19, 29, 0.98);
+  --mode-soft: rgba(40, 215, 255, 0.14);
+  --mode-panel: #0e1d27;
+  --mode-panel-2: #0a131d;
+  --mode-border: rgba(40, 215, 255, 0.34);
+  --mode-border-soft: rgba(40, 215, 255, 0.20);
+  --mode-inner: #08111a;
+  --mode-text: #9defff;
 }
 
 .analysis-mode-rekap {
   --mode-accent: #6ea8ff;
-  --mode-soft: rgba(110, 168, 255, 0.13);
-  --mode-panel: rgba(17, 24, 42, 0.98);
-  --mode-panel-2: rgba(11, 16, 30, 0.98);
+  --mode-soft: rgba(110, 168, 255, 0.16);
+  --mode-panel: #11182a;
+  --mode-panel-2: #0b101e;
+  --mode-border: rgba(110, 168, 255, 0.34);
+  --mode-border-soft: rgba(110, 168, 255, 0.22);
+  --mode-inner: #080e1a;
+  --mode-text: #b8d4ff;
+}
+
+.analysis-mode-ai,
+.analysis-mode-mati,
+.analysis-mode-jumlah,
+.analysis-mode-shio,
+.analysis-mode-rekap {
+  background: transparent !important;
 }
 
 .analysis-mode-ai .premium-panel,
@@ -129,15 +157,16 @@ header p {
 .analysis-mode-shio .premium-panel,
 .analysis-mode-rekap .premium-panel {
   background: linear-gradient(180deg, var(--mode-panel), var(--mode-panel-2)) !important;
-  border-color: color-mix(in srgb, var(--mode-accent) 24%, transparent) !important;
+  border-color: var(--mode-border-soft) !important;
 }
 
-.analysis-mode-ai .premium-panel:first-of-type,
-.analysis-mode-mati .premium-panel:first-of-type,
-.analysis-mode-jumlah .premium-panel:first-of-type,
-.analysis-mode-shio .premium-panel:first-of-type,
-.analysis-mode-rekap .premium-panel:first-of-type {
-  border-color: color-mix(in srgb, var(--mode-accent) 38%, transparent) !important;
+.analysis-mode-ai > .premium-panel,
+.analysis-mode-mati > .premium-panel,
+.analysis-mode-jumlah > .premium-panel,
+.analysis-mode-shio > .premium-panel,
+.analysis-mode-rekap > .premium-panel {
+  border-color: var(--mode-border) !important;
+  background: linear-gradient(180deg, var(--mode-panel), var(--mode-panel-2)) !important;
 }
 
 .analysis-mode-ai .primary-button,
@@ -147,6 +176,7 @@ header p {
 .analysis-mode-rekap .primary-button {
   background: var(--mode-accent) !important;
   color: #0d0a1a !important;
+  border-color: var(--mode-border) !important;
 }
 
 .analysis-mode-ai .ghost-button,
@@ -154,8 +184,9 @@ header p {
 .analysis-mode-jumlah .ghost-button,
 .analysis-mode-shio .ghost-button,
 .analysis-mode-rekap .ghost-button {
-  border-color: color-mix(in srgb, var(--mode-accent) 24%, transparent) !important;
-  color: color-mix(in srgb, var(--mode-accent) 78%, white) !important;
+  background: var(--mode-inner) !important;
+  border-color: var(--mode-border-soft) !important;
+  color: var(--mode-text) !important;
 }
 
 .analysis-mode-ai .result-glow,
@@ -163,8 +194,8 @@ header p {
 .analysis-mode-jumlah .result-glow,
 .analysis-mode-shio .result-glow,
 .analysis-mode-rekap .result-glow {
-  background: linear-gradient(180deg, color-mix(in srgb, var(--mode-panel) 88%, var(--mode-accent)), var(--mode-panel-2)) !important;
-  border-color: color-mix(in srgb, var(--mode-accent) 34%, transparent) !important;
+  background: linear-gradient(180deg, var(--mode-panel), var(--mode-inner)) !important;
+  border-color: var(--mode-border) !important;
 }
 
 .analysis-mode-ai .rounded-3xl.bg-black\/20,
@@ -176,9 +207,14 @@ header p {
 .analysis-mode-mati .rounded-3xl.bg-black\/25,
 .analysis-mode-jumlah .rounded-3xl.bg-black\/25,
 .analysis-mode-shio .rounded-3xl.bg-black\/25,
-.analysis-mode-rekap .rounded-3xl.bg-black\/25 {
-  background: color-mix(in srgb, var(--mode-panel-2) 88%, black) !important;
-  border-color: color-mix(in srgb, var(--mode-accent) 20%, transparent) !important;
+.analysis-mode-rekap .rounded-3xl.bg-black\/25,
+.analysis-mode-ai .rounded-3xl.bg-black\/30,
+.analysis-mode-mati .rounded-3xl.bg-black\/30,
+.analysis-mode-jumlah .rounded-3xl.bg-black\/30,
+.analysis-mode-shio .rounded-3xl.bg-black\/30,
+.analysis-mode-rekap .rounded-3xl.bg-black\/30 {
+  background: var(--mode-inner) !important;
+  border-color: var(--mode-border-soft) !important;
 }
 
 .analysis-mode-ai .h-full.rounded-full,
@@ -187,6 +223,14 @@ header p {
 .analysis-mode-shio .h-full.rounded-full,
 .analysis-mode-rekap .h-full.rounded-full {
   background-color: var(--mode-accent) !important;
+}
+
+.analysis-mode-ai .inline-flex,
+.analysis-mode-mati .inline-flex,
+.analysis-mode-jumlah .inline-flex,
+.analysis-mode-shio .inline-flex,
+.analysis-mode-rekap .inline-flex {
+  border-color: var(--mode-border-soft) !important;
 }
 
 /* Floating report action. Bottom navigation is no longer rendered. */
