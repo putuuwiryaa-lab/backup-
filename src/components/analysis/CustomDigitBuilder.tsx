@@ -7,6 +7,11 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+const RECOMMENDATION_SAMPLE_SIZE = 15;
+const RECOMMENDATION_MIN_SAMPLE = 10;
+const RECOMMENDATION_FULL_SAMPLE_WINS = 11;
+const RECOMMENDATION_PARTIAL_WIN_RATE = 0.75;
+
 type RecommendedMap = Record<string, boolean>;
 
 function isSuccessStatus(row: any) {
@@ -15,11 +20,11 @@ function isSuccessStatus(row: any) {
 
 function pickRecommendation(rows: any[], params: number[], prefer: "low" | "high") {
   const goodParams = params.filter((param) => {
-    const sample = rows.filter((row) => Number(row.param) === param).slice(0, 9);
-    if (sample.length < 5) return false;
+    const sample = rows.filter((row) => Number(row.param) === param).slice(0, RECOMMENDATION_SAMPLE_SIZE);
+    if (sample.length < RECOMMENDATION_MIN_SAMPLE) return false;
     const wins = sample.filter(isSuccessStatus).length;
-    if (sample.length >= 9) return wins >= 7;
-    return wins / sample.length >= 0.8;
+    if (sample.length >= RECOMMENDATION_SAMPLE_SIZE) return wins >= RECOMMENDATION_FULL_SAMPLE_WINS;
+    return wins / sample.length >= RECOMMENDATION_PARTIAL_WIN_RATE;
   });
   if (!goodParams.length) return null;
   return prefer === "low" ? Math.min(...goodParams) : Math.max(...goodParams);
@@ -34,7 +39,7 @@ async function loadRows(marketId: string, mode: string, position: string, params
     .eq("position", position)
     .in("param", params)
     .order("evaluated_at", { ascending: false })
-    .limit(60);
+    .limit(80);
   if (error) throw error;
   return data || [];
 }
