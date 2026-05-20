@@ -12,6 +12,8 @@ export default function RekapResult({ result, param, marketId, meta }: {
   const isCustom = Boolean(result?.custom);
   const mode = isTop ? "top" : "invest";
   const lines = safeArray(result.lines);
+  const displayLines = lines.join(" * ");
+  const copyLines = lines.join("*");
   const rows = isCustom ? [
     ...(safeArray(result.ai).length ? [["AI", safeArray(result.ai).join(" "), "🔥", "#f3c14b"]] : []),
     ...(safeArray(result.bbfs).length ? [["BBFS", safeArray(result.bbfs).join(" "), "✨", "#f3c14b"]] : []),
@@ -49,8 +51,8 @@ export default function RekapResult({ result, param, marketId, meta }: {
 
       <div className="premium-panel space-y-3 p-4">
         <div className="flex items-center justify-between"><span className="font-['Orbitron'] text-[12px] font-black uppercase tracking-[2px] text-[var(--text)]">Generate Lines</span><span className="rounded-full px-3 py-1 text-[10px] font-black" style={{ backgroundColor: meta.soft, color: meta.accent }}>{lines.length} LINE</span></div>
-        <div className="max-h-[260px] overflow-y-auto rounded-3xl border border-[var(--border2)] bg-black/30 p-4 font-['JetBrains_Mono'] text-[14px] font-bold leading-8 tracking-[2px] custom-scrollbar" style={{ color: meta.accent }}>{lines.join(" * ")}</div>
-        <button onClick={() => navigator.clipboard?.writeText(lines.join("*"))} className="flex w-full items-center justify-center gap-2 rounded-3xl p-4 font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px] text-black transition active:scale-95" style={{ backgroundColor: meta.accent }}><Copy size={16} /> Copy Semua</button>
+        <div className="max-h-[260px] overflow-y-auto rounded-3xl border border-[var(--border2)] bg-black/30 p-4 font-['JetBrains_Mono'] text-[14px] font-bold leading-8 tracking-[2px] custom-scrollbar" style={{ color: meta.accent }}>{displayLines}</div>
+        <button onClick={() => navigator.clipboard?.writeText(copyLines)} className="flex w-full items-center justify-center gap-2 rounded-3xl p-4 font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px] text-black transition active:scale-95" style={{ backgroundColor: meta.accent }}><Copy size={16} /> Copy Semua</button>
       </div>
 
       {!isCustom && <div className="premium-panel space-y-3 p-4"><RekapHistory marketId={marketId} mode={mode} /></div>}
