@@ -12,8 +12,8 @@ const RECOMMENDATION_MIN_SAMPLE = 10;
 
 const AI_WIN_THRESHOLDS: Record<number, number> = {
   2: 7,
-  4: 10,
-  6: 13,
+  4: 11,
+  6: 12,
   8: 11,
 };
 
@@ -25,8 +25,8 @@ const OFF_WIN_THRESHOLDS: Record<number, number> = {
 
 const PARTIAL_AI_WIN_RATES: Record<number, number> = {
   2: 7 / 15,
-  4: 10 / 15,
-  6: 13 / 15,
+  4: 11 / 15,
+  6: 12 / 15,
   8: 11 / 15,
 };
 
