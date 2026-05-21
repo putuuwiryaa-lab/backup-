@@ -7,7 +7,7 @@ import RekapResult from "../components/analysis/RekapResult";
 import AnalysisResult from "../components/analysis/AnalysisResult";
 import { typeMeta } from "../lib/analysis/constants";
 import { toNumberList } from "../lib/analysis/utils";
-import { buildCustomDigitLines, customFocusPairs, type CustomFocus, type TargetPair } from "../lib/analysis/customDigit";
+import { buildCustomDigitLines, CUSTOM_FOCUS_OPTIONS, customFocusLabel, customFocusPairs, customFocusSubtitle, type CustomFocus, type TargetPair } from "../lib/analysis/customDigit";
 
 const TARGET_PAIR_OPTIONS: Array<{ key: TargetPair; title: string; subtitle: string }> = [
   { key: "depan", title: "2D DEPAN", subtitle: "AS - KOP" },
@@ -41,6 +41,31 @@ function TargetPairSelector({ meta, onSelect }: { meta: { accent: string; soft: 
   );
 }
 
+function RekapFocusSelector({ meta, onSelect }: { meta: { accent: string; soft: string }; onSelect: (focus: CustomFocus) => void }) {
+  return (
+    <div className="premium-panel mt-4 space-y-4 p-4">
+      <div className="text-center">
+        <div className="text-[10px] font-black uppercase tracking-[3px]" style={{ color: meta.accent }}>Pilih Jenis Rekap</div>
+        <p className="mt-2 text-[10px] font-semibold uppercase tracking-[1.5px] text-[var(--text-dim)]">Pilih dulu jenis line yang mau dibuat.</p>
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        {CUSTOM_FOCUS_OPTIONS.map((item) => (
+          <button
+            key={item.key}
+            type="button"
+            onClick={() => onSelect(item.key)}
+            className={`${item.key === "4d" ? "col-span-2" : ""} rounded-3xl border p-4 text-center transition active:scale-95`}
+            style={{ borderColor: meta.accent, backgroundColor: meta.soft, color: meta.accent }}
+          >
+            <span className="block font-['Orbitron'] text-[12px] font-black uppercase tracking-[2px]">{item.title}</span>
+            <span className="mt-2 block text-[8px] font-black uppercase tracking-[1px] opacity-75">{item.subtitle}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function targetPairLabel(pair: TargetPair | null) {
   if (!pair) return "";
   const option = TARGET_PAIR_OPTIONS.find((item) => item.key === pair);
@@ -57,7 +82,7 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
   const [error, setError] = useState("");
   const [detailValidationOpen, setDetailValidationOpen] = useState(false);
   const [angkaJadiOpen, setAngkaJadiOpen] = useState(false);
-  const [customFocus, setCustomFocus] = useState<CustomFocus>("belakang");
+  const [customFocus, setCustomFocus] = useState<CustomFocus | null>(type === "rekap" ? null : "belakang");
   const [customAiDigitByPair, setCustomAiDigitByPair] = useState<PairAiMap>({});
   const [customIncludeBBFSByPair, setCustomIncludeBBFSByPair] = useState<PairBooleanMap>({});
   const [customOffAsCount, setCustomOffAsCount] = useState<number | null>(null);
@@ -117,6 +142,12 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
     setError("");
   };
 
+  const handleCustomFocusReset = () => {
+    setCustomFocus(null);
+    setResult(null);
+    setError("");
+  };
+
   const handleAnalyze = async (selectedParam: number) => {
     if (needsTargetPair && !targetPair) {
       setError("Pilih fokus 2D dulu.");
@@ -134,6 +165,10 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
   };
 
   const handleCustomDigitGenerate = async () => {
+    if (!customFocus) {
+      setError("Pilih jenis rekap dulu.");
+      return;
+    }
     const pairs = customFocusPairs(customFocus);
     const hasAnyPairFilter = pairs.some((pair) => customAiDigitByPair[pair] || customIncludeBBFSByPair[pair] || customOffJumlahCountByPair[pair] || customOffShioCountByPair[pair]);
     const hasAnyFilter = Boolean(hasAnyPairFilter || customOffAsCount || customOffKopCount || customOffKepalaCount || customOffEkorCount);
@@ -186,8 +221,10 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
   };
 
   const isRekapCustom = type === "rekap" && param === 3;
+  const showRekapFocusSelector = isRekapCustom && !customFocus && !result && !loading;
+  const showCustomDigitBuilder = isRekapCustom && Boolean(customFocus) && !result;
   const showTargetPairSelector = needsTargetPair && !targetPair && !result && !loading;
-  const showParamSelector = !showTargetPairSelector;
+  const showParamSelector = !showTargetPairSelector && !showRekapFocusSelector;
 
   return (
     <div className={`analysis-mode-${type} animate-[fadeIn_0.35s_ease-out] pb-8`}>
@@ -205,11 +242,13 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
         </div>
         <div className="relative rounded-3xl bg-black/25 p-4 text-center ring-1 ring-white/10"><span className="mr-3 text-[10px] font-black uppercase tracking-[3px]" style={{ color: meta.accent }}>Pasaran:</span><span className="font-['Orbitron'] text-[13px] font-black uppercase tracking-[4px] text-[var(--text)]">{marketId}</span></div>
         {needsTargetPair && targetPair && <div className="relative mt-3 flex items-center justify-between gap-3 rounded-3xl bg-black/20 p-3 ring-1 ring-white/10"><div className="min-w-0 text-left"><span className="mr-2 text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Fokus:</span><span className="font-['Orbitron'] text-[10px] font-black uppercase tracking-[2px]" style={{ color: meta.accent }}>{targetPairLabel(targetPair)}</span></div><button type="button" onClick={handleTargetPairReset} className="shrink-0 rounded-full border px-3 py-1.5 text-[8px] font-black uppercase tracking-[1px] transition active:scale-95" style={{ borderColor: `${meta.accent}66`, color: meta.accent }}>Ganti</button></div>}
+        {isRekapCustom && customFocus && <div className="relative mt-3 flex items-center justify-between gap-3 rounded-3xl bg-black/20 p-3 ring-1 ring-white/10"><div className="min-w-0 text-left"><span className="mr-2 text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Rekap:</span><span className="font-['Orbitron'] text-[10px] font-black uppercase tracking-[2px]" style={{ color: meta.accent }}>{customFocusLabel(customFocus)} · {customFocusSubtitle(customFocus)}</span></div><button type="button" onClick={handleCustomFocusReset} className="shrink-0 rounded-full border px-3 py-1.5 text-[8px] font-black uppercase tracking-[1px] transition active:scale-95" style={{ borderColor: `${meta.accent}66`, color: meta.accent }}>Ganti</button></div>}
       </div>
 
       {!result && !loading && param !== 0 && !isRekapCustom && <button onClick={() => handleAnalyze(param || 1)} className="primary-button mb-4 flex w-full items-center justify-center gap-3 p-5 font-['Orbitron'] text-[12px] font-black uppercase tracking-[4px] transition active:scale-95"><RefreshCw size={18} /> Mulai Analisa</button>}
 
       {showTargetPairSelector && <TargetPairSelector meta={meta} onSelect={handleTargetPairSelect} />}
+      {showRekapFocusSelector && <RekapFocusSelector meta={meta} onSelect={(focus) => { setCustomFocus(focus); setError(""); }} />}
 
       {showParamSelector && <ParamSelector
         type={type}
@@ -219,8 +258,8 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
         onCustomDigit={() => { setParam(3); setResult(null); setError(""); }}
       />}
 
-      <CustomDigitBuilder
-        show={type === "rekap" && param === 3 && !result}
+      {customFocus && <CustomDigitBuilder
+        show={showCustomDigitBuilder}
         marketId={marketId}
         meta={meta}
         customFocus={customFocus}
@@ -242,7 +281,7 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
         customOffShioCountByPair={customOffShioCountByPair}
         setCustomOffShioCountForPair={setCustomOffShioCountForPair}
         onGenerate={handleCustomDigitGenerate}
-      />
+      />}
 
       {loading && <div className="premium-panel my-4 flex flex-col items-center justify-center gap-4 p-8 text-center"><div className="h-12 w-12 animate-spin rounded-full border-4 border-white/10" style={{ borderTopColor: meta.accent }} /><div className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px] text-[var(--text-dim)]">Memproses Analisa</div></div>}
       {error && <div className="my-4 rounded-3xl border border-red-400/30 bg-red-500/10 p-4 text-center text-[12px] font-bold text-red-300">{error}</div>}
