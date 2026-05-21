@@ -8,9 +8,47 @@ import AnalysisResult from "../components/analysis/AnalysisResult";
 import { typeMeta } from "../lib/analysis/constants";
 import { buildCustomDigitLines, toNumberList } from "../lib/analysis/utils";
 
+type TargetPair = "depan" | "tengah" | "belakang";
+
+const TARGET_PAIR_OPTIONS: Array<{ key: TargetPair; title: string; subtitle: string }> = [
+  { key: "depan", title: "2D DEPAN", subtitle: "AS - KOP" },
+  { key: "tengah", title: "2D TENGAH", subtitle: "KOP - KEPALA" },
+  { key: "belakang", title: "2D BELAKANG", subtitle: "KEPALA - EKOR" },
+];
+
+function TargetPairSelector({ meta, onSelect }: { meta: { accent: string; soft: string }; onSelect: (pair: TargetPair) => void }) {
+  return (
+    <div className="premium-panel mt-4 p-4">
+      <div className="mb-3 text-center text-[10px] font-black uppercase tracking-[3px]" style={{ color: meta.accent }}>Pilih Fokus 2D</div>
+      <div className="space-y-2">
+        {TARGET_PAIR_OPTIONS.map((option) => (
+          <button
+            key={option.key}
+            type="button"
+            onClick={() => onSelect(option.key)}
+            className="flex w-full items-center justify-between rounded-3xl border p-4 text-left transition active:scale-95"
+            style={{ borderColor: meta.accent, backgroundColor: meta.soft, color: meta.accent }}
+          >
+            <span className="font-['Orbitron'] text-[14px] font-black uppercase tracking-[2px]">{option.title}</span>
+            <span className="text-[10px] font-black uppercase tracking-[1.5px] opacity-80">{option.subtitle}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function targetPairLabel(pair: TargetPair | null) {
+  if (!pair) return "";
+  const option = TARGET_PAIR_OPTIONS.find((item) => item.key === pair);
+  return option ? `${option.title} · ${option.subtitle}` : "";
+}
+
 export default function AnalysisPageV3({ type, title, icon, marketId }: { type: string; title: string; icon: string; marketId: string }) {
   const navigate = useNavigate();
+  const needsTargetPair = ["ai", "jumlah", "shio"].includes(type);
   const [param, setParam] = useState<number | null>(type === "rekap" ? 3 : 0);
+  const [targetPair, setTargetPair] = useState<TargetPair | null>(needsTargetPair ? null : "belakang");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState("");
@@ -42,24 +80,35 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
     return data;
   };
 
-  const postAnalyze = async (analysisType: string, data: string[], analysisParam: number) => {
+  const postAnalyze = async (analysisType: string, data: string[], analysisParam: number, analysisTargetPair: TargetPair = "belakang") => {
     const token = localStorage.getItem("supreme_token");
     const res = await fetch("/api/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ type: analysisType, data, param: analysisParam }),
+      body: JSON.stringify({ type: analysisType, data, param: analysisParam, target_pair: analysisTargetPair }),
     });
     const json = await res.json();
     if (json.success || json.data) return json.data || json;
     throw new Error(json.error || "Gagal memproses analisa");
   };
 
+  const handleTargetPairSelect = (pair: TargetPair) => {
+    setTargetPair(pair);
+    setParam(0);
+    setResult(null);
+    setError("");
+  };
+
   const handleAnalyze = async (selectedParam: number) => {
+    if (needsTargetPair && !targetPair) {
+      setError("Pilih fokus 2D dulu.");
+      return;
+    }
     setParam(selectedParam);
     resetBeforeAnalyze();
     try {
       const data = await getMarketData();
-      setResult(await postAnalyze(type, data, selectedParam));
+      setResult(await postAnalyze(type, data, selectedParam, targetPair || "belakang"));
     } catch (e: any) {
       setError(e.message || "Error koneksi server");
     }
@@ -99,6 +148,8 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
   };
 
   const isRekapCustom = type === "rekap" && param === 3;
+  const showTargetPairSelector = needsTargetPair && !targetPair && !result && !loading;
+  const showParamSelector = !showTargetPairSelector;
 
   return (
     <div className={`analysis-mode-${type} animate-[fadeIn_0.35s_ease-out] pb-8`}>
@@ -115,17 +166,20 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
           </div>
         </div>
         <div className="relative rounded-3xl bg-black/25 p-4 text-center ring-1 ring-white/10"><span className="mr-3 text-[10px] font-black uppercase tracking-[3px]" style={{ color: meta.accent }}>Pasaran:</span><span className="font-['Orbitron'] text-[13px] font-black uppercase tracking-[4px] text-[var(--text)]">{marketId}</span></div>
+        {needsTargetPair && targetPair && <div className="relative mt-3 rounded-3xl bg-black/20 p-3 text-center ring-1 ring-white/10"><span className="mr-2 text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Fokus:</span><span className="font-['Orbitron'] text-[10px] font-black uppercase tracking-[2px]" style={{ color: meta.accent }}>{targetPairLabel(targetPair)}</span></div>}
       </div>
 
       {!result && !loading && param !== 0 && !isRekapCustom && <button onClick={() => handleAnalyze(param || 1)} className="primary-button mb-4 flex w-full items-center justify-center gap-3 p-5 font-['Orbitron'] text-[12px] font-black uppercase tracking-[4px] transition active:scale-95"><RefreshCw size={18} /> Mulai Analisa</button>}
 
-      <ParamSelector
+      {showTargetPairSelector && <TargetPairSelector meta={meta} onSelect={handleTargetPairSelect} />}
+
+      {showParamSelector && <ParamSelector
         type={type}
         param={param}
         meta={meta}
         onAnalyze={handleAnalyze}
         onCustomDigit={() => { setParam(3); setResult(null); setError(""); }}
-      />
+      />}
 
       <CustomDigitBuilder
         show={type === "rekap" && param === 3 && !result}
