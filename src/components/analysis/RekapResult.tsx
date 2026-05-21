@@ -1,6 +1,51 @@
 import { Copy } from "lucide-react";
 import RekapHistory from "../RekapHistory";
 import { safeArray } from "../../lib/analysis/utils";
+import { customFocusLabel, customFocusPairs, customFocusPositionLabels, customFocusSubtitle, customFocusPositions, type TargetPair } from "../../lib/analysis/customDigit";
+
+const pairLabel: Record<TargetPair, string> = {
+  depan: "DEPAN",
+  tengah: "TENGAH",
+  belakang: "BELAKANG",
+};
+
+const pairSubtitle: Record<TargetPair, string> = {
+  depan: "AS-KOP",
+  tengah: "KOP-KEPALA",
+  belakang: "KEPALA-EKOR",
+};
+
+function formatValue(value: any, pad = false) {
+  return safeArray(value).map((item: any) => pad ? String(item).padStart(2, "0") : String(item)).join(" . ");
+}
+
+function customRows(result: any) {
+  const focus = result?.customFocus || "belakang";
+  const pairs = customFocusPairs(focus);
+  const positions = customFocusPositions(focus);
+  const rows: any[] = [
+    ["JENIS REKAP", `${customFocusLabel(focus)} · ${customFocusSubtitle(focus)}`, "🧭", "#7ab2ff"],
+  ];
+
+  pairs.forEach((pair) => {
+    const suffix = `${pairLabel[pair]} · ${pairSubtitle[pair]}`;
+    if (safeArray(result.aiByPair?.[pair]).length) rows.push([`AI ${suffix}`, formatValue(result.aiByPair[pair]), "🔥", "#f3c14b"]);
+    if (safeArray(result.bbfsByPair?.[pair]).length) rows.push([`BBFS ${suffix}`, formatValue(result.bbfsByPair[pair]), "✨", "#f3c14b"]);
+  });
+
+  positions.forEach((position) => {
+    const key = position === "as" ? "offAs" : position === "kop" ? "offKop" : position === "kepala" ? "offKepala" : "offEkor";
+    if (safeArray(result[key]).length) rows.push([`OFF ${customFocusPositionLabels[position]}`, formatValue(result[key]), "🎯", "#ff647c"]);
+  });
+
+  pairs.forEach((pair) => {
+    const suffix = `${pairLabel[pair]} · ${pairSubtitle[pair]}`;
+    if (safeArray(result.jumlahByPair?.[pair]).length) rows.push([`OFF JML ${suffix}`, formatValue(result.jumlahByPair[pair]), "🔢", "#b58cff"]);
+    if (safeArray(result.shioByPair?.[pair]).length) rows.push([`OFF SHIO ${suffix}`, formatValue(result.shioByPair[pair], true), "🐲", "#28d7ff"]);
+  });
+
+  return rows;
+}
 
 export default function RekapResult({ result, param, marketId, meta }: {
   result: any;
@@ -14,14 +59,7 @@ export default function RekapResult({ result, param, marketId, meta }: {
   const lines = safeArray(result.lines);
   const displayLines = lines.join(" * ");
   const copyLines = lines.join("*");
-  const rows = isCustom ? [
-    ...(safeArray(result.ai).length ? [["AI", safeArray(result.ai).join(" "), "🔥", "#f3c14b"]] : []),
-    ...(safeArray(result.bbfs).length ? [["BBFS", safeArray(result.bbfs).join(" "), "✨", "#f3c14b"]] : []),
-    ...(safeArray(result.offKepala).length ? [["OFF KEP", safeArray(result.offKepala).join(" . "), "🎯", "#ff647c"]] : []),
-    ...(safeArray(result.offEkor).length ? [["OFF EKR", safeArray(result.offEkor).join(" . "), "🎯", "#ff647c"]] : []),
-    ...(safeArray(result.offJumlah).length ? [["OFF JML", safeArray(result.offJumlah).join(" . "), "🔢", "#b58cff"]] : []),
-    ...(safeArray(result.offShio).length ? [["OFF SHIO", safeArray(result.offShio).map((s: any) => String(s).padStart(2, "0")).join(" . "), "🐲", "#28d7ff"]] : []),
-  ] : [
+  const rows = isCustom ? customRows(result) : [
     [isTop ? "AI TOP" : "AI CT", safeArray(result.ai).join(" "), "🔥", "#f3c14b"],
     ["OFF KEP", safeArray(result.offKepala).join(" . "), "🎯", "#ff647c"],
     ["OFF EKR", safeArray(result.offEkor).join(" . "), "🎯", "#ff647c"],
@@ -40,10 +78,10 @@ export default function RekapResult({ result, param, marketId, meta }: {
           <span className="rounded-full px-3 py-1 text-[10px] font-black" style={{ backgroundColor: meta.soft, color: meta.accent }}>READY</span>
         </div>
         <div className="space-y-3">
-          {rows.map(([label, value, emoji, color]: any) => (
-            <div key={label} className="flex items-center justify-between gap-3 rounded-3xl border border-[var(--border2)] bg-black/20 p-3">
-              <div className="flex shrink-0 items-center gap-3"><span className="text-base">{emoji}</span><span className="text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">{label}</span></div>
-              <span className="min-w-0 text-right font-['Orbitron'] text-[13px] font-black tracking-[2px]" style={{ color }}>{value}</span>
+          {rows.map(([label, value, emoji, color]: any, index: number) => (
+            <div key={`${label}-${index}`} className="flex items-center justify-between gap-3 rounded-3xl border border-[var(--border2)] bg-black/20 p-3">
+              <div className="flex min-w-0 items-center gap-3"><span className="shrink-0 text-base">{emoji}</span><span className="min-w-0 text-[9px] font-black uppercase tracking-[1.6px] text-[var(--text-dim)]">{label}</span></div>
+              <span className="max-w-[45%] truncate text-right font-['Orbitron'] text-[12px] font-black tracking-[1.5px]" style={{ color }}>{value}</span>
             </div>
           ))}
         </div>
