@@ -164,6 +164,27 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
     setError("");
   };
 
+  const handleBack = () => {
+    if (loading) return;
+    if (result) {
+      setResult(null);
+      setError("");
+      return;
+    }
+    if (isRekapCustom && customFocus) {
+      setCustomFocus(null);
+      setError("");
+      return;
+    }
+    if (needsTargetPair && targetPair) {
+      setTargetPair(null);
+      setParam(0);
+      setError("");
+      return;
+    }
+    navigate(-1);
+  };
+
   const handleAnalyze = async (selectedParam: number) => {
     if (needsTargetPair && !targetPair) {
       setError("Pilih fokus 2D dulu.");
@@ -244,7 +265,7 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
 
   return (
     <div className={`analysis-mode-${type} animate-[fadeIn_0.35s_ease-out] pb-8`}>
-      <button onClick={() => navigate(-1)} className="ghost-button mb-4 flex items-center gap-2 px-4 py-3 text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)] transition active:scale-95"><ArrowLeft size={16} /> Kembali</button>
+      <button onClick={handleBack} className="ghost-button mb-4 flex items-center gap-2 px-4 py-3 text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)] transition active:scale-95"><ArrowLeft size={16} /> Kembali</button>
 
       <div className="premium-panel relative mb-4 overflow-hidden p-5">
         <div className="absolute -right-12 -top-12 h-36 w-36 rounded-full blur-3xl" style={{ backgroundColor: `${meta.accent}20` }} />
@@ -279,7 +300,6 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
         marketId={marketId}
         meta={meta}
         customFocus={customFocus}
-        setCustomFocus={setCustomFocus}
         customAiDigitByPair={customAiDigitByPair}
         setCustomAiDigitForPair={setCustomAiDigitForPair}
         customIncludeBBFSByPair={customIncludeBBFSByPair}
