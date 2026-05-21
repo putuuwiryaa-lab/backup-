@@ -152,6 +152,13 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
     if (result) {
       setResult(null);
       setError("");
+      if (needsTargetPair) {
+        setTargetPair(null);
+        setParam(0);
+      }
+      if (isRekapCustom) {
+        setCustomFocus(null);
+      }
       return true;
     }
     if (isRekapCustom && customFocus) {
