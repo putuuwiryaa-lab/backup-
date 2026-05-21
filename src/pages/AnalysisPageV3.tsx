@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, RefreshCw, Sparkles } from "lucide-react";
 import ParamSelector from "../components/analysis/ParamSelector";
@@ -25,13 +25,7 @@ function TargetPairSelector({ meta, onSelect }: { meta: { accent: string; soft: 
       <div className="mb-3 text-center text-[10px] font-black uppercase tracking-[3px]" style={{ color: meta.accent }}>Pilih Fokus 2D</div>
       <div className="space-y-2">
         {TARGET_PAIR_OPTIONS.map((option) => (
-          <button
-            key={option.key}
-            type="button"
-            onClick={() => onSelect(option.key)}
-            className="flex w-full items-center justify-between rounded-3xl border p-4 text-left transition active:scale-95"
-            style={{ borderColor: meta.accent, backgroundColor: meta.soft, color: meta.accent }}
-          >
+          <button key={option.key} type="button" onClick={() => onSelect(option.key)} className="flex w-full items-center justify-between rounded-3xl border p-4 text-left transition active:scale-95" style={{ borderColor: meta.accent, backgroundColor: meta.soft, color: meta.accent }}>
             <span className="font-['Orbitron'] text-[14px] font-black uppercase tracking-[2px]">{option.title}</span>
             <span className="text-[10px] font-black uppercase tracking-[1.5px] opacity-80">{option.subtitle}</span>
           </button>
@@ -52,13 +46,7 @@ function RekapFocusSelector({ meta, onSelect }: { meta: { accent: string; soft: 
       </div>
       <div className="grid grid-cols-3 gap-2">
         {twoDOptions.map((item) => (
-          <button
-            key={item.key}
-            type="button"
-            onClick={() => onSelect(item.key)}
-            className="rounded-3xl border p-3 text-center transition active:scale-95"
-            style={{ borderColor: meta.accent, backgroundColor: meta.soft, color: meta.accent }}
-          >
+          <button key={item.key} type="button" onClick={() => onSelect(item.key)} className="rounded-3xl border p-3 text-center transition active:scale-95" style={{ borderColor: meta.accent, backgroundColor: meta.soft, color: meta.accent }}>
             <span className="block font-['Orbitron'] text-[10px] font-black uppercase tracking-[1.5px]">{item.title}</span>
             <span className="mt-2 block text-[7px] font-black uppercase tracking-[0.8px] opacity-75">{item.subtitle}</span>
           </button>
@@ -66,13 +54,7 @@ function RekapFocusSelector({ meta, onSelect }: { meta: { accent: string; soft: 
       </div>
       <div className="space-y-2">
         {fullOptions.map((item) => (
-          <button
-            key={item.key}
-            type="button"
-            onClick={() => onSelect(item.key)}
-            className="w-full rounded-3xl border p-4 text-center transition active:scale-95"
-            style={{ borderColor: meta.accent, backgroundColor: meta.soft, color: meta.accent }}
-          >
+          <button key={item.key} type="button" onClick={() => onSelect(item.key)} className="w-full rounded-3xl border p-4 text-center transition active:scale-95" style={{ borderColor: meta.accent, backgroundColor: meta.soft, color: meta.accent }}>
             <span className="block font-['Orbitron'] text-[13px] font-black uppercase tracking-[2px]">{item.title}</span>
             <span className="mt-2 block text-[8px] font-black uppercase tracking-[1px] opacity-75">{item.subtitle}</span>
           </button>
@@ -185,6 +167,18 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
     navigate(-1);
   };
 
+  useEffect(() => {
+    const canStepBack = Boolean(result || (type === "rekap" && param === 3 && customFocus) || (needsTargetPair && targetPair));
+    if (!canStepBack) return;
+    window.history.pushState({ analysisStep: true }, "", window.location.href);
+    const onPopState = () => {
+      window.history.pushState({ analysisStep: true }, "", window.location.href);
+      handleBack();
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, [result, customFocus, targetPair, loading, type, param]);
+
   const handleAnalyze = async (selectedParam: number) => {
     if (needsTargetPair && !targetPair) {
       setError("Pilih fokus 2D dulu.");
@@ -287,37 +281,9 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
       {showTargetPairSelector && <TargetPairSelector meta={meta} onSelect={handleTargetPairSelect} />}
       {showRekapFocusSelector && <RekapFocusSelector meta={meta} onSelect={(focus) => { setCustomFocus(focus); setError(""); }} />}
 
-      {showParamSelector && <ParamSelector
-        type={type}
-        param={param}
-        meta={meta}
-        onAnalyze={handleAnalyze}
-        onCustomDigit={() => { setParam(3); setResult(null); setError(""); }}
-      />}
+      {showParamSelector && <ParamSelector type={type} param={param} meta={meta} onAnalyze={handleAnalyze} onCustomDigit={() => { setParam(3); setResult(null); setError(""); }} />}
 
-      {customFocus && <CustomDigitBuilder
-        show={showCustomDigitBuilder}
-        marketId={marketId}
-        meta={meta}
-        customFocus={customFocus}
-        customAiDigitByPair={customAiDigitByPair}
-        setCustomAiDigitForPair={setCustomAiDigitForPair}
-        customIncludeBBFSByPair={customIncludeBBFSByPair}
-        setCustomIncludeBBFSForPair={setCustomIncludeBBFSForPair}
-        customOffAsCount={customOffAsCount}
-        setCustomOffAsCount={setCustomOffAsCount}
-        customOffKopCount={customOffKopCount}
-        setCustomOffKopCount={setCustomOffKopCount}
-        customOffKepalaCount={customOffKepalaCount}
-        setCustomOffKepalaCount={setCustomOffKepalaCount}
-        customOffEkorCount={customOffEkorCount}
-        setCustomOffEkorCount={setCustomOffEkorCount}
-        customOffJumlahCountByPair={customOffJumlahCountByPair}
-        setCustomOffJumlahCountForPair={setCustomOffJumlahCountForPair}
-        customOffShioCountByPair={customOffShioCountByPair}
-        setCustomOffShioCountForPair={setCustomOffShioCountForPair}
-        onGenerate={handleCustomDigitGenerate}
-      />}
+      {customFocus && <CustomDigitBuilder show={showCustomDigitBuilder} marketId={marketId} meta={meta} customFocus={customFocus} customAiDigitByPair={customAiDigitByPair} setCustomAiDigitForPair={setCustomAiDigitForPair} customIncludeBBFSByPair={customIncludeBBFSByPair} setCustomIncludeBBFSForPair={setCustomIncludeBBFSForPair} customOffAsCount={customOffAsCount} setCustomOffAsCount={setCustomOffAsCount} customOffKopCount={customOffKopCount} setCustomOffKopCount={setCustomOffKopCount} customOffKepalaCount={customOffKepalaCount} setCustomOffKepalaCount={setCustomOffKepalaCount} customOffEkorCount={customOffEkorCount} setCustomOffEkorCount={setCustomOffEkorCount} customOffJumlahCountByPair={customOffJumlahCountByPair} setCustomOffJumlahCountForPair={setCustomOffJumlahCountForPair} customOffShioCountByPair={customOffShioCountByPair} setCustomOffShioCountForPair={setCustomOffShioCountForPair} onGenerate={handleCustomDigitGenerate} />}
 
       {loading && <div className="premium-panel my-4 flex flex-col items-center justify-center gap-4 p-8 text-center"><div className="h-12 w-12 animate-spin rounded-full border-4 border-white/10" style={{ borderTopColor: meta.accent }} /><div className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px] text-[var(--text-dim)]">Memproses Analisa</div></div>}
       {error && <div className="my-4 rounded-3xl border border-red-400/30 bg-red-500/10 p-4 text-center text-[12px] font-bold text-red-300">{error}</div>}
