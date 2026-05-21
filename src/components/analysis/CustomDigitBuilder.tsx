@@ -20,6 +20,7 @@ type RecommendationGroup = "ai" | "off";
 type RecommendedMap = Record<string, "thumb" | "fire">;
 type PairAiMap = Partial<Record<TargetPair, 2 | 4 | 6 | null>>;
 type PairCountMap = Partial<Record<TargetPair, number | null>>;
+type PairBooleanMap = Partial<Record<TargetPair, boolean>>;
 
 const pairLabel: Record<TargetPair, string> = {
   depan: "DEPAN",
@@ -88,8 +89,8 @@ export default function CustomDigitBuilder({
   setCustomFocus,
   customAiDigitByPair,
   setCustomAiDigitForPair,
-  customIncludeBBFS,
-  setCustomIncludeBBFS,
+  customIncludeBBFSByPair,
+  setCustomIncludeBBFSForPair,
   customOffAsCount,
   setCustomOffAsCount,
   customOffKopCount,
@@ -111,8 +112,8 @@ export default function CustomDigitBuilder({
   setCustomFocus: (value: CustomFocus) => void;
   customAiDigitByPair: PairAiMap;
   setCustomAiDigitForPair: (pair: TargetPair, value: 2 | 4 | 6 | null) => void;
-  customIncludeBBFS: boolean;
-  setCustomIncludeBBFS: (fn: (value: boolean) => boolean) => void;
+  customIncludeBBFSByPair: PairBooleanMap;
+  setCustomIncludeBBFSForPair: (pair: TargetPair, value: boolean) => void;
   customOffAsCount: number | null;
   setCustomOffAsCount: (value: number | null) => void;
   customOffKopCount: number | null;
@@ -233,10 +234,12 @@ export default function CustomDigitBuilder({
         </section>
       ))}
 
-      <section className="space-y-2">
-        <MiniLabel>BBFS</MiniLabel>
-        {optionButton(customIncludeBBFS, "Include BBFS", () => setCustomIncludeBBFS((value) => !value), "w-full")}
-      </section>
+      {visiblePairs.map((pair) => (
+        <section key={`bbfs-${pair}`} className="space-y-2">
+          <MiniLabel>BBFS {pairLabel[pair]} · {pairSubtitle[pair]}</MiniLabel>
+          {optionButton(Boolean(customIncludeBBFSByPair[pair]), "Include BBFS", () => setCustomIncludeBBFSForPair(pair, !customIncludeBBFSByPair[pair]), "w-full", `bbfs-${pair}`)}
+        </section>
+      ))}
 
       {visiblePositions.map((position) => (
         <section key={position} className="space-y-2">
