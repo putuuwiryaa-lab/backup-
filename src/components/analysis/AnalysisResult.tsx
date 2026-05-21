@@ -6,6 +6,8 @@ import { safeArray, statsFrom } from "../../lib/analysis/utils";
 import { DetailToggle, ResultHeader, SectionTitle, ShioChip } from "./Shared";
 import AngkaJadiPanel from "./AngkaJadiPanel";
 
+type TargetPair = "depan" | "tengah" | "belakang";
+
 function StatsList({ stats, accent }: { stats: any[]; accent: string }) {
   if (!stats.length) return <div className="rounded-3xl border border-[var(--border2)] bg-black/20 p-4 text-center text-[11px] font-bold uppercase tracking-[2px] text-[var(--text-dim)]">Belum ada statistik aktif</div>;
   return (
@@ -110,12 +112,13 @@ function MatiEvaluationTabs({ marketId, param, accent, soft }: { marketId: strin
   );
 }
 
-export default function AnalysisResult({ type, result, param, marketId, meta, detailValidationOpen, setDetailValidationOpen, angkaJadiOpen, setAngkaJadiOpen }: {
+export default function AnalysisResult({ type, result, param, marketId, meta, targetPair = "belakang", detailValidationOpen, setDetailValidationOpen, angkaJadiOpen, setAngkaJadiOpen }: {
   type: string;
   result: any;
   param: number | null;
   marketId: string;
   meta: { accent: string; soft: string; label: string };
+  targetPair?: TargetPair;
   detailValidationOpen: boolean;
   setDetailValidationOpen: (fn: (value: boolean) => boolean) => void;
   angkaJadiOpen: boolean;
@@ -154,7 +157,7 @@ export default function AnalysisResult({ type, result, param, marketId, meta, de
         {detailValidationOpen && <div className="mt-4"><StatsList stats={stats} accent={meta.accent} /></div>}
       </div>
       <AngkaJadiPanel type={type} result={result} open={angkaJadiOpen} setOpen={setAngkaJadiOpen} meta={meta} />
-      {evaluationModes.has(type) && param !== 0 && <div className="premium-panel space-y-3 p-4"><EvaluationHistory marketId={marketId} mode={type as any} param={param || 1} /></div>}
+      {evaluationModes.has(type) && param !== 0 && <div className="premium-panel space-y-3 p-4"><EvaluationHistory marketId={marketId} mode={type as any} param={param || 1} targetPair={targetPair} /></div>}
     </div>
   );
 }
