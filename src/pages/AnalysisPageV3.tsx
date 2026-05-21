@@ -17,6 +17,7 @@ const TARGET_PAIR_OPTIONS: Array<{ key: TargetPair; title: string; subtitle: str
 
 type PairAiMap = Partial<Record<TargetPair, 2 | 4 | 6 | null>>;
 type PairCountMap = Partial<Record<TargetPair, number | null>>;
+type PairBooleanMap = Partial<Record<TargetPair, boolean>>;
 
 function TargetPairSelector({ meta, onSelect }: { meta: { accent: string; soft: string }; onSelect: (pair: TargetPair) => void }) {
   return (
@@ -58,7 +59,7 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
   const [angkaJadiOpen, setAngkaJadiOpen] = useState(false);
   const [customFocus, setCustomFocus] = useState<CustomFocus>("belakang");
   const [customAiDigitByPair, setCustomAiDigitByPair] = useState<PairAiMap>({});
-  const [customIncludeBBFS, setCustomIncludeBBFS] = useState(false);
+  const [customIncludeBBFSByPair, setCustomIncludeBBFSByPair] = useState<PairBooleanMap>({});
   const [customOffAsCount, setCustomOffAsCount] = useState<number | null>(null);
   const [customOffKopCount, setCustomOffKopCount] = useState<number | null>(null);
   const [customOffKepalaCount, setCustomOffKepalaCount] = useState<number | null>(null);
@@ -67,17 +68,10 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
   const [customOffShioCountByPair, setCustomOffShioCountByPair] = useState<PairCountMap>({});
   const meta = typeMeta[type] || typeMeta.ai;
 
-  const setCustomAiDigitForPair = (pair: TargetPair, value: 2 | 4 | 6 | null) => {
-    setCustomAiDigitByPair((prev) => ({ ...prev, [pair]: value }));
-  };
-
-  const setCustomOffJumlahCountForPair = (pair: TargetPair, value: number | null) => {
-    setCustomOffJumlahCountByPair((prev) => ({ ...prev, [pair]: value }));
-  };
-
-  const setCustomOffShioCountForPair = (pair: TargetPair, value: number | null) => {
-    setCustomOffShioCountByPair((prev) => ({ ...prev, [pair]: value }));
-  };
+  const setCustomAiDigitForPair = (pair: TargetPair, value: 2 | 4 | 6 | null) => setCustomAiDigitByPair((prev) => ({ ...prev, [pair]: value }));
+  const setCustomIncludeBBFSForPair = (pair: TargetPair, value: boolean) => setCustomIncludeBBFSByPair((prev) => ({ ...prev, [pair]: value }));
+  const setCustomOffJumlahCountForPair = (pair: TargetPair, value: number | null) => setCustomOffJumlahCountByPair((prev) => ({ ...prev, [pair]: value }));
+  const setCustomOffShioCountForPair = (pair: TargetPair, value: number | null) => setCustomOffShioCountByPair((prev) => ({ ...prev, [pair]: value }));
 
   const resetBeforeAnalyze = () => {
     setLoading(true);
@@ -141,8 +135,8 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
 
   const handleCustomDigitGenerate = async () => {
     const pairs = customFocusPairs(customFocus);
-    const hasAnyPairFilter = pairs.some((pair) => customAiDigitByPair[pair] || customOffJumlahCountByPair[pair] || customOffShioCountByPair[pair]);
-    const hasAnyFilter = Boolean(hasAnyPairFilter || customIncludeBBFS || customOffAsCount || customOffKopCount || customOffKepalaCount || customOffEkorCount);
+    const hasAnyPairFilter = pairs.some((pair) => customAiDigitByPair[pair] || customIncludeBBFSByPair[pair] || customOffJumlahCountByPair[pair] || customOffShioCountByPair[pair]);
+    const hasAnyFilter = Boolean(hasAnyPairFilter || customOffAsCount || customOffKopCount || customOffKepalaCount || customOffEkorCount);
     if (!hasAnyFilter) {
       setError("Pilih minimal satu filter dulu.");
       return;
@@ -159,10 +153,11 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
 
       for (const pair of pairs) {
         const aiDigit = customAiDigitByPair[pair];
+        const useBBFS = Boolean(customIncludeBBFSByPair[pair]);
         const jumlahCount = customOffJumlahCountByPair[pair];
         const shioCount = customOffShioCountByPair[pair];
         if (aiDigit) aiByPair[pair] = toNumberList((await postAnalyze("ai", data, aiDigit, pair))?.result);
-        if (customIncludeBBFS) bbfsByPair[pair] = toNumberList((await postAnalyze("ai", data, 8, pair))?.result);
+        if (useBBFS) bbfsByPair[pair] = toNumberList((await postAnalyze("ai", data, 8, pair))?.result);
         if (jumlahCount) jumlahByPair[pair] = toNumberList((await postAnalyze("jumlah", data, jumlahCount, pair))?.result);
         if (shioCount) shioByPair[pair] = toNumberList((await postAnalyze("shio", data, shioCount, pair))?.result);
       }
@@ -181,9 +176,9 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
       const offKop = customOffKopCount ? toNumberList(matiKopData?.KOP?.result) : [];
       const offKepala = customOffKepalaCount ? toNumberList(matiKepalaData?.KEPALA?.result) : [];
       const offEkor = customOffEkorCount ? toNumberList(matiEkorData?.EKOR?.result) : [];
-      const lines = buildCustomDigitLines({ focus: customFocus, aiByPair, bbfsByPair, includeBBFS: customIncludeBBFS, offAs, offKop, offKepala, offEkor, jumlahByPair, shioByPair });
+      const lines = buildCustomDigitLines({ focus: customFocus, aiByPair, bbfsByPair, offAs, offKop, offKepala, offEkor, jumlahByPair, shioByPair });
 
-      setResult({ custom: true, customFocus, aiByPair, bbfsByPair, includeBBFS: customIncludeBBFS, offAs, offKop, offKepala, offEkor, jumlahByPair, shioByPair, lines });
+      setResult({ custom: true, customFocus, aiByPair, bbfsByPair, customIncludeBBFSByPair, offAs, offKop, offKepala, offEkor, jumlahByPair, shioByPair, lines });
     } catch (e: any) {
       setError(e.message || "Gagal generate custom digit");
     }
@@ -232,8 +227,8 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
         setCustomFocus={setCustomFocus}
         customAiDigitByPair={customAiDigitByPair}
         setCustomAiDigitForPair={setCustomAiDigitForPair}
-        customIncludeBBFS={customIncludeBBFS}
-        setCustomIncludeBBFS={setCustomIncludeBBFS}
+        customIncludeBBFSByPair={customIncludeBBFSByPair}
+        setCustomIncludeBBFSForPair={setCustomIncludeBBFSForPair}
         customOffAsCount={customOffAsCount}
         setCustomOffAsCount={setCustomOffAsCount}
         customOffKopCount={customOffKopCount}
