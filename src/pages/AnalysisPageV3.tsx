@@ -5,7 +5,6 @@ import ParamSelector from "../components/analysis/ParamSelector";
 import CustomDigitBuilder from "../components/analysis/CustomDigitBuilder";
 import RekapResult from "../components/analysis/RekapResult";
 import AnalysisResult from "../components/analysis/AnalysisResult";
-import { useStepBackNavigation } from "../hooks/useStepBackNavigation";
 import { typeMeta } from "../lib/analysis/constants";
 import { toNumberList } from "../lib/analysis/utils";
 import { buildCustomDigitLines, CUSTOM_FOCUS_OPTIONS, customFocusLabel, customFocusPairs, customFocusSubtitle, type CustomFocus, type TargetPair } from "../lib/analysis/customDigit";
@@ -173,9 +172,6 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
     if (!stepBack()) navigate(-1);
   };
 
-  const canStepBack = Boolean(result || (isRekapCustom && customFocus) || (needsTargetPair && targetPair));
-  useStepBackNavigation(canStepBack, stepBack);
-
   const handleAnalyze = async (selectedParam: number) => {
     if (needsTargetPair && !targetPair) {
       setError("Pilih fokus 2D dulu.");
@@ -281,7 +277,7 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
 
       {customFocus && <CustomDigitBuilder show={showCustomDigitBuilder} marketId={marketId} meta={meta} customFocus={customFocus} customAiDigitByPair={customAiDigitByPair} setCustomAiDigitForPair={setCustomAiDigitForPair} customIncludeBBFSByPair={customIncludeBBFSByPair} setCustomIncludeBBFSForPair={setCustomIncludeBBFSForPair} customOffAsCount={customOffAsCount} setCustomOffAsCount={setCustomOffAsCount} customOffKopCount={customOffKopCount} setCustomOffKopCount={setCustomOffKopCount} customOffKepalaCount={customOffKepalaCount} setCustomOffKepalaCount={setCustomOffKepalaCount} customOffEkorCount={customOffEkorCount} setCustomOffEkorCount={setCustomOffEkorCount} customOffJumlahCountByPair={customOffJumlahCountByPair} setCustomOffJumlahCountForPair={setCustomOffJumlahCountForPair} customOffShioCountByPair={customOffShioCountByPair} setCustomOffShioCountForPair={setCustomOffShioCountForPair} onGenerate={handleCustomDigitGenerate} />}
 
-      {loading && <div className="premium-panel my-4 flex flex-col items-center justify-center gap-4 p-8 text-center"><div className="h-12 w-12 animate-spin rounded-full border-4 border-white/10" style={{ borderTopColor: meta.accent }} /><div className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px] text-[var(--text-dim)]">Memproses Analisa</div></div>}
+      {loading && <div className="premium-panel my-4 flex flex-col items-center justify-center gap-4 p-8 text-center"><div className="h-12 w-12 animate-spin rounded-full border-4 border-white/10" style={{ borderTopColor: meta.accent }} /><div className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px]">Memproses Analisa</div></div>}
       {error && <div className="my-4 rounded-3xl border border-red-400/30 bg-red-500/10 p-4 text-center text-[12px] font-bold text-red-300">{error}</div>}
 
       {result && type === "rekap" && <RekapResult result={result} param={param} marketId={marketId} meta={meta} />}
