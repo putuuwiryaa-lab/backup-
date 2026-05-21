@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 
 export function useStepBackNavigation(canStepBack: boolean, onStepBack: () => boolean) {
   const canStepBackRef = useRef(canStepBack);
@@ -11,6 +11,14 @@ export function useStepBackNavigation(canStepBack: boolean, onStepBack: () => bo
 
   useEffect(() => {
     if (!canStepBack) {
+      const currentState = window.history.state as { analysisStep?: boolean } | null;
+      if (pushedRef.current && currentState?.analysisStep) {
+        ignoreNextPopRef.current = true;
+        pushedRef.current = false;
+        window.history.back();
+        return;
+      }
+
       pushedRef.current = false;
       return;
     }
@@ -37,15 +45,4 @@ export function useStepBackNavigation(canStepBack: boolean, onStepBack: () => bo
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
-
-  const consumeStepHistory = useCallback(() => {
-    const currentState = window.history.state as { analysisStep?: boolean } | null;
-    if (!pushedRef.current || !currentState?.analysisStep) return;
-
-    ignoreNextPopRef.current = true;
-    pushedRef.current = false;
-    window.history.back();
-  }, []);
-
-  return { consumeStepHistory };
 }
