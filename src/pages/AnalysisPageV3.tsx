@@ -99,6 +99,13 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
     setError("");
   };
 
+  const handleTargetPairReset = () => {
+    setTargetPair(null);
+    setParam(0);
+    setResult(null);
+    setError("");
+  };
+
   const handleAnalyze = async (selectedParam: number) => {
     if (needsTargetPair && !targetPair) {
       setError("Pilih fokus 2D dulu.");
@@ -166,7 +173,7 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
           </div>
         </div>
         <div className="relative rounded-3xl bg-black/25 p-4 text-center ring-1 ring-white/10"><span className="mr-3 text-[10px] font-black uppercase tracking-[3px]" style={{ color: meta.accent }}>Pasaran:</span><span className="font-['Orbitron'] text-[13px] font-black uppercase tracking-[4px] text-[var(--text)]">{marketId}</span></div>
-        {needsTargetPair && targetPair && <div className="relative mt-3 rounded-3xl bg-black/20 p-3 text-center ring-1 ring-white/10"><span className="mr-2 text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Fokus:</span><span className="font-['Orbitron'] text-[10px] font-black uppercase tracking-[2px]" style={{ color: meta.accent }}>{targetPairLabel(targetPair)}</span></div>}
+        {needsTargetPair && targetPair && <div className="relative mt-3 flex items-center justify-between gap-3 rounded-3xl bg-black/20 p-3 ring-1 ring-white/10"><div className="min-w-0 text-left"><span className="mr-2 text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Fokus:</span><span className="font-['Orbitron'] text-[10px] font-black uppercase tracking-[2px]" style={{ color: meta.accent }}>{targetPairLabel(targetPair)}</span></div><button type="button" onClick={handleTargetPairReset} className="shrink-0 rounded-full border px-3 py-1.5 text-[8px] font-black uppercase tracking-[1px] transition active:scale-95" style={{ borderColor: `${meta.accent}66`, color: meta.accent }}>Ganti</button></div>}
       </div>
 
       {!result && !loading && param !== 0 && !isRekapCustom && <button onClick={() => handleAnalyze(param || 1)} className="primary-button mb-4 flex w-full items-center justify-center gap-3 p-5 font-['Orbitron'] text-[12px] font-black uppercase tracking-[4px] transition active:scale-95"><RefreshCw size={18} /> Mulai Analisa</button>}
