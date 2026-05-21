@@ -7,6 +7,7 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 type EvaluationMode = "ai" | "mati" | "jumlah" | "shio";
 type EvaluationPosition = "all" | "as" | "kop" | "kepala" | "ekor";
+type TargetPair = "depan" | "tengah" | "belakang";
 const EVALUATION_HISTORY_LIMIT = 15;
 
 function labelFromMatiDetail(detail: any) {
@@ -36,12 +37,14 @@ export default function EvaluationHistory({
   mode,
   param,
   position = "all",
+  targetPair = "belakang",
   title = "Riwayat Evaluasi",
 }: {
   marketId: string;
   mode: EvaluationMode;
   param: number;
   position?: EvaluationPosition;
+  targetPair?: TargetPair;
   title?: string;
 }) {
   const [rows, setRows] = useState<any[]>([]);
@@ -55,13 +58,14 @@ export default function EvaluationHistory({
       try {
         let query = supabase
           .from("analysis_evaluations")
-          .select("id,from_result,new_result,is_hit,status,detail,evaluated_at,position")
+          .select("id,from_result,new_result,is_hit,status,detail,evaluated_at,position,target_pair")
           .eq("market_id", marketId)
           .eq("mode", mode)
           .eq("param", param)
           .order("evaluated_at", { ascending: false })
           .limit(EVALUATION_HISTORY_LIMIT);
         if (position) query = query.eq("position", position);
+        if (mode !== "mati") query = query.eq("target_pair", targetPair);
         const { data, error } = await query;
         if (error) throw error;
         if (active) setRows((data || []).slice(0, EVALUATION_HISTORY_LIMIT));
@@ -73,7 +77,7 @@ export default function EvaluationHistory({
     };
     load();
     return () => { active = false; };
-  }, [marketId, mode, param, position]);
+  }, [marketId, mode, param, position, targetPair]);
 
   if (loading) {
     return <div className="rounded-3xl border border-[var(--border2)] bg-black/20 p-4 text-center text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Memuat riwayat...</div>;
