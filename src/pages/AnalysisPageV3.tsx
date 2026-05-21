@@ -6,9 +6,8 @@ import CustomDigitBuilder from "../components/analysis/CustomDigitBuilder";
 import RekapResult from "../components/analysis/RekapResult";
 import AnalysisResult from "../components/analysis/AnalysisResult";
 import { typeMeta } from "../lib/analysis/constants";
-import { buildCustomDigitLines, toNumberList } from "../lib/analysis/utils";
-
-type TargetPair = "depan" | "tengah" | "belakang";
+import { toNumberList } from "../lib/analysis/utils";
+import { buildCustomDigitLines, customFocusPairs, type CustomFocus, type TargetPair } from "../lib/analysis/customDigit";
 
 const TARGET_PAIR_OPTIONS: Array<{ key: TargetPair; title: string; subtitle: string }> = [
   { key: "depan", title: "2D DEPAN", subtitle: "AS - KOP" },
@@ -54,8 +53,11 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
   const [error, setError] = useState("");
   const [detailValidationOpen, setDetailValidationOpen] = useState(false);
   const [angkaJadiOpen, setAngkaJadiOpen] = useState(false);
+  const [customFocus, setCustomFocus] = useState<CustomFocus>("belakang");
   const [customAiDigit, setCustomAiDigit] = useState<2 | 4 | 6 | null>(null);
   const [customIncludeBBFS, setCustomIncludeBBFS] = useState(false);
+  const [customOffAsCount, setCustomOffAsCount] = useState<number | null>(null);
+  const [customOffKopCount, setCustomOffKopCount] = useState<number | null>(null);
   const [customOffKepalaCount, setCustomOffKepalaCount] = useState<number | null>(null);
   const [customOffEkorCount, setCustomOffEkorCount] = useState<number | null>(null);
   const [customOffJumlahCount, setCustomOffJumlahCount] = useState<number | null>(null);
@@ -123,7 +125,7 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
   };
 
   const handleCustomDigitGenerate = async () => {
-    const hasAnyFilter = Boolean(customAiDigit || customIncludeBBFS || customOffKepalaCount || customOffEkorCount || customOffJumlahCount || customOffShioCount);
+    const hasAnyFilter = Boolean(customAiDigit || customIncludeBBFS || customOffAsCount || customOffKopCount || customOffKepalaCount || customOffEkorCount || customOffJumlahCount || customOffShioCount);
     if (!hasAnyFilter) {
       setError("Pilih minimal satu filter dulu.");
       return;
@@ -132,22 +134,37 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
     resetBeforeAnalyze();
     try {
       const data = await getMarketData();
-      const aiData = customAiDigit ? await postAnalyze("ai", data, customAiDigit) : null;
-      const bbfsData = customIncludeBBFS ? await postAnalyze("ai", data, 8) : null;
-      const matiKepalaData = customOffKepalaCount ? await postAnalyze("mati", data, customOffKepalaCount) : null;
-      const matiEkorData = customOffEkorCount ? await postAnalyze("mati", data, customOffEkorCount) : null;
-      const jumlahData = customOffJumlahCount ? await postAnalyze("jumlah", data, customOffJumlahCount) : null;
-      const shioData = customOffShioCount ? await postAnalyze("shio", data, customOffShioCount) : null;
+      const pairs = customFocusPairs(customFocus);
+      const aiByPair: Partial<Record<TargetPair, number[]>> = {};
+      const bbfsByPair: Partial<Record<TargetPair, number[]>> = {};
+      const jumlahByPair: Partial<Record<TargetPair, number[]>> = {};
+      const shioByPair: Partial<Record<TargetPair, number[]>> = {};
+      const matiCache: Partial<Record<number, any>> = {};
 
-      const ai = customAiDigit ? toNumberList(aiData?.result) : [];
-      const bbfs = customIncludeBBFS ? toNumberList(bbfsData?.result) : [];
+      for (const pair of pairs) {
+        if (customAiDigit) aiByPair[pair] = toNumberList((await postAnalyze("ai", data, customAiDigit, pair))?.result);
+        if (customIncludeBBFS) bbfsByPair[pair] = toNumberList((await postAnalyze("ai", data, 8, pair))?.result);
+        if (customOffJumlahCount) jumlahByPair[pair] = toNumberList((await postAnalyze("jumlah", data, customOffJumlahCount, pair))?.result);
+        if (customOffShioCount) shioByPair[pair] = toNumberList((await postAnalyze("shio", data, customOffShioCount, pair))?.result);
+      }
+
+      const getMati = async (count: number | null) => {
+        if (!count) return null;
+        if (!matiCache[count]) matiCache[count] = await postAnalyze("mati", data, count);
+        return matiCache[count];
+      };
+
+      const matiAsData = await getMati(customOffAsCount);
+      const matiKopData = await getMati(customOffKopCount);
+      const matiKepalaData = await getMati(customOffKepalaCount);
+      const matiEkorData = await getMati(customOffEkorCount);
+      const offAs = customOffAsCount ? toNumberList(matiAsData?.AS?.result) : [];
+      const offKop = customOffKopCount ? toNumberList(matiKopData?.KOP?.result) : [];
       const offKepala = customOffKepalaCount ? toNumberList(matiKepalaData?.KEPALA?.result) : [];
       const offEkor = customOffEkorCount ? toNumberList(matiEkorData?.EKOR?.result) : [];
-      const offJumlah = customOffJumlahCount ? toNumberList(jumlahData?.result) : [];
-      const offShio = customOffShioCount ? toNumberList(shioData?.result) : [];
-      const lines = buildCustomDigitLines({ ai, bbfs, includeBBFS: customIncludeBBFS, offKepala, offEkor, offJumlah, offShio });
+      const lines = buildCustomDigitLines({ focus: customFocus, aiByPair, bbfsByPair, includeBBFS: customIncludeBBFS, offAs, offKop, offKepala, offEkor, jumlahByPair, shioByPair });
 
-      setResult({ custom: true, ai, bbfs, includeBBFS: customIncludeBBFS, offKepala, offEkor, offJumlah, offShio, lines });
+      setResult({ custom: true, customFocus, aiByPair, bbfsByPair, includeBBFS: customIncludeBBFS, offAs, offKop, offKepala, offEkor, jumlahByPair, shioByPair, lines });
     } catch (e: any) {
       setError(e.message || "Gagal generate custom digit");
     }
@@ -192,10 +209,16 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
         show={type === "rekap" && param === 3 && !result}
         marketId={marketId}
         meta={meta}
+        customFocus={customFocus}
+        setCustomFocus={setCustomFocus}
         customAiDigit={customAiDigit}
         setCustomAiDigit={setCustomAiDigit}
         customIncludeBBFS={customIncludeBBFS}
         setCustomIncludeBBFS={setCustomIncludeBBFS}
+        customOffAsCount={customOffAsCount}
+        setCustomOffAsCount={setCustomOffAsCount}
+        customOffKopCount={customOffKopCount}
+        setCustomOffKopCount={setCustomOffKopCount}
         customOffKepalaCount={customOffKepalaCount}
         setCustomOffKepalaCount={setCustomOffKepalaCount}
         customOffEkorCount={customOffEkorCount}
