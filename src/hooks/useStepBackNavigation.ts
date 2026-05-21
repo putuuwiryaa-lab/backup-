@@ -8,27 +8,24 @@ export function useStepBackNavigation(canStepBack: boolean, onStepBack: () => bo
   canStepBackRef.current = canStepBack;
   onStepBackRef.current = onStepBack;
 
-  const pushStepState = () => {
-    if (!canStepBackRef.current || pushedRef.current) return;
+  useEffect(() => {
+    if (!canStepBack) {
+      pushedRef.current = false;
+      return;
+    }
+
+    if (pushedRef.current) return;
+
     window.history.pushState({ analysisStep: true }, "", window.location.href);
     pushedRef.current = true;
-  };
-
-  useEffect(() => {
-    if (canStepBack) pushStepState();
-    if (!canStepBack) pushedRef.current = false;
   }, [canStepBack]);
 
   useEffect(() => {
     const onPopState = () => {
       if (!canStepBackRef.current) return;
-      pushedRef.current = false;
-      const handled = onStepBackRef.current();
-      if (!handled) return;
 
-      window.setTimeout(() => {
-        pushStepState();
-      }, 0);
+      pushedRef.current = false;
+      onStepBackRef.current();
     };
 
     window.addEventListener("popstate", onPopState);
