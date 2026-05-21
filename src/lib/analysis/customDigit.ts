@@ -1,4 +1,4 @@
-import { jumlah2D, shioOf2D } from "./utils";
+import { SHIO_2D } from "./constants";
 
 export type TargetPair = "depan" | "tengah" | "belakang";
 export type CustomFocus = TargetPair | "3d" | "4d";
@@ -38,6 +38,18 @@ export const customFocusPositionLabels: Record<PositionKey, string> = {
   ekor: "EKOR",
 };
 
+const jumlah2DLocal = (a: number, b: number) => {
+  const s = a + b;
+  return s >= 10 ? s - 9 : s;
+};
+
+const shioOf2DLocal = (n: number) => {
+  for (const [shio, list] of Object.entries(SHIO_2D)) {
+    if (list.includes(n)) return Number(shio);
+  }
+  return 1;
+};
+
 const pairDigits = (line: Record<PositionKey, number>, pair: TargetPair) => {
   if (pair === "depan") return [line.as, line.kop];
   if (pair === "tengah") return [line.kop, line.kepala];
@@ -66,10 +78,6 @@ export const buildCustomDigitLines = ({
   offEkor?: number[];
   jumlahByPair?: Partial<Record<TargetPair, number[]>>;
   shioByPair?: Partial<Record<TargetPair, number[]>>;
-  ai?: number[];
-  bbfs?: number[];
-  offJumlah?: number[];
-  offShio?: number[];
 }) => {
   const positions = customFocusPositions(focus);
   const pairs = customFocusPairs(focus);
@@ -88,8 +96,8 @@ export const buildCustomDigitLines = ({
       const offShio = shioByPair?.[pair] || [];
       if (ai.length && !ai.includes(a) && !ai.includes(b)) return false;
       if (includeBBFS && (!bbfs.includes(a) || !bbfs.includes(b))) return false;
-      if (offJumlah.includes(jumlah2D(a, b))) return false;
-      if (offShio.includes(shioOf2D(a * 10 + b))) return false;
+      if (offJumlah.includes(jumlah2DLocal(a, b))) return false;
+      if (offShio.includes(shioOf2DLocal(a * 10 + b))) return false;
     }
     return true;
   };
