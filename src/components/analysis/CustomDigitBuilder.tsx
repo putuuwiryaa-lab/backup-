@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { RefreshCw } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
+import { CUSTOM_FOCUS_OPTIONS, customFocusLabel, customFocusPositionLabels, customFocusPositions, customFocusSubtitle, type CustomFocus, type PositionKey } from "../../lib/analysis/customDigit";
 import { MiniLabel } from "./Shared";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
@@ -76,10 +77,11 @@ function pickRecommendation(rows: any[], params: number[], prefer: "low" | "high
 async function loadRows(marketId: string, mode: string, position: string, params: number[]) {
   const { data, error } = await supabase
     .from("analysis_evaluations")
-    .select("param,is_hit,status,evaluated_at")
+    .select("param,is_hit,status,evaluated_at,target_pair")
     .eq("market_id", marketId)
     .eq("mode", mode)
     .eq("position", position)
+    .eq("target_pair", "belakang")
     .in("param", params)
     .order("evaluated_at", { ascending: false })
     .limit(80);
@@ -91,10 +93,16 @@ export default function CustomDigitBuilder({
   show,
   marketId,
   meta,
+  customFocus,
+  setCustomFocus,
   customAiDigit,
   setCustomAiDigit,
   customIncludeBBFS,
   setCustomIncludeBBFS,
+  customOffAsCount,
+  setCustomOffAsCount,
+  customOffKopCount,
+  setCustomOffKopCount,
   customOffKepalaCount,
   setCustomOffKepalaCount,
   customOffEkorCount,
@@ -108,10 +116,16 @@ export default function CustomDigitBuilder({
   show: boolean;
   marketId: string;
   meta: { accent: string; soft: string };
+  customFocus: CustomFocus;
+  setCustomFocus: (value: CustomFocus) => void;
   customAiDigit: 2 | 4 | 6 | null;
   setCustomAiDigit: (value: 2 | 4 | 6) => void;
   customIncludeBBFS: boolean;
   setCustomIncludeBBFS: (fn: (value: boolean) => boolean) => void;
+  customOffAsCount: number | null;
+  setCustomOffAsCount: (value: number | null) => void;
+  customOffKopCount: number | null;
+  setCustomOffKopCount: (value: number | null) => void;
   customOffKepalaCount: number | null;
   setCustomOffKepalaCount: (value: number | null) => void;
   customOffEkorCount: number | null;
@@ -129,9 +143,11 @@ export default function CustomDigitBuilder({
     const loadRecommendations = async () => {
       if (!show || !marketId) return;
       try {
-        const [aiRows, bbfsRows, kepalaRows, ekorRows, jumlahRows, shioRows] = await Promise.all([
+        const [aiRows, bbfsRows, asRows, kopRows, kepalaRows, ekorRows, jumlahRows, shioRows] = await Promise.all([
           loadRows(marketId, "ai", "all", [2, 4, 6]),
           loadRows(marketId, "ai", "all", [8]),
+          loadRows(marketId, "mati", "as", [1, 2, 3]),
+          loadRows(marketId, "mati", "kop", [1, 2, 3]),
           loadRows(marketId, "mati", "kepala", [1, 2, 3]),
           loadRows(marketId, "mati", "ekor", [1, 2, 3]),
           loadRows(marketId, "jumlah", "all", [1, 2, 3]),
@@ -139,6 +155,8 @@ export default function CustomDigitBuilder({
         ]);
         const next: RecommendedMap = {};
         const aiPick = pickRecommendation(aiRows, [2, 4, 6], "low", "ai");
+        const asPick = pickRecommendation(asRows, [1, 2, 3], "high", "off");
+        const kopPick = pickRecommendation(kopRows, [1, 2, 3], "high", "off");
         const kepalaPick = pickRecommendation(kepalaRows, [1, 2, 3], "high", "off");
         const ekorPick = pickRecommendation(ekorRows, [1, 2, 3], "high", "off");
         const jumlahPick = pickRecommendation(jumlahRows, [1, 2, 3], "high", "off");
@@ -146,6 +164,8 @@ export default function CustomDigitBuilder({
         const bbfsPick = pickRecommendation(bbfsRows, [8], "low", "ai");
         if (aiPick) next[`ai-${aiPick.param}`] = aiPick.badge;
         if (bbfsPick) next.bbfs = bbfsPick.badge;
+        if (asPick) next[`as-${asPick.param}`] = asPick.badge;
+        if (kopPick) next[`kop-${kopPick.param}`] = kopPick.badge;
         if (kepalaPick) next[`kepala-${kepalaPick.param}`] = kepalaPick.badge;
         if (ekorPick) next[`ekor-${ekorPick.param}`] = ekorPick.badge;
         if (jumlahPick) next[`jumlah-${jumlahPick.param}`] = jumlahPick.badge;
@@ -160,6 +180,9 @@ export default function CustomDigitBuilder({
   }, [show, marketId]);
 
   const badges = useMemo(() => recommended, [recommended]);
+  const visiblePositions = customFocusPositions(customFocus);
+  const positionValues: Record<PositionKey, number | null> = { as: customOffAsCount, kop: customOffKopCount, kepala: customOffKepalaCount, ekor: customOffEkorCount };
+  const positionSetters: Record<PositionKey, (value: number | null) => void> = { as: setCustomOffAsCount, kop: setCustomOffKopCount, kepala: setCustomOffKepalaCount, ekor: setCustomOffEkorCount };
 
   if (!show) return null;
 
@@ -179,11 +202,30 @@ export default function CustomDigitBuilder({
     );
   };
 
+  const focusButton = (focus: CustomFocus) => optionButton(customFocus === focus, customFocusLabel(focus), () => setCustomFocus(focus), "", undefined);
+
   return (
     <div className="premium-panel mt-4 space-y-4 p-4">
       <div className="text-center">
         <div className="text-[10px] font-black uppercase tracking-[3px]" style={{ color: meta.accent }}>Custom Digit</div>
-        <p className="mt-2 text-[10px] font-semibold uppercase tracking-[1.5px] text-[var(--text-dim)]">Pilih filter yang mau dipakai, lalu generate.</p>
+        <p className="mt-2 text-[10px] font-semibold uppercase tracking-[1.5px] text-[var(--text-dim)]">Pilih fokus dan filter yang mau dipakai, lalu generate.</p>
+      </div>
+
+      <section className="space-y-2">
+        <MiniLabel>Fokus Rekap</MiniLabel>
+        <div className="grid grid-cols-2 gap-2">
+          {CUSTOM_FOCUS_OPTIONS.map((item) => (
+            <button key={item.key} type="button" onClick={() => setCustomFocus(item.key)} className={`${item.key === "4d" ? "col-span-2" : ""} rounded-3xl border p-4 text-center transition active:scale-95`} style={{ borderColor: customFocus === item.key ? meta.accent : "rgba(255,255,255,0.14)", backgroundColor: customFocus === item.key ? meta.soft : "rgba(255,255,255,0.04)", color: customFocus === item.key ? meta.accent : "var(--text-dim)" }}>
+              <span className="block font-['Orbitron'] text-[12px] font-black uppercase tracking-[2px]">{item.title}</span>
+              <span className="mt-2 block text-[8px] font-black uppercase tracking-[1px] opacity-75">{item.subtitle}</span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <div className="rounded-3xl bg-black/20 p-3 text-center ring-1 ring-white/10">
+        <span className="text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Aktif: </span>
+        <span className="font-['Orbitron'] text-[10px] font-black uppercase tracking-[2px]" style={{ color: meta.accent }}>{customFocusLabel(customFocus)} · {customFocusSubtitle(customFocus)}</span>
       </div>
 
       <section className="space-y-2">
@@ -200,19 +242,14 @@ export default function CustomDigitBuilder({
         {optionButton(customIncludeBBFS, "Include BBFS", () => setCustomIncludeBBFS((value) => !value), "w-full", "bbfs")}
       </section>
 
-      <section className="space-y-2">
-        <MiniLabel>Angka Mati Kepala</MiniLabel>
-        <div className="grid grid-cols-3 gap-2">
-          {[1, 2, 3].map((n) => optionButton(customOffKepalaCount === n, String(n), () => setCustomOffKepalaCount(customOffKepalaCount === n ? null : n), "", `kepala-${n}`))}
-        </div>
-      </section>
-
-      <section className="space-y-2">
-        <MiniLabel>Angka Mati Ekor</MiniLabel>
-        <div className="grid grid-cols-3 gap-2">
-          {[1, 2, 3].map((n) => optionButton(customOffEkorCount === n, String(n), () => setCustomOffEkorCount(customOffEkorCount === n ? null : n), "", `ekor-${n}`))}
-        </div>
-      </section>
+      {visiblePositions.map((position) => (
+        <section key={position} className="space-y-2">
+          <MiniLabel>Angka Mati {customFocusPositionLabels[position]}</MiniLabel>
+          <div className="grid grid-cols-3 gap-2">
+            {[1, 2, 3].map((n) => optionButton(positionValues[position] === n, String(n), () => positionSetters[position](positionValues[position] === n ? null : n), "", `${position}-${n}`))}
+          </div>
+        </section>
+      ))}
 
       <section className="space-y-2">
         <MiniLabel>Jumlah Mati</MiniLabel>
