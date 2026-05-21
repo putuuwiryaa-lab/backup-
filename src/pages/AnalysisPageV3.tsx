@@ -15,6 +15,9 @@ const TARGET_PAIR_OPTIONS: Array<{ key: TargetPair; title: string; subtitle: str
   { key: "belakang", title: "2D BELAKANG", subtitle: "KEPALA - EKOR" },
 ];
 
+type PairAiMap = Partial<Record<TargetPair, 2 | 4 | 6 | null>>;
+type PairCountMap = Partial<Record<TargetPair, number | null>>;
+
 function TargetPairSelector({ meta, onSelect }: { meta: { accent: string; soft: string }; onSelect: (pair: TargetPair) => void }) {
   return (
     <div className="premium-panel mt-4 p-4">
@@ -54,15 +57,27 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
   const [detailValidationOpen, setDetailValidationOpen] = useState(false);
   const [angkaJadiOpen, setAngkaJadiOpen] = useState(false);
   const [customFocus, setCustomFocus] = useState<CustomFocus>("belakang");
-  const [customAiDigit, setCustomAiDigit] = useState<2 | 4 | 6 | null>(null);
+  const [customAiDigitByPair, setCustomAiDigitByPair] = useState<PairAiMap>({});
   const [customIncludeBBFS, setCustomIncludeBBFS] = useState(false);
   const [customOffAsCount, setCustomOffAsCount] = useState<number | null>(null);
   const [customOffKopCount, setCustomOffKopCount] = useState<number | null>(null);
   const [customOffKepalaCount, setCustomOffKepalaCount] = useState<number | null>(null);
   const [customOffEkorCount, setCustomOffEkorCount] = useState<number | null>(null);
-  const [customOffJumlahCount, setCustomOffJumlahCount] = useState<number | null>(null);
-  const [customOffShioCount, setCustomOffShioCount] = useState<number | null>(null);
+  const [customOffJumlahCountByPair, setCustomOffJumlahCountByPair] = useState<PairCountMap>({});
+  const [customOffShioCountByPair, setCustomOffShioCountByPair] = useState<PairCountMap>({});
   const meta = typeMeta[type] || typeMeta.ai;
+
+  const setCustomAiDigitForPair = (pair: TargetPair, value: 2 | 4 | 6 | null) => {
+    setCustomAiDigitByPair((prev) => ({ ...prev, [pair]: value }));
+  };
+
+  const setCustomOffJumlahCountForPair = (pair: TargetPair, value: number | null) => {
+    setCustomOffJumlahCountByPair((prev) => ({ ...prev, [pair]: value }));
+  };
+
+  const setCustomOffShioCountForPair = (pair: TargetPair, value: number | null) => {
+    setCustomOffShioCountByPair((prev) => ({ ...prev, [pair]: value }));
+  };
 
   const resetBeforeAnalyze = () => {
     setLoading(true);
@@ -125,7 +140,9 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
   };
 
   const handleCustomDigitGenerate = async () => {
-    const hasAnyFilter = Boolean(customAiDigit || customIncludeBBFS || customOffAsCount || customOffKopCount || customOffKepalaCount || customOffEkorCount || customOffJumlahCount || customOffShioCount);
+    const pairs = customFocusPairs(customFocus);
+    const hasAnyPairFilter = pairs.some((pair) => customAiDigitByPair[pair] || customOffJumlahCountByPair[pair] || customOffShioCountByPair[pair]);
+    const hasAnyFilter = Boolean(hasAnyPairFilter || customIncludeBBFS || customOffAsCount || customOffKopCount || customOffKepalaCount || customOffEkorCount);
     if (!hasAnyFilter) {
       setError("Pilih minimal satu filter dulu.");
       return;
@@ -134,7 +151,6 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
     resetBeforeAnalyze();
     try {
       const data = await getMarketData();
-      const pairs = customFocusPairs(customFocus);
       const aiByPair: Partial<Record<TargetPair, number[]>> = {};
       const bbfsByPair: Partial<Record<TargetPair, number[]>> = {};
       const jumlahByPair: Partial<Record<TargetPair, number[]>> = {};
@@ -142,10 +158,13 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
       const matiCache: Partial<Record<number, any>> = {};
 
       for (const pair of pairs) {
-        if (customAiDigit) aiByPair[pair] = toNumberList((await postAnalyze("ai", data, customAiDigit, pair))?.result);
+        const aiDigit = customAiDigitByPair[pair];
+        const jumlahCount = customOffJumlahCountByPair[pair];
+        const shioCount = customOffShioCountByPair[pair];
+        if (aiDigit) aiByPair[pair] = toNumberList((await postAnalyze("ai", data, aiDigit, pair))?.result);
         if (customIncludeBBFS) bbfsByPair[pair] = toNumberList((await postAnalyze("ai", data, 8, pair))?.result);
-        if (customOffJumlahCount) jumlahByPair[pair] = toNumberList((await postAnalyze("jumlah", data, customOffJumlahCount, pair))?.result);
-        if (customOffShioCount) shioByPair[pair] = toNumberList((await postAnalyze("shio", data, customOffShioCount, pair))?.result);
+        if (jumlahCount) jumlahByPair[pair] = toNumberList((await postAnalyze("jumlah", data, jumlahCount, pair))?.result);
+        if (shioCount) shioByPair[pair] = toNumberList((await postAnalyze("shio", data, shioCount, pair))?.result);
       }
 
       const getMati = async (count: number | null) => {
@@ -211,8 +230,8 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
         meta={meta}
         customFocus={customFocus}
         setCustomFocus={setCustomFocus}
-        customAiDigit={customAiDigit}
-        setCustomAiDigit={setCustomAiDigit}
+        customAiDigitByPair={customAiDigitByPair}
+        setCustomAiDigitForPair={setCustomAiDigitForPair}
         customIncludeBBFS={customIncludeBBFS}
         setCustomIncludeBBFS={setCustomIncludeBBFS}
         customOffAsCount={customOffAsCount}
@@ -223,10 +242,10 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
         setCustomOffKepalaCount={setCustomOffKepalaCount}
         customOffEkorCount={customOffEkorCount}
         setCustomOffEkorCount={setCustomOffEkorCount}
-        customOffJumlahCount={customOffJumlahCount}
-        setCustomOffJumlahCount={setCustomOffJumlahCount}
-        customOffShioCount={customOffShioCount}
-        setCustomOffShioCount={setCustomOffShioCount}
+        customOffJumlahCountByPair={customOffJumlahCountByPair}
+        setCustomOffJumlahCountForPair={setCustomOffJumlahCountForPair}
+        customOffShioCountByPair={customOffShioCountByPair}
+        setCustomOffShioCountForPair={setCustomOffShioCountForPair}
         onGenerate={handleCustomDigitGenerate}
       />
 
