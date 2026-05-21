@@ -1,18 +1,12 @@
 import { Copy } from "lucide-react";
 import RekapHistory from "../RekapHistory";
 import { safeArray } from "../../lib/analysis/utils";
-import { customFocusLabel, customFocusPairs, customFocusPositionLabels, customFocusSubtitle, customFocusPositions, type TargetPair } from "../../lib/analysis/customDigit";
+import { customFocusPairs, customFocusPositionLabels, customFocusPositions, type TargetPair } from "../../lib/analysis/customDigit";
 
 const pairLabel: Record<TargetPair, string> = {
   depan: "DEPAN",
   tengah: "TENGAH",
   belakang: "BELAKANG",
-};
-
-const pairSubtitle: Record<TargetPair, string> = {
-  depan: "AS-KOP",
-  tengah: "KOP-KEPALA",
-  belakang: "KEPALA-EKOR",
 };
 
 function formatValue(value: any, pad = false) {
@@ -23,14 +17,11 @@ function customRows(result: any) {
   const focus = result?.customFocus || "belakang";
   const pairs = customFocusPairs(focus);
   const positions = customFocusPositions(focus);
-  const rows: any[] = [
-    ["JENIS REKAP", `${customFocusLabel(focus)} · ${customFocusSubtitle(focus)}`, "🧭", "#7ab2ff"],
-  ];
+  const rows: any[] = [];
 
   pairs.forEach((pair) => {
-    const suffix = `${pairLabel[pair]} · ${pairSubtitle[pair]}`;
-    if (safeArray(result.aiByPair?.[pair]).length) rows.push([`AI ${suffix}`, formatValue(result.aiByPair[pair]), "🔥", "#f3c14b"]);
-    if (safeArray(result.bbfsByPair?.[pair]).length) rows.push([`BBFS ${suffix}`, formatValue(result.bbfsByPair[pair]), "✨", "#f3c14b"]);
+    if (safeArray(result.aiByPair?.[pair]).length) rows.push([`AI ${pairLabel[pair]}`, formatValue(result.aiByPair[pair]), "🔥", "#f3c14b"]);
+    if (safeArray(result.bbfsByPair?.[pair]).length) rows.push([`BBFS ${pairLabel[pair]}`, formatValue(result.bbfsByPair[pair]), "✨", "#f3c14b"]);
   });
 
   positions.forEach((position) => {
@@ -39,9 +30,8 @@ function customRows(result: any) {
   });
 
   pairs.forEach((pair) => {
-    const suffix = `${pairLabel[pair]} · ${pairSubtitle[pair]}`;
-    if (safeArray(result.jumlahByPair?.[pair]).length) rows.push([`OFF JML ${suffix}`, formatValue(result.jumlahByPair[pair]), "🔢", "#b58cff"]);
-    if (safeArray(result.shioByPair?.[pair]).length) rows.push([`OFF SHIO ${suffix}`, formatValue(result.shioByPair[pair], true), "🐲", "#28d7ff"]);
+    if (safeArray(result.jumlahByPair?.[pair]).length) rows.push([`OFF JML ${pairLabel[pair]}`, formatValue(result.jumlahByPair[pair]), "🔢", "#b58cff"]);
+    if (safeArray(result.shioByPair?.[pair]).length) rows.push([`OFF SHIO ${pairLabel[pair]}`, formatValue(result.shioByPair[pair], true), "🐲", "#28d7ff"]);
   });
 
   return rows;
@@ -80,8 +70,8 @@ export default function RekapResult({ result, param, marketId, meta }: {
         <div className="space-y-3">
           {rows.map(([label, value, emoji, color]: any, index: number) => (
             <div key={`${label}-${index}`} className="flex items-center justify-between gap-3 rounded-3xl border border-[var(--border2)] bg-black/20 p-3">
-              <div className="flex min-w-0 items-center gap-3"><span className="shrink-0 text-base">{emoji}</span><span className="min-w-0 text-[9px] font-black uppercase tracking-[1.6px] text-[var(--text-dim)]">{label}</span></div>
-              <span className="max-w-[45%] truncate text-right font-['Orbitron'] text-[12px] font-black tracking-[1.5px]" style={{ color }}>{value}</span>
+              <div className="flex min-w-0 items-center gap-3"><span className="shrink-0 text-base">{emoji}</span><span className="min-w-0 text-[10px] font-black uppercase tracking-[1.8px] text-[var(--text-dim)]">{label}</span></div>
+              <span className="max-w-[54%] truncate text-right font-['Orbitron'] text-[12px] font-black tracking-[1.5px]" style={{ color }}>{value}</span>
             </div>
           ))}
         </div>
