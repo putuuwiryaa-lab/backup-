@@ -60,7 +60,6 @@ export const buildCustomDigitLines = ({
   focus = "belakang",
   aiByPair,
   bbfsByPair,
-  includeBBFS,
   offAs = [],
   offKop = [],
   offKepala = [],
@@ -71,7 +70,7 @@ export const buildCustomDigitLines = ({
   focus?: CustomFocus;
   aiByPair?: Partial<Record<TargetPair, number[]>>;
   bbfsByPair?: Partial<Record<TargetPair, number[]>>;
-  includeBBFS: boolean;
+  includeBBFS?: boolean;
   offAs?: number[];
   offKop?: number[];
   offKepala?: number[];
@@ -95,7 +94,7 @@ export const buildCustomDigitLines = ({
       const offJumlah = jumlahByPair?.[pair] || [];
       const offShio = shioByPair?.[pair] || [];
       if (ai.length && !ai.includes(a) && !ai.includes(b)) return false;
-      if (includeBBFS && (!bbfs.includes(a) || !bbfs.includes(b))) return false;
+      if (bbfs.length && (!bbfs.includes(a) || !bbfs.includes(b))) return false;
       if (offJumlah.includes(jumlah2DLocal(a, b))) return false;
       if (offShio.includes(shioOf2DLocal(a * 10 + b))) return false;
     }
