@@ -5,6 +5,7 @@ import ParamSelector from "../components/analysis/ParamSelector";
 import CustomDigitBuilder from "../components/analysis/CustomDigitBuilder";
 import RekapResult from "../components/analysis/RekapResult";
 import AnalysisResult from "../components/analysis/AnalysisResult";
+import { useStepBackNavigation } from "../hooks/useStepBackNavigation";
 import { typeMeta } from "../lib/analysis/constants";
 import { toNumberList } from "../lib/analysis/utils";
 import { buildCustomDigitLines, CUSTOM_FOCUS_OPTIONS, customFocusLabel, customFocusPairs, customFocusSubtitle, type CustomFocus, type TargetPair } from "../lib/analysis/customDigit";
@@ -174,6 +175,10 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
     }
     return false;
   };
+
+  const canStepBack = Boolean(result || loading || (isRekapCustom && customFocus) || (needsTargetPair && targetPair));
+
+  useStepBackNavigation(canStepBack, stepBack);
 
   const handleBack = () => {
     if (!stepBack()) navigate(-1);
