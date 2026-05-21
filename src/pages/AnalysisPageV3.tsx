@@ -42,22 +42,38 @@ function TargetPairSelector({ meta, onSelect }: { meta: { accent: string; soft: 
 }
 
 function RekapFocusSelector({ meta, onSelect }: { meta: { accent: string; soft: string }; onSelect: (focus: CustomFocus) => void }) {
+  const twoDOptions = CUSTOM_FOCUS_OPTIONS.filter((item) => ["depan", "tengah", "belakang"].includes(item.key));
+  const fullOptions = CUSTOM_FOCUS_OPTIONS.filter((item) => ["3d", "4d"].includes(item.key));
   return (
     <div className="premium-panel mt-4 space-y-4 p-4">
       <div className="text-center">
         <div className="text-[10px] font-black uppercase tracking-[3px]" style={{ color: meta.accent }}>Pilih Jenis Rekap</div>
         <p className="mt-2 text-[10px] font-semibold uppercase tracking-[1.5px] text-[var(--text-dim)]">Pilih dulu jenis line yang mau dibuat.</p>
       </div>
-      <div className="grid grid-cols-2 gap-2">
-        {CUSTOM_FOCUS_OPTIONS.map((item) => (
+      <div className="grid grid-cols-3 gap-2">
+        {twoDOptions.map((item) => (
           <button
             key={item.key}
             type="button"
             onClick={() => onSelect(item.key)}
-            className={`${item.key === "4d" ? "col-span-2" : ""} rounded-3xl border p-4 text-center transition active:scale-95`}
+            className="rounded-3xl border p-3 text-center transition active:scale-95"
             style={{ borderColor: meta.accent, backgroundColor: meta.soft, color: meta.accent }}
           >
-            <span className="block font-['Orbitron'] text-[12px] font-black uppercase tracking-[2px]">{item.title}</span>
+            <span className="block font-['Orbitron'] text-[10px] font-black uppercase tracking-[1.5px]">{item.title}</span>
+            <span className="mt-2 block text-[7px] font-black uppercase tracking-[0.8px] opacity-75">{item.subtitle}</span>
+          </button>
+        ))}
+      </div>
+      <div className="space-y-2">
+        {fullOptions.map((item) => (
+          <button
+            key={item.key}
+            type="button"
+            onClick={() => onSelect(item.key)}
+            className="w-full rounded-3xl border p-4 text-center transition active:scale-95"
+            style={{ borderColor: meta.accent, backgroundColor: meta.soft, color: meta.accent }}
+          >
+            <span className="block font-['Orbitron'] text-[13px] font-black uppercase tracking-[2px]">{item.title}</span>
             <span className="mt-2 block text-[8px] font-black uppercase tracking-[1px] opacity-75">{item.subtitle}</span>
           </button>
         ))}
