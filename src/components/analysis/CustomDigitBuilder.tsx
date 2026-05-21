@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { RefreshCw } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
-import { CUSTOM_FOCUS_OPTIONS, customFocusLabel, customFocusPositionLabels, customFocusPositions, customFocusSubtitle, type CustomFocus, type PositionKey } from "../../lib/analysis/customDigit";
+import { CUSTOM_FOCUS_OPTIONS, customFocusLabel, customFocusPairs, customFocusPositionLabels, customFocusPositions, customFocusSubtitle, type CustomFocus, type PositionKey, type TargetPair } from "../../lib/analysis/customDigit";
 import { MiniLabel } from "./Shared";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
@@ -11,34 +11,27 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 const RECOMMENDATION_SAMPLE_SIZE = 15;
 const RECOMMENDATION_MIN_SAMPLE = 10;
 
-const AI_WIN_THRESHOLDS: Record<number, number> = {
-  2: 7,
-  4: 11,
-  6: 12,
-  8: 11,
-};
-
-const OFF_WIN_THRESHOLDS: Record<number, number> = {
-  1: 13,
-  2: 12,
-  3: 11,
-};
-
-const PARTIAL_AI_WIN_RATES: Record<number, number> = {
-  2: 7 / 15,
-  4: 11 / 15,
-  6: 12 / 15,
-  8: 11 / 15,
-};
-
-const PARTIAL_OFF_WIN_RATES: Record<number, number> = {
-  1: 13 / 15,
-  2: 12 / 15,
-  3: 11 / 15,
-};
+const AI_WIN_THRESHOLDS: Record<number, number> = { 2: 7, 4: 11, 6: 12, 8: 11 };
+const OFF_WIN_THRESHOLDS: Record<number, number> = { 1: 13, 2: 12, 3: 11 };
+const PARTIAL_AI_WIN_RATES: Record<number, number> = { 2: 7 / 15, 4: 11 / 15, 6: 12 / 15, 8: 11 / 15 };
+const PARTIAL_OFF_WIN_RATES: Record<number, number> = { 1: 13 / 15, 2: 12 / 15, 3: 11 / 15 };
 
 type RecommendationGroup = "ai" | "off";
 type RecommendedMap = Record<string, "thumb" | "fire">;
+type PairAiMap = Partial<Record<TargetPair, 2 | 4 | 6 | null>>;
+type PairCountMap = Partial<Record<TargetPair, number | null>>;
+
+const pairLabel: Record<TargetPair, string> = {
+  depan: "DEPAN",
+  tengah: "TENGAH",
+  belakang: "BELAKANG",
+};
+
+const pairSubtitle: Record<TargetPair, string> = {
+  depan: "AS - KOP",
+  tengah: "KOP - KEPALA",
+  belakang: "KEPALA - EKOR",
+};
 
 function isSuccessStatus(row: any) {
   return row?.status !== "TIDAK MASUK" && row?.status !== "ZONK" && row?.is_hit !== false;
@@ -60,9 +53,7 @@ function scoreParam(rows: any[], param: number, group: RecommendationGroup) {
   const fullThreshold = getFullThreshold(group, param);
   const partialWinRate = getPartialWinRate(group, param);
   if (!fullThreshold || !partialWinRate) return null;
-  const isRecommended = sample.length >= RECOMMENDATION_SAMPLE_SIZE
-    ? wins >= fullThreshold
-    : wins / sample.length >= partialWinRate;
+  const isRecommended = sample.length >= RECOMMENDATION_SAMPLE_SIZE ? wins >= fullThreshold : wins / sample.length >= partialWinRate;
   if (!isRecommended) return null;
   return { param, badge: isPerfect ? "fire" as const : "thumb" as const };
 }
@@ -74,14 +65,14 @@ function pickRecommendation(rows: any[], params: number[], prefer: "low" | "high
   return scored.find((item) => item.param === selectedParam) || null;
 }
 
-async function loadRows(marketId: string, mode: string, position: string, params: number[]) {
+async function loadRows(marketId: string, mode: string, position: string, params: number[], targetPair: TargetPair = "belakang") {
   const { data, error } = await supabase
     .from("analysis_evaluations")
     .select("param,is_hit,status,evaluated_at,target_pair")
     .eq("market_id", marketId)
     .eq("mode", mode)
     .eq("position", position)
-    .eq("target_pair", "belakang")
+    .eq("target_pair", targetPair)
     .in("param", params)
     .order("evaluated_at", { ascending: false })
     .limit(80);
@@ -95,8 +86,8 @@ export default function CustomDigitBuilder({
   meta,
   customFocus,
   setCustomFocus,
-  customAiDigit,
-  setCustomAiDigit,
+  customAiDigitByPair,
+  setCustomAiDigitForPair,
   customIncludeBBFS,
   setCustomIncludeBBFS,
   customOffAsCount,
@@ -107,10 +98,10 @@ export default function CustomDigitBuilder({
   setCustomOffKepalaCount,
   customOffEkorCount,
   setCustomOffEkorCount,
-  customOffJumlahCount,
-  setCustomOffJumlahCount,
-  customOffShioCount,
-  setCustomOffShioCount,
+  customOffJumlahCountByPair,
+  setCustomOffJumlahCountForPair,
+  customOffShioCountByPair,
+  setCustomOffShioCountForPair,
   onGenerate,
 }: {
   show: boolean;
@@ -118,8 +109,8 @@ export default function CustomDigitBuilder({
   meta: { accent: string; soft: string };
   customFocus: CustomFocus;
   setCustomFocus: (value: CustomFocus) => void;
-  customAiDigit: 2 | 4 | 6 | null;
-  setCustomAiDigit: (value: 2 | 4 | 6) => void;
+  customAiDigitByPair: PairAiMap;
+  setCustomAiDigitForPair: (pair: TargetPair, value: 2 | 4 | 6 | null) => void;
   customIncludeBBFS: boolean;
   setCustomIncludeBBFS: (fn: (value: boolean) => boolean) => void;
   customOffAsCount: number | null;
@@ -130,10 +121,10 @@ export default function CustomDigitBuilder({
   setCustomOffKepalaCount: (value: number | null) => void;
   customOffEkorCount: number | null;
   setCustomOffEkorCount: (value: number | null) => void;
-  customOffJumlahCount: number | null;
-  setCustomOffJumlahCount: (value: number | null) => void;
-  customOffShioCount: number | null;
-  setCustomOffShioCount: (value: number | null) => void;
+  customOffJumlahCountByPair: PairCountMap;
+  setCustomOffJumlahCountForPair: (pair: TargetPair, value: number | null) => void;
+  customOffShioCountByPair: PairCountMap;
+  setCustomOffShioCountForPair: (pair: TargetPair, value: number | null) => void;
   onGenerate: () => void;
 }) {
   const [recommended, setRecommended] = useState<RecommendedMap>({});
@@ -143,33 +134,39 @@ export default function CustomDigitBuilder({
     const loadRecommendations = async () => {
       if (!show || !marketId) return;
       try {
-        const [aiRows, bbfsRows, asRows, kopRows, kepalaRows, ekorRows, jumlahRows, shioRows] = await Promise.all([
-          loadRows(marketId, "ai", "all", [2, 4, 6]),
-          loadRows(marketId, "ai", "all", [8]),
+        const pairs = customFocusPairs(customFocus);
+        const next: RecommendedMap = {};
+        await Promise.all(pairs.map(async (pair) => {
+          const [aiRows, bbfsRows, jumlahRows, shioRows] = await Promise.all([
+            loadRows(marketId, "ai", "all", [2, 4, 6], pair),
+            loadRows(marketId, "ai", "all", [8], pair),
+            loadRows(marketId, "jumlah", "all", [1, 2, 3], pair),
+            loadRows(marketId, "shio", "all", [1, 2, 3], pair),
+          ]);
+          const aiPick = pickRecommendation(aiRows, [2, 4, 6], "low", "ai");
+          const jumlahPick = pickRecommendation(jumlahRows, [1, 2, 3], "high", "off");
+          const shioPick = pickRecommendation(shioRows, [1, 2, 3], "high", "off");
+          const bbfsPick = pickRecommendation(bbfsRows, [8], "low", "ai");
+          if (aiPick) next[`ai-${pair}-${aiPick.param}`] = aiPick.badge;
+          if (bbfsPick) next[`bbfs-${pair}`] = bbfsPick.badge;
+          if (jumlahPick) next[`jumlah-${pair}-${jumlahPick.param}`] = jumlahPick.badge;
+          if (shioPick) next[`shio-${pair}-${shioPick.param}`] = shioPick.badge;
+        }));
+
+        const [asRows, kopRows, kepalaRows, ekorRows] = await Promise.all([
           loadRows(marketId, "mati", "as", [1, 2, 3]),
           loadRows(marketId, "mati", "kop", [1, 2, 3]),
           loadRows(marketId, "mati", "kepala", [1, 2, 3]),
           loadRows(marketId, "mati", "ekor", [1, 2, 3]),
-          loadRows(marketId, "jumlah", "all", [1, 2, 3]),
-          loadRows(marketId, "shio", "all", [1, 2, 3]),
         ]);
-        const next: RecommendedMap = {};
-        const aiPick = pickRecommendation(aiRows, [2, 4, 6], "low", "ai");
         const asPick = pickRecommendation(asRows, [1, 2, 3], "high", "off");
         const kopPick = pickRecommendation(kopRows, [1, 2, 3], "high", "off");
         const kepalaPick = pickRecommendation(kepalaRows, [1, 2, 3], "high", "off");
         const ekorPick = pickRecommendation(ekorRows, [1, 2, 3], "high", "off");
-        const jumlahPick = pickRecommendation(jumlahRows, [1, 2, 3], "high", "off");
-        const shioPick = pickRecommendation(shioRows, [1, 2, 3], "high", "off");
-        const bbfsPick = pickRecommendation(bbfsRows, [8], "low", "ai");
-        if (aiPick) next[`ai-${aiPick.param}`] = aiPick.badge;
-        if (bbfsPick) next.bbfs = bbfsPick.badge;
         if (asPick) next[`as-${asPick.param}`] = asPick.badge;
         if (kopPick) next[`kop-${kopPick.param}`] = kopPick.badge;
         if (kepalaPick) next[`kepala-${kepalaPick.param}`] = kepalaPick.badge;
         if (ekorPick) next[`ekor-${ekorPick.param}`] = ekorPick.badge;
-        if (jumlahPick) next[`jumlah-${jumlahPick.param}`] = jumlahPick.badge;
-        if (shioPick) next[`shio-${shioPick.param}`] = shioPick.badge;
         if (active) setRecommended(next);
       } catch {
         if (active) setRecommended({});
@@ -177,10 +174,11 @@ export default function CustomDigitBuilder({
     };
     loadRecommendations();
     return () => { active = false; };
-  }, [show, marketId]);
+  }, [show, marketId, customFocus]);
 
   const badges = useMemo(() => recommended, [recommended]);
   const visiblePositions = customFocusPositions(customFocus);
+  const visiblePairs = customFocusPairs(customFocus);
   const positionValues: Record<PositionKey, number | null> = { as: customOffAsCount, kop: customOffKopCount, kepala: customOffKepalaCount, ekor: customOffEkorCount };
   const positionSetters: Record<PositionKey, (value: number | null) => void> = { as: setCustomOffAsCount, kop: setCustomOffKopCount, kepala: setCustomOffKepalaCount, ekor: setCustomOffEkorCount };
 
@@ -201,8 +199,6 @@ export default function CustomDigitBuilder({
       </button>
     );
   };
-
-  const focusButton = (focus: CustomFocus) => optionButton(customFocus === focus, customFocusLabel(focus), () => setCustomFocus(focus), "", undefined);
 
   return (
     <div className="premium-panel mt-4 space-y-4 p-4">
@@ -228,18 +224,18 @@ export default function CustomDigitBuilder({
         <span className="font-['Orbitron'] text-[10px] font-black uppercase tracking-[2px]" style={{ color: meta.accent }}>{customFocusLabel(customFocus)} · {customFocusSubtitle(customFocus)}</span>
       </div>
 
-      <section className="space-y-2">
-        <MiniLabel>AI</MiniLabel>
-        <div className="grid grid-cols-3 gap-2">
-          {optionButton(customAiDigit === 2, "2 Digit", () => setCustomAiDigit(2), "", "ai-2")}
-          {optionButton(customAiDigit === 4, "4 Digit", () => setCustomAiDigit(4), "", "ai-4")}
-          {optionButton(customAiDigit === 6, "6 Digit", () => setCustomAiDigit(6), "", "ai-6")}
-        </div>
-      </section>
+      {visiblePairs.map((pair) => (
+        <section key={`ai-${pair}`} className="space-y-2">
+          <MiniLabel>AI {pairLabel[pair]} · {pairSubtitle[pair]}</MiniLabel>
+          <div className="grid grid-cols-3 gap-2">
+            {[2, 4, 6].map((n) => optionButton(customAiDigitByPair[pair] === n, `${n} Digit`, () => setCustomAiDigitForPair(pair, customAiDigitByPair[pair] === n ? null : n as 2 | 4 | 6), "", `ai-${pair}-${n}`))}
+          </div>
+        </section>
+      ))}
 
       <section className="space-y-2">
         <MiniLabel>BBFS</MiniLabel>
-        {optionButton(customIncludeBBFS, "Include BBFS", () => setCustomIncludeBBFS((value) => !value), "w-full", "bbfs")}
+        {optionButton(customIncludeBBFS, "Include BBFS", () => setCustomIncludeBBFS((value) => !value), "w-full")}
       </section>
 
       {visiblePositions.map((position) => (
@@ -251,19 +247,23 @@ export default function CustomDigitBuilder({
         </section>
       ))}
 
-      <section className="space-y-2">
-        <MiniLabel>Jumlah Mati</MiniLabel>
-        <div className="grid grid-cols-3 gap-2">
-          {[1, 2, 3].map((n) => optionButton(customOffJumlahCount === n, String(n), () => setCustomOffJumlahCount(customOffJumlahCount === n ? null : n), "", `jumlah-${n}`))}
-        </div>
-      </section>
+      {visiblePairs.map((pair) => (
+        <section key={`jumlah-${pair}`} className="space-y-2">
+          <MiniLabel>Jumlah Mati {pairLabel[pair]} · {pairSubtitle[pair]}</MiniLabel>
+          <div className="grid grid-cols-3 gap-2">
+            {[1, 2, 3].map((n) => optionButton(customOffJumlahCountByPair[pair] === n, String(n), () => setCustomOffJumlahCountForPair(pair, customOffJumlahCountByPair[pair] === n ? null : n), "", `jumlah-${pair}-${n}`))}
+          </div>
+        </section>
+      ))}
 
-      <section className="space-y-2">
-        <MiniLabel>Shio Mati</MiniLabel>
-        <div className="grid grid-cols-3 gap-2">
-          {[1, 2, 3].map((n) => optionButton(customOffShioCount === n, String(n), () => setCustomOffShioCount(customOffShioCount === n ? null : n), "", `shio-${n}`))}
-        </div>
-      </section>
+      {visiblePairs.map((pair) => (
+        <section key={`shio-${pair}`} className="space-y-2">
+          <MiniLabel>Shio Mati {pairLabel[pair]} · {pairSubtitle[pair]}</MiniLabel>
+          <div className="grid grid-cols-3 gap-2">
+            {[1, 2, 3].map((n) => optionButton(customOffShioCountByPair[pair] === n, String(n), () => setCustomOffShioCountForPair(pair, customOffShioCountByPair[pair] === n ? null : n), "", `shio-${pair}-${n}`))}
+          </div>
+        </section>
+      ))}
 
       <button onClick={onGenerate} className="primary-button flex w-full items-center justify-center gap-3 p-5 font-['Orbitron'] text-[12px] font-black uppercase tracking-[4px] transition active:scale-95"><RefreshCw size={18} /> Generate</button>
     </div>
