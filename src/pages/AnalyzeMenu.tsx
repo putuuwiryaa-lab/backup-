@@ -14,12 +14,13 @@ const MODE_META: any = {
 export default function AnalyzeMenu() {
   return (
     <Routes>
-      <Route path="/" element={<AnalyzeList />} />
-      <Route path="/ai" element={<AnalysisWrapper type="ai" title="ANGKA IKUT / BBFS" />} />
-      <Route path="/mati" element={<AnalysisWrapper type="mati" title="ANGKA MATI 4D" />} />
-      <Route path="/jumlah" element={<AnalysisWrapper type="jumlah" title="JUMLAH MATI 2D" />} />
-      <Route path="/shio" element={<AnalysisWrapper type="shio" title="SHIO MATI" />} />
-      <Route path="/rekap" element={<AnalysisWrapper type="rekap" title="MENU REKAP" />} />
+      <Route index element={<AnalyzeList />} />
+      <Route path="ai" element={<AnalysisWrapper type="ai" title="ANGKA IKUT / BBFS" />} />
+      <Route path="mati" element={<AnalysisWrapper type="mati" title="ANGKA MATI 4D" />} />
+      <Route path="jumlah" element={<AnalysisWrapper type="jumlah" title="JUMLAH MATI 2D" />} />
+      <Route path="shio" element={<AnalysisWrapper type="shio" title="SHIO MATI" />} />
+      <Route path="rekap" element={<AnalysisWrapper type="rekap" title="MENU REKAP" />} />
+      <Route path="*" element={<AnalyzeList />} />
     </Routes>
   );
 }
