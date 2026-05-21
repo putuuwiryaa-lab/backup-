@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, RefreshCw, Sparkles } from "lucide-react";
 import ParamSelector from "../components/analysis/ParamSelector";
 import CustomDigitBuilder from "../components/analysis/CustomDigitBuilder";
 import RekapResult from "../components/analysis/RekapResult";
 import AnalysisResult from "../components/analysis/AnalysisResult";
+import { useStepBackNavigation } from "../hooks/useStepBackNavigation";
 import { typeMeta } from "../lib/analysis/constants";
 import { toNumberList } from "../lib/analysis/utils";
 import { buildCustomDigitLines, CUSTOM_FOCUS_OPTIONS, customFocusLabel, customFocusPairs, customFocusSubtitle, type CustomFocus, type TargetPair } from "../lib/analysis/customDigit";
@@ -90,6 +91,7 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
   const [customOffJumlahCountByPair, setCustomOffJumlahCountByPair] = useState<PairCountMap>({});
   const [customOffShioCountByPair, setCustomOffShioCountByPair] = useState<PairCountMap>({});
   const meta = typeMeta[type] || typeMeta.ai;
+  const isRekapCustom = type === "rekap" && param === 3;
 
   const setCustomAiDigitForPair = (pair: TargetPair, value: 2 | 4 | 6 | null) => setCustomAiDigitByPair((prev) => ({ ...prev, [pair]: value }));
   const setCustomIncludeBBFSForPair = (pair: TargetPair, value: boolean) => setCustomIncludeBBFSByPair((prev) => ({ ...prev, [pair]: value }));
@@ -146,38 +148,33 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
     setError("");
   };
 
-  const handleBack = () => {
-    if (loading) return;
+  const stepBack = () => {
+    if (loading) return true;
     if (result) {
       setResult(null);
       setError("");
-      return;
+      return true;
     }
     if (isRekapCustom && customFocus) {
       setCustomFocus(null);
       setError("");
-      return;
+      return true;
     }
     if (needsTargetPair && targetPair) {
       setTargetPair(null);
       setParam(0);
       setError("");
-      return;
+      return true;
     }
-    navigate(-1);
+    return false;
   };
 
-  useEffect(() => {
-    const canStepBack = Boolean(result || (type === "rekap" && param === 3 && customFocus) || (needsTargetPair && targetPair));
-    if (!canStepBack) return;
-    window.history.pushState({ analysisStep: true }, "", window.location.href);
-    const onPopState = () => {
-      window.history.pushState({ analysisStep: true }, "", window.location.href);
-      handleBack();
-    };
-    window.addEventListener("popstate", onPopState);
-    return () => window.removeEventListener("popstate", onPopState);
-  }, [result, customFocus, targetPair, loading, type, param]);
+  const handleBack = () => {
+    if (!stepBack()) navigate(-1);
+  };
+
+  const canStepBack = Boolean(result || (isRekapCustom && customFocus) || (needsTargetPair && targetPair));
+  useStepBackNavigation(canStepBack, stepBack);
 
   const handleAnalyze = async (selectedParam: number) => {
     if (needsTargetPair && !targetPair) {
@@ -251,7 +248,6 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
     setLoading(false);
   };
 
-  const isRekapCustom = type === "rekap" && param === 3;
   const showRekapFocusSelector = isRekapCustom && !customFocus && !result && !loading;
   const showCustomDigitBuilder = isRekapCustom && Boolean(customFocus) && !result;
   const showTargetPairSelector = needsTargetPair && !targetPair && !result && !loading;
