@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { RefreshCw } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
-import { CUSTOM_FOCUS_OPTIONS, customFocusLabel, customFocusPairs, customFocusPositionLabels, customFocusPositions, customFocusSubtitle, type CustomFocus, type PositionKey, type TargetPair } from "../../lib/analysis/customDigit";
+import { customFocusPairs, customFocusPositionLabels, customFocusPositions, type CustomFocus, type PositionKey, type TargetPair } from "../../lib/analysis/customDigit";
 import { MiniLabel } from "./Shared";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
@@ -86,7 +86,6 @@ export default function CustomDigitBuilder({
   marketId,
   meta,
   customFocus,
-  setCustomFocus,
   customAiDigitByPair,
   setCustomAiDigitForPair,
   customIncludeBBFSByPair,
@@ -109,7 +108,6 @@ export default function CustomDigitBuilder({
   marketId: string;
   meta: { accent: string; soft: string };
   customFocus: CustomFocus;
-  setCustomFocus: (value: CustomFocus) => void;
   customAiDigitByPair: PairAiMap;
   setCustomAiDigitForPair: (pair: TargetPair, value: 2 | 4 | 6 | null) => void;
   customIncludeBBFSByPair: PairBooleanMap;
@@ -205,24 +203,7 @@ export default function CustomDigitBuilder({
     <div className="premium-panel mt-4 space-y-4 p-4">
       <div className="text-center">
         <div className="text-[10px] font-black uppercase tracking-[3px]" style={{ color: meta.accent }}>Custom Digit</div>
-        <p className="mt-2 text-[10px] font-semibold uppercase tracking-[1.5px] text-[var(--text-dim)]">Pilih fokus dan filter yang mau dipakai, lalu generate.</p>
-      </div>
-
-      <section className="space-y-2">
-        <MiniLabel>Fokus Rekap</MiniLabel>
-        <div className="grid grid-cols-2 gap-2">
-          {CUSTOM_FOCUS_OPTIONS.map((item) => (
-            <button key={item.key} type="button" onClick={() => setCustomFocus(item.key)} className={`${item.key === "4d" ? "col-span-2" : ""} rounded-3xl border p-4 text-center transition active:scale-95`} style={{ borderColor: customFocus === item.key ? meta.accent : "rgba(255,255,255,0.14)", backgroundColor: customFocus === item.key ? meta.soft : "rgba(255,255,255,0.04)", color: customFocus === item.key ? meta.accent : "var(--text-dim)" }}>
-              <span className="block font-['Orbitron'] text-[12px] font-black uppercase tracking-[2px]">{item.title}</span>
-              <span className="mt-2 block text-[8px] font-black uppercase tracking-[1px] opacity-75">{item.subtitle}</span>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <div className="rounded-3xl bg-black/20 p-3 text-center ring-1 ring-white/10">
-        <span className="text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Aktif: </span>
-        <span className="font-['Orbitron'] text-[10px] font-black uppercase tracking-[2px]" style={{ color: meta.accent }}>{customFocusLabel(customFocus)} · {customFocusSubtitle(customFocus)}</span>
+        <p className="mt-2 text-[10px] font-semibold uppercase tracking-[1.5px] text-[var(--text-dim)]">Pilih filter yang mau dipakai, lalu generate.</p>
       </div>
 
       {visiblePairs.map((pair) => (
