@@ -13,6 +13,10 @@ function formatValue(value: any, pad = false) {
   return safeArray(value).map((item: any) => pad ? String(item).padStart(2, "0") : String(item)).join(" . ");
 }
 
+function formatCompact(value: any) {
+  return safeArray(value).map((item: any) => String(item)).join("");
+}
+
 function customRows(result: any) {
   const focus = result?.customFocus || "belakang";
   const pairs = customFocusPairs(focus);
@@ -20,8 +24,8 @@ function customRows(result: any) {
   const rows: any[] = [];
 
   pairs.forEach((pair) => {
-    if (safeArray(result.aiByPair?.[pair]).length) rows.push([`AI ${pairLabel[pair]}`, formatValue(result.aiByPair[pair]), "🔥", "#f3c14b"]);
-    if (safeArray(result.bbfsByPair?.[pair]).length) rows.push([`BBFS ${pairLabel[pair]}`, formatValue(result.bbfsByPair[pair]), "✨", "#f3c14b"]);
+    if (safeArray(result.aiByPair?.[pair]).length) rows.push([`AI ${pairLabel[pair]}`, formatCompact(result.aiByPair[pair]), "🔥", "#f3c14b"]);
+    if (safeArray(result.bbfsByPair?.[pair]).length) rows.push([`BBFS ${pairLabel[pair]}`, formatCompact(result.bbfsByPair[pair]), "✨", "#f3c14b"]);
   });
 
   positions.forEach((position) => {
@@ -50,7 +54,7 @@ export default function RekapResult({ result, param, marketId, meta }: {
   const displayLines = lines.join(" * ");
   const copyLines = lines.join("*");
   const rows = isCustom ? customRows(result) : [
-    [isTop ? "AI TOP" : "AI CT", safeArray(result.ai).join(" "), "🔥", "#f3c14b"],
+    [isTop ? "AI TOP" : "AI CT", safeArray(result.ai).join(""), "🔥", "#f3c14b"],
     ["OFF KEP", safeArray(result.offKepala).join(" . "), "🎯", "#ff647c"],
     ["OFF EKR", safeArray(result.offEkor).join(" . "), "🎯", "#ff647c"],
     ["OFF JML", safeArray(result.offJumlah).join(" . "), "🔢", "#b58cff"],
