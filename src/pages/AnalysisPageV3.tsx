@@ -26,7 +26,7 @@ function TargetPairSelector({ meta, onSelect }: { meta: { accent: string; soft: 
       <div className="mb-3 text-center text-[10px] font-black uppercase tracking-[3px]" style={{ color: meta.accent }}>Pilih Fokus 2D</div>
       <div className="space-y-2">
         {TARGET_PAIR_OPTIONS.map((option) => (
-          <button key={option.key} type="button" onClick={() => onSelect(option.key)} className="flex w-full items-center justify-between rounded-3xl border p-4 text-left transition active:scale-95" style={{ borderColor: meta.accent, backgroundColor: meta.soft, color: meta.accent }}>
+          <button key={option.key} type="button" onClick={() => onSelect(option.key)} className="flex w-full items-center justify-between rounded-3xl border p-4 text-left transition active:scale-95" style={{ borderColor: `${meta.accent}77`, backgroundColor: meta.soft, color: meta.accent }}>
             <span className="font-['Orbitron'] text-[14px] font-black uppercase tracking-[2px]">{option.title}</span>
             <span className="text-[10px] font-black uppercase tracking-[1.5px] opacity-80">{option.subtitle}</span>
           </button>
@@ -47,7 +47,7 @@ function RekapFocusSelector({ meta, onSelect }: { meta: { accent: string; soft: 
       </div>
       <div className="grid grid-cols-3 gap-2">
         {twoDOptions.map((item) => (
-          <button key={item.key} type="button" onClick={() => onSelect(item.key)} className="rounded-3xl border p-3 text-center transition active:scale-95" style={{ borderColor: meta.accent, backgroundColor: meta.soft, color: meta.accent }}>
+          <button key={item.key} type="button" onClick={() => onSelect(item.key)} className="rounded-3xl border p-3 text-center transition active:scale-95" style={{ borderColor: `${meta.accent}77`, backgroundColor: meta.soft, color: meta.accent }}>
             <span className="block font-['Orbitron'] text-[10px] font-black uppercase tracking-[1.5px]">{item.title}</span>
             <span className="mt-2 block text-[7px] font-black uppercase tracking-[0.8px] opacity-75">{item.subtitle}</span>
           </button>
@@ -55,7 +55,7 @@ function RekapFocusSelector({ meta, onSelect }: { meta: { accent: string; soft: 
       </div>
       <div className="space-y-2">
         {fullOptions.map((item) => (
-          <button key={item.key} type="button" onClick={() => onSelect(item.key)} className="w-full rounded-3xl border p-4 text-center transition active:scale-95" style={{ borderColor: meta.accent, backgroundColor: meta.soft, color: meta.accent }}>
+          <button key={item.key} type="button" onClick={() => onSelect(item.key)} className="w-full rounded-3xl border p-4 text-center transition active:scale-95" style={{ borderColor: `${meta.accent}77`, backgroundColor: meta.soft, color: meta.accent }}>
             <span className="block font-['Orbitron'] text-[13px] font-black uppercase tracking-[2px]">{item.title}</span>
             <span className="mt-2 block text-[8px] font-black uppercase tracking-[1px] opacity-75">{item.subtitle}</span>
           </button>
@@ -263,21 +263,33 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
 
   return (
     <div className={`analysis-mode-${type} animate-[fadeIn_0.35s_ease-out] pb-8`}>
-      <button onClick={handleBack} className="ghost-button mb-4 flex items-center gap-2 px-4 py-3 text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)] transition active:scale-95"><ArrowLeft size={16} /> Kembali</button>
+      <button onClick={handleBack} className="ghost-button mb-3 flex items-center gap-2 px-4 py-3 text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)] transition active:scale-95"><ArrowLeft size={16} /> Kembali</button>
 
-      <div className="premium-panel relative mb-4 overflow-hidden p-5">
-        <div className="absolute -right-12 -top-12 h-36 w-36 rounded-full blur-3xl" style={{ backgroundColor: `${meta.accent}20` }} />
-        <div className="absolute inset-x-0 top-0 h-1" style={{ background: `linear-gradient(90deg, transparent, ${meta.accent}, transparent)` }} />
+      <div className="premium-panel relative mb-4 overflow-hidden p-4">
+        <div className="absolute -right-12 -top-12 h-28 w-28 rounded-full blur-3xl" style={{ backgroundColor: `${meta.accent}18` }} />
+        <div className="absolute inset-x-0 top-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${meta.accent}, transparent)` }} />
+
         <div className="relative mb-4 flex items-center gap-3">
-          <div className="flex h-15 w-15 items-center justify-center rounded-3xl border text-[24px] shadow-sm" style={{ borderColor: meta.accent, backgroundColor: meta.soft, color: meta.accent }}>{icon}</div>
-          <div className="min-w-0">
-            <div className="mb-1 inline-flex items-center gap-2 rounded-full px-3 py-1 text-[9px] font-black uppercase tracking-[2px]" style={{ backgroundColor: meta.soft, color: meta.accent }}><Sparkles size={11} /> Prediction Mode</div>
-            <h2 className="truncate font-['Orbitron'] text-[18px] font-black uppercase tracking-[4px] text-[var(--text)]">{title}</h2>
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border bg-white/[0.028] text-[18px] shadow-sm" style={{ borderColor: `${meta.accent}66`, color: meta.accent }}>{icon}</div>
+          <div className="min-w-0 flex-1">
+            <div className="mb-1 inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-[8px] font-black uppercase tracking-[1.8px]" style={{ backgroundColor: meta.soft, color: meta.accent }}><Sparkles size={10} /> Mode Analisa</div>
+            <h2 className="truncate font-['Orbitron'] text-[16px] font-black uppercase tracking-[3px] text-[var(--text)]">{title}</h2>
           </div>
         </div>
-        <div className="relative rounded-3xl bg-black/25 p-4 text-center ring-1 ring-white/10"><span className="mr-3 text-[10px] font-black uppercase tracking-[3px]" style={{ color: meta.accent }}>Pasaran:</span><span className="font-['Orbitron'] text-[13px] font-black uppercase tracking-[4px] text-[var(--text)]">{marketId}</span></div>
-        {needsTargetPair && targetPair && <div className="relative mt-3 flex items-center justify-between gap-3 rounded-3xl bg-black/20 p-3 ring-1 ring-white/10"><div className="min-w-0 text-left"><span className="mr-2 text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Fokus:</span><span className="font-['Orbitron'] text-[10px] font-black uppercase tracking-[2px]" style={{ color: meta.accent }}>{targetPairLabel(targetPair)}</span></div><button type="button" onClick={handleTargetPairReset} className="shrink-0 rounded-full border px-3 py-1.5 text-[8px] font-black uppercase tracking-[1px] transition active:scale-95" style={{ borderColor: `${meta.accent}66`, color: meta.accent }}>Ganti</button></div>}
-        {isRekapCustom && customFocus && <div className="relative mt-3 flex items-center justify-between gap-3 rounded-3xl bg-black/20 p-3 ring-1 ring-white/10"><div className="min-w-0 text-left"><span className="mr-2 text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Rekap:</span><span className="font-['Orbitron'] text-[10px] font-black uppercase tracking-[2px]" style={{ color: meta.accent }}>{customFocusLabel(customFocus)} · {customFocusSubtitle(customFocus)}</span></div><button type="button" onClick={handleCustomFocusReset} className="shrink-0 rounded-full border px-3 py-1.5 text-[8px] font-black uppercase tracking-[1px] transition active:scale-95" style={{ borderColor: `${meta.accent}66`, color: meta.accent }}>Ganti</button></div>}
+
+        <div className="relative grid grid-cols-2 gap-2">
+          <div className="rounded-2xl bg-black/22 p-3 ring-1 ring-white/10">
+            <p className="mb-1 text-[8px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Pasaran</p>
+            <p className="truncate font-['Orbitron'] text-[11px] font-black uppercase tracking-[2.4px] text-[var(--text)]">{marketId}</p>
+          </div>
+          <div className="rounded-2xl bg-black/22 p-3 ring-1 ring-white/10">
+            <p className="mb-1 text-[8px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Status</p>
+            <p className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[2.4px]" style={{ color: meta.accent }}>{result ? "Hasil" : loading ? "Proses" : "Siap"}</p>
+          </div>
+        </div>
+
+        {needsTargetPair && targetPair && <div className="relative mt-3 flex items-center justify-between gap-3 rounded-2xl bg-black/20 p-3 ring-1 ring-white/10"><div className="min-w-0 text-left"><span className="mr-2 text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Fokus:</span><span className="font-['Orbitron'] text-[10px] font-black uppercase tracking-[2px]" style={{ color: meta.accent }}>{targetPairLabel(targetPair)}</span></div><button type="button" onClick={handleTargetPairReset} className="shrink-0 rounded-full border px-3 py-1.5 text-[8px] font-black uppercase tracking-[1px] transition active:scale-95" style={{ borderColor: `${meta.accent}66`, color: meta.accent }}>Ganti</button></div>}
+        {isRekapCustom && customFocus && <div className="relative mt-3 flex items-center justify-between gap-3 rounded-2xl bg-black/20 p-3 ring-1 ring-white/10"><div className="min-w-0 text-left"><span className="mr-2 text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Rekap:</span><span className="font-['Orbitron'] text-[10px] font-black uppercase tracking-[2px]" style={{ color: meta.accent }}>{customFocusLabel(customFocus)} · {customFocusSubtitle(customFocus)}</span></div><button type="button" onClick={handleCustomFocusReset} className="shrink-0 rounded-full border px-3 py-1.5 text-[8px] font-black uppercase tracking-[1px] transition active:scale-95" style={{ borderColor: `${meta.accent}66`, color: meta.accent }}>Ganti</button></div>}
       </div>
 
       {!result && !loading && param !== 0 && !isRekapCustom && <button onClick={() => handleAnalyze(param || 1)} className="primary-button mb-4 flex w-full items-center justify-center gap-3 p-5 font-['Orbitron'] text-[12px] font-black uppercase tracking-[4px] transition active:scale-95"><RefreshCw size={18} /> Mulai Analisa</button>}
