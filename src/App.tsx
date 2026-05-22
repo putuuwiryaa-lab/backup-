@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate, useLocation } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
 import {
-  Zap, ShieldCheck, Search, RefreshCw, Crown, Sparkles, Smartphone, Database, MessageCircle, LogOut
+  Zap, ShieldCheck, Search, RefreshCw, Crown, Sparkles, Database, MessageCircle, LogOut
 } from "lucide-react";
 import { Analytics } from "@vercel/analytics/react";
 import AnalyzeMenu from "./pages/AnalyzeMenu";
@@ -141,12 +141,7 @@ function AppLayout() {
 
   return (
     <div className={`relative mx-auto flex min-h-screen w-full max-w-3xl flex-col px-4 sm:px-6 ${isAnalyzePage ? "pb-6 pt-4" : "pb-24 pt-4"}`}>
-      {!isAnalyzePage && location.pathname !== "/admin" && (
-        <>
-          <HeroHeader />
-          <StatusStrip role={role} displayCode={displayCode} />
-        </>
-      )}
+      {!isAnalyzePage && location.pathname !== "/admin" && <HeroHeader role={role} displayCode={displayCode} />}
 
       {systemSetting?.dbError && !isAnalyzePage && (
         <div className="mb-4 flex items-start gap-3 rounded-3xl border border-red-400/25 bg-red-500/10 p-4 shadow-sm">
@@ -201,27 +196,6 @@ function ExpiredScreen() {
   );
 }
 
-function HeroHeader() {
-  return (
-    <header className="hero-header mb-3">
-      <div className="hero-card premium-panel relative overflow-hidden p-4 sm:p-5">
-        <div className="relative flex items-center justify-between gap-4">
-          <div className="min-w-0">
-            <div className="hero-badge mb-2 inline-flex items-center gap-2 rounded-full bg-[var(--gold-dim)] px-3 py-1 text-[9px] font-black uppercase tracking-[1.8px] text-[var(--gold)]">
-              <Sparkles size={12} /> Supreme Dark Pro
-            </div>
-            <h1 className="font-['Orbitron'] text-[24px] font-black uppercase leading-none tracking-[4px] text-[var(--text)] sm:text-[32px]">Analisa Angka</h1>
-            <p className="mt-2 max-w-sm text-[11px] font-semibold uppercase tracking-[1.6px] text-[var(--text-dim)]">Aplikasi berbasis matematis.</p>
-          </div>
-          <div className="hero-crown flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/12 bg-[rgba(124,77,255,0.22)] text-[var(--cyan-bright)]">
-            <Crown className="h-6 w-6 text-[var(--cyan-bright)]" strokeWidth={2.5} />
-          </div>
-        </div>
-      </div>
-    </header>
-  );
-}
-
 function formatTokenExpiry() {
   try {
     const token = localStorage.getItem("supreme_token");
@@ -238,31 +212,42 @@ function formatTokenExpiry() {
   }
 }
 
-function StatusStrip({ role, displayCode }: { role: string; displayCode: string }) {
+function getAccountInfo(role: string) {
   const isMaster = role === "MASTER";
   const isPro = role === "PRO";
   const isTrial = role === "TRIAL";
   const roleLabel = isMaster ? "MASTER" : isPro ? "VIP" : isTrial ? "TRIAL" : role;
-  const roleSub = isMaster ? "Admin access" : isPro ? `Aktif sampai ${formatTokenExpiry()}` : isTrial ? `Aktif sampai ${formatTokenExpiry()}` : "";
+  const roleSub = isMaster ? "Admin access" : isPro || isTrial ? `Aktif sampai ${formatTokenExpiry()}` : "Akses aktif";
+  return { roleLabel, roleSub };
+}
+
+function HeroHeader({ role, displayCode }: { role: string; displayCode: string }) {
+  const { roleLabel, roleSub } = getAccountInfo(role);
+
   return (
-    <div className="status-strip mb-5 grid grid-cols-2 gap-3">
-      <div className="premium-card flex min-h-[78px] items-center gap-3 p-4">
-        <div className={`h-11 w-11 shrink-0 rounded-2xl ${isMaster ? "bg-[var(--gold-dim)] text-[var(--gold)]" : isPro ? "bg-[var(--cyan-dim)] text-[var(--cyan)]" : "bg-white/8 text-white/55"} flex items-center justify-center`}>
-          <Crown size={19} />
-        </div>
-        <div className="min-w-0">
-          <p className="truncate font-['Orbitron'] text-[11px] font-black uppercase tracking-[2px] text-[var(--text)]">{roleLabel}</p>
-          {roleSub && <p className="mt-1 truncate text-[10px] text-[var(--text-dim)]">{roleSub}</p>}
+    <header className="hero-header mb-4">
+      <div className="hero-card premium-panel relative overflow-hidden p-4 sm:p-5">
+        <div className="relative min-h-[128px]">
+          <div className="account-mini-strip absolute left-0 top-0 z-10 rounded-2xl border border-white/10 bg-black/18 px-3 py-2 text-left backdrop-blur-md">
+            <p className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[2px] text-[var(--gold)]">{roleLabel}</p>
+            <p className="mt-1 max-w-[170px] truncate text-[10px] font-semibold text-[var(--text-dim)]">{roleSub}</p>
+            <p className="mt-1 font-['JetBrains_Mono'] text-[11px] font-black tracking-[1.8px] text-[var(--text)]">KEY {displayCode}</p>
+          </div>
+
+          <div className="hero-crown absolute right-0 top-0 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/12 bg-[rgba(124,77,255,0.22)] text-[var(--cyan-bright)]">
+            <Crown className="h-6 w-6 text-[var(--cyan-bright)]" strokeWidth={2.5} />
+          </div>
+
+          <div className="pt-[76px]">
+            <div className="hero-badge mb-2 inline-flex items-center gap-2 rounded-full bg-[var(--gold-dim)] px-3 py-1 text-[9px] font-black uppercase tracking-[1.8px] text-[var(--gold)]">
+              <Sparkles size={12} /> Supreme Dark Pro
+            </div>
+            <h1 className="font-['Orbitron'] text-[24px] font-black uppercase leading-none tracking-[4px] text-[var(--text)] sm:text-[32px]">Analisa Angka</h1>
+            <p className="mt-2 max-w-sm text-[11px] font-semibold uppercase tracking-[1.6px] text-[var(--text-dim)]">Aplikasi berbasis matematis.</p>
+          </div>
         </div>
       </div>
-      <div className="premium-card flex min-h-[78px] items-center gap-3 p-4">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[var(--cyan-dim)] text-[var(--cyan)]"><Smartphone size={19} /></div>
-        <div className="min-w-0">
-          <p className="truncate text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Device Key</p>
-          <p className="font-['JetBrains_Mono'] text-[14px] font-black text-[var(--text)]">{displayCode}</p>
-        </div>
-      </div>
-    </div>
+    </header>
   );
 }
 
