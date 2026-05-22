@@ -3,6 +3,7 @@ import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import './ui/design-system.css';
 import './ui/theme-polish.css';
+import './ui/pwa-icon-header.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
