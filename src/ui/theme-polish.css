@@ -93,23 +93,42 @@ input[readonly] {
 }
 
 .hero-header {
-  margin-bottom: 0.75rem !important;
+  margin-bottom: 0.85rem !important;
 }
 
 .hero-card {
-  min-height: 138px !important;
+  min-height: 144px !important;
+  padding: 1.25rem !important;
   background:
     linear-gradient(135deg, rgba(255,255,255,0.085), rgba(255,255,255,0.035)),
-    radial-gradient(circle at 88% 18%, rgba(246,198,106,0.13), transparent 34%) !important;
+    radial-gradient(circle at 88% 44%, rgba(246,198,106,0.14), transparent 30%) !important;
+}
+
+.hero-copy {
+  min-height: 104px !important;
+  justify-content: center !important;
+}
+
+.hero-header h1 {
+  max-width: calc(100vw - 9rem);
+  line-height: 0.95 !important;
 }
 
 .hero-crown {
+  top: 50% !important;
+  right: 1.35rem !important;
+  transform: translateY(-50%) !important;
+  width: 3.35rem !important;
+  height: 3.35rem !important;
+  border-radius: 1.35rem !important;
   background: rgba(246,198,106,0.12) !important;
   color: var(--gold-bright) !important;
   box-shadow: 0 0 24px rgba(246,198,106,0.16) !important;
 }
 
 .hero-crown svg {
+  width: 1.7rem !important;
+  height: 1.7rem !important;
   color: var(--gold-bright) !important;
 }
 
@@ -159,7 +178,7 @@ input[readonly] {
 
 .market-grid-compact {
   gap: 0.85rem !important;
-  padding-bottom: 5.5rem !important;
+  padding-bottom: 6.75rem !important;
 }
 
 .market-card-compact {
@@ -208,15 +227,57 @@ input[readonly] {
   justify-content: center;
 }
 
+.bottom-account-nav {
+  pointer-events: none;
+}
+
+.bottom-account-shell {
+  pointer-events: auto;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.09), rgba(255,255,255,0.035)),
+    rgba(7,5,13,0.72) !important;
+  box-shadow:
+    0 16px 34px rgba(0,0,0,0.48),
+    inset 0 1px 0 rgba(255,255,255,0.10) !important;
+}
+
+.bottom-account-button {
+  background: linear-gradient(135deg, rgba(124,77,255,0.26), rgba(246,198,106,0.12)) !important;
+  color: var(--text) !important;
+  border: 1px solid rgba(255,255,255,0.10) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08) !important;
+}
+
+.bottom-account-button svg {
+  color: var(--gold-bright) !important;
+}
+
 @media (max-width: 420px) {
   .hero-header h1 {
-    font-size: clamp(1.45rem, 7.4vw, 1.85rem) !important;
-    letter-spacing: 0.11em !important;
+    font-size: clamp(1.55rem, 7.1vw, 1.9rem) !important;
+    letter-spacing: 0.105em !important;
+    max-width: calc(100vw - 8.25rem);
   }
 
   .hero-card {
-    min-height: 128px !important;
+    min-height: 136px !important;
     padding: 1rem !important;
+  }
+
+  .hero-copy {
+    min-height: 102px !important;
+  }
+
+  .hero-crown {
+    right: 1rem !important;
+    width: 3.05rem !important;
+    height: 3.05rem !important;
+    border-radius: 1.15rem !important;
+  }
+
+  .hero-crown svg {
+    width: 1.52rem !important;
+    height: 1.52rem !important;
   }
 
   .market-section-title h2 {
@@ -235,7 +296,7 @@ input[readonly] {
 
   .market-grid-compact {
     gap: 0.7rem !important;
-    padding-bottom: 5.75rem !important;
+    padding-bottom: 7rem !important;
   }
 
   .market-card-compact {
