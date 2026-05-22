@@ -1,0 +1,173 @@
+/* Global UI polish layer
+   Loaded after design-system.css.
+   Purpose: improve contrast, font consistency, and premium color balance without touching page logic. */
+
+:root {
+  --bg: #090712;
+  --bg2: #100c1d;
+  --bg-elevated: #171126;
+
+  --surface: rgba(255,255,255,0.068);
+  --surface2: rgba(255,255,255,0.045);
+  --surface3: rgba(255,255,255,0.032);
+  --surface-inner: rgba(9,7,18,0.94);
+  --card: rgba(255,255,255,0.068);
+  --card2: rgba(255,255,255,0.045);
+
+  --border: rgba(255,255,255,0.12);
+  --border2: rgba(255,255,255,0.20);
+  --border-accent: rgba(246,198,106,0.30);
+
+  --text: #f7f1ff;
+  --text-dim: #b9acd3;
+  --text-soft: #82749f;
+  --text-faint: #5b4a78;
+
+  --gold: #f6c66a;
+  --gold-bright: #ffe19a;
+  --gold-dim: rgba(246,198,106,0.14);
+  --gold-strong-dim: rgba(246,198,106,0.23);
+
+  --cyan: #a98cff;
+  --cyan-bright: #d8c7ff;
+  --cyan-dim: rgba(169,140,255,0.14);
+
+  --purple: #7c4dff;
+  --purple-dim: rgba(124,77,255,0.16);
+  --blue: #8fb7ff;
+  --blue-dim: rgba(143,183,255,0.14);
+
+  --green: #79f2bb;
+  --green-dim: rgba(121,242,187,0.14);
+  --red: #ff6b8a;
+  --red-dim: rgba(255,107,138,0.14);
+
+  --ink: #080610;
+}
+
+html {
+  font-size: clamp(13.5px, 3.55vw, 16px) !important;
+}
+
+body {
+  font-family: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  letter-spacing: 0.005em;
+  background:
+    radial-gradient(ellipse 70% 46% at 14% 8%, rgba(124,77,255,0.24) 0%, transparent 62%),
+    radial-gradient(ellipse 56% 42% at 88% 10%, rgba(246,198,106,0.14) 0%, transparent 58%),
+    radial-gradient(ellipse 54% 44% at 50% 92%, rgba(169,140,255,0.12) 0%, transparent 58%),
+    linear-gradient(180deg, #100c1d 0%, #090712 62%, #06040d 100%) !important;
+}
+
+.app-container {
+  background:
+    radial-gradient(ellipse 70% 46% at 14% 8%, rgba(124,77,255,0.24) 0%, transparent 62%),
+    radial-gradient(ellipse 56% 42% at 88% 10%, rgba(246,198,106,0.14) 0%, transparent 58%),
+    radial-gradient(ellipse 54% 44% at 50% 92%, rgba(169,140,255,0.12) 0%, transparent 58%),
+    linear-gradient(180deg, #100c1d 0%, #090712 62%, #06040d 100%) !important;
+}
+
+.font-\['Orbitron'\],
+.hero-header h1,
+.market-section-title h2,
+h1, h2, h3 {
+  font-family: 'Syne', 'Outfit', system-ui, sans-serif !important;
+  letter-spacing: 0.12em;
+}
+
+.font-\['JetBrains_Mono'\],
+.market-last-value,
+input[readonly] {
+  font-family: 'DM Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+}
+
+.premium-panel,
+.premium-card,
+.glass-card {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.082), rgba(255,255,255,0.038)) !important;
+  border-color: rgba(255,255,255,0.13) !important;
+  box-shadow:
+    0 18px 42px rgba(0,0,0,0.42),
+    inset 0 1px 0 rgba(255,255,255,0.085) !important;
+}
+
+.hero-card {
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.085), rgba(255,255,255,0.035)),
+    radial-gradient(circle at 88% 18%, rgba(246,198,106,0.13), transparent 34%) !important;
+}
+
+.hero-crown {
+  background: rgba(246,198,106,0.12) !important;
+  color: var(--gold-bright) !important;
+  box-shadow: 0 0 24px rgba(246,198,106,0.16) !important;
+}
+
+.hero-crown svg {
+  color: var(--gold-bright) !important;
+}
+
+.primary-button {
+  background: linear-gradient(135deg, #7c4dff 0%, #a98cff 48%, #f6c66a 100%) !important;
+  color: #090712 !important;
+  box-shadow: 0 14px 28px rgba(124,77,255,0.30), 0 0 22px rgba(246,198,106,0.12) !important;
+}
+
+.ghost-button,
+.report-floating-button {
+  background: rgba(15,11,28,0.76) !important;
+  border-color: rgba(255,255,255,0.14) !important;
+  color: var(--text-dim) !important;
+  backdrop-filter: blur(18px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(180%) !important;
+}
+
+.soft-input {
+  background: rgba(8,6,16,0.62) !important;
+  border-color: rgba(255,255,255,0.15) !important;
+}
+
+.soft-input:focus {
+  border-color: rgba(246,198,106,0.52) !important;
+  box-shadow: 0 0 0 3px rgba(246,198,106,0.11), inset 0 1px 0 rgba(255,255,255,0.05) !important;
+}
+
+.market-name-strip {
+  background: linear-gradient(135deg, rgba(124,77,255,0.55), rgba(246,198,106,0.22)) !important;
+}
+
+.market-last-value {
+  color: var(--gold-bright) !important;
+  text-shadow: 0 0 16px rgba(246,198,106,0.16);
+}
+
+.status-strip .premium-card {
+  min-height: 72px !important;
+}
+
+.report-floating-button {
+  min-width: 94px;
+  justify-content: center;
+}
+
+@media (max-width: 420px) {
+  .hero-header h1 {
+    font-size: clamp(1.45rem, 7.4vw, 1.85rem) !important;
+    letter-spacing: 0.11em !important;
+  }
+
+  .market-section-title h2 {
+    letter-spacing: 0.14em !important;
+  }
+
+  .status-strip .premium-card {
+    padding: 0.85rem !important;
+  }
+
+  .report-floating-button {
+    min-width: 86px;
+    padding-left: 0.85rem !important;
+    padding-right: 0.85rem !important;
+  }
+}
