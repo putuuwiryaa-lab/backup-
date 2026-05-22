@@ -238,7 +238,7 @@ function StatusStrip({ role, displayCode }: { role: string; displayCode: string 
   const isPro = role === "PRO";
   const isTrial = role === "TRIAL";
   const roleLabel = isMaster ? "MASTER" : isPro ? "VIP" : isTrial ? "TRIAL" : role;
-  const roleSub = isTrial ? `Habis ${formatTokenExpiry()}` : "";
+  const roleSub = isMaster ? "Admin access" : isPro ? `Aktif sampai ${formatTokenExpiry()}` : isTrial ? `Aktif sampai ${formatTokenExpiry()}` : "";
   return (
     <div className="status-strip mb-5 grid grid-cols-2 gap-3">
       <div className="premium-card flex min-h-[78px] items-center gap-3 p-4">
