@@ -346,7 +346,7 @@ function FloatingActions({ onLogout }: { onLogout: () => void }) {
         aria-label="Laporkan Masalah"
       >
         <MessageCircle size={16} />
-        <span>Laporkan Masalah</span>
+        <span>Lapor</span>
       </button>
     </div>
   );
