@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate, useLocation } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
 import {
-  Zap, ShieldCheck, Search, RefreshCw, Crown, Sparkles, Database, MessageCircle, LogOut, Copy
+  Zap, ShieldCheck, Search, RefreshCw, Sparkles, Database, MessageCircle, LogOut, Copy
 } from "lucide-react";
 import { Analytics } from "@vercel/analytics/react";
 import AnalyzeMenu from "./pages/AnalyzeMenu";
@@ -233,12 +233,44 @@ function getAccountInfo(role: string) {
   return { roleLabel, roleSub };
 }
 
+function AppLogoMark({ className = "h-7 w-7" }: { className?: string }) {
+  return (
+    <svg className={`app-logo-mark ${className}`} viewBox="0 0 64 64" fill="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="appLogoGold" x1="12" y1="52" x2="52" y2="10" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#f8c76a" />
+          <stop offset="0.48" stopColor="#8df7df" />
+          <stop offset="1" stopColor="#8f7cff" />
+        </linearGradient>
+        <linearGradient id="appLogoSoft" x1="16" y1="48" x2="48" y2="16" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#ffe29a" stopOpacity="0.95" />
+          <stop offset="1" stopColor="#b79cff" stopOpacity="0.85" />
+        </linearGradient>
+        <filter id="appLogoGlow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="1.8" result="blur" />
+          <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.55 0 0 0 0 0.95 0 0 0 0 0.86 0 0 0 0.55 0" />
+          <feMerge>
+            <feMergeNode />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+      <path d="M32 5.5 54.5 18.5v27L32 58.5 9.5 45.5v-27L32 5.5Z" stroke="url(#appLogoGold)" strokeWidth="3.2" strokeLinejoin="round" filter="url(#appLogoGlow)" />
+      <path d="M32 13.5 47.2 22.2v18.1L32 49 16.8 40.3V22.2L32 13.5Z" stroke="url(#appLogoGold)" strokeWidth="2" strokeLinejoin="round" opacity="0.72" />
+      <path d="M19 44 31.6 17.5 45 44" stroke="url(#appLogoSoft)" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M25.2 35.2h13.6" stroke="#0b1119" strokeWidth="6" strokeLinecap="round" opacity="0.55" />
+      <path d="M26 35.2h12" stroke="url(#appLogoGold)" strokeWidth="3.2" strokeLinecap="round" />
+      <path d="M32 18.5 32 44" stroke="#9fffe6" strokeWidth="1.6" strokeLinecap="round" opacity="0.45" />
+    </svg>
+  );
+}
+
 function HeroHeader() {
   return (
     <header className="hero-header mb-4">
       <div className="hero-card premium-panel relative overflow-hidden p-5 sm:p-6">
         <div className="hero-crown absolute right-5 top-5 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/12 bg-[rgba(124,77,255,0.22)] text-[var(--cyan-bright)]">
-          <Crown className="h-6 w-6 text-[var(--cyan-bright)]" strokeWidth={2.5} />
+          <AppLogoMark className="h-8 w-8" />
         </div>
 
         <div className="hero-copy relative flex min-h-[118px] max-w-[82%] flex-col justify-center">
@@ -325,7 +357,7 @@ function BottomAccountNav({ onOpenAccount }: { onOpenAccount: () => void }) {
           className="bottom-account-button flex h-13 w-full items-center justify-center gap-3 rounded-[1.35rem] text-[11px] font-black uppercase tracking-[2px] active:scale-[0.99]"
           aria-label="Akun Saya"
         >
-          <Crown size={18} />
+          <AppLogoMark className="h-5 w-5" />
           <span>Akun Saya</span>
         </button>
       </div>
