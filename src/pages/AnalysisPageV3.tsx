@@ -277,9 +277,8 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
           </div>
         </div>
 
-        <div className="relative rounded-2xl bg-black/22 p-4 ring-1 ring-white/10">
-          <p className="mb-2 text-[8px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Pasaran</p>
-          <p className="break-words font-['Orbitron'] text-[17px] font-black uppercase leading-tight tracking-[3.2px] text-[var(--text)]">{marketId}</p>
+        <div className="relative flex min-h-[78px] items-center justify-center rounded-2xl bg-black/22 px-4 py-4 text-center ring-1 ring-white/10">
+          <p className="break-words font-['Orbitron'] text-[24px] font-black uppercase leading-tight tracking-[4px] text-[var(--text)] sm:text-[28px]">{marketId}</p>
         </div>
 
         {needsTargetPair && targetPair && <div className="relative mt-3 flex items-center justify-between gap-3 rounded-2xl bg-black/20 p-3 ring-1 ring-white/10"><div className="min-w-0 text-left"><span className="mr-2 text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Fokus:</span><span className="font-['Orbitron'] text-[10px] font-black uppercase tracking-[2px]" style={{ color: meta.accent }}>{targetPairLabel(targetPair)}</span></div><button type="button" onClick={handleTargetPairReset} className="shrink-0 rounded-full border px-3 py-1.5 text-[8px] font-black uppercase tracking-[1px] transition active:scale-95" style={{ borderColor: `${meta.accent}66`, color: meta.accent }}>Ganti</button></div>}
