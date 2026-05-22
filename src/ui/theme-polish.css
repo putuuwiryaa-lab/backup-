@@ -133,6 +133,10 @@ input[readonly] {
   box-shadow: 0 0 0 3px rgba(246,198,106,0.11), inset 0 1px 0 rgba(255,255,255,0.05) !important;
 }
 
+.market-card-compact {
+  min-height: 118px !important;
+}
+
 .market-name-strip {
   background: linear-gradient(135deg, rgba(124,77,255,0.55), rgba(246,198,106,0.22)) !important;
 }
@@ -159,6 +163,10 @@ input[readonly] {
 
   .market-section-title h2 {
     letter-spacing: 0.14em !important;
+  }
+
+  .market-card-compact {
+    min-height: 112px !important;
   }
 
   .status-strip .premium-card {
