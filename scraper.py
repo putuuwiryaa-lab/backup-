@@ -74,7 +74,6 @@ MARKETS = {
   "PCSO": "/data-pengeluaran-togel-pcso/",
   "MOROCCO 21:00": "/data-pengeluaran-togel-morocco-quatro-21-00-wib/",
   "TOTO MACAU 22": "/data-pengeluaran-togel-toto-macau-4/",
-  "TENNESSE MORNING": "/data-pengeluaran-togel-tennesse-morning/",
   "TEXAS MORNING": "/data-pengeluaran-togel-texas-morning/",
 }
 
