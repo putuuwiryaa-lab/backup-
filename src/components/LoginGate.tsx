@@ -71,10 +71,10 @@ export default function LoginGate({ deviceId, displayCode, onAuthSuccess }: Logi
             <Lock className="h-9 w-9 text-black" />
           </div>
           <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-[var(--cyan-dim)] px-3 py-1 text-[10px] font-black uppercase tracking-[2px] text-[var(--cyan)]">
-            <KeyRound size={12} /> Secure Login
+            <KeyRound size={12} /> Login Aman
           </div>
-          <h2 className="mb-2 font-['Orbitron'] text-[23px] font-black uppercase tracking-[4px] text-[var(--text)]">System Access</h2>
-          <p className="text-sm text-[var(--text-dim)]">Update sistem login: semua user mendapat trial baru 14 hari.</p>
+          <h2 className="mb-2 font-['Orbitron'] text-[23px] font-black uppercase tracking-[4px] text-[var(--text)]">Masuk Aplikasi</h2>
+          <p className="text-sm text-[var(--text-dim)]">Mulai trial gratis 14 hari tanpa PIN. PIN hanya untuk akses VIP.</p>
         </div>
 
         {!showPinLogin ? (
@@ -89,9 +89,10 @@ export default function LoginGate({ deviceId, displayCode, onAuthSuccess }: Logi
               Saya Punya PIN VIP
             </button>
 
-            <p className="text-center text-[10px] leading-5 text-[var(--text-dim)]">
-              PIN hanya diperlukan untuk aktivasi VIP.<br />Device Key: <span className="font-['JetBrains_Mono'] font-black text-[var(--gold)]">{displayCode}</span>
-            </p>
+            <div className="space-y-2 text-center text-[10px] leading-5 text-[var(--text-dim)]">
+              <p>Device Key: <span className="font-['JetBrains_Mono'] font-black text-[var(--gold)]">{displayCode}</span></p>
+              <a href={activationUrl} target="_blank" rel="noopener noreferrer" className="font-bold text-[var(--gold)] underline underline-offset-4">Belum punya PIN VIP? Hubungi Admin</a>
+            </div>
           </div>
         ) : (
           <>
