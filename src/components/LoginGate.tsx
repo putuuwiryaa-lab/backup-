@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { KeyRound, Lock } from "lucide-react";
+import { Lock } from "lucide-react";
 
 type LoginGateProps = {
   deviceId: string;
@@ -69,9 +69,6 @@ export default function LoginGate({ deviceId, displayCode, onAuthSuccess }: Logi
         <div className="mb-8 text-center">
           <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-[2rem] bg-[var(--gold)] shadow-lg shadow-yellow-900/20 ring-4 ring-white/10">
             <Lock className="h-9 w-9 text-black" />
-          </div>
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-[var(--cyan-dim)] px-3 py-1 text-[10px] font-black uppercase tracking-[2px] text-[var(--cyan)]">
-            <KeyRound size={12} /> Login Aman
           </div>
           <h2 className="mb-2 font-['Orbitron'] text-[23px] font-black uppercase tracking-[4px] text-[var(--text)]">Masuk Aplikasi</h2>
           <p className="text-sm text-[var(--text-dim)]">Mulai trial gratis 14 hari tanpa PIN. PIN hanya untuk akses VIP.</p>
