@@ -52,6 +52,8 @@ function AppLayout() {
   };
 
   const handleLogout = () => {
+    const confirmed = window.confirm("Yakin ingin logout? Device Key tetap disimpan di browser ini.");
+    if (!confirmed) return;
     localStorage.removeItem("supreme_token");
     setRole("FREE");
     setAuthStatus("LOCKED");
