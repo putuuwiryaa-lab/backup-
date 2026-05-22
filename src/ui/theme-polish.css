@@ -182,18 +182,21 @@ input[readonly] {
 }
 
 .market-card-compact {
-  min-height: 112px !important;
   height: 112px !important;
-  padding: 0.82rem 0.82rem 0.72rem !important;
-  display: grid !important;
-  grid-template-rows: auto 1fr !important;
-  align-items: stretch !important;
+  min-height: 112px !important;
+  padding: 0 !important;
+  position: relative !important;
+  display: block !important;
 }
 
 .market-name-strip {
+  position: absolute !important;
+  top: 15px !important;
+  left: 14px !important;
+  right: 14px !important;
   height: 34px !important;
   min-height: 34px !important;
-  width: 100% !important;
+  width: auto !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -208,12 +211,16 @@ input[readonly] {
 }
 
 .market-result-row {
-  height: 100% !important;
-  min-height: 0 !important;
+  position: absolute !important;
+  top: 62px !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 28px !important;
+  min-height: 28px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  transform: translateY(-1px) !important;
+  transform: none !important;
 }
 
 .market-last-value {
@@ -302,14 +309,17 @@ input[readonly] {
   }
 
   .market-card-compact {
-    min-height: 110px !important;
     height: 110px !important;
-    padding: 0.78rem 0.78rem 0.7rem !important;
-    display: grid !important;
-    grid-template-rows: auto 1fr !important;
+    min-height: 110px !important;
+    padding: 0 !important;
+    position: relative !important;
+    display: block !important;
   }
 
   .market-name-strip {
+    top: 14px !important;
+    left: 13px !important;
+    right: 13px !important;
     height: 32px !important;
     min-height: 32px !important;
     border-radius: 9px !important;
@@ -320,10 +330,11 @@ input[readonly] {
   }
 
   .market-result-row {
-    height: 100% !important;
-    min-height: 0 !important;
+    top: 61px !important;
+    height: 28px !important;
+    min-height: 28px !important;
     align-items: center !important;
-    transform: translateY(-1px) !important;
+    transform: none !important;
   }
 
   .market-last-value {
