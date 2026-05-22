@@ -144,7 +144,7 @@ function AppLayout() {
   if (authStatus === "EXPIRED") return <ExpiredScreen />;
 
   return (
-    <div className={`relative mx-auto flex min-h-screen w-full max-w-3xl flex-col px-4 sm:px-6 ${isAnalyzePage ? "pb-6 pt-4" : "pb-28 pt-4"}`}>
+    <div className={`relative mx-auto flex min-h-screen w-full max-w-3xl flex-col px-4 sm:px-6 ${isAnalyzePage ? "pb-6 pt-4" : "pb-32 pt-4"}`}>
       {!isAnalyzePage && location.pathname !== "/admin" && <HeroHeader />}
 
       {systemSetting?.dbError && !isAnalyzePage && (
@@ -236,17 +236,17 @@ function getAccountInfo(role: string) {
 function HeroHeader() {
   return (
     <header className="hero-header mb-4">
-      <div className="hero-card premium-panel relative overflow-hidden p-4 sm:p-5">
-        <div className="hero-crown absolute right-4 top-4 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/12 bg-[rgba(124,77,255,0.22)] text-[var(--cyan-bright)]">
+      <div className="hero-card premium-panel relative overflow-hidden p-5 sm:p-6">
+        <div className="hero-crown absolute right-5 top-5 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/12 bg-[rgba(124,77,255,0.22)] text-[var(--cyan-bright)]">
           <Crown className="h-6 w-6 text-[var(--cyan-bright)]" strokeWidth={2.5} />
         </div>
 
-        <div className="relative pt-10">
-          <div className="hero-badge mb-2 inline-flex items-center gap-2 rounded-full bg-[var(--gold-dim)] px-3 py-1 text-[9px] font-black uppercase tracking-[1.8px] text-[var(--gold)]">
+        <div className="hero-copy relative flex min-h-[118px] max-w-[82%] flex-col justify-center">
+          <div className="hero-badge mb-3 inline-flex w-fit items-center gap-2 rounded-full bg-[var(--gold-dim)] px-3 py-1 text-[9px] font-black uppercase tracking-[1.8px] text-[var(--gold)]">
             <Sparkles size={12} /> Supreme Dark Pro
           </div>
-          <h1 className="font-['Orbitron'] text-[24px] font-black uppercase leading-none tracking-[4px] text-[var(--text)] sm:text-[32px]">Analisa Angka</h1>
-          <p className="mt-2 max-w-sm text-[11px] font-semibold uppercase tracking-[1.6px] text-[var(--text-dim)]">Aplikasi berbasis matematis.</p>
+          <h1 className="font-['Orbitron'] text-[26px] font-black uppercase leading-none tracking-[4px] text-[var(--text)] sm:text-[34px]">Analisa Angka</h1>
+          <p className="mt-3 max-w-sm text-[11px] font-semibold uppercase tracking-[1.6px] text-[var(--text-dim)]">Aplikasi berbasis matematis.</p>
         </div>
       </div>
     </header>
@@ -317,16 +317,18 @@ function Dashboard({ markets, onRefresh }: { markets: any[]; onRefresh: () => vo
 
 function BottomAccountNav({ onOpenAccount }: { onOpenAccount: () => void }) {
   return (
-    <div className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-4 right-4 z-40 flex justify-center">
-      <button
-        type="button"
-        onClick={onOpenAccount}
-        className="report-floating-button flex h-12 min-w-[168px] items-center justify-center gap-2 rounded-full border px-5 text-[11px] font-black uppercase tracking-[1.8px] active:scale-95"
-        aria-label="Akun Saya"
-      >
-        <Crown size={17} />
-        <span>Akun Saya</span>
-      </button>
+    <div className="bottom-account-nav fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom))] left-4 right-4 z-40 mx-auto max-w-3xl">
+      <div className="bottom-account-shell rounded-[1.75rem] border border-white/12 bg-black/32 p-2 shadow-2xl backdrop-blur-xl">
+        <button
+          type="button"
+          onClick={onOpenAccount}
+          className="bottom-account-button flex h-13 w-full items-center justify-center gap-3 rounded-[1.35rem] text-[11px] font-black uppercase tracking-[2px] active:scale-[0.99]"
+          aria-label="Akun Saya"
+        >
+          <Crown size={18} />
+          <span>Akun Saya</span>
+        </button>
+      </div>
     </div>
   );
 }
