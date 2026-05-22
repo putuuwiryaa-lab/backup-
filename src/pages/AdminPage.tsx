@@ -53,15 +53,18 @@ export default function AdminPage() {
     return await res.json();
   };
 
+  const getStoredDeviceId = () => localStorage.getItem("supreme_device_id") || "";
+
   useEffect(() => {
     const verifyToken = async () => {
       const t = localStorage.getItem("supreme_token");
-      if (!t) { setIsAuthorized(false); setChecking(false); return; }
+      const deviceId = getStoredDeviceId();
+      if (!t || !deviceId) { setIsAuthorized(false); setChecking(false); return; }
       try {
         const res = await fetch("/api/verify", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token: t })
+          body: JSON.stringify({ token: t, deviceId })
         });
         const json = await res.json();
         if (json.valid && json.role === "MASTER") {
@@ -256,7 +259,7 @@ export default function AdminPage() {
   );
 }
 
-function StatBox({ label, value, color }: { label: string; value: string }) {
+function StatBox({ label, value, color }: { label: string; value: string; color: string }) {
   return (
     <div className="premium-card p-3 text-center">
       <p className="text-[8px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">{label}</p>
