@@ -334,21 +334,21 @@ function FloatingActions({ onLogout }: { onLogout: () => void }) {
     <div className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-4 right-4 z-40 flex items-center justify-end gap-2">
       <button
         type="button"
-        onClick={onLogout}
-        className="report-floating-button flex h-11 items-center gap-2 rounded-full border px-4 text-[10px] font-black uppercase tracking-[1.4px] active:scale-95"
-        aria-label="Logout"
-      >
-        <LogOut size={16} />
-        <span>Logout</span>
-      </button>
-      <button
-        type="button"
         onClick={openReport}
         className="report-floating-button flex h-11 items-center gap-2 rounded-full border px-4 text-[10px] font-black uppercase tracking-[1.4px] active:scale-95"
         aria-label="Laporkan Masalah"
       >
         <MessageCircle size={16} />
         <span>Lapor</span>
+      </button>
+      <button
+        type="button"
+        onClick={onLogout}
+        className="report-floating-button flex h-11 items-center gap-2 rounded-full border px-4 text-[10px] font-black uppercase tracking-[1.4px] active:scale-95"
+        aria-label="Logout"
+      >
+        <LogOut size={16} />
+        <span>Logout</span>
       </button>
     </div>
   );
