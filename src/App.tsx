@@ -33,6 +33,7 @@ function AppLayout() {
   const [role, setRole] = useState("FREE");
   const [markets, setMarkets] = useState<any[]>([]);
   const [systemSetting, setSystemSetting] = useState<any>({ runningText: "..." });
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const isAnalyzePage = location.pathname.startsWith("/analyze/");
 
   const getDeviceIdentity = () => {
@@ -51,11 +52,12 @@ function AppLayout() {
     return { deviceId: storedDeviceId, displayCode: storedDisplayCode };
   };
 
-  const handleLogout = () => {
-    const confirmed = window.confirm("Yakin ingin log out?");
-    if (!confirmed) return;
+  const requestLogout = () => setShowLogoutConfirm(true);
+
+  const confirmLogout = () => {
     localStorage.removeItem("supreme_token");
     setRole("FREE");
+    setShowLogoutConfirm(false);
     setAuthStatus("LOCKED");
   };
 
@@ -165,7 +167,8 @@ function AppLayout() {
         </Routes>
       </main>
 
-      {!isAnalyzePage && <FloatingActions onLogout={handleLogout} />}
+      {!isAnalyzePage && <FloatingActions onLogout={requestLogout} />}
+      <LogoutConfirmModal open={showLogoutConfirm} onCancel={() => setShowLogoutConfirm(false)} onConfirm={confirmLogout} />
     </div>
   );
 }
@@ -350,6 +353,27 @@ function FloatingActions({ onLogout }: { onLogout: () => void }) {
         <LogOut size={16} />
         <span>Logout</span>
       </button>
+    </div>
+  );
+}
+
+function LogoutConfirmModal({ open, onCancel, onConfirm }: { open: boolean; onCancel: () => void; onConfirm: () => void }) {
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/65 px-4 pb-[calc(1.25rem+env(safe-area-inset-bottom))] backdrop-blur-sm sm:items-center sm:pb-4">
+      <div className="premium-panel w-full max-w-sm p-5 shadow-2xl animate-[riseIn_0.2s_ease-out]">
+        <div className="mb-5 text-center">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-red-500/10 text-red-300 ring-1 ring-red-400/25">
+            <LogOut size={22} />
+          </div>
+          <h3 className="font-['Orbitron'] text-[16px] font-black uppercase tracking-[2px] text-[var(--text)]">Yakin ingin log out?</h3>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <button type="button" onClick={onCancel} className="ghost-button py-3 text-[11px] font-black uppercase tracking-[2px] active:scale-95">Batal</button>
+          <button type="button" onClick={onConfirm} className="rounded-3xl border border-red-400/25 bg-red-500/12 py-3 text-[11px] font-black uppercase tracking-[2px] text-red-200 transition active:scale-95">Log out</button>
+        </div>
+      </div>
     </div>
   );
 }
