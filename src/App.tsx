@@ -136,7 +136,7 @@ function AppLayout() {
   if (authStatus === "EXPIRED") return <ExpiredScreen />;
 
   return (
-    <div className={`relative mx-auto flex min-h-screen w-full max-w-3xl flex-col px-4 sm:px-6 ${isAnalyzePage ? "pb-6 pt-4" : "pb-20 pt-5"}`}>
+    <div className={`relative mx-auto flex min-h-screen w-full max-w-3xl flex-col px-4 sm:px-6 ${isAnalyzePage ? "pb-6 pt-4" : "pb-20 pt-4"}`}>
       {!isAnalyzePage && location.pathname !== "/admin" && (
         <>
           <HeroHeader />
@@ -198,18 +198,18 @@ function ExpiredScreen() {
 
 function HeroHeader() {
   return (
-    <header className="hero-header mb-4">
-      <div className="hero-card premium-panel relative overflow-hidden p-5 sm:p-6">
-        <div className="relative flex items-start justify-between gap-4">
+    <header className="hero-header mb-3">
+      <div className="hero-card premium-panel relative overflow-hidden p-4 sm:p-5">
+        <div className="relative flex items-center justify-between gap-4">
           <div className="min-w-0">
-            <div className="hero-badge mb-3 inline-flex items-center gap-2 rounded-full bg-[var(--gold-dim)] px-3 py-1 text-[10px] font-black uppercase tracking-[2px] text-[var(--gold)]">
-              <Sparkles size={13} /> Supreme Dark Pro
+            <div className="hero-badge mb-2 inline-flex items-center gap-2 rounded-full bg-[var(--gold-dim)] px-3 py-1 text-[9px] font-black uppercase tracking-[1.8px] text-[var(--gold)]">
+              <Sparkles size={12} /> Supreme Dark Pro
             </div>
-            <h1 className="font-['Orbitron'] text-[28px] font-black uppercase leading-none tracking-[5px] text-[var(--text)] sm:text-[36px]">Analisa Angka</h1>
-            <p className="mt-3 max-w-sm text-[12px] font-semibold uppercase tracking-[2px] text-[var(--text-dim)]">Aplikasi berbasis matematis.</p>
+            <h1 className="font-['Orbitron'] text-[24px] font-black uppercase leading-none tracking-[4px] text-[var(--text)] sm:text-[32px]">Analisa Angka</h1>
+            <p className="mt-2 max-w-sm text-[11px] font-semibold uppercase tracking-[1.6px] text-[var(--text-dim)]">Aplikasi berbasis matematis.</p>
           </div>
-          <div className="hero-crown flex h-14 w-14 shrink-0 items-center justify-center rounded-3xl border border-white/12 bg-[rgba(124,77,255,0.22)] text-[var(--cyan-bright)]">
-            <Crown className="h-7 w-7 text-[var(--cyan-bright)]" strokeWidth={2.5} />
+          <div className="hero-crown flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/12 bg-[rgba(124,77,255,0.22)] text-[var(--cyan-bright)]">
+            <Crown className="h-6 w-6 text-[var(--cyan-bright)]" strokeWidth={2.5} />
           </div>
         </div>
       </div>
