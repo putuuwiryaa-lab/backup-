@@ -89,6 +89,7 @@ header p {
   padding: 0 !important;
   text-align: center !important;
   font-size: 0.7rem !important;
+  font-weight: 900 !important;
   line-height: 1 !important;
   letter-spacing: 0.08rem !important;
   color: rgba(250, 246, 255, 0.96) !important;
@@ -118,11 +119,12 @@ header p {
 .market-card-compact .market-last-value {
   width: auto !important;
   text-align: center !important;
-  font-size: 1.28rem !important;
+  font-size: 1.34rem !important;
+  font-weight: 900 !important;
   line-height: 1 !important;
-  letter-spacing: 0.16rem !important;
-  color: #f5c466 !important;
-  text-shadow: none !important;
+  letter-spacing: 0.17rem !important;
+  color: #f8cb6f !important;
+  text-shadow: 0 0 10px rgba(248, 203, 111, 0.12) !important;
 }
 
 .market-card-favorite,
@@ -356,6 +358,7 @@ header p {
 
   .market-card-compact .market-name {
     font-size: 0.68rem !important;
+    font-weight: 900 !important;
     letter-spacing: 0.07rem !important;
   }
 
@@ -366,7 +369,8 @@ header p {
   }
 
   .market-card-compact .market-last-value {
-    font-size: 1.25rem !important;
-    letter-spacing: 0.15rem !important;
+    font-size: 1.31rem !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.16rem !important;
   }
 }
