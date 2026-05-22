@@ -34,6 +34,7 @@ function AppLayout() {
   const [markets, setMarkets] = useState<any[]>([]);
   const [systemSetting, setSystemSetting] = useState<any>({ runningText: "..." });
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [showAccountPanel, setShowAccountPanel] = useState(false);
   const isAnalyzePage = location.pathname.startsWith("/analyze/");
 
   const getDeviceIdentity = () => {
@@ -52,7 +53,10 @@ function AppLayout() {
     return { deviceId: storedDeviceId, displayCode: storedDisplayCode };
   };
 
-  const requestLogout = () => setShowLogoutConfirm(true);
+  const requestLogout = () => {
+    setShowAccountPanel(false);
+    setShowLogoutConfirm(true);
+  };
 
   const confirmLogout = () => {
     localStorage.removeItem("supreme_token");
@@ -141,7 +145,9 @@ function AppLayout() {
 
   return (
     <div className={`relative mx-auto flex min-h-screen w-full max-w-3xl flex-col px-4 sm:px-6 ${isAnalyzePage ? "pb-6 pt-4" : "pb-24 pt-4"}`}>
-      {!isAnalyzePage && location.pathname !== "/admin" && <HeroHeader role={role} displayCode={displayCode} />}
+      {!isAnalyzePage && location.pathname !== "/admin" && (
+        <HeroHeader role={role} onOpenAccount={() => setShowAccountPanel(true)} />
+      )}
 
       {systemSetting?.dbError && !isAnalyzePage && (
         <div className="mb-4 flex items-start gap-3 rounded-3xl border border-red-400/25 bg-red-500/10 p-4 shadow-sm">
@@ -162,7 +168,13 @@ function AppLayout() {
         </Routes>
       </main>
 
-      {!isAnalyzePage && <FloatingActions onLogout={requestLogout} />}
+      <AccountPanel
+        open={showAccountPanel}
+        role={role}
+        displayCode={displayCode}
+        onClose={() => setShowAccountPanel(false)}
+        onLogout={requestLogout}
+      />
       <LogoutConfirmModal open={showLogoutConfirm} onCancel={() => setShowLogoutConfirm(false)} onConfirm={confirmLogout} />
     </div>
   );
@@ -221,30 +233,32 @@ function getAccountInfo(role: string) {
   return { roleLabel, roleSub };
 }
 
-function HeroHeader({ role, displayCode }: { role: string; displayCode: string }) {
-  const { roleLabel, roleSub } = getAccountInfo(role);
+function HeroHeader({ role, onOpenAccount }: { role: string; onOpenAccount: () => void }) {
+  const { roleLabel } = getAccountInfo(role);
 
   return (
     <header className="hero-header mb-4">
       <div className="hero-card premium-panel relative overflow-hidden p-4 sm:p-5">
-        <div className="relative min-h-[128px]">
-          <div className="account-mini-strip absolute left-0 top-0 z-10 rounded-2xl border border-white/10 bg-black/18 px-3 py-2 text-left backdrop-blur-md">
-            <p className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[2px] text-[var(--gold)]">{roleLabel}</p>
-            <p className="mt-1 max-w-[170px] truncate text-[10px] font-semibold text-[var(--text-dim)]">{roleSub}</p>
-            <p className="mt-1 font-['JetBrains_Mono'] text-[11px] font-black tracking-[1.8px] text-[var(--text)]">KEY {displayCode}</p>
-          </div>
+        <button
+          type="button"
+          onClick={onOpenAccount}
+          className="account-open-button absolute left-4 top-4 z-10 flex h-11 items-center gap-2 rounded-2xl border border-white/12 bg-black/20 px-3 text-[10px] font-black uppercase tracking-[1.8px] text-[var(--gold)] backdrop-blur-md active:scale-95"
+          aria-label="Buka Akun Saya"
+        >
+          <Crown size={15} />
+          <span>{roleLabel}</span>
+        </button>
 
-          <div className="hero-crown absolute right-0 top-0 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/12 bg-[rgba(124,77,255,0.22)] text-[var(--cyan-bright)]">
-            <Crown className="h-6 w-6 text-[var(--cyan-bright)]" strokeWidth={2.5} />
-          </div>
+        <div className="hero-crown absolute right-4 top-4 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/12 bg-[rgba(124,77,255,0.22)] text-[var(--cyan-bright)]">
+          <Crown className="h-6 w-6 text-[var(--cyan-bright)]" strokeWidth={2.5} />
+        </div>
 
-          <div className="pt-[76px]">
-            <div className="hero-badge mb-2 inline-flex items-center gap-2 rounded-full bg-[var(--gold-dim)] px-3 py-1 text-[9px] font-black uppercase tracking-[1.8px] text-[var(--gold)]">
-              <Sparkles size={12} /> Supreme Dark Pro
-            </div>
-            <h1 className="font-['Orbitron'] text-[24px] font-black uppercase leading-none tracking-[4px] text-[var(--text)] sm:text-[32px]">Analisa Angka</h1>
-            <p className="mt-2 max-w-sm text-[11px] font-semibold uppercase tracking-[1.6px] text-[var(--text-dim)]">Aplikasi berbasis matematis.</p>
+        <div className="relative pt-16">
+          <div className="hero-badge mb-2 inline-flex items-center gap-2 rounded-full bg-[var(--gold-dim)] px-3 py-1 text-[9px] font-black uppercase tracking-[1.8px] text-[var(--gold)]">
+            <Sparkles size={12} /> Supreme Dark Pro
           </div>
+          <h1 className="font-['Orbitron'] text-[24px] font-black uppercase leading-none tracking-[4px] text-[var(--text)] sm:text-[32px]">Analisa Angka</h1>
+          <p className="mt-2 max-w-sm text-[11px] font-semibold uppercase tracking-[1.6px] text-[var(--text-dim)]">Aplikasi berbasis matematis.</p>
         </div>
       </div>
     </header>
@@ -313,31 +327,39 @@ function Dashboard({ markets, onRefresh }: { markets: any[]; onRefresh: () => vo
   );
 }
 
-function FloatingActions({ onLogout }: { onLogout: () => void }) {
-  const openReport = () => {
-    window.open("https://wa.me/6285792030642?text=Halo%2C%20saya%20ingin%20melaporkan%20masalah%20pada%20aplikasi%20Analisa%20Angka", "_blank", "noopener,noreferrer");
-  };
+function AccountPanel({ open, role, displayCode, onClose, onLogout }: { open: boolean; role: string; displayCode: string; onClose: () => void; onLogout: () => void }) {
+  if (!open) return null;
+  const { roleLabel, roleSub } = getAccountInfo(role);
+  const activationMessage = encodeURIComponent(`Halo, saya ingin bantuan Analisa Angka. Device Key saya ${displayCode}`);
+  const activationUrl = `https://wa.me/6285792030642?text=${activationMessage}`;
 
   return (
-    <div className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-4 right-4 z-40 flex items-center justify-end gap-2">
-      <button
-        type="button"
-        onClick={openReport}
-        className="report-floating-button flex h-11 items-center gap-2 rounded-full border px-4 text-[10px] font-black uppercase tracking-[1.4px] active:scale-95"
-        aria-label="Laporkan Masalah"
-      >
-        <MessageCircle size={16} />
-        <span>Lapor</span>
-      </button>
-      <button
-        type="button"
-        onClick={onLogout}
-        className="report-floating-button flex h-11 items-center gap-2 rounded-full border px-4 text-[10px] font-black uppercase tracking-[1.4px] active:scale-95"
-        aria-label="Logout"
-      >
-        <LogOut size={16} />
-        <span>Logout</span>
-      </button>
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/65 px-4 pb-[calc(1.25rem+env(safe-area-inset-bottom))] backdrop-blur-sm sm:items-center sm:pb-4">
+      <div className="premium-panel w-full max-w-sm p-5 shadow-2xl animate-[riseIn_0.2s_ease-out]">
+        <div className="mb-5 flex items-start justify-between gap-4">
+          <div>
+            <p className="font-['Orbitron'] text-[10px] font-black uppercase tracking-[2px] text-[var(--gold)]">Akun Saya</p>
+            <h3 className="mt-2 font-['Orbitron'] text-[20px] font-black uppercase tracking-[3px] text-[var(--text)]">{roleLabel}</h3>
+            <p className="mt-1 text-[12px] font-semibold text-[var(--text-dim)]">{roleSub}</p>
+          </div>
+          <button type="button" onClick={onClose} className="ghost-button h-10 rounded-2xl px-4 text-[10px] font-black uppercase tracking-[1.6px] active:scale-95">Tutup</button>
+        </div>
+
+        <div className="mb-5 rounded-3xl border border-white/10 bg-black/18 p-4">
+          <p className="text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Device Key</p>
+          <p className="mt-2 font-['JetBrains_Mono'] text-[24px] font-black tracking-[5px] text-[var(--gold-bright)]">{displayCode}</p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <a href={activationUrl} target="_blank" rel="noopener noreferrer" className="report-floating-button flex h-12 items-center justify-center gap-2 rounded-2xl border text-[11px] font-black uppercase tracking-[1.6px] active:scale-95">
+            <MessageCircle size={17} />
+            <span>Lapor</span>
+          </a>
+          <button type="button" onClick={onLogout} className="rounded-2xl border border-red-400/25 bg-red-500/12 text-[11px] font-black uppercase tracking-[1.6px] text-red-200 active:scale-95">
+            <span className="inline-flex items-center justify-center gap-2"><LogOut size={17} /> Log out</span>
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
