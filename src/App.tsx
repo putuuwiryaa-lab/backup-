@@ -144,10 +144,8 @@ function AppLayout() {
   if (authStatus === "EXPIRED") return <ExpiredScreen />;
 
   return (
-    <div className={`relative mx-auto flex min-h-screen w-full max-w-3xl flex-col px-4 sm:px-6 ${isAnalyzePage ? "pb-6 pt-4" : "pb-24 pt-4"}`}>
-      {!isAnalyzePage && location.pathname !== "/admin" && (
-        <HeroHeader role={role} onOpenAccount={() => setShowAccountPanel(true)} />
-      )}
+    <div className={`relative mx-auto flex min-h-screen w-full max-w-3xl flex-col px-4 sm:px-6 ${isAnalyzePage ? "pb-6 pt-4" : "pb-28 pt-4"}`}>
+      {!isAnalyzePage && location.pathname !== "/admin" && <HeroHeader />}
 
       {systemSetting?.dbError && !isAnalyzePage && (
         <div className="mb-4 flex items-start gap-3 rounded-3xl border border-red-400/25 bg-red-500/10 p-4 shadow-sm">
@@ -167,6 +165,8 @@ function AppLayout() {
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </main>
+
+      {!isAnalyzePage && location.pathname !== "/admin" && <BottomAccountNav onOpenAccount={() => setShowAccountPanel(true)} />}
 
       <AccountPanel
         open={showAccountPanel}
@@ -233,27 +233,15 @@ function getAccountInfo(role: string) {
   return { roleLabel, roleSub };
 }
 
-function HeroHeader({ role, onOpenAccount }: { role: string; onOpenAccount: () => void }) {
-  const { roleLabel } = getAccountInfo(role);
-
+function HeroHeader() {
   return (
     <header className="hero-header mb-4">
       <div className="hero-card premium-panel relative overflow-hidden p-4 sm:p-5">
-        <button
-          type="button"
-          onClick={onOpenAccount}
-          className="account-open-button absolute left-4 top-4 z-10 flex h-11 items-center gap-2 rounded-2xl border border-white/12 bg-black/20 px-3 text-[10px] font-black uppercase tracking-[1.8px] text-[var(--gold)] backdrop-blur-md active:scale-95"
-          aria-label="Buka Akun Saya"
-        >
-          <Crown size={15} />
-          <span>{roleLabel}</span>
-        </button>
-
         <div className="hero-crown absolute right-4 top-4 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/12 bg-[rgba(124,77,255,0.22)] text-[var(--cyan-bright)]">
           <Crown className="h-6 w-6 text-[var(--cyan-bright)]" strokeWidth={2.5} />
         </div>
 
-        <div className="relative pt-16">
+        <div className="relative pt-10">
           <div className="hero-badge mb-2 inline-flex items-center gap-2 rounded-full bg-[var(--gold-dim)] px-3 py-1 text-[9px] font-black uppercase tracking-[1.8px] text-[var(--gold)]">
             <Sparkles size={12} /> Supreme Dark Pro
           </div>
@@ -323,6 +311,22 @@ function Dashboard({ markets, onRefresh }: { markets: any[]; onRefresh: () => vo
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function BottomAccountNav({ onOpenAccount }: { onOpenAccount: () => void }) {
+  return (
+    <div className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-4 right-4 z-40 flex justify-center">
+      <button
+        type="button"
+        onClick={onOpenAccount}
+        className="report-floating-button flex h-12 min-w-[168px] items-center justify-center gap-2 rounded-full border px-5 text-[11px] font-black uppercase tracking-[1.8px] active:scale-95"
+        aria-label="Akun Saya"
+      >
+        <Crown size={17} />
+        <span>Akun Saya</span>
+      </button>
     </div>
   );
 }
