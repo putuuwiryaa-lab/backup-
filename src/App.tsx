@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate, useLocation } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
 import {
-  Zap, ShieldCheck, Search, RefreshCw, Crown, Sparkles, Database, MessageCircle, LogOut
+  Zap, ShieldCheck, Search, RefreshCw, Crown, Sparkles, Database, MessageCircle, LogOut, Copy
 } from "lucide-react";
 import { Analytics } from "@vercel/analytics/react";
 import AnalyzeMenu from "./pages/AnalyzeMenu";
@@ -334,10 +334,21 @@ function BottomAccountNav({ onOpenAccount }: { onOpenAccount: () => void }) {
 }
 
 function AccountPanel({ open, role, displayCode, onClose, onLogout }: { open: boolean; role: string; displayCode: string; onClose: () => void; onLogout: () => void }) {
+  const [copied, setCopied] = useState(false);
   if (!open) return null;
   const { roleLabel, roleSub } = getAccountInfo(role);
   const activationMessage = encodeURIComponent(`Halo, saya ingin bantuan Analisa Angka. Device Key saya ${displayCode}`);
   const activationUrl = `https://wa.me/6285792030642?text=${activationMessage}`;
+
+  const handleCopyDeviceKey = async () => {
+    try {
+      await navigator.clipboard.writeText(displayCode);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1400);
+    } catch {
+      setCopied(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/65 px-4 pb-[calc(1.25rem+env(safe-area-inset-bottom))] backdrop-blur-sm sm:items-center sm:pb-4">
@@ -346,14 +357,30 @@ function AccountPanel({ open, role, displayCode, onClose, onLogout }: { open: bo
           <div>
             <p className="font-['Orbitron'] text-[10px] font-black uppercase tracking-[2px] text-[var(--gold)]">Akun Saya</p>
             <h3 className="mt-2 font-['Orbitron'] text-[20px] font-black uppercase tracking-[3px] text-[var(--text)]">{roleLabel}</h3>
-            <p className="mt-1 text-[12px] font-semibold text-[var(--text-dim)]">{roleSub}</p>
           </div>
           <button type="button" onClick={onClose} className="ghost-button h-10 rounded-2xl px-4 text-[10px] font-black uppercase tracking-[1.6px] active:scale-95">Tutup</button>
         </div>
 
-        <div className="mb-5 rounded-3xl border border-white/10 bg-black/18 p-4">
-          <p className="text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Device Key</p>
-          <p className="mt-2 font-['JetBrains_Mono'] text-[24px] font-black tracking-[5px] text-[var(--gold-bright)]">{displayCode}</p>
+        <div className="mb-4 grid gap-3">
+          <div className="rounded-3xl border border-white/10 bg-white/[0.045] p-4">
+            <p className="text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Masa Aktif</p>
+            <p className="mt-2 text-[13px] font-bold text-[var(--text)]">{roleSub}</p>
+          </div>
+
+          <div className="rounded-3xl border border-white/10 bg-black/18 p-4">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <p className="text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Device Key</p>
+              <button
+                type="button"
+                onClick={handleCopyDeviceKey}
+                className="ghost-button flex h-9 items-center gap-2 rounded-2xl px-3 text-[9px] font-black uppercase tracking-[1.4px] active:scale-95"
+              >
+                <Copy size={14} /> {copied ? "Tersalin" : "Salin"}
+              </button>
+            </div>
+            <p className="font-['JetBrains_Mono'] text-[26px] font-black tracking-[5px] text-[var(--gold-bright)]">{displayCode}</p>
+            <p className="mt-2 text-[10px] leading-4 text-[var(--text-soft)]">Kirim Device Key ini saat aktivasi VIP atau lapor masalah.</p>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
