@@ -22,13 +22,22 @@ type PairBooleanMap = Partial<Record<TargetPair, boolean>>;
 
 function TargetPairSelector({ meta, onSelect }: { meta: { accent: string; soft: string }; onSelect: (pair: TargetPair) => void }) {
   return (
-    <div className="premium-panel mt-4 p-4">
-      <div className="mb-3 text-center text-[10px] font-black uppercase tracking-[3px]" style={{ color: meta.accent }}>Pilih Fokus 2D</div>
-      <div className="space-y-2">
+    <div className="premium-panel mt-4 space-y-4 p-4">
+      <div className="text-center">
+        <div className="text-[11px] font-black uppercase tracking-[3px]" style={{ color: meta.accent }}>Pilih Fokus 2D</div>
+        <p className="mt-2 text-[11px] font-semibold uppercase tracking-[1.5px] text-[var(--text-dim)]">Pilih posisi angka yang mau dianalisa.</p>
+      </div>
+      <div className="grid grid-cols-1 gap-3">
         {TARGET_PAIR_OPTIONS.map((option) => (
-          <button key={option.key} type="button" onClick={() => onSelect(option.key)} className="flex w-full items-center justify-between rounded-3xl border p-4 text-left transition active:scale-95" style={{ borderColor: `${meta.accent}77`, backgroundColor: meta.soft, color: meta.accent }}>
-            <span className="font-['Orbitron'] text-[14px] font-black uppercase tracking-[2px]">{option.title}</span>
-            <span className="text-[10px] font-black uppercase tracking-[1.5px] opacity-80">{option.subtitle}</span>
+          <button
+            key={option.key}
+            type="button"
+            onClick={() => onSelect(option.key)}
+            className="min-h-[76px] w-full rounded-3xl border px-5 py-4 text-center transition active:scale-95"
+            style={{ borderColor: `${meta.accent}77`, backgroundColor: meta.soft, color: meta.accent }}
+          >
+            <span className="block font-['Orbitron'] text-[15px] font-black uppercase tracking-[2.2px]">{option.title}</span>
+            <span className="mt-3 block text-[10px] font-black uppercase tracking-[1.4px] opacity-80">{option.subtitle}</span>
           </button>
         ))}
       </div>
@@ -37,27 +46,23 @@ function TargetPairSelector({ meta, onSelect }: { meta: { accent: string; soft: 
 }
 
 function RekapFocusSelector({ meta, onSelect }: { meta: { accent: string; soft: string }; onSelect: (focus: CustomFocus) => void }) {
-  const twoDOptions = CUSTOM_FOCUS_OPTIONS.filter((item) => ["depan", "tengah", "belakang"].includes(item.key));
-  const fullOptions = CUSTOM_FOCUS_OPTIONS.filter((item) => ["3d", "4d"].includes(item.key));
   return (
     <div className="premium-panel mt-4 space-y-4 p-4">
       <div className="text-center">
-        <div className="text-[10px] font-black uppercase tracking-[3px]" style={{ color: meta.accent }}>Pilih Jenis Rekap</div>
-        <p className="mt-2 text-[10px] font-semibold uppercase tracking-[1.5px] text-[var(--text-dim)]">Pilih dulu jenis line yang mau dibuat.</p>
+        <div className="text-[11px] font-black uppercase tracking-[3px]" style={{ color: meta.accent }}>Pilih Jenis Rekap</div>
+        <p className="mt-2 text-[11px] font-semibold uppercase tracking-[1.5px] text-[var(--text-dim)]">Pilih dulu jenis line yang mau dibuat.</p>
       </div>
-      <div className="grid grid-cols-3 gap-2">
-        {twoDOptions.map((item) => (
-          <button key={item.key} type="button" onClick={() => onSelect(item.key)} className="rounded-3xl border p-3 text-center transition active:scale-95" style={{ borderColor: `${meta.accent}77`, backgroundColor: meta.soft, color: meta.accent }}>
-            <span className="block font-['Orbitron'] text-[10px] font-black uppercase tracking-[1.5px]">{item.title}</span>
-            <span className="mt-2 block text-[7px] font-black uppercase tracking-[0.8px] opacity-75">{item.subtitle}</span>
-          </button>
-        ))}
-      </div>
-      <div className="space-y-2">
-        {fullOptions.map((item) => (
-          <button key={item.key} type="button" onClick={() => onSelect(item.key)} className="w-full rounded-3xl border p-4 text-center transition active:scale-95" style={{ borderColor: `${meta.accent}77`, backgroundColor: meta.soft, color: meta.accent }}>
-            <span className="block font-['Orbitron'] text-[13px] font-black uppercase tracking-[2px]">{item.title}</span>
-            <span className="mt-2 block text-[8px] font-black uppercase tracking-[1px] opacity-75">{item.subtitle}</span>
+      <div className="grid grid-cols-1 gap-3">
+        {CUSTOM_FOCUS_OPTIONS.map((item) => (
+          <button
+            key={item.key}
+            type="button"
+            onClick={() => onSelect(item.key)}
+            className="min-h-[76px] w-full rounded-3xl border px-5 py-4 text-center transition active:scale-95"
+            style={{ borderColor: `${meta.accent}77`, backgroundColor: meta.soft, color: meta.accent }}
+          >
+            <span className="block font-['Orbitron'] text-[15px] font-black uppercase tracking-[2.2px]">{item.title}</span>
+            <span className="mt-3 block text-[10px] font-black uppercase tracking-[1.4px] opacity-80">{item.subtitle}</span>
           </button>
         ))}
       </div>
