@@ -92,7 +92,12 @@ input[readonly] {
     inset 0 1px 0 rgba(255,255,255,0.085) !important;
 }
 
+.hero-header {
+  margin-bottom: 0.75rem !important;
+}
+
 .hero-card {
+  min-height: 138px !important;
   background:
     linear-gradient(135deg, rgba(255,255,255,0.085), rgba(255,255,255,0.035)),
     radial-gradient(circle at 88% 18%, rgba(246,198,106,0.13), transparent 34%) !important;
@@ -131,6 +136,25 @@ input[readonly] {
 .soft-input:focus {
   border-color: rgba(246,198,106,0.52) !important;
   box-shadow: 0 0 0 3px rgba(246,198,106,0.11), inset 0 1px 0 rgba(255,255,255,0.05) !important;
+}
+
+.status-strip {
+  margin-bottom: 1rem !important;
+}
+
+.status-strip .premium-card {
+  min-height: 66px !important;
+  padding: 0.85rem !important;
+}
+
+.status-strip .premium-card > div:first-child {
+  height: 2.35rem !important;
+  width: 2.35rem !important;
+  border-radius: 1rem !important;
+}
+
+.market-search {
+  margin-bottom: 1rem !important;
 }
 
 .market-grid-compact {
@@ -179,10 +203,6 @@ input[readonly] {
   text-shadow: 0 0 16px rgba(246,198,106,0.16);
 }
 
-.status-strip .premium-card {
-  min-height: 72px !important;
-}
-
 .report-floating-button {
   min-width: 94px;
   justify-content: center;
@@ -194,8 +214,23 @@ input[readonly] {
     letter-spacing: 0.11em !important;
   }
 
+  .hero-card {
+    min-height: 128px !important;
+    padding: 1rem !important;
+  }
+
   .market-section-title h2 {
     letter-spacing: 0.14em !important;
+  }
+
+  .status-strip .premium-card {
+    min-height: 62px !important;
+    padding: 0.78rem !important;
+  }
+
+  .status-strip .premium-card > div:first-child {
+    height: 2.2rem !important;
+    width: 2.2rem !important;
   }
 
   .market-grid-compact {
@@ -226,10 +261,6 @@ input[readonly] {
   .market-last-value {
     font-size: 1.24rem !important;
     letter-spacing: 0.16em !important;
-  }
-
-  .status-strip .premium-card {
-    padding: 0.85rem !important;
   }
 
   .report-floating-button {
