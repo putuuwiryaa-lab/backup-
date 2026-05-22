@@ -136,7 +136,7 @@ function AppLayout() {
   if (authStatus === "EXPIRED") return <ExpiredScreen />;
 
   return (
-    <div className={`relative mx-auto flex min-h-screen w-full max-w-3xl flex-col px-4 sm:px-6 ${isAnalyzePage ? "pb-6 pt-4" : "pb-20 pt-4"}`}>
+    <div className={`relative mx-auto flex min-h-screen w-full max-w-3xl flex-col px-4 sm:px-6 ${isAnalyzePage ? "pb-6 pt-4" : "pb-24 pt-4"}`}>
       {!isAnalyzePage && location.pathname !== "/admin" && (
         <>
           <HeroHeader />
@@ -329,7 +329,7 @@ function FloatingActions({ onLogout }: { onLogout: () => void }) {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-40 flex items-center gap-2">
+    <div className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-4 right-4 z-40 flex items-center justify-end gap-2">
       <button
         type="button"
         onClick={onLogout}
