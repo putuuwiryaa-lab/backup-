@@ -182,13 +182,12 @@ input[readonly] {
 }
 
 .market-card-compact {
-  min-height: 118px !important;
-  height: 118px !important;
-  padding: 0.9rem !important;
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: flex-start !important;
-  gap: 0.95rem !important;
+  min-height: 112px !important;
+  height: 112px !important;
+  padding: 0.82rem 0.82rem 0.72rem !important;
+  display: grid !important;
+  grid-template-rows: auto 1fr !important;
+  align-items: stretch !important;
 }
 
 .market-name-strip {
@@ -209,13 +208,12 @@ input[readonly] {
 }
 
 .market-result-row {
-  height: auto !important;
+  height: 100% !important;
   min-height: 0 !important;
-  flex: 0 0 auto !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  transform: none !important;
+  transform: translateY(-1px) !important;
 }
 
 .market-last-value {
@@ -304,11 +302,11 @@ input[readonly] {
   }
 
   .market-card-compact {
-    min-height: 116px !important;
-    height: 116px !important;
-    padding: 0.78rem !important;
-    justify-content: flex-start !important;
-    gap: 0.95rem !important;
+    min-height: 110px !important;
+    height: 110px !important;
+    padding: 0.78rem 0.78rem 0.7rem !important;
+    display: grid !important;
+    grid-template-rows: auto 1fr !important;
   }
 
   .market-name-strip {
@@ -322,10 +320,10 @@ input[readonly] {
   }
 
   .market-result-row {
-    height: auto !important;
+    height: 100% !important;
     min-height: 0 !important;
     align-items: center !important;
-    transform: none !important;
+    transform: translateY(-1px) !important;
   }
 
   .market-last-value {
