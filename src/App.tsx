@@ -2,11 +2,12 @@ import React, { useState, useEffect, useMemo } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate, useLocation } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
 import {
-  Lock, Zap, ShieldCheck, Search, RefreshCw, Crown, Sparkles, Smartphone, KeyRound, Database, MessageCircle
+  Zap, ShieldCheck, Search, RefreshCw, Crown, Sparkles, Smartphone, Database, MessageCircle
 } from "lucide-react";
 import { Analytics } from "@vercel/analytics/react";
 import AnalyzeMenu from "./pages/AnalyzeMenu";
 import AdminPage from "./pages/AdminPage";
+import LoginGate from "./components/LoginGate";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
@@ -25,7 +26,8 @@ export default function App() {
 
 function AppLayout() {
   const location = useLocation();
-  const [deviceCode, setDeviceCode] = useState("");
+  const [deviceId, setDeviceId] = useState("");
+  const [displayCode, setDisplayCode] = useState("");
   const [authStatus, setAuthStatus] = useState<"LOADING" | "LOCKED" | "READY" | "EXPIRED">("LOADING");
   const [authStage, setAuthStage] = useState("Menyiapkan aplikasi...");
   const [role, setRole] = useState("FREE");
@@ -33,13 +35,20 @@ function AppLayout() {
   const [systemSetting, setSystemSetting] = useState<any>({ runningText: "..." });
   const isAnalyzePage = location.pathname.startsWith("/analyze/");
 
-  const getDeviceCode = () => {
-    let code = localStorage.getItem("supreme_devcode");
-    if (!code || code.length !== 4) {
-      code = Math.floor(1000 + Math.random() * 9000).toString();
-      localStorage.setItem("supreme_devcode", code);
+  const getDeviceIdentity = () => {
+    let storedDeviceId = localStorage.getItem("supreme_device_id");
+    if (!storedDeviceId) {
+      storedDeviceId = crypto.randomUUID();
+      localStorage.setItem("supreme_device_id", storedDeviceId);
     }
-    return code;
+
+    let storedDisplayCode = localStorage.getItem("supreme_display_code");
+    if (!storedDisplayCode || storedDisplayCode.length !== 6) {
+      storedDisplayCode = Math.floor(100000 + Math.random() * 900000).toString();
+      localStorage.setItem("supreme_display_code", storedDisplayCode);
+    }
+
+    return { deviceId: storedDeviceId, displayCode: storedDisplayCode };
   };
 
   const getLastResult = (historyData: string) => {
@@ -68,8 +77,10 @@ function AppLayout() {
 
   useEffect(() => {
     const init = async () => {
-      const code = getDeviceCode();
-      setDeviceCode(code);
+      const identity = getDeviceIdentity();
+      setDeviceId(identity.deviceId);
+      setDisplayCode(identity.displayCode);
+
       const savedToken = localStorage.getItem("supreme_token");
       if (savedToken) {
         setAuthStatus("LOADING");
@@ -78,7 +89,7 @@ function AppLayout() {
           const res = await fetch("/api/verify", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ token: savedToken, deviceCode: code })
+            body: JSON.stringify({ token: savedToken, deviceId: identity.deviceId })
           });
           const json = await res.json();
           if (json.valid) {
@@ -105,8 +116,9 @@ function AppLayout() {
   }
 
   if (authStatus === "LOCKED") return (
-    <LayarKunci
-      deviceCode={deviceCode}
+    <LoginGate
+      deviceId={deviceId}
+      displayCode={displayCode}
       onAuthSuccess={(r, t) => {
         setRole(r);
         localStorage.setItem("supreme_token", t);
@@ -122,7 +134,7 @@ function AppLayout() {
       {!isAnalyzePage && location.pathname !== "/admin" && (
         <>
           <HeroHeader />
-          <StatusStrip role={role} deviceCode={deviceCode} />
+          <StatusStrip role={role} displayCode={displayCode} />
         </>
       )}
 
@@ -215,7 +227,7 @@ function formatTokenExpiry() {
   }
 }
 
-function StatusStrip({ role, deviceCode }: { role: string; deviceCode: string }) {
+function StatusStrip({ role, displayCode }: { role: string; displayCode: string }) {
   const isMaster = role === "MASTER";
   const isPro = role === "PRO";
   const isTrial = role === "TRIAL";
@@ -235,8 +247,8 @@ function StatusStrip({ role, deviceCode }: { role: string; deviceCode: string })
       <div className="premium-card flex min-h-[78px] items-center gap-3 p-4">
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[var(--cyan-dim)] text-[var(--cyan)]"><Smartphone size={19} /></div>
         <div className="min-w-0">
-          <p className="truncate text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Device ID</p>
-          <p className="font-['JetBrains_Mono'] text-[14px] font-black text-[var(--text)]">{deviceCode}</p>
+          <p className="truncate text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Device Key</p>
+          <p className="font-['JetBrains_Mono'] text-[14px] font-black text-[var(--text)]">{displayCode}</p>
         </div>
       </div>
     </div>
@@ -320,67 +332,5 @@ function ReportButton() {
       <MessageCircle size={16} />
       <span>Laporkan Masalah</span>
     </button>
-  );
-}
-
-function LayarKunci({ deviceCode, onAuthSuccess }: { deviceCode: string; onAuthSuccess: (role: string, token: string) => void }) {
-  const [pin, setPin] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const activationMessage = encodeURIComponent(`Halo, saya minta PIN aktivasi Analisa Angka dengan ID ${deviceCode}`);
-  const activationUrl = `https://wa.me/6285792030642?text=${activationMessage}`;
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!pin) return;
-    setLoading(true);
-    setError("");
-    try {
-      const res = await fetch("/api/auth", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pin, deviceCode })
-      });
-      const json = await res.json();
-      if (json.success) onAuthSuccess(json.role, json.token);
-      else setError(json.error || "PIN SALAH!");
-    } catch {
-      setError("Error koneksi server!");
-    }
-    setLoading(false);
-  };
-
-  return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-5">
-      <div className="premium-panel relative w-full max-w-sm overflow-hidden p-7 sm:p-8">
-        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[var(--gold)] via-[var(--cyan)] to-[var(--gold)]" />
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-[2rem] bg-[var(--gold)] shadow-lg shadow-yellow-900/20 ring-4 ring-white/10">
-            <Lock className="h-9 w-9 text-black" />
-          </div>
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-[var(--cyan-dim)] px-3 py-1 text-[10px] font-black uppercase tracking-[2px] text-[var(--cyan)]"><KeyRound size={12} /> Secure Login</div>
-          <h2 className="mb-2 font-['Orbitron'] text-[23px] font-black uppercase tracking-[4px] text-[var(--text)]">System Access</h2>
-          <p className="text-sm text-[var(--text-dim)]">Masukkan PIN untuk membuka dashboard premium.</p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="ml-1 mb-2 block text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Device Key</label>
-            <input type="text" value={deviceCode} readOnly className="soft-input h-14 w-full px-4 text-center font-['JetBrains_Mono'] text-[18px] font-black tracking-[5px]" />
-          </div>
-          <div>
-            <label className="ml-1 mb-2 block text-[10px] font-black uppercase tracking-[2px] text-[var(--cyan)]">PIN Aktivasi</label>
-            <input type="password" value={pin} autoFocus onChange={e => setPin(e.target.value)} placeholder="••••••" className="soft-input h-16 w-full px-4 text-center font-['JetBrains_Mono'] text-[24px] font-black tracking-[10px] placeholder:opacity-20" />
-          </div>
-          {error && <p className="rounded-2xl border border-red-400/25 bg-red-500/10 p-3 text-center text-[11px] font-bold uppercase tracking-[1px] text-red-300">{error}</p>}
-          <button type="submit" disabled={loading || !pin} className="primary-button w-full py-4 text-[12px] font-black uppercase tracking-[4px] disabled:opacity-50 active:scale-95">
-            {loading ? "Memverifikasi..." : "Buka Akses"}
-          </button>
-        </form>
-        <p className="mt-6 text-center text-[11px] text-[var(--text-dim)]">
-          <a href={activationUrl} target="_blank" rel="noopener noreferrer" className="font-bold text-[var(--gold)] underline underline-offset-4">Hubungi Pembuat untuk Aktivasi PIN</a>
-        </p>
-      </div>
-    </div>
   );
 }
