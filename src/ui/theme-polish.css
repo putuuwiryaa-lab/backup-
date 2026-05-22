@@ -134,14 +134,7 @@ input[readonly] {
 }
 
 .market-card-compact {
-  min-height: 118px !important;
-}
-
-.market-card-compact .market-name-strip {
-  min-height: 42px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
+  min-height: 116px !important;
 }
 
 .market-name-strip {
@@ -156,7 +149,7 @@ input[readonly] {
 }
 
 .market-result-row {
-  min-height: 70px !important;
+  min-height: 54px !important;
 }
 
 .status-strip .premium-card {
@@ -179,11 +172,7 @@ input[readonly] {
   }
 
   .market-card-compact {
-    min-height: 112px !important;
-  }
-
-  .market-card-compact .market-name-strip {
-    min-height: 40px !important;
+    min-height: 110px !important;
   }
 
   .market-last-value {
@@ -191,7 +180,7 @@ input[readonly] {
   }
 
   .market-result-row {
-    min-height: 66px !important;
+    min-height: 50px !important;
   }
 
   .status-strip .premium-card {
