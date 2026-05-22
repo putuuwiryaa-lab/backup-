@@ -140,7 +140,7 @@ function AppLayout() {
       {!isAnalyzePage && location.pathname !== "/admin" && (
         <>
           <HeroHeader />
-          <StatusStrip role={role} displayCode={displayCode} onLogout={handleLogout} />
+          <StatusStrip role={role} displayCode={displayCode} />
         </>
       )}
 
@@ -163,7 +163,7 @@ function AppLayout() {
         </Routes>
       </main>
 
-      {!isAnalyzePage && <ReportButton />}
+      {!isAnalyzePage && <FloatingActions onLogout={handleLogout} />}
     </div>
   );
 }
@@ -233,14 +233,14 @@ function formatTokenExpiry() {
   }
 }
 
-function StatusStrip({ role, displayCode, onLogout }: { role: string; displayCode: string; onLogout: () => void }) {
+function StatusStrip({ role, displayCode }: { role: string; displayCode: string }) {
   const isMaster = role === "MASTER";
   const isPro = role === "PRO";
   const isTrial = role === "TRIAL";
   const roleLabel = isMaster ? "MASTER" : isPro ? "VIP" : isTrial ? "TRIAL" : role;
   const roleSub = isTrial ? `Habis ${formatTokenExpiry()}` : "";
   return (
-    <div className="status-strip mb-5 grid grid-cols-3 gap-3">
+    <div className="status-strip mb-5 grid grid-cols-2 gap-3">
       <div className="premium-card flex min-h-[78px] items-center gap-3 p-4">
         <div className={`h-11 w-11 shrink-0 rounded-2xl ${isMaster ? "bg-[var(--gold-dim)] text-[var(--gold)]" : isPro ? "bg-[var(--cyan-dim)] text-[var(--cyan)]" : "bg-white/8 text-white/55"} flex items-center justify-center`}>
           <Crown size={19} />
@@ -257,15 +257,6 @@ function StatusStrip({ role, displayCode, onLogout }: { role: string; displayCod
           <p className="font-['JetBrains_Mono'] text-[14px] font-black text-[var(--text)]">{displayCode}</p>
         </div>
       </div>
-      <button
-        type="button"
-        onClick={onLogout}
-        className="premium-card flex min-h-[78px] items-center justify-center gap-2 p-4 text-[10px] font-black uppercase tracking-[1.4px] text-[var(--text-dim)] active:scale-95"
-        aria-label="Logout"
-      >
-        <LogOut size={18} />
-        <span>Logout</span>
-      </button>
     </div>
   );
 }
@@ -332,20 +323,31 @@ function Dashboard({ markets, onRefresh }: { markets: any[]; onRefresh: () => vo
   );
 }
 
-function ReportButton() {
+function FloatingActions({ onLogout }: { onLogout: () => void }) {
   const openReport = () => {
     window.open("https://wa.me/6285792030642?text=Halo%2C%20saya%20ingin%20melaporkan%20masalah%20pada%20aplikasi%20Analisa%20Angka", "_blank", "noopener,noreferrer");
   };
 
   return (
-    <button
-      type="button"
-      onClick={openReport}
-      className="report-floating-button fixed bottom-4 right-4 z-40 flex h-11 items-center gap-2 rounded-full border px-4 text-[10px] font-black uppercase tracking-[1.4px] active:scale-95"
-      aria-label="Laporkan Masalah"
-    >
-      <MessageCircle size={16} />
-      <span>Laporkan Masalah</span>
-    </button>
+    <div className="fixed bottom-4 right-4 z-40 flex items-center gap-2">
+      <button
+        type="button"
+        onClick={onLogout}
+        className="report-floating-button flex h-11 items-center gap-2 rounded-full border px-4 text-[10px] font-black uppercase tracking-[1.4px] active:scale-95"
+        aria-label="Logout"
+      >
+        <LogOut size={16} />
+        <span>Logout</span>
+      </button>
+      <button
+        type="button"
+        onClick={openReport}
+        className="report-floating-button flex h-11 items-center gap-2 rounded-full border px-4 text-[10px] font-black uppercase tracking-[1.4px] active:scale-95"
+        aria-label="Laporkan Masalah"
+      >
+        <MessageCircle size={16} />
+        <span>Laporkan Masalah</span>
+      </button>
+    </div>
   );
 }
