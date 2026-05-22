@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate, useLocation } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
 import {
-  Zap, ShieldCheck, Search, RefreshCw, Crown, Sparkles, Smartphone, Database, MessageCircle
+  Zap, ShieldCheck, Search, RefreshCw, Crown, Sparkles, Smartphone, Database, MessageCircle, LogOut
 } from "lucide-react";
 import { Analytics } from "@vercel/analytics/react";
 import AnalyzeMenu from "./pages/AnalyzeMenu";
@@ -49,6 +49,12 @@ function AppLayout() {
     }
 
     return { deviceId: storedDeviceId, displayCode: storedDisplayCode };
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("supreme_token");
+    setRole("FREE");
+    setAuthStatus("LOCKED");
   };
 
   const getLastResult = (historyData: string) => {
@@ -134,7 +140,7 @@ function AppLayout() {
       {!isAnalyzePage && location.pathname !== "/admin" && (
         <>
           <HeroHeader />
-          <StatusStrip role={role} displayCode={displayCode} />
+          <StatusStrip role={role} displayCode={displayCode} onLogout={handleLogout} />
         </>
       )}
 
@@ -227,14 +233,14 @@ function formatTokenExpiry() {
   }
 }
 
-function StatusStrip({ role, displayCode }: { role: string; displayCode: string }) {
+function StatusStrip({ role, displayCode, onLogout }: { role: string; displayCode: string; onLogout: () => void }) {
   const isMaster = role === "MASTER";
   const isPro = role === "PRO";
   const isTrial = role === "TRIAL";
   const roleLabel = isMaster ? "MASTER" : isPro ? "VIP" : isTrial ? "TRIAL" : role;
   const roleSub = isTrial ? `Habis ${formatTokenExpiry()}` : "";
   return (
-    <div className="status-strip mb-5 grid grid-cols-2 gap-3">
+    <div className="status-strip mb-5 grid grid-cols-3 gap-3">
       <div className="premium-card flex min-h-[78px] items-center gap-3 p-4">
         <div className={`h-11 w-11 shrink-0 rounded-2xl ${isMaster ? "bg-[var(--gold-dim)] text-[var(--gold)]" : isPro ? "bg-[var(--cyan-dim)] text-[var(--cyan)]" : "bg-white/8 text-white/55"} flex items-center justify-center`}>
           <Crown size={19} />
@@ -251,6 +257,15 @@ function StatusStrip({ role, displayCode }: { role: string; displayCode: string 
           <p className="font-['JetBrains_Mono'] text-[14px] font-black text-[var(--text)]">{displayCode}</p>
         </div>
       </div>
+      <button
+        type="button"
+        onClick={onLogout}
+        className="premium-card flex min-h-[78px] items-center justify-center gap-2 p-4 text-[10px] font-black uppercase tracking-[1.4px] text-[var(--text-dim)] active:scale-95"
+        aria-label="Logout"
+      >
+        <LogOut size={18} />
+        <span>Logout</span>
+      </button>
     </div>
   );
 }
