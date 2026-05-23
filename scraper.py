@@ -22,7 +22,6 @@ MARKETS = {
   "TAIWAN": "/data-pengeluaran-togel-taiwan/",
   "HONGKONG POOLS": "/data-pengeluaran-togel-hongkong-pools/",
   "HONGKONG LOTTO": "/data-pengeluaran-togel-hklotto/",
-  "TOTO MACAU 00": "/data-pengeluaran-togel-toto-macau-5/",
   "MARYLAND MIDDAY": "/data-pengeluaran-togel-maryland-midday/",
   "GEORGIA MIDDAY": "/data-pengeluaran-togel-georgia-midday/",
   "MOROCCO 23:59": "/data-pengeluaran-togel-morocco-quatro-23-59-wib/",
@@ -67,13 +66,9 @@ MARKETS = {
   "CAROLINA EVE": "/data-pengeluaran-togel-north-carolina-evening/",
   "GEORGIA NIGHT": "/data-pengeluaran-togel-georgia-night/",
   "OREGON 13": "/data-pengeluaran-togel-oregon-13-00-wib/",
-  "TOTO MACAU 13": "/data-pengeluaran-togel-toto-macau-1/",
-  "TOTO MACAU 16": "/data-pengeluaran-togel-toto-macau-2/",
   "MOROCCO 18:00": "/data-pengeluaran-togel-morocco-quatro-18-00-wib/",
-  "TOTO MACAU 19": "/data-pengeluaran-togel-toto-macau-3/",
   "PCSO": "/data-pengeluaran-togel-pcso/",
   "MOROCCO 21:00": "/data-pengeluaran-togel-morocco-quatro-21-00-wib/",
-  "TOTO MACAU 22": "/data-pengeluaran-togel-toto-macau-4/",
   "TEXAS MORNING": "/data-pengeluaran-togel-texas-morning/",
 }
 
