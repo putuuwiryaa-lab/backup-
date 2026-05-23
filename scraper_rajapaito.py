@@ -4,6 +4,12 @@ from bs4 import BeautifulSoup
 
 RAJAPAITO_MARKETS = {
     "TENNESSE MORNING": "https://w2.rajapaito1.net/data-togel-tennesse-morning/",
+    "MACAU P1": "https://w2.rajapaito1.net/data-togel-macau-p1/",
+    "MACAU P2": "https://w2.rajapaito1.net/data-togel-macau-p2/",
+    "MACAU P3": "https://w2.rajapaito1.net/data-togel-macau-p3/",
+    "MACAU P4": "https://w2.rajapaito1.net/data-togel-macau-p4/",
+    "MACAU P5": "https://w2.rajapaito1.net/data-togel-macau-p5/",
+    "MACAU P6": "https://w2.rajapaito1.net/data-togel-macau-p6/",
 }
 
 HEADERS = {
