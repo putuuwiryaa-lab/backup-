@@ -1,5 +1,5 @@
-/* Ultra-light performance mode
-   No glass, no blur, no heavy shadows, no decorative glow, no animations.
+/* Light performance mode
+   Keep glass/blur/shadow heavy effects off, but allow subtle motion so UI feels responsive.
 */
 
 :root {
@@ -8,13 +8,14 @@
   --glass-border: rgba(255, 255, 255, 0.075);
   --glass-blur: 0px;
   --glass-saturate: 100%;
+  --motion-fast: 140ms;
+  --motion-mid: 220ms;
+  --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 *,
 *::before,
 *::after {
-  animation: none !important;
-  transition: none !important;
   filter: none !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
@@ -91,6 +92,75 @@ header .inline-flex,
   display: none !important;
 }
 
+/* Lightweight motion: responsive but cheap on mobile GPUs. */
+.premium-panel,
+.premium-card,
+.glass-card,
+.hero-card,
+.market-card,
+.market-card-compact,
+.primary-button,
+.ghost-button,
+.report-floating-button,
+.bottom-nav button,
+.soft-input,
+.market-name-strip,
+.main-digit-chip,
+a,
+button,
+input,
+select {
+  transition:
+    transform var(--motion-fast) var(--motion-ease),
+    background-color var(--motion-mid) var(--motion-ease),
+    border-color var(--motion-mid) var(--motion-ease),
+    color var(--motion-mid) var(--motion-ease),
+    opacity var(--motion-mid) var(--motion-ease) !important;
+}
+
+.market-card-compact,
+.premium-card,
+.glass-card,
+.hero-card {
+  animation: ui-soft-in 260ms var(--motion-ease) both !important;
+}
+
+.market-card-compact:active,
+.market-card:active,
+.primary-button:active,
+.ghost-button:active,
+.report-floating-button:active,
+.bottom-nav button:active {
+  transform: scale(0.985) !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .market-card-compact:hover,
+  .market-card:hover,
+  .premium-card:hover,
+  .glass-card:hover {
+    transform: translateY(-1px) !important;
+  }
+
+  .primary-button:hover,
+  .ghost-button:hover,
+  .report-floating-button:hover,
+  .bottom-nav button:hover {
+    transform: translateY(-1px) !important;
+  }
+}
+
+@keyframes ui-soft-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .market-section-title {
   margin-bottom: 0.9rem !important;
 }
@@ -116,19 +186,27 @@ header .inline-flex,
   border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
-.bottom-nav button.bg-\[var\(--gold\)],
-.bottom-nav button:first-child.bg-\[var\(--gold\)] {
+.bottom-nav button.bg-\[var\(--gold\)\],
+.bottom-nav button:first-child.bg-\[var\(--gold\)\] {
   background: #8f2f58 !important;
   color: #f4d7e4 !important;
-  transform: none !important;
   box-shadow: none !important;
 }
 
-.bottom-nav button.bg-\[var\(--gold\)] svg,
-.bottom-nav button:first-child.bg-\[var\(--gold\)] svg,
-.bottom-nav button.bg-\[var\(--gold\)] span,
-.bottom-nav button:first-child.bg-\[var\(--gold\)] span {
+.bottom-nav button.bg-\[var\(--gold\)\] svg,
+.bottom-nav button:first-child.bg-\[var\(--gold\)\] svg,
+.bottom-nav button.bg-\[var\(--gold\)\] span,
+.bottom-nav button:first-child.bg-\[var\(--gold\)\] span {
   color: #f4d7e4 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
 }
 
 @media (max-width: 768px) {
