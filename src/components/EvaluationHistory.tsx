@@ -49,6 +49,7 @@ export default function EvaluationHistory({
 }) {
   const [rows, setRows] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const showAi2DigitNote = mode === "ai" && param === 2;
 
   useEffect(() => {
     let active = true;
@@ -93,7 +94,7 @@ export default function EvaluationHistory({
         <span className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[2px] text-[var(--text)]">{title}</span>
         <span className="text-[9px] font-black uppercase tracking-[1px] text-[var(--text-dim)]">15 Terbaru</span>
       </div>
-      {mode === "ai" && (
+      {showAi2DigitNote && (
         <div className="rounded-2xl border border-[rgba(246,198,106,0.22)] bg-[rgba(246,198,106,0.08)] px-3 py-2 text-[9px] font-bold leading-relaxed tracking-[0.4px] text-[var(--gold-bright)]">
           Catatan: jika AI 2 digit terlalu sering ZONK, lebih bijak jadikan hasilnya sebagai OFF 2 digit.
         </div>
