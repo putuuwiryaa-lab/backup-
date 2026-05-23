@@ -1,11 +1,43 @@
 import React, { useState } from "react";
-import { Crown, KeyRound, Lock, MessageCircle, Sparkles } from "lucide-react";
+import { KeyRound, Lock, MessageCircle, Sparkles } from "lucide-react";
 
 type LoginGateProps = {
   deviceId: string;
   displayCode: string;
   onAuthSuccess: (role: string, token: string) => void;
 };
+
+function AppLogoMark({ className = "h-9 w-9" }: { className?: string }) {
+  return (
+    <svg className={`app-logo-mark ${className}`} viewBox="0 0 64 64" fill="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="loginLogoGold" x1="12" y1="52" x2="52" y2="10" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#f8c76a" />
+          <stop offset="0.48" stopColor="#8df7df" />
+          <stop offset="1" stopColor="#8f7cff" />
+        </linearGradient>
+        <linearGradient id="loginLogoSoft" x1="16" y1="48" x2="48" y2="16" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#ffe29a" stopOpacity="0.95" />
+          <stop offset="1" stopColor="#b79cff" stopOpacity="0.85" />
+        </linearGradient>
+        <filter id="loginLogoGlow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="1.8" result="blur" />
+          <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.55 0 0 0 0 0.95 0 0 0 0 0.86 0 0 0 0.55 0" />
+          <feMerge>
+            <feMergeNode />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+      <path d="M32 5.5 54.5 18.5v27L32 58.5 9.5 45.5v-27L32 5.5Z" stroke="url(#loginLogoGold)" strokeWidth="3.2" strokeLinejoin="round" filter="url(#loginLogoGlow)" />
+      <path d="M32 13.5 47.2 22.2v18.1L32 49 16.8 40.3V22.2L32 13.5Z" stroke="url(#loginLogoGold)" strokeWidth="2" strokeLinejoin="round" opacity="0.72" />
+      <path d="M19 44 31.6 17.5 45 44" stroke="url(#loginLogoSoft)" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M25.2 35.2h13.6" stroke="#0b1119" strokeWidth="6" strokeLinecap="round" opacity="0.55" />
+      <path d="M26 35.2h12" stroke="url(#loginLogoGold)" strokeWidth="3.2" strokeLinecap="round" />
+      <path d="M32 18.5 32 44" stroke="#9fffe6" strokeWidth="1.6" strokeLinecap="round" opacity="0.45" />
+    </svg>
+  );
+}
 
 export default function LoginGate({ deviceId, displayCode, onAuthSuccess }: LoginGateProps) {
   const [pin, setPin] = useState("");
@@ -65,8 +97,8 @@ export default function LoginGate({ deviceId, displayCode, onAuthSuccess }: Logi
     <div className="login-page flex min-h-screen flex-col items-center justify-center p-5">
       <div className="login-shell w-full max-w-sm">
         <div className="mb-5 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-[1.65rem] border border-white/12 bg-[var(--gold-dim)] text-[var(--gold-bright)] shadow-xl shadow-black/30">
-            <Crown className="h-8 w-8" strokeWidth={2.4} />
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-[1.65rem] border border-white/12 bg-[rgba(124,77,255,0.18)] shadow-xl shadow-black/30">
+            <AppLogoMark className="h-12 w-12" />
           </div>
           <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[9px] font-black uppercase tracking-[1.8px] text-[var(--gold)]">
             <Sparkles size={12} /> Analisa Angka
