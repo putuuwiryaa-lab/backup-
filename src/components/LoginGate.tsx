@@ -94,17 +94,17 @@ export default function LoginGate({ deviceId, displayCode, onAuthSuccess }: Logi
   };
 
   return (
-    <div className="login-page flex min-h-screen flex-col items-center justify-center p-5">
+    <div className="login-page flex min-h-screen flex-col items-center justify-start px-5 pb-6 pt-[calc(2.1rem+env(safe-area-inset-top))] sm:pt-10">
       <div className="login-shell w-full max-w-sm">
-        <div className="mb-5 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-[1.65rem] border border-white/12 bg-[rgba(124,77,255,0.18)] shadow-xl shadow-black/30">
-            <AppLogoMark className="h-12 w-12" />
+        <div className="login-header-card mb-5 rounded-[2rem] border border-white/12 bg-white/[0.055] p-5 text-center shadow-2xl shadow-black/35 backdrop-blur-xl">
+          <div className="mx-auto mb-4 flex h-[4.65rem] w-[4.65rem] items-center justify-center rounded-[1.7rem] border border-white/14 bg-[rgba(124,77,255,0.20)] shadow-xl shadow-black/30">
+            <AppLogoMark className="h-[3.55rem] w-[3.55rem]" />
           </div>
-          <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[9px] font-black uppercase tracking-[1.8px] text-[var(--gold)]">
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/18 px-3 py-1 text-[9px] font-black uppercase tracking-[1.8px] text-[var(--gold)]">
             <Sparkles size={12} /> Analisa Angka
           </div>
           <h1 className="font-['Orbitron'] text-[25px] font-black uppercase leading-none tracking-[4px] text-[var(--text)]">Masuk Aplikasi</h1>
-          <p className="mt-3 text-[13px] leading-5 text-[var(--text-dim)]">
+          <p className="mt-3 text-[13px] font-semibold leading-5 text-[var(--text-dim)]">
             Mulai trial gratis atau masuk dengan PIN VIP.
           </p>
         </div>
@@ -112,17 +112,17 @@ export default function LoginGate({ deviceId, displayCode, onAuthSuccess }: Logi
         <div className="premium-panel relative overflow-hidden p-5 sm:p-6">
           <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[var(--purple)] via-[var(--gold)] to-[var(--purple)]" />
 
-          <div className="mb-5 rounded-3xl border border-white/10 bg-black/18 p-4">
+          <div className="mb-5 rounded-3xl border border-white/12 bg-black/24 p-4 shadow-inner shadow-black/30">
             <div className="mb-3 flex items-center gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[var(--cyan-dim)] text-[var(--cyan-bright)]">
                 <KeyRound size={18} />
               </div>
               <div>
                 <p className="text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Device Key</p>
-                <p className="mt-1 text-[11px] text-[var(--text-soft)]">Kode perangkat untuk aktivasi VIP</p>
+                <p className="mt-1 text-[11px] font-semibold text-[var(--text)]">Kode perangkat untuk aktivasi VIP</p>
               </div>
             </div>
-            <p className="font-['JetBrains_Mono'] text-[28px] font-black tracking-[6px] text-[var(--gold-bright)]">{displayCode}</p>
+            <p className="font-['JetBrains_Mono'] text-[28px] font-black tracking-[6px] text-[var(--text)]">{displayCode}</p>
           </div>
 
           {error && (
