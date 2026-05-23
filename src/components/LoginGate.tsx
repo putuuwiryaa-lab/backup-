@@ -100,11 +100,8 @@ export default function LoginGate({ deviceId, displayCode, onAuthSuccess }: Logi
           <div className="mx-auto mb-4 flex h-[4.65rem] w-[4.65rem] items-center justify-center rounded-[1.7rem] border border-white/14 bg-[rgba(124,77,255,0.20)] shadow-xl shadow-black/30">
             <AppLogoMark className="h-[3.55rem] w-[3.55rem]" />
           </div>
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/18 px-3 py-1 text-[9px] font-black uppercase tracking-[1.8px] text-[var(--gold)]">
-            <Sparkles size={12} /> Analisa Angka
-          </div>
-          <h1 className="font-['Orbitron'] text-[25px] font-black uppercase leading-none tracking-[4px] text-[var(--text)]">Masuk Aplikasi</h1>
-          <p className="mt-3 text-[13px] font-semibold leading-5 text-[var(--text-dim)]">
+          <h1 className="font-['Orbitron'] text-[34px] font-black uppercase leading-none tracking-[5px] text-[var(--text)] sm:text-[38px]">Analisa Angka</h1>
+          <p className="mt-4 text-[13px] font-semibold leading-5 text-[var(--text-dim)]">
             Mulai trial gratis atau masuk dengan PIN VIP.
           </p>
         </div>
