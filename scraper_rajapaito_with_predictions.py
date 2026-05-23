@@ -18,11 +18,17 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 RAJAPAITO_PRIORITY_ORDER = {
     "TENNESSE MORNING": 11,
+    "MACAU P1": 12,
+    "MACAU P2": 13,
+    "MACAU P3": 14,
+    "MACAU P4": 15,
+    "MACAU P5": 16,
+    "MACAU P6": 17,
 }
 
 
 def main():
-    next_order = 12
+    next_order = 18
     success = 0
     errors = 0
     processed = 0
