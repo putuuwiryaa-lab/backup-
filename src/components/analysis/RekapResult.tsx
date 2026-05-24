@@ -62,32 +62,32 @@ export default function RekapResult({ result, param, marketId, meta }: {
   ];
 
   return (
-    <div className="space-y-4 animate-[fadeIn_0.3s_ease-out]">
-      <div className="premium-panel result-glow p-5">
+    <div className="ui-motion-in space-y-4">
+      <div className="ui-panel ui-motion-in result-glow p-5">
         <div className="mb-4 flex items-center justify-between gap-3">
           <div>
-            <p className="text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Hasil Rekap</p>
-            <h3 className="font-['Orbitron'] text-[18px] font-black uppercase tracking-[3px] text-[var(--text)]">Mode {isCustom ? "Custom Digit" : isTop ? "Top" : "Invest"}</h3>
+            <p className="ui-label text-[9px]">Hasil Rekap</p>
+            <h3 className="font-['Orbitron'] text-[18px] font-black uppercase tracking-[3px] text-[var(--ui-text)]">Mode {isCustom ? "Custom Digit" : isTop ? "Top" : "Invest"}</h3>
           </div>
           <span className="rounded-full px-3 py-1 text-[10px] font-black" style={{ backgroundColor: meta.soft, color: meta.accent }}>READY</span>
         </div>
         <div className="space-y-3">
           {rows.map(([label, value, emoji, color]: any, index: number) => (
-            <div key={`${label}-${index}`} className="flex items-center justify-between gap-3 rounded-3xl border border-[var(--border2)] bg-black/20 p-3">
-              <div className="flex min-w-0 items-center gap-3"><span className="shrink-0 text-base">{emoji}</span><span className="min-w-0 text-[10px] font-black uppercase tracking-[1.8px] text-[var(--text-dim)]">{label}</span></div>
+            <div key={`${label}-${index}`} className="ui-card ui-motion-soft ui-lift flex items-center justify-between gap-3 rounded-3xl p-3">
+              <div className="flex min-w-0 items-center gap-3"><span className="shrink-0 text-base">{emoji}</span><span className="ui-label min-w-0 text-[10px]">{label}</span></div>
               <span className="max-w-[54%] truncate text-right font-['Orbitron'] text-[12px] font-black tracking-[1.5px]" style={{ color }}>{value}</span>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="premium-panel space-y-3 p-4">
-        <div className="flex items-center justify-between"><span className="font-['Orbitron'] text-[12px] font-black uppercase tracking-[2px] text-[var(--text)]">Generate Lines</span><span className="rounded-full px-3 py-1 text-[10px] font-black" style={{ backgroundColor: meta.soft, color: meta.accent }}>{lines.length} LINE</span></div>
-        <div className="max-h-[260px] overflow-y-auto rounded-3xl border border-[var(--border2)] bg-black/30 p-4 font-['JetBrains_Mono'] text-[14px] font-bold leading-8 tracking-[2px] custom-scrollbar" style={{ color: meta.accent }}>{displayLines}</div>
-        <button onClick={() => navigator.clipboard?.writeText(copyLines)} className="flex w-full items-center justify-center gap-2 rounded-3xl p-4 font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px] text-black transition active:scale-95" style={{ backgroundColor: meta.accent }}><Copy size={16} /> Copy Semua</button>
+      <div className="ui-panel ui-motion-in space-y-3 p-4">
+        <div className="flex items-center justify-between"><span className="ui-title text-[12px]">Generate Lines</span><span className="rounded-full px-3 py-1 text-[10px] font-black" style={{ backgroundColor: meta.soft, color: meta.accent }}>{lines.length} LINE</span></div>
+        <div className="max-h-[260px] overflow-y-auto rounded-3xl border border-[var(--ui-border-soft)] bg-black/30 p-4 font-['JetBrains_Mono'] text-[14px] font-bold leading-8 tracking-[2px] custom-scrollbar" style={{ color: meta.accent }}>{displayLines}</div>
+        <button onClick={() => navigator.clipboard?.writeText(copyLines)} className="ui-motion-soft ui-tap flex w-full items-center justify-center gap-2 rounded-3xl p-4 font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px] text-black" style={{ backgroundColor: meta.accent }}><Copy size={16} /> Copy Semua</button>
       </div>
 
-      {!isCustom && <div className="premium-panel space-y-3 p-4"><RekapHistory marketId={marketId} mode={mode} /></div>}
+      {!isCustom && <div className="ui-panel ui-motion-in space-y-3 p-4"><RekapHistory marketId={marketId} mode={mode} /></div>}
     </div>
   );
 }
