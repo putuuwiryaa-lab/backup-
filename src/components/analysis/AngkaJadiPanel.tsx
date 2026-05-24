@@ -13,13 +13,13 @@ export default function AngkaJadiPanel({ type, result, open, setOpen, meta }: {
   const data = buildAngkaJadi(type, result);
 
   return (
-    <div className="premium-panel space-y-3 p-4">
+    <div className="ui-panel ui-motion-in space-y-3 p-4">
       <div className="flex items-center justify-between gap-3">
         <SectionTitle accent={meta.accent} title="Angka Jadi" />
         <DetailToggle open={open} accent={meta.accent} onClick={() => setOpen((value) => !value)} />
       </div>
       {open && (
-        <div className="space-y-3 pt-1">
+        <div className="ui-motion-in space-y-3 pt-1">
           {data.sections.map((section) => <LineBox key={section.label} label={section.label} lines={section.lines} accent={meta.accent} soft={meta.soft} />)}
         </div>
       )}
