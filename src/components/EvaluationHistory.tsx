@@ -81,21 +81,21 @@ export default function EvaluationHistory({
   }, [marketId, mode, param, position, targetPair]);
 
   if (loading) {
-    return <div className="rounded-3xl border border-[var(--border2)] bg-black/20 p-4 text-center text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Memuat riwayat...</div>;
+    return <div className="ui-card ui-motion-in rounded-3xl p-4 text-center text-[10px] font-black uppercase tracking-[2px] text-[var(--ui-text-muted)]">Memuat riwayat...</div>;
   }
 
   if (!rows.length) {
-    return <div className="rounded-3xl border border-[var(--border2)] bg-black/20 p-4 text-center text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Riwayat evaluasi belum ada</div>;
+    return <div className="ui-card ui-motion-in rounded-3xl p-4 text-center text-[10px] font-black uppercase tracking-[2px] text-[var(--ui-text-muted)]">Riwayat evaluasi belum ada</div>;
   }
 
   return (
-    <div className="space-y-3">
+    <div className="ui-motion-in space-y-3">
       <div className="flex items-center justify-between px-1">
-        <span className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[2px] text-[var(--text)]">{title}</span>
-        <span className="text-[9px] font-black uppercase tracking-[1px] text-[var(--text-dim)]">15 Terbaru</span>
+        <span className="ui-title text-[11px]">{title}</span>
+        <span className="ui-label text-[9px]">15 Terbaru</span>
       </div>
       {showAi2DigitNote && (
-        <div className="rounded-2xl border border-[rgba(246,198,106,0.22)] bg-[rgba(246,198,106,0.08)] px-3 py-2 text-[9px] font-bold leading-relaxed tracking-[0.4px] text-[var(--gold-bright)]">
+        <div className="ui-note ui-motion-in border-[rgba(246,198,106,0.22)] bg-[rgba(246,198,106,0.08)] px-3 py-2 text-[9.5px] font-bold leading-relaxed tracking-[0.4px] text-[var(--ui-gold-bright)]">
           Catatan: jika AI 2 digit terlalu sering ZONK, lebih bijak jadikan hasilnya sebagai OFF 2 digit.
         </div>
       )}
@@ -104,9 +104,9 @@ export default function EvaluationHistory({
           const label = displayLabel(row, mode);
           const isSuccess = label !== "ZONK";
           return (
-            <div key={row.id} className="rounded-3xl border border-[var(--border2)] bg-black/25 p-2 text-center">
-              <div className="font-['JetBrains_Mono'] text-[10px] font-black tracking-[0.5px] text-[var(--text)] sm:text-[11px]">{row.from_result} → {row.new_result}</div>
-              <div className={`mt-2 rounded-full px-1.5 py-1 text-[8px] font-black uppercase tracking-[0.5px] ${isSuccess ? "bg-[var(--green-dim)] text-[var(--green)]" : "bg-[var(--red-dim)] text-[var(--red)]"}`}>{label}</div>
+            <div key={row.id} className="ui-card ui-motion-soft ui-lift rounded-3xl p-2 text-center">
+              <div className="font-['JetBrains_Mono'] text-[10px] font-black tracking-[0.5px] text-[var(--ui-text)] sm:text-[11px]">{row.from_result} → {row.new_result}</div>
+              <div className={`mt-2 rounded-full px-1.5 py-1 text-[8px] font-black uppercase tracking-[0.5px] ${isSuccess ? "bg-[var(--green-dim)] text-[var(--ui-green)]" : "bg-[var(--red-dim)] text-[var(--ui-red)]"}`}>{label}</div>
             </div>
           );
         })}
