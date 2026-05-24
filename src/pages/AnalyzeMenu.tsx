@@ -64,7 +64,7 @@ function AnalyzeList() {
   ];
 
   return (
-    <div className="analyze-menu-page animate-[slideIn_0.22s_ease-out] pb-4">
+    <div className="analyze-menu-page pb-4">
       <button onClick={() => navigate("/")} className="ghost-button mb-3 flex items-center gap-2 px-4 py-3 text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)] active:scale-95">
         <ArrowLeft size={16} /> Beranda
       </button>
