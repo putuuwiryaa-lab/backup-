@@ -377,6 +377,52 @@ a {
   }
 }
 
+/* Refined motion polish */
+.fixed.inset-0.z-50 {
+  animation: premium-fade 220ms var(--motion-premium) both;
+}
+
+.fixed.inset-0.z-50 > .premium-panel {
+  animation: premium-sheet 320ms var(--motion-premium) both !important;
+}
+
+.bottom-account-shell {
+  animation: premium-dock 420ms var(--motion-premium) both !important;
+}
+
+.hero-crown .app-logo-mark {
+  animation: premium-logo-breathe 3.6s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.premium-panel.result-glow,
+.analysis-mode-ai .premium-panel,
+.analysis-mode-mati .premium-panel,
+.analysis-mode-jumlah .premium-panel,
+.analysis-mode-shio .premium-panel,
+.analysis-mode-rekap .premium-panel {
+  animation: premium-rise 320ms var(--motion-premium) both;
+}
+
+.main-digit-chip,
+.premium-panel.result-glow > .relative.rounded-3xl > .mt-4 > div > div {
+  animation: premium-pop 360ms var(--motion-premium) both;
+}
+
+.market-card-compact .market-last-value,
+.main-digit-chip {
+  transition:
+    transform var(--motion-fast) var(--motion-premium),
+    text-shadow var(--motion-mid) var(--motion-premium),
+    color var(--motion-mid) var(--motion-premium) !important;
+}
+
+.market-card-compact:active .market-last-value,
+.main-digit-chip:active {
+  transform: scale(1.035) !important;
+  text-shadow: 0 0 18px rgba(246,198,106,0.24) !important;
+}
+
 @keyframes premium-rise {
   from {
     opacity: 0;
@@ -385,6 +431,55 @@ a {
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes premium-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes premium-sheet {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes premium-dock {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes premium-pop {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes premium-logo-breathe {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.96;
+  }
+  50% {
+    transform: scale(1.045);
+    opacity: 1;
   }
 }
 
@@ -397,7 +492,11 @@ a {
   .premium-card,
   .glass-card,
   .market-card-compact,
-  .bottom-account-shell {
+  .bottom-account-shell,
+  .fixed.inset-0.z-50,
+  .fixed.inset-0.z-50 > .premium-panel,
+  .hero-crown .app-logo-mark,
+  .main-digit-chip {
     animation: none !important;
   }
 
@@ -411,7 +510,9 @@ a {
   .bottom-account-button,
   .soft-input,
   button,
-  a {
+  a,
+  .market-card-compact .market-last-value,
+  .main-digit-chip {
     transition: none !important;
   }
 }
