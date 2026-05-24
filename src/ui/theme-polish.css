@@ -423,6 +423,75 @@ a {
   text-shadow: 0 0 18px rgba(246,198,106,0.24) !important;
 }
 
+/* Interaction polish layer */
+main.min-w-0.flex-1 {
+  animation: premium-page 300ms var(--motion-premium) both;
+}
+
+.flex.min-h-screen.flex-col.items-center.justify-center,
+.flex.min-h-screen.items-center.justify-center {
+  animation: premium-page 360ms var(--motion-premium) both;
+}
+
+.market-search {
+  transition:
+    transform var(--motion-fast) var(--motion-premium),
+    filter var(--motion-mid) var(--motion-premium) !important;
+}
+
+.market-search:focus-within {
+  transform: translateY(-1px) !important;
+  filter: drop-shadow(0 10px 20px rgba(246,198,106,0.08));
+}
+
+.market-search:focus-within svg {
+  color: var(--gold-bright) !important;
+  transform: scale(1.06);
+}
+
+.market-search svg,
+.ghost-button svg,
+.primary-button svg,
+.report-floating-button svg,
+.bottom-account-button svg {
+  transition:
+    transform var(--motion-mid) var(--motion-premium),
+    color var(--motion-mid) var(--motion-premium),
+    opacity var(--motion-mid) var(--motion-premium) !important;
+}
+
+.ghost-button:active svg,
+.primary-button:active svg,
+.report-floating-button:active svg,
+.bottom-account-button:active svg {
+  transform: scale(0.92) rotate(-4deg);
+}
+
+.market-section-title .ghost-button:active svg {
+  transform: rotate(180deg) scale(0.92);
+}
+
+button:focus-visible,
+a:focus-visible,
+.soft-input:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid rgba(246,198,106,0.58) !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 0 5px rgba(246,198,106,0.10) !important;
+}
+
+.premium-panel.max-w-sm,
+.premium-panel.w-full.max-w-sm {
+  transform-origin: bottom center;
+}
+
+@media (min-width: 640px) {
+  .premium-panel.max-w-sm,
+  .premium-panel.w-full.max-w-sm {
+    transform-origin: center;
+  }
+}
+
 @keyframes premium-rise {
   from {
     opacity: 0;
@@ -437,6 +506,17 @@ a {
 @keyframes premium-fade {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+@keyframes premium-page {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes premium-sheet {
@@ -496,7 +576,10 @@ a {
   .fixed.inset-0.z-50,
   .fixed.inset-0.z-50 > .premium-panel,
   .hero-crown .app-logo-mark,
-  .main-digit-chip {
+  .main-digit-chip,
+  main.min-w-0.flex-1,
+  .flex.min-h-screen.flex-col.items-center.justify-center,
+  .flex.min-h-screen.items-center.justify-center {
     animation: none !important;
   }
 
@@ -512,7 +595,13 @@ a {
   button,
   a,
   .market-card-compact .market-last-value,
-  .main-digit-chip {
+  .main-digit-chip,
+  .market-search,
+  .market-search svg,
+  .ghost-button svg,
+  .primary-button svg,
+  .report-floating-button svg,
+  .bottom-account-button svg {
     transition: none !important;
   }
 }
