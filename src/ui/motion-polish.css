@@ -71,11 +71,9 @@
   }
 }
 
-.ui-motion-in,
-.ui-panel,
-.result-glow,
-.premium-panel.result-glow {
-  animation: motion-panel-in 340ms var(--motion-flow) both !important;
+/* Generic motion utilities: keep these for explicit motion classes only. */
+.ui-motion-in {
+  animation: motion-panel-in 320ms var(--motion-flow) both !important;
   transform-origin: center top;
 }
 
@@ -101,109 +99,116 @@
   }
 }
 
-/* Full analysis flow motion */
+/* Page-level motion: reduced scope so child panels do not double animate too heavily. */
 .analysis-mode-ai,
 .analysis-mode-mati,
 .analysis-mode-jumlah,
 .analysis-mode-shio,
 .analysis-mode-rekap {
-  animation: motion-page-in 320ms var(--motion-flow) both !important;
+  animation: motion-page-in 300ms var(--motion-flow) both !important;
 }
 
-.analysis-mode-ai > *,
-.analysis-mode-mati > *,
-.analysis-mode-jumlah > *,
-.analysis-mode-shio > *,
-.analysis-mode-rekap > * {
-  animation: motion-soft-rise 340ms var(--motion-flow) both !important;
+.analysis-mode-ai > .premium-panel,
+.analysis-mode-mati > .premium-panel,
+.analysis-mode-jumlah > .premium-panel,
+.analysis-mode-shio > .premium-panel,
+.analysis-mode-rekap > .premium-panel,
+.analysis-mode-ai > .ui-panel,
+.analysis-mode-mati > .ui-panel,
+.analysis-mode-jumlah > .ui-panel,
+.analysis-mode-shio > .ui-panel,
+.analysis-mode-rekap > .ui-panel {
+  animation: motion-soft-rise 300ms var(--motion-flow) both !important;
 }
 
-.analysis-mode-ai > *:nth-child(1),
-.analysis-mode-mati > *:nth-child(1),
-.analysis-mode-jumlah > *:nth-child(1),
-.analysis-mode-shio > *:nth-child(1),
-.analysis-mode-rekap > *:nth-child(1) { animation-delay: 20ms !important; }
-.analysis-mode-ai > *:nth-child(2),
-.analysis-mode-mati > *:nth-child(2),
-.analysis-mode-jumlah > *:nth-child(2),
-.analysis-mode-shio > *:nth-child(2),
-.analysis-mode-rekap > *:nth-child(2) { animation-delay: 70ms !important; }
-.analysis-mode-ai > *:nth-child(3),
-.analysis-mode-mati > *:nth-child(3),
-.analysis-mode-jumlah > *:nth-child(3),
-.analysis-mode-shio > *:nth-child(3),
-.analysis-mode-rekap > *:nth-child(3) { animation-delay: 120ms !important; }
-.analysis-mode-ai > *:nth-child(4),
-.analysis-mode-mati > *:nth-child(4),
-.analysis-mode-jumlah > *:nth-child(4),
-.analysis-mode-shio > *:nth-child(4),
-.analysis-mode-rekap > *:nth-child(4) { animation-delay: 170ms !important; }
+.analysis-mode-ai > .premium-panel:nth-child(1),
+.analysis-mode-mati > .premium-panel:nth-child(1),
+.analysis-mode-jumlah > .premium-panel:nth-child(1),
+.analysis-mode-shio > .premium-panel:nth-child(1),
+.analysis-mode-rekap > .premium-panel:nth-child(1),
+.analysis-mode-ai > .ui-panel:nth-child(1),
+.analysis-mode-mati > .ui-panel:nth-child(1),
+.analysis-mode-jumlah > .ui-panel:nth-child(1),
+.analysis-mode-shio > .ui-panel:nth-child(1),
+.analysis-mode-rekap > .ui-panel:nth-child(1) { animation-delay: 20ms !important; }
 
+.analysis-mode-ai > .premium-panel:nth-child(2),
+.analysis-mode-mati > .premium-panel:nth-child(2),
+.analysis-mode-jumlah > .premium-panel:nth-child(2),
+.analysis-mode-shio > .premium-panel:nth-child(2),
+.analysis-mode-rekap > .premium-panel:nth-child(2),
+.analysis-mode-ai > .ui-panel:nth-child(2),
+.analysis-mode-mati > .ui-panel:nth-child(2),
+.analysis-mode-jumlah > .ui-panel:nth-child(2),
+.analysis-mode-shio > .ui-panel:nth-child(2),
+.analysis-mode-rekap > .ui-panel:nth-child(2) { animation-delay: 65ms !important; }
+
+.analysis-mode-ai > .premium-panel:nth-child(3),
+.analysis-mode-mati > .premium-panel:nth-child(3),
+.analysis-mode-jumlah > .premium-panel:nth-child(3),
+.analysis-mode-shio > .premium-panel:nth-child(3),
+.analysis-mode-rekap > .premium-panel:nth-child(3),
+.analysis-mode-ai > .ui-panel:nth-child(3),
+.analysis-mode-mati > .ui-panel:nth-child(3),
+.analysis-mode-jumlah > .ui-panel:nth-child(3),
+.analysis-mode-shio > .ui-panel:nth-child(3),
+.analysis-mode-rekap > .ui-panel:nth-child(3) { animation-delay: 110ms !important; }
+
+/* Options get staggered; generic .ui-card is no longer globally animated. */
 .ui-panel .grid > .ui-motion-soft,
 .ui-panel .grid > .ui-tap,
 .ui-panel .grid > button,
 .ui-card .grid > .ui-motion-soft,
 .ui-card .grid > .ui-tap,
 .ui-card .grid > button {
-  animation: motion-option-in 300ms var(--motion-flow) both !important;
+  animation: motion-option-in 280ms var(--motion-flow) both !important;
 }
 
 .ui-panel .grid > *:nth-child(1),
-.ui-card .grid > *:nth-child(1) { animation-delay: 35ms !important; }
+.ui-card .grid > *:nth-child(1) { animation-delay: 30ms !important; }
 .ui-panel .grid > *:nth-child(2),
-.ui-card .grid > *:nth-child(2) { animation-delay: 70ms !important; }
+.ui-card .grid > *:nth-child(2) { animation-delay: 60ms !important; }
 .ui-panel .grid > *:nth-child(3),
-.ui-card .grid > *:nth-child(3) { animation-delay: 105ms !important; }
+.ui-card .grid > *:nth-child(3) { animation-delay: 90ms !important; }
 .ui-panel .grid > *:nth-child(4),
-.ui-card .grid > *:nth-child(4) { animation-delay: 140ms !important; }
+.ui-card .grid > *:nth-child(4) { animation-delay: 120ms !important; }
 
-.ui-card {
-  animation: motion-card-stack 320ms var(--motion-flow) both !important;
-  transform-origin: center top;
-}
-
-.ui-card:nth-child(1) { animation-delay: 35ms !important; }
-.ui-card:nth-child(2) { animation-delay: 70ms !important; }
-.ui-card:nth-child(3) { animation-delay: 105ms !important; }
-.ui-card:nth-child(4) { animation-delay: 140ms !important; }
-.ui-card:nth-child(5) { animation-delay: 175ms !important; }
-.ui-card:nth-child(n+6) { animation-delay: 210ms !important; }
-
+/* Result-specific reveal. */
 .result-glow,
 .premium-panel.result-glow {
-  animation: motion-result-reveal 440ms var(--motion-flow) both !important;
+  animation: motion-result-reveal 420ms var(--motion-flow) both !important;
 }
 
-.result-glow .ui-card,
-.premium-panel.result-glow .ui-card {
-  animation: motion-result-inner 360ms var(--motion-flow) 90ms both !important;
+.result-glow > .ui-card,
+.premium-panel.result-glow > .ui-card {
+  animation: motion-result-inner 340ms var(--motion-flow) 80ms both !important;
 }
 
 .main-digit-chip,
 .premium-panel.result-glow > .relative.rounded-3xl > .mt-4 > div > div,
 .ui-motion-soft.flex.items-center.justify-center.rounded-2xl,
 .ui-motion-soft.ui-tap.flex.items-center.justify-center.rounded-2xl {
-  animation: motion-chip-pop 360ms var(--motion-snap) both !important;
+  animation: motion-chip-pop 340ms var(--motion-snap) both !important;
 }
 
 .main-digit-chip:nth-child(1),
 .premium-panel.result-glow > .relative.rounded-3xl > .mt-4 > div > div:nth-child(1),
-.ui-motion-soft.flex.items-center.justify-center.rounded-2xl:nth-child(1) { animation-delay: 40ms !important; }
+.ui-motion-soft.flex.items-center.justify-center.rounded-2xl:nth-child(1) { animation-delay: 35ms !important; }
 .main-digit-chip:nth-child(2),
 .premium-panel.result-glow > .relative.rounded-3xl > .mt-4 > div > div:nth-child(2),
-.ui-motion-soft.flex.items-center.justify-center.rounded-2xl:nth-child(2) { animation-delay: 75ms !important; }
+.ui-motion-soft.flex.items-center.justify-center.rounded-2xl:nth-child(2) { animation-delay: 65ms !important; }
 .main-digit-chip:nth-child(3),
 .premium-panel.result-glow > .relative.rounded-3xl > .mt-4 > div > div:nth-child(3),
-.ui-motion-soft.flex.items-center.justify-center.rounded-2xl:nth-child(3) { animation-delay: 110ms !important; }
+.ui-motion-soft.flex.items-center.justify-center.rounded-2xl:nth-child(3) { animation-delay: 95ms !important; }
 .main-digit-chip:nth-child(4),
 .premium-panel.result-glow > .relative.rounded-3xl > .mt-4 > div > div:nth-child(4),
-.ui-motion-soft.flex.items-center.justify-center.rounded-2xl:nth-child(4) { animation-delay: 145ms !important; }
+.ui-motion-soft.flex.items-center.justify-center.rounded-2xl:nth-child(4) { animation-delay: 125ms !important; }
 .main-digit-chip:nth-child(5),
 .premium-panel.result-glow > .relative.rounded-3xl > .mt-4 > div > div:nth-child(5),
-.ui-motion-soft.flex.items-center.justify-center.rounded-2xl:nth-child(5) { animation-delay: 180ms !important; }
+.ui-motion-soft.flex.items-center.justify-center.rounded-2xl:nth-child(5) { animation-delay: 155ms !important; }
 .main-digit-chip:nth-child(n+6),
 .premium-panel.result-glow > .relative.rounded-3xl > .mt-4 > div > div:nth-child(n+6),
-.ui-motion-soft.flex.items-center.justify-center.rounded-2xl:nth-child(n+6) { animation-delay: 215ms !important; }
+.ui-motion-soft.flex.items-center.justify-center.rounded-2xl:nth-child(n+6) { animation-delay: 185ms !important; }
 
 button:disabled,
 button[aria-disabled="true"] {
@@ -222,175 +227,94 @@ button svg.animate-spin {
   animation-duration: 850ms !important;
 }
 
-.ui-panel .space-y-3 > .ui-card,
-.ui-panel .space-y-3 > .ui-motion-soft,
-.ui-panel .space-y-3 > div,
-.ui-panel .space-y-5 > section,
-.ui-motion-in.space-y-4 > * {
-  animation: motion-soft-rise 320ms var(--motion-flow) both !important;
+/* Stagger only direct result/layout sections, not every nested div. */
+.ui-motion-in.space-y-4 > .ui-panel,
+.ui-motion-in.space-y-4 > .result-glow,
+.ui-motion-in.space-y-4 > .premium-panel {
+  animation: motion-soft-rise 300ms var(--motion-flow) both !important;
 }
 
-.ui-motion-in.space-y-4 > *:nth-child(1) { animation-delay: 30ms !important; }
-.ui-motion-in.space-y-4 > *:nth-child(2) { animation-delay: 75ms !important; }
-.ui-motion-in.space-y-4 > *:nth-child(3) { animation-delay: 120ms !important; }
-.ui-motion-in.space-y-4 > *:nth-child(4) { animation-delay: 165ms !important; }
-.ui-motion-in.space-y-4 > *:nth-child(5) { animation-delay: 210ms !important; }
-.ui-motion-in.space-y-4 > *:nth-child(n+6) { animation-delay: 245ms !important; }
+.ui-motion-in.space-y-4 > .ui-panel:nth-child(1),
+.ui-motion-in.space-y-4 > .result-glow:nth-child(1),
+.ui-motion-in.space-y-4 > .premium-panel:nth-child(1) { animation-delay: 25ms !important; }
+.ui-motion-in.space-y-4 > .ui-panel:nth-child(2),
+.ui-motion-in.space-y-4 > .result-glow:nth-child(2),
+.ui-motion-in.space-y-4 > .premium-panel:nth-child(2) { animation-delay: 65ms !important; }
+.ui-motion-in.space-y-4 > .ui-panel:nth-child(3),
+.ui-motion-in.space-y-4 > .result-glow:nth-child(3),
+.ui-motion-in.space-y-4 > .premium-panel:nth-child(3) { animation-delay: 105ms !important; }
+.ui-motion-in.space-y-4 > .ui-panel:nth-child(4),
+.ui-motion-in.space-y-4 > .result-glow:nth-child(4),
+.ui-motion-in.space-y-4 > .premium-panel:nth-child(4) { animation-delay: 145ms !important; }
+.ui-motion-in.space-y-4 > .ui-panel:nth-child(n+5),
+.ui-motion-in.space-y-4 > .result-glow:nth-child(n+5),
+.ui-motion-in.space-y-4 > .premium-panel:nth-child(n+5) { animation-delay: 185ms !important; }
 
 .custom-scrollbar,
 .max-h-\[260px\] {
-  animation: motion-text-reveal 420ms var(--motion-flow) 110ms both !important;
+  animation: motion-text-reveal 380ms var(--motion-flow) 90ms both !important;
 }
 
 @keyframes motion-page-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes motion-hero-in {
-  from {
-    opacity: 0;
-    transform: translateY(12px) scale(0.975);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  from { opacity: 0; transform: translateY(12px) scale(0.975); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes motion-soft-rise {
-  from {
-    opacity: 0;
-    transform: translateY(7px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(7px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes motion-card-slide {
-  from {
-    opacity: 0;
-    transform: translateX(12px) translateY(8px) scale(0.985);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0) translateY(0) scale(1);
-  }
-}
-
-@keyframes motion-card-stack {
-  from {
-    opacity: 0;
-    transform: translateY(9px) scale(0.99);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  from { opacity: 0; transform: translateX(12px) translateY(8px) scale(0.985); }
+  to { opacity: 1; transform: translateX(0) translateY(0) scale(1); }
 }
 
 @keyframes motion-option-in {
-  from {
-    opacity: 0;
-    transform: translateY(6px) scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  from { opacity: 0; transform: translateY(6px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes motion-number-pop {
-  0% {
-    opacity: 0;
-    transform: scale(0.82) translateY(4px);
-  }
-  70% {
-    opacity: 1;
-    transform: scale(1.045) translateY(0);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
+  0% { opacity: 0; transform: scale(0.82) translateY(4px); }
+  70% { opacity: 1; transform: scale(1.045) translateY(0); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 @keyframes motion-panel-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px) scale(0.985);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  from { opacity: 0; transform: translateY(10px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes motion-result-reveal {
-  from {
-    opacity: 0;
-    transform: translateY(12px) scale(0.975);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  from { opacity: 0; transform: translateY(12px) scale(0.975); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes motion-result-inner {
-  from {
-    opacity: 0;
-    transform: translateY(7px) scale(0.985);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  from { opacity: 0; transform: translateY(7px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes motion-chip-pop {
-  0% {
-    opacity: 0;
-    transform: translateY(8px) scale(0.9);
-  }
-  75% {
-    opacity: 1;
-    transform: translateY(0) scale(1.04);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  0% { opacity: 0; transform: translateY(8px) scale(0.9); }
+  75% { opacity: 1; transform: translateY(0) scale(1.04); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes motion-loading-pulse {
-  0%, 100% {
-    transform: translateY(0) scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: translateY(-1px) scale(1.01);
-    opacity: 0.92;
-  }
+  0%, 100% { transform: translateY(0) scale(1); opacity: 1; }
+  50% { transform: translateY(-1px) scale(1.01); opacity: 0.92; }
 }
 
 @keyframes motion-text-reveal {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -404,14 +328,17 @@ button svg.animate-spin {
   .analysis-mode-jumlah,
   .analysis-mode-shio,
   .analysis-mode-rekap,
-  .analysis-mode-ai > *,
-  .analysis-mode-mati > *,
-  .analysis-mode-jumlah > *,
-  .analysis-mode-shio > *,
-  .analysis-mode-rekap > *,
+  .analysis-mode-ai > .premium-panel,
+  .analysis-mode-mati > .premium-panel,
+  .analysis-mode-jumlah > .premium-panel,
+  .analysis-mode-shio > .premium-panel,
+  .analysis-mode-rekap > .premium-panel,
+  .analysis-mode-ai > .ui-panel,
+  .analysis-mode-mati > .ui-panel,
+  .analysis-mode-jumlah > .ui-panel,
+  .analysis-mode-shio > .ui-panel,
+  .analysis-mode-rekap > .ui-panel,
   .ui-motion-in,
-  .ui-panel,
-  .ui-card,
   .ui-panel .grid > *,
   .ui-card .grid > *,
   .result-glow,
