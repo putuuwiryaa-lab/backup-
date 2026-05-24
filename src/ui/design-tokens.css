@@ -1,0 +1,136 @@
+/* Shared visual tokens and reusable UI primitives.
+   This layer keeps color, spacing, radius, and motion consistent across the app.
+*/
+
+:root {
+  --ui-bg-main: #0d0a1a;
+  --ui-bg-deep: #080611;
+  --ui-surface: #151025;
+  --ui-surface-soft: #120d22;
+  --ui-surface-strong: #18122d;
+  --ui-surface-pressed: #20183a;
+
+  --ui-border-soft: rgba(255, 255, 255, 0.08);
+  --ui-border: rgba(255, 255, 255, 0.13);
+  --ui-border-strong: rgba(255, 255, 255, 0.20);
+  --ui-border-gold: rgba(246, 198, 106, 0.24);
+  --ui-border-purple: rgba(181, 140, 255, 0.24);
+
+  --ui-text: #f7f1ff;
+  --ui-text-muted: #b9acd3;
+  --ui-text-soft: #82749f;
+  --ui-text-faint: #5b4a78;
+
+  --ui-gold: #f6c66a;
+  --ui-gold-bright: #ffe19a;
+  --ui-purple: #a98cff;
+  --ui-purple-strong: #7c4dff;
+  --ui-cyan: #28d7ff;
+  --ui-blue: #8fb7ff;
+  --ui-green: #79f2bb;
+  --ui-red: #ff6b8a;
+
+  --ui-space-1: 0.25rem;
+  --ui-space-2: 0.5rem;
+  --ui-space-3: 0.75rem;
+  --ui-space-4: 1rem;
+  --ui-space-5: 1.25rem;
+  --ui-space-6: 1.5rem;
+
+  --ui-radius-sm: 0.75rem;
+  --ui-radius-md: 1rem;
+  --ui-radius-lg: 1.35rem;
+  --ui-radius-xl: 1.75rem;
+  --ui-radius-2xl: 2rem;
+
+  --ui-motion-fast: 140ms;
+  --ui-motion-mid: 220ms;
+  --ui-motion-slow: 320ms;
+  --ui-motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ui-card,
+.ui-panel,
+.ui-note {
+  border: 1px solid var(--ui-border-soft);
+  background: var(--ui-surface);
+}
+
+.ui-card,
+.ui-panel {
+  border-radius: var(--ui-radius-xl);
+}
+
+.ui-note {
+  border-radius: var(--ui-radius-lg);
+}
+
+.ui-title {
+  font-family: 'Syne', 'Outfit', system-ui, sans-serif;
+  color: var(--ui-text);
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.ui-label {
+  color: var(--ui-text-muted);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.ui-number {
+  font-family: 'DM Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  color: var(--ui-gold-bright);
+  font-weight: 900;
+  letter-spacing: 0.2em;
+}
+
+.ui-motion-in {
+  animation: ui-motion-in var(--ui-motion-slow) var(--ui-motion-ease) both;
+}
+
+.ui-motion-soft {
+  transition:
+    transform var(--ui-motion-fast) var(--ui-motion-ease),
+    background-color var(--ui-motion-mid) var(--ui-motion-ease),
+    border-color var(--ui-motion-mid) var(--ui-motion-ease),
+    color var(--ui-motion-mid) var(--ui-motion-ease),
+    opacity var(--ui-motion-mid) var(--ui-motion-ease);
+}
+
+.ui-tap:active {
+  transform: scale(0.985);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ui-lift:hover {
+    transform: translateY(-1px);
+  }
+}
+
+@keyframes ui-motion-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-motion-in {
+    animation: none !important;
+  }
+
+  .ui-motion-soft,
+  .ui-tap,
+  .ui-lift {
+    transition: none !important;
+    transform: none !important;
+  }
+}
