@@ -1,0 +1,230 @@
+/* Focused motion polish layer.
+   Loaded after theme-polish.css. Motion only: no color/layout/performance resets. */
+
+:root {
+  --motion-snap: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-flow: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.analyze-menu-page {
+  animation: motion-page-in 320ms var(--motion-flow) both !important;
+}
+
+.analyze-market-hero {
+  animation: motion-hero-in 420ms var(--motion-flow) both !important;
+  transform-origin: center top;
+}
+
+.analyze-last-result {
+  animation: motion-number-pop 460ms var(--motion-snap) 120ms both !important;
+  transform-origin: center;
+}
+
+.analyze-section-title {
+  animation: motion-soft-rise 300ms var(--motion-flow) 130ms both !important;
+}
+
+.analyze-menu-card {
+  animation: motion-card-slide 420ms var(--motion-flow) both !important;
+  transform-origin: center;
+  transition:
+    transform 160ms var(--motion-snap),
+    border-color 240ms var(--motion-flow),
+    box-shadow 260ms var(--motion-flow),
+    background 260ms var(--motion-flow),
+    opacity 220ms var(--motion-flow) !important;
+}
+
+.analyze-menu-icon,
+.analyze-menu-chevron {
+  transition:
+    transform 180ms var(--motion-snap),
+    color 220ms var(--motion-flow),
+    border-color 240ms var(--motion-flow),
+    background 240ms var(--motion-flow),
+    opacity 220ms var(--motion-flow) !important;
+}
+
+.analyze-menu-card:active {
+  transform: scale(0.982) !important;
+}
+
+.analyze-menu-card:active .analyze-menu-icon {
+  transform: scale(0.92) rotate(-5deg) !important;
+}
+
+.analyze-menu-card:active .analyze-menu-chevron {
+  transform: translateX(5px) scale(0.94) !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .analyze-menu-card:hover {
+    transform: translateY(-2px) scale(1.006) !important;
+  }
+
+  .analyze-menu-card:hover .analyze-menu-icon {
+    transform: translateY(-1px) scale(1.045) !important;
+  }
+
+  .analyze-menu-card:hover .analyze-menu-chevron {
+    transform: translateX(4px) !important;
+  }
+}
+
+.ui-motion-in,
+.ui-panel,
+.result-glow,
+.premium-panel.result-glow {
+  animation: motion-panel-in 340ms var(--motion-flow) both !important;
+  transform-origin: center top;
+}
+
+.ui-motion-soft,
+.ui-tap,
+.ui-lift {
+  transition:
+    transform 160ms var(--motion-snap),
+    background 240ms var(--motion-flow),
+    border-color 240ms var(--motion-flow),
+    box-shadow 240ms var(--motion-flow),
+    opacity 220ms var(--motion-flow) !important;
+}
+
+.ui-tap:active,
+.ui-lift:active {
+  transform: scale(0.985) !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ui-lift:hover {
+    transform: translateY(-2px) !important;
+  }
+}
+
+.main-digit-chip,
+.premium-panel.result-glow > .relative.rounded-3xl > .mt-4 > div > div {
+  animation: motion-chip-pop 360ms var(--motion-snap) both !important;
+}
+
+.main-digit-chip:nth-child(1),
+.premium-panel.result-glow > .relative.rounded-3xl > .mt-4 > div > div:nth-child(1) { animation-delay: 40ms !important; }
+.main-digit-chip:nth-child(2),
+.premium-panel.result-glow > .relative.rounded-3xl > .mt-4 > div > div:nth-child(2) { animation-delay: 75ms !important; }
+.main-digit-chip:nth-child(3),
+.premium-panel.result-glow > .relative.rounded-3xl > .mt-4 > div > div:nth-child(3) { animation-delay: 110ms !important; }
+.main-digit-chip:nth-child(4),
+.premium-panel.result-glow > .relative.rounded-3xl > .mt-4 > div > div:nth-child(4) { animation-delay: 145ms !important; }
+.main-digit-chip:nth-child(5),
+.premium-panel.result-glow > .relative.rounded-3xl > .mt-4 > div > div:nth-child(5) { animation-delay: 180ms !important; }
+.main-digit-chip:nth-child(n+6),
+.premium-panel.result-glow > .relative.rounded-3xl > .mt-4 > div > div:nth-child(n+6) { animation-delay: 215ms !important; }
+
+@keyframes motion-page-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes motion-hero-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.975);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes motion-soft-rise {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes motion-card-slide {
+  from {
+    opacity: 0;
+    transform: translateX(12px) translateY(8px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) translateY(0) scale(1);
+  }
+}
+
+@keyframes motion-number-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.82) translateY(4px);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.045) translateY(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes motion-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes motion-chip-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.9);
+  }
+  75% {
+    opacity: 1;
+    transform: translateY(0) scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .analyze-menu-page,
+  .analyze-market-hero,
+  .analyze-last-result,
+  .analyze-section-title,
+  .analyze-menu-card,
+  .ui-motion-in,
+  .ui-panel,
+  .result-glow,
+  .premium-panel.result-glow,
+  .main-digit-chip,
+  .premium-panel.result-glow > .relative.rounded-3xl > .mt-4 > div > div {
+    animation: none !important;
+  }
+
+  .analyze-menu-card,
+  .analyze-menu-icon,
+  .analyze-menu-chevron,
+  .ui-motion-soft,
+  .ui-tap,
+  .ui-lift {
+    transition: none !important;
+  }
+}
