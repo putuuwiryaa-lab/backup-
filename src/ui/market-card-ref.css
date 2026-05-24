@@ -109,7 +109,6 @@ header p {
   display: flex !important;
   justify-content: center !important;
   align-items: center !important;
-  transform: none !important;
 }
 
 .market-card-compact .market-last-label {
@@ -278,22 +277,7 @@ header p {
   border-color: var(--mode-border-soft) !important;
 }
 
-/* Long screenshot stability: prevent Android/WebView stitching duplicates. */
-.analysis-mode-ai,
-.analysis-mode-mati,
-.analysis-mode-jumlah,
-.analysis-mode-shio,
-.analysis-mode-rekap,
-.analysis-mode-ai *,
-.analysis-mode-mati *,
-.analysis-mode-jumlah *,
-.analysis-mode-shio *,
-.analysis-mode-rekap * {
-  animation: none !important;
-  transition-property: background-color, border-color, color, opacity !important;
-  transform: none !important;
-}
-
+/* Long screenshot stability: layout isolation only. Motion remains enabled for testing. */
 .analysis-mode-ai .premium-panel,
 .analysis-mode-mati .premium-panel,
 .analysis-mode-jumlah .premium-panel,
