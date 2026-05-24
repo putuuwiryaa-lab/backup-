@@ -3,6 +3,7 @@
    Performance and hierarchy overrides live beside this entry.
 */
 
+@import "./design-tokens.css";
 @import "../design-system.css";
 @import "./performance-polish.css";
 @import "./market-card-ref.css";
