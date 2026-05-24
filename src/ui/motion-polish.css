@@ -6,6 +6,25 @@
   --motion-flow: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* Own analysis motion here. These guards neutralize broad legacy entrance rules from theme-polish.css only inside analysis flows. */
+.analysis-mode-ai .premium-panel:not(.result-glow),
+.analysis-mode-mati .premium-panel:not(.result-glow),
+.analysis-mode-jumlah .premium-panel:not(.result-glow),
+.analysis-mode-shio .premium-panel:not(.result-glow),
+.analysis-mode-rekap .premium-panel:not(.result-glow),
+.analysis-mode-ai .premium-card,
+.analysis-mode-mati .premium-card,
+.analysis-mode-jumlah .premium-card,
+.analysis-mode-shio .premium-card,
+.analysis-mode-rekap .premium-card,
+.analysis-mode-ai .glass-card,
+.analysis-mode-mati .glass-card,
+.analysis-mode-jumlah .glass-card,
+.analysis-mode-shio .glass-card,
+.analysis-mode-rekap .glass-card {
+  animation: none !important;
+}
+
 .analyze-menu-page {
   animation: motion-page-in 320ms var(--motion-flow) both !important;
 }
@@ -71,7 +90,6 @@
   }
 }
 
-/* Generic motion utilities: keep these for explicit motion classes only. */
 .ui-motion-in {
   animation: motion-panel-in 320ms var(--motion-flow) both !important;
   transform-origin: center top;
@@ -99,7 +117,6 @@
   }
 }
 
-/* Page-level motion: reduced scope so child panels do not double animate too heavily. */
 .analysis-mode-ai,
 .analysis-mode-mati,
 .analysis-mode-jumlah,
@@ -154,7 +171,6 @@
 .analysis-mode-shio > .ui-panel:nth-child(3),
 .analysis-mode-rekap > .ui-panel:nth-child(3) { animation-delay: 110ms !important; }
 
-/* Options get staggered; generic .ui-card is no longer globally animated. */
 .ui-panel .grid > .ui-motion-soft,
 .ui-panel .grid > .ui-tap,
 .ui-panel .grid > button,
@@ -173,7 +189,6 @@
 .ui-panel .grid > *:nth-child(4),
 .ui-card .grid > *:nth-child(4) { animation-delay: 120ms !important; }
 
-/* Result-specific reveal. */
 .result-glow,
 .premium-panel.result-glow {
   animation: motion-result-reveal 420ms var(--motion-flow) both !important;
@@ -227,7 +242,6 @@ button svg.animate-spin {
   animation-duration: 850ms !important;
 }
 
-/* Stagger only direct result/layout sections, not every nested div. */
 .ui-motion-in.space-y-4 > .ui-panel,
 .ui-motion-in.space-y-4 > .result-glow,
 .ui-motion-in.space-y-4 > .premium-panel {
@@ -255,67 +269,18 @@ button svg.animate-spin {
   animation: motion-text-reveal 380ms var(--motion-flow) 90ms both !important;
 }
 
-@keyframes motion-page-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes motion-hero-in {
-  from { opacity: 0; transform: translateY(12px) scale(0.975); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@keyframes motion-soft-rise {
-  from { opacity: 0; transform: translateY(7px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes motion-card-slide {
-  from { opacity: 0; transform: translateX(12px) translateY(8px) scale(0.985); }
-  to { opacity: 1; transform: translateX(0) translateY(0) scale(1); }
-}
-
-@keyframes motion-option-in {
-  from { opacity: 0; transform: translateY(6px) scale(0.96); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@keyframes motion-number-pop {
-  0% { opacity: 0; transform: scale(0.82) translateY(4px); }
-  70% { opacity: 1; transform: scale(1.045) translateY(0); }
-  100% { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-@keyframes motion-panel-in {
-  from { opacity: 0; transform: translateY(10px) scale(0.985); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@keyframes motion-result-reveal {
-  from { opacity: 0; transform: translateY(12px) scale(0.975); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@keyframes motion-result-inner {
-  from { opacity: 0; transform: translateY(7px) scale(0.985); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@keyframes motion-chip-pop {
-  0% { opacity: 0; transform: translateY(8px) scale(0.9); }
-  75% { opacity: 1; transform: translateY(0) scale(1.04); }
-  100% { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@keyframes motion-loading-pulse {
-  0%, 100% { transform: translateY(0) scale(1); opacity: 1; }
-  50% { transform: translateY(-1px) scale(1.01); opacity: 0.92; }
-}
-
-@keyframes motion-text-reveal {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+@keyframes motion-page-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes motion-hero-in { from { opacity: 0; transform: translateY(12px) scale(0.975); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes motion-soft-rise { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes motion-card-slide { from { opacity: 0; transform: translateX(12px) translateY(8px) scale(0.985); } to { opacity: 1; transform: translateX(0) translateY(0) scale(1); } }
+@keyframes motion-option-in { from { opacity: 0; transform: translateY(6px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes motion-number-pop { 0% { opacity: 0; transform: scale(0.82) translateY(4px); } 70% { opacity: 1; transform: scale(1.045) translateY(0); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+@keyframes motion-panel-in { from { opacity: 0; transform: translateY(10px) scale(0.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes motion-result-reveal { from { opacity: 0; transform: translateY(12px) scale(0.975); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes motion-result-inner { from { opacity: 0; transform: translateY(7px) scale(0.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes motion-chip-pop { 0% { opacity: 0; transform: translateY(8px) scale(0.9); } 75% { opacity: 1; transform: translateY(0) scale(1.04); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes motion-loading-pulse { 0%, 100% { transform: translateY(0) scale(1); opacity: 1; } 50% { transform: translateY(-1px) scale(1.01); opacity: 0.92; } }
+@keyframes motion-text-reveal { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
 @media (prefers-reduced-motion: reduce) {
   .analyze-menu-page,
