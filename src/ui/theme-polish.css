@@ -43,6 +43,11 @@
   --red-dim: rgba(255,107,138,0.14);
 
   --ink: #080610;
+
+  --motion-fast: 140ms;
+  --motion-mid: 240ms;
+  --motion-slow: 380ms;
+  --motion-premium: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 html {
@@ -220,7 +225,6 @@ input[readonly] {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  transform: none !important;
 }
 
 .market-last-value {
@@ -259,6 +263,143 @@ input[readonly] {
 
 .bottom-account-button svg {
   color: var(--gold-bright) !important;
+}
+
+/* Premium motion language */
+.dashboard-page,
+.hero-card,
+.market-section-title,
+.market-search,
+.premium-panel,
+.premium-card,
+.glass-card,
+.bottom-account-shell {
+  animation: premium-rise var(--motion-slow) var(--motion-premium) both;
+  will-change: transform, opacity;
+}
+
+.market-card-compact {
+  animation: premium-rise 340ms var(--motion-premium) both;
+  transition:
+    transform var(--motion-fast) var(--motion-premium),
+    border-color var(--motion-mid) var(--motion-premium),
+    box-shadow var(--motion-mid) var(--motion-premium),
+    background var(--motion-mid) var(--motion-premium),
+    opacity var(--motion-mid) var(--motion-premium) !important;
+  will-change: transform, opacity;
+}
+
+.premium-panel,
+.premium-card,
+.glass-card,
+.primary-button,
+.ghost-button,
+.report-floating-button,
+.bottom-account-button,
+.soft-input,
+button,
+a {
+  transition:
+    transform var(--motion-fast) var(--motion-premium),
+    background var(--motion-mid) var(--motion-premium),
+    border-color var(--motion-mid) var(--motion-premium),
+    box-shadow var(--motion-mid) var(--motion-premium),
+    color var(--motion-mid) var(--motion-premium),
+    opacity var(--motion-mid) var(--motion-premium) !important;
+}
+
+.primary-button,
+.bottom-account-button,
+.report-floating-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.primary-button::after,
+.bottom-account-button::after,
+.report-floating-button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.22) 45%, transparent 70%);
+  transform: translateX(-125%);
+  transition: transform 560ms var(--motion-premium);
+}
+
+.primary-button:active::after,
+.bottom-account-button:active::after,
+.report-floating-button:active::after {
+  transform: translateX(125%);
+}
+
+.market-card-compact:active,
+.primary-button:active,
+.ghost-button:active,
+.report-floating-button:active,
+.bottom-account-button:active,
+.premium-card:active {
+  transform: scale(0.985) !important;
+}
+
+.soft-input:focus {
+  transform: translateY(-1px) !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .market-card-compact:hover,
+  .premium-card:hover,
+  .glass-card:hover {
+    transform: translateY(-2px) scale(1.01) !important;
+    border-color: rgba(246,198,106,0.28) !important;
+    box-shadow: 0 16px 34px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.10) !important;
+  }
+
+  .primary-button:hover,
+  .ghost-button:hover,
+  .report-floating-button:hover,
+  .bottom-account-button:hover {
+    transform: translateY(-1px) !important;
+  }
+}
+
+@keyframes premium-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-page,
+  .hero-card,
+  .market-section-title,
+  .market-search,
+  .premium-panel,
+  .premium-card,
+  .glass-card,
+  .market-card-compact,
+  .bottom-account-shell {
+    animation: none !important;
+  }
+
+  .premium-panel,
+  .premium-card,
+  .glass-card,
+  .market-card-compact,
+  .primary-button,
+  .ghost-button,
+  .report-floating-button,
+  .bottom-account-button,
+  .soft-input,
+  button,
+  a {
+    transition: none !important;
+  }
 }
 
 @media (max-width: 420px) {
@@ -334,7 +475,6 @@ input[readonly] {
     height: 28px !important;
     min-height: 28px !important;
     align-items: center !important;
-    transform: none !important;
   }
 
   .market-last-value {
