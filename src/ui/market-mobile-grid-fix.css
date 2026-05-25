@@ -1,0 +1,39 @@
+/* Force stable 2-card dashboard grid on mobile WebView/browser cache variants. */
+.market-grid.market-grid-compact,
+.grid.grid-cols-2.gap-3.pb-6.market-grid-compact {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 0.78rem !important;
+  width: 100% !important;
+  align-items: stretch !important;
+}
+
+.market-grid.market-grid-compact > .market-card-compact,
+.market-grid.market-grid-compact > .market-card-compact.premium-card,
+.grid.grid-cols-2.gap-3.pb-6.market-grid-compact > .market-card-compact,
+.grid.grid-cols-2.gap-3.pb-6.market-grid-compact > .market-card-compact.premium-card {
+  min-width: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+}
+
+.market-card-compact .market-name {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+@media (max-width: 420px) {
+  .market-grid.market-grid-compact,
+  .grid.grid-cols-2.gap-3.pb-6.market-grid-compact {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.72rem !important;
+  }
+}
+
+@media (min-width: 640px) {
+  .market-grid.market-grid-compact,
+  .grid.grid-cols-2.gap-3.pb-6.market-grid-compact {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
