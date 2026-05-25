@@ -1,0 +1,39 @@
+/* Dashboard grid safety lock
+   Purpose: keep market cards in 2 columns on mobile even when older WebView/Tailwind
+   utilities or CSS ordering behave differently. Loaded last from ui/design-system.css. */
+
+.dashboard-page .market-grid,
+.dashboard-page .market-grid-compact,
+.app-container .dashboard-page .market-grid.market-grid-compact,
+.app-container .dashboard-page .grid.market-grid-compact {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  grid-auto-flow: row !important;
+  align-items: stretch !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.dashboard-page .market-grid > *,
+.dashboard-page .market-grid-compact > *,
+.app-container .dashboard-page .market-grid.market-grid-compact > * {
+  min-width: 0 !important;
+  width: auto !important;
+  max-width: 100% !important;
+  grid-column: auto !important;
+}
+
+.dashboard-page .market-card-compact,
+.app-container .dashboard-page .market-card-compact.premium-card {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+@media (min-width: 640px) {
+  .dashboard-page .market-grid,
+  .dashboard-page .market-grid-compact,
+  .app-container .dashboard-page .market-grid.market-grid-compact,
+  .app-container .dashboard-page .grid.market-grid-compact {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
