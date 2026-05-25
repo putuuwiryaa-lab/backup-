@@ -1,0 +1,119 @@
+/* Dashboard market grid hard guard
+   Keep at least two market cards per row on every mobile viewport/WebView.
+   This file is imported last so it overrides older max-width:360px rules that collapsed the grid to 1 column.
+*/
+
+.dashboard-page .market-grid.market-grid-compact,
+.dashboard-page .grid.grid-cols-2.gap-3.pb-6.market-grid-compact {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: clamp(0.5rem, 2.6vw, 0.78rem) !important;
+  align-items: stretch !important;
+}
+
+.dashboard-page .market-grid.market-grid-compact > .market-card-compact,
+.dashboard-page .grid.grid-cols-2.gap-3.pb-6.market-grid-compact > .market-card-compact,
+.dashboard-page .market-grid.market-grid-compact > .premium-card,
+.dashboard-page .grid.grid-cols-2.gap-3.pb-6.market-grid-compact > .premium-card {
+  min-width: 0 !important;
+  width: auto !important;
+  max-width: none !important;
+  box-sizing: border-box !important;
+}
+
+@media (min-width: 640px) {
+  .dashboard-page .market-grid.market-grid-compact,
+  .dashboard-page .grid.grid-cols-2.gap-3.pb-6.market-grid-compact {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .dashboard-page .market-grid.market-grid-compact,
+  .dashboard-page .grid.grid-cols-2.gap-3.pb-6.market-grid-compact {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.55rem !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .dashboard-page .market-grid.market-grid-compact,
+  .dashboard-page .grid.grid-cols-2.gap-3.pb-6.market-grid-compact {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.45rem !important;
+  }
+
+  .dashboard-page .market-card-compact,
+  .dashboard-page .market-card-compact.premium-card,
+  .dashboard-page .market-grid.market-grid-compact > .market-card-compact,
+  .dashboard-page .grid.grid-cols-2.gap-3.pb-6.market-grid-compact > .market-card-compact {
+    min-height: 102px !important;
+    height: 102px !important;
+    border-radius: 1.05rem !important;
+  }
+
+  .dashboard-page .market-card-compact .market-name-strip,
+  .dashboard-page .market-name-strip {
+    top: 11px !important;
+    left: 9px !important;
+    right: 9px !important;
+    min-height: 30px !important;
+    height: 30px !important;
+    padding: 0 0.32rem !important;
+    border-radius: 8px !important;
+  }
+
+  .dashboard-page .market-card-compact .market-name {
+    font-size: 0.58rem !important;
+    letter-spacing: 0.045rem !important;
+    line-height: 1.05 !important;
+  }
+
+  .dashboard-page .market-card-compact .market-result-row {
+    top: 56px !important;
+    height: 30px !important;
+    min-height: 30px !important;
+  }
+
+  .dashboard-page .market-card-compact .market-last-value {
+    font-size: 1.08rem !important;
+    letter-spacing: 0.11rem !important;
+  }
+}
+
+@media (max-width: 320px) {
+  .dashboard-page .market-grid.market-grid-compact,
+  .dashboard-page .grid.grid-cols-2.gap-3.pb-6.market-grid-compact {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.38rem !important;
+  }
+
+  .dashboard-page .market-card-compact,
+  .dashboard-page .market-card-compact.premium-card {
+    min-height: 96px !important;
+    height: 96px !important;
+  }
+
+  .dashboard-page .market-card-compact .market-name-strip,
+  .dashboard-page .market-name-strip {
+    top: 10px !important;
+    left: 8px !important;
+    right: 8px !important;
+    min-height: 28px !important;
+    height: 28px !important;
+  }
+
+  .dashboard-page .market-card-compact .market-name {
+    font-size: 0.54rem !important;
+    letter-spacing: 0.035rem !important;
+  }
+
+  .dashboard-page .market-card-compact .market-result-row {
+    top: 52px !important;
+  }
+
+  .dashboard-page .market-card-compact .market-last-value {
+    font-size: 1rem !important;
+    letter-spacing: 0.09rem !important;
+  }
+}
