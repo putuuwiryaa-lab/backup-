@@ -1,4 +1,4 @@
-import { AI_I, AI_L, AI_B, AI_T, AI_P, _0xc3c54e, _0xJ2d } from './tables';
+import { AI_I, AI_L, AI_B, AI_T, AI_P, _0xc3c54e, _0xJ2d } from './tables.js';
 
 export const _0xe57f0c: Record<number, number> = { 4: 11, 5: 12, 6: 13 };
 
@@ -28,77 +28,16 @@ export const _0x9a025f = [
   { n: "R23 Cross Multiply Flow", f: (c: string, p: string, p2: string) => { if (!p) return null; const X = ((+p[0]) * (+c[2])) % 10; return Array.from(new Set([X, AI_T[X], AI_L[X], _0xc3c54e(X + 3)])); }, dg: 4 },
   { n: "R24 Front Multiply", f: (c: string, p: string, p2: string) => { const X = ((+c[0]) * (+c[1]) * (+c[2])) % 10; return Array.from(new Set([X, AI_T[X], AI_I[X], _0xc3c54e(X + 1)])); }, dg: 4 },
   { n: "R25 Lag 2 Resonance", f: (c: string, p: string, p2: string) => { if (!p2) return null; const X = (+p2[0] + (+p2[1]) + (+p2[2]) + (+p2[3])) % 10; return Array.from(new Set([X, AI_T[X], AI_I[X], AI_L[X]])); }, dg: 4 },
-  {
-    n: "R26 master moegywara666",
-    f: (c: string, p: string, p2: string) => {
-      const X = +c[2]; const IDX = AI_I[X];
-      return Array.from(new Set([X, _0xc3c54e(X - 1), IDX, _0xc3c54e(IDX - 1)]));
-    }, dg: 4
-  },
-  {
-    n: "R27 master moegywara666",
-    f: (c: string, p: string, p2: string) => {
-      const A = +c[0]; const K = +c[1];
-      return Array.from(new Set([_0xJ2d(A, K), _0xc3c54e(A + 1), _0xc3c54e(A + 2), AI_I[A]]));
-    }, dg: 4
-  },
-  {
-    n: "R28 master moegywara666",
-    f: (c: string, p: string, p2: string) => {
-      const X = _0xJ2d(c[2], c[3]); const MB = AI_B[X];
-      return Array.from(new Set([X, MB, _0xc3c54e(MB + 2)]));
-    }, dg: 3
-  },
-  {
-    n: "R29 master moegywara666",
-    f: (c: string, p: string, p2: string) => {
-      const X = +c[3];
-      return Array.from(new Set([X, _0xc3c54e(X - 1), _0xc3c54e(X - 2), _0xc3c54e(X + 3), _0xc3c54e(X + 4)]));
-    }, dg: 5
-  },
-  {
-    n: "R30 Cosmic Chain",
-    f: (c: string, p: string, p2: string) => {
-      const X = (+c[0] + +c[2]) % 10; const MB = AI_B[X]; const IDX = AI_I[MB]; const ML = AI_L[IDX];
-      return Array.from(new Set([X, MB, IDX, ML]));
-    }, dg: 4
-  },
-  {
-    n: "R31 Cipher Loop",
-    f: (c: string, p: string, p2: string) => {
-      const KOP = +c[1]; const EIDX = AI_I[+c[3]]; const sum = KOP + EIDX;
-      const base = sum > 9 ? (Math.floor(sum / 10) + (sum % 10)) : sum;
-      return Array.from(new Set([_0xc3c54e(base), _0xc3c54e(base + 2), _0xc3c54e(base + 4), _0xc3c54e(base + 6)]));
-    }, dg: 4
-  },
-  {
-    n: "R32 Reverse Pulse",
-    f: (c: string, p: string, p2: string) => {
-      if (!p) return null; const X = +p[3];
-      return Array.from(new Set([_0xc3c54e(X), _0xc3c54e(X - 2), _0xc3c54e(X - 4), _0xc3c54e(X - 6), _0xc3c54e(X - 8)]));
-    }, dg: 5
-  },
-  {
-    n: "R33 Mid Spiral",
-    f: (c: string, p: string, p2: string) => {
-      const biji = _0xJ2d(c[1], c[2]); const base = _0xc3c54e(biji - 1);
-      return Array.from(new Set([base, _0xc3c54e(base + 1), _0xc3c54e(base + 3), _0xc3c54e(base + 4)]));
-    }, dg: 4
-  },
-  {
-    n: "R34 Hex Surge",
-    f: (c: string, p: string, p2: string) => {
-      const biji = _0xJ2d(c[2], c[3]); const X = _0xc3c54e(biji + 6);
-      return Array.from(new Set([X, _0xc3c54e(X + 2), _0xc3c54e(X + 3), _0xc3c54e(X + 7)]));
-    }, dg: 4
-  },
-  {
-    n: "R35 Step Six",
-    f: (c: string, p: string, p2: string) => {
-      const X = _0xc3c54e(+c[3] - 1);
-      return Array.from(new Set([X, _0xc3c54e(X + 1), _0xc3c54e(X + 2), _0xc3c54e(X + 3), _0xc3c54e(X + 4), _0xc3c54e(X + 5)]));
-    }, dg: 6
-  },
+  { n: "R26 Master Core", f: (c: string, p: string, p2: string) => { const X = +c[2]; const IDX = AI_I[X]; return Array.from(new Set([X, _0xc3c54e(X - 1), IDX, _0xc3c54e(IDX - 1)])); }, dg: 4 },
+  { n: "R27 Master Core", f: (c: string, p: string, p2: string) => { const A = +c[0]; const K = +c[1]; return Array.from(new Set([_0xJ2d(A, K), _0xc3c54e(A + 1), _0xc3c54e(A + 2), AI_I[A]])); }, dg: 4 },
+  { n: "R28 Master Core", f: (c: string, p: string, p2: string) => { const X = _0xJ2d(c[2], c[3]); const MB = AI_B[X]; return Array.from(new Set([X, MB, _0xc3c54e(MB + 2)])); }, dg: 3 },
+  { n: "R29 Master Core", f: (c: string, p: string, p2: string) => { const X = +c[3]; return Array.from(new Set([X, _0xc3c54e(X - 1), _0xc3c54e(X - 2), _0xc3c54e(X + 3), _0xc3c54e(X + 4)])); }, dg: 5 },
+  { n: "R30 Cosmic Chain", f: (c: string, p: string, p2: string) => { const X = (+c[0] + +c[2]) % 10; const MB = AI_B[X]; const IDX = AI_I[MB]; const ML = AI_L[IDX]; return Array.from(new Set([X, MB, IDX, ML])); }, dg: 4 },
+  { n: "R31 Cipher Loop", f: (c: string, p: string, p2: string) => { const KOP = +c[1]; const EIDX = AI_I[+c[3]]; const sum = KOP + EIDX; const base = sum > 9 ? (Math.floor(sum / 10) + (sum % 10)) : sum; return Array.from(new Set([_0xc3c54e(base), _0xc3c54e(base + 2), _0xc3c54e(base + 4), _0xc3c54e(base + 6)])); }, dg: 4 },
+  { n: "R32 Reverse Pulse", f: (c: string, p: string, p2: string) => { if (!p) return null; const X = +p[3]; return Array.from(new Set([_0xc3c54e(X), _0xc3c54e(X - 2), _0xc3c54e(X - 4), _0xc3c54e(X - 6), _0xc3c54e(X - 8)])); }, dg: 5 },
+  { n: "R33 Mid Spiral", f: (c: string, p: string, p2: string) => { const biji = _0xJ2d(c[1], c[2]); const base = _0xc3c54e(biji - 1); return Array.from(new Set([base, _0xc3c54e(base + 1), _0xc3c54e(base + 3), _0xc3c54e(base + 4)])); }, dg: 4 },
+  { n: "R34 Hex Surge", f: (c: string, p: string, p2: string) => { const biji = _0xJ2d(c[2], c[3]); const X = _0xc3c54e(biji + 6); return Array.from(new Set([X, _0xc3c54e(X + 2), _0xc3c54e(X + 3), _0xc3c54e(X + 7)])); }, dg: 4 },
+  { n: "R35 Step Six", f: (c: string, p: string, p2: string) => { const X = _0xc3c54e(+c[3] - 1); return Array.from(new Set([X, _0xc3c54e(X + 1), _0xc3c54e(X + 2), _0xc3c54e(X + 3), _0xc3c54e(X + 4), _0xc3c54e(X + 5)])); }, dg: 6 },
 ];
 
 export function _0xEngineAI(D: string[], param: number = 6) {
