@@ -144,7 +144,7 @@ export default function AnalysisResult({ type, result, param, marketId, meta, ta
   const stats = safeArray(result.stats);
   const displayResult = safeArray(result.result);
   const active = result.elitCount ?? result.eliteTotal ?? stats.length;
-  const formulaTotal = type === "ai" ? 35 : type === "jumlah" ? 51 : 50;
+  const formulaTotal = type === "ai" ? 35 : type === "jumlah" ? 54 : 50;
   const isBBFSResult = type === "ai" && param === 8;
   const resultLabel = isBBFSResult ? "BBFS" : meta.label;
 
