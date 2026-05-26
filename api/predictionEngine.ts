@@ -1,9 +1,9 @@
-import { _0xJ2d } from './engines/tables';
-import { _0x3ca571, RM_NAMES } from './engines/offFormula';
-import { _0xEngineJumlahMati } from './engines/jumlahEngine';
-import { _0x2d4get, _0xRumusShio, SHIO_RUMUS_NAMES, _0xEngineShioMati } from './engines/shioEngine';
-import { _0x9a025f, _0xe57f0c, _0xEngineAI } from './engines/aiEngine';
-import { runRekap } from './engines/rekapEngine';
+import { _0xJ2d } from './engines/tables.js';
+import { _0x3ca571, RM_NAMES } from './engines/offFormula.js';
+import { _0xEngineJumlahMati } from './engines/jumlahEngine.js';
+import { _0x2d4get, _0xRumusShio, SHIO_RUMUS_NAMES, _0xEngineShioMati } from './engines/shioEngine.js';
+import { _0x9a025f, _0xe57f0c, _0xEngineAI } from './engines/aiEngine.js';
+import { runRekap } from './engines/rekapEngine.js';
 
 export function runAnalysis(type: string, payload: string[], param: number) {
   const D = payload;
