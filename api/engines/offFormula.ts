@@ -1,4 +1,4 @@
-import { TBL_I, TBL_L, TBL_B, TBL_T, _0xJ2d, _0xc3c54e } from './tables';
+import { TBL_I, TBL_L, TBL_B, TBL_T, _0xJ2d, _0xc3c54e } from './tables.js';
 
 export const RM_NAMES = [
   "R01 Phantom Edge","R02 Shadow Index","R03 Night Blade","R04 Void Pulse","R05 Ghost Bridge",
