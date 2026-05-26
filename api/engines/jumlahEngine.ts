@@ -1,5 +1,5 @@
-import { _0xJ2d } from './tables';
-import { _0x3ca571 } from './offFormula';
+import { _0xJ2d } from './tables.js';
+import { _0x3ca571 } from './offFormula.js';
 
 export function _0xEngineJumlahMati(D: string[], param: number = 1) {
   const U = D.slice(-17);
