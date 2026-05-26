@@ -1,4 +1,4 @@
-import { TBL_I, TBL_L, TBL_B, TBL_T, _0xJ2d } from './tables';
+import { TBL_I, TBL_L, TBL_B, TBL_T, _0xJ2d, _0xc3c54e } from './tables';
 
 export const RM_NAMES = [
   "R01 Phantom Edge","R02 Shadow Index","R03 Night Blade","R04 Void Pulse","R05 Ghost Bridge",
@@ -11,7 +11,7 @@ export const RM_NAMES = [
   "R36 Double Mistis Core","R37 Outer Cross Index","R38 Biji 2D Backward","R39 Absolute Delta 4D","R40 Phantom Tesson Strike",
   "R41 Double Tail Strike","R42 Kop-Kepala Cross Index","R43 Mystic 3D Rear","R44 As-Ekor Multiplier","R45 Inner Resonance Mist",
   "R46 Taysen Alpha-Omega","R47 Cross Wing Squared","R48 Index Gap Shift","R49 Past Biji Multiplier","R50 Taysen Triple Front",
-  "R51 Master Moegywara666","R52 Nexus Index","R53 Tri Shift"
+  "R51 Master Moegywara666","R52 Nexus Index","R53 Tri Shift","R54 Alpha Shift Four"
 ];
 
 export function _0x3ca571(a: string, b: string) {
@@ -39,5 +39,6 @@ export function _0x3ca571(a: string, b: string) {
     yy: _0xJ2d(_0xJ2d(c2.kpl, c2.ekr), 6),
     zz: TBL_I[(c2.as + c2.kop) % 10],
     aaa: (c2.as + c2.kop + 3) % 10,
+    bbb: _0xc3c54e(_0xJ2d(c2.as, c2.kop) + 4),
   };
 }
