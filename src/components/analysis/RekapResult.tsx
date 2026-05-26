@@ -1,5 +1,4 @@
 import { Copy } from "lucide-react";
-import RekapHistory from "../RekapHistory";
 import { safeArray } from "../../lib/analysis/utils";
 import { customFocusPairs, customFocusPositionLabels, customFocusPositions, type TargetPair } from "../../lib/analysis/customDigit";
 
@@ -41,25 +40,16 @@ function customRows(result: any) {
   return rows;
 }
 
-export default function RekapResult({ result, param, marketId, meta }: {
+export default function RekapResult({ result, meta }: {
   result: any;
   param: number | null;
   marketId: string;
   meta: { accent: string; soft: string };
 }) {
-  const isTop = param === 2;
-  const isCustom = Boolean(result?.custom);
-  const mode = isTop ? "top" : "invest";
   const lines = safeArray(result.lines);
   const displayLines = lines.join(" * ");
   const copyLines = lines.join("*");
-  const rows = isCustom ? customRows(result) : [
-    [isTop ? "AI TOP" : "AI CT", safeArray(result.ai).join(""), "🔥", "#f3c14b"],
-    ["OFF KEP", safeArray(result.offKepala).join(" . "), "🎯", "#ff647c"],
-    ["OFF EKR", safeArray(result.offEkor).join(" . "), "🎯", "#ff647c"],
-    ["OFF JML", safeArray(result.offJumlah).join(" . "), "🔢", "#b58cff"],
-    ...(safeArray(result.offShio).length ? [["OFF SHIO", safeArray(result.offShio).map((s: any) => String(s).padStart(2, "0")).join(" . "), "🐲", "#28d7ff"]] : []),
-  ];
+  const rows = customRows(result);
 
   return (
     <div className="ui-motion-in space-y-4">
@@ -67,7 +57,7 @@ export default function RekapResult({ result, param, marketId, meta }: {
         <div className="mb-4 flex items-center justify-between gap-3">
           <div>
             <p className="ui-label text-[9px]">Hasil Rekap</p>
-            <h3 className="font-['Orbitron'] text-[18px] font-black uppercase tracking-[3px] text-[var(--ui-text)]">Mode {isCustom ? "Custom Digit" : isTop ? "Top" : "Invest"}</h3>
+            <h3 className="font-['Orbitron'] text-[18px] font-black uppercase tracking-[3px] text-[var(--ui-text)]">Mode Custom Digit</h3>
           </div>
           <span className="rounded-full px-3 py-1 text-[10px] font-black" style={{ backgroundColor: meta.soft, color: meta.accent }}>READY</span>
         </div>
@@ -86,8 +76,6 @@ export default function RekapResult({ result, param, marketId, meta }: {
         <div className="max-h-[260px] overflow-y-auto rounded-3xl border border-[var(--ui-border-soft)] bg-black/30 p-4 font-['JetBrains_Mono'] text-[14px] font-bold leading-8 tracking-[2px] custom-scrollbar" style={{ color: meta.accent }}>{displayLines}</div>
         <button onClick={() => navigator.clipboard?.writeText(copyLines)} className="ui-motion-soft ui-tap flex w-full items-center justify-center gap-2 rounded-3xl p-4 font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px] text-black" style={{ backgroundColor: meta.accent }}><Copy size={16} /> Copy Semua</button>
       </div>
-
-      {!isCustom && <div className="ui-panel ui-motion-in space-y-3 p-4"><RekapHistory marketId={marketId} mode={mode} /></div>}
     </div>
   );
 }
