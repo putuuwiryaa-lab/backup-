@@ -26,7 +26,7 @@ export function _0x2d4get(r: string) {
 export function _0xRumusShio(a: string, b: string) {
   const p = { A: +a[0], B: +a[1], C: +a[2], D: +a[3] };
   const c = { A: +b[0], B: +b[1], C: +b[2], D: +b[3] };
-  const m = (x: number) => { const v = Math.abs(x) % 12; return v === 0 ? 12 : v; };
+  const m = (x: number) => ((x - 1) % 12 + 12) % 12 + 1;
   return {
     k1: m(c.A + c.B + c.C + c.D), k2: m(p.D + c.D), k3: m(c.C * c.D), k4: m(c.A * c.D), k5: m(c.B + c.C),
     k6: m(p.A + c.A), k7: m(p.B + c.B), k8: m(p.C + c.C), k9: m(c.A - c.D), k10: m(c.B - c.C), k11: m(p.D * c.A),
