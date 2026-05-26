@@ -39,6 +39,10 @@ export function _0xRumusShio(a: string, b: string) {
     k40: m(p.C + p.D - c.A), k41: m(c.A + c.D + p.A + p.D), k42: m(c.B + c.C + p.B + p.C), k43: m((c.A * c.C) + c.D),
     k44: m((c.B * c.D) + c.A), k45: m((p.A * p.C) + p.D), k46: m((p.B * p.D) + p.A), k47: m(c.A + p.B + c.C + p.D),
     k48: m(c.B + p.C + c.D + p.A), k49: m(c.A * c.B * c.C), k50: m(c.B * c.C * c.D),
+    k51: m((c.A + c.D) * 2 - c.B), k52: m((c.B + c.C) * 2 - p.D), k53: m((p.A + c.C) * (c.D + 1)),
+    k54: m((p.D + c.A) * (c.B + 1)), k55: m((c.A * c.D) - (p.B + c.C)), k56: m((c.B * c.C) - (p.A + c.D)),
+    k57: m((p.A + p.D + c.B) * 2), k58: m((p.B + p.C + c.D) * 2), k59: m((c.A + c.B + p.C + p.D) - c.D),
+    k60: m((c.C + c.D + p.A + p.B) - c.A),
   };
 }
 
@@ -52,7 +56,9 @@ export const SHIO_RUMUS_NAMES = [
   "RS31 Modulus Cross Multiplex","RS32 Lunar Squared Drop","RS33 Front Cascade Beast","RS34 Twin Orbit Clash","RS35 Zodiac Inversion",
   "RS36 Double Modulus Core","RS37 Outer Cross Lunar","RS38 Beast 2D Backward","RS39 Absolute Zodiac 4D","RS40 Phantom Orbit Strike",
   "RS41 Double Lunar Strike","RS42 Beast Cross Matrix","RS43 Modulus 3D Rear","RS44 Lunar Multiplier","RS45 Inner Resonance Beast",
-  "RS46 Zodiac Alpha-Omega","RS47 Cross Wing Orbit","RS48 Modulus Gap Shift","RS49 Past Lunar Multiplier","RS50 Zodiac Triple Front"
+  "RS46 Zodiac Alpha-Omega","RS47 Cross Wing Orbit","RS48 Modulus Gap Shift","RS49 Past Lunar Multiplier","RS50 Zodiac Triple Front",
+  "RS51 Twin Lunar Drop","RS52 Beast Double Drift","RS53 Cross Zodiac Gate","RS54 Alpha Tail Orbit","RS55 Lunar Clash Minus",
+  "RS56 Beast Core Minus","RS57 Past Alpha Surge","RS58 Past Core Surge","RS59 Mixed Front Shift","RS60 Mixed Rear Shift"
 ];
 
 export function _0xEngineShioMati(D: string[], param: number = 1) {
