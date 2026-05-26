@@ -5,14 +5,13 @@ export default function ParamSelector({ type, param, meta, onAnalyze, onCustomDi
   onAnalyze: (param: number) => void;
   onCustomDigit: () => void;
 }) {
-  if (param !== 0) return null;
+  if (type === "rekap" || param !== 0) return null;
 
   const options: any = {
     ai: { title: "PILIH JUMLAH DIGIT AI", values: [2, 4, 6, 8], labels: { 8: "BBFS" } },
     mati: { title: "PILIH JUMLAH DIGIT OFF", values: [1, 2, 3], hints: { 1: "RINGAN", 2: "SEIMBANG", 3: "KETAT" } },
     jumlah: { title: "PILIH JUMLAH OFF", values: [1, 2, 3], hints: { 1: "RINGAN", 2: "SEIMBANG", 3: "KETAT" } },
     shio: { title: "PILIH JUMLAH SHIO MATI", values: [1, 2, 3], hints: { 1: "RINGAN", 2: "SEIMBANG", 3: "KETAT" } },
-    rekap: { title: "PILIH MODE REKAP", values: [1, 2], labels: { 1: "INVEST", 2: "TOP" } },
   };
   const cfg = options[type] || options.ai;
   const isThreeDigitMode = type === "mati" || type === "jumlah" || type === "shio";
@@ -33,11 +32,6 @@ export default function ParamSelector({ type, param, meta, onAnalyze, onCustomDi
             </button>
           );
         })}
-        {type === "rekap" && (
-          <button onClick={onCustomDigit} className="ui-motion-soft ui-tap ui-lift col-span-2 rounded-3xl border p-5 text-center sm:col-span-4" style={{ borderColor: `${meta.accent}88`, backgroundColor: meta.soft, color: meta.accent }}>
-            <span className="block font-['Orbitron'] text-xl font-black tracking-[2px]">CUSTOM DIGIT</span>
-          </button>
-        )}
       </div>
     </div>
   );
