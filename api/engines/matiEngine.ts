@@ -1,4 +1,4 @@
-import { _0x3ca571 } from './offFormula';
+import { _0x3ca571 } from './offFormula.js';
 
 export function _0xEngineMatiPos(D: string[], posIdx: number, param: number = 1) {
   const U = D.slice(-17);
