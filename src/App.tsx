@@ -285,9 +285,30 @@ function HeroHeader() {
   );
 }
 
+function formatMarketUpdatedAt(value: any) {
+  if (!value) return "Belum ada info update";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Info update tidak valid";
+  return date.toLocaleString("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 function Dashboard({ markets, onRefresh }: { markets: any[]; onRefresh: () => void }) {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
+
+  const latestMarketUpdate = useMemo(() => {
+    const timestamps = markets
+      .map((m) => new Date(m.updated_at || 0).getTime())
+      .filter((time) => Number.isFinite(time) && time > 0);
+    if (!timestamps.length) return null;
+    return new Date(Math.max(...timestamps)).toISOString();
+  }, [markets]);
 
   const filteredMarkets = useMemo(() => {
     const q = search.toLowerCase();
@@ -302,8 +323,9 @@ function Dashboard({ markets, onRefresh }: { markets: any[]; onRefresh: () => vo
         <div>
           <h2 className="font-['Orbitron'] text-[15px] font-black uppercase tracking-[4px] text-[var(--text)]">Pilih Pasaran</h2>
           <p className="mt-1 text-xs text-[var(--text-dim)]">Pilih market untuk mulai analisa.</p>
+          <p className="mt-1 text-[10px] font-bold uppercase tracking-[1.5px] text-[var(--cyan)]">Update terbaru: {formatMarketUpdatedAt(latestMarketUpdate)}</p>
         </div>
-        <button onClick={onRefresh} className="ghost-button flex h-12 w-12 items-center justify-center text-[var(--text-dim)] active:scale-95">
+        <button onClick={onRefresh} className="ghost-button flex h-12 w-12 items-center justify-center text-[var(--text-dim)] active:scale-95" aria-label="Refresh data pasaran">
           <RefreshCw size={18} />
         </button>
       </div>
@@ -317,6 +339,7 @@ function Dashboard({ markets, onRefresh }: { markets: any[]; onRefresh: () => vo
         {filteredMarkets.length > 0 ? filteredMarkets.map((m) => {
           const title = m.name || m.id;
           const lastResult = m.lastResult || "----";
+          const updatedLabel = formatMarketUpdatedAt(m.updated_at);
           return (
             <div
               key={m.id}
@@ -333,6 +356,9 @@ function Dashboard({ markets, onRefresh }: { markets: any[]; onRefresh: () => vo
               </div>
               <div className="market-result-row flex flex-1 items-center justify-center">
                 <span className="market-last-value font-['JetBrains_Mono'] text-[18px] font-black tracking-[1px] text-[var(--cyan)]">{lastResult}</span>
+              </div>
+              <div className="border-t border-white/10 px-2 pb-2 pt-2">
+                <p className="truncate text-[8px] font-black uppercase tracking-[1.2px] text-[var(--text-dim)]">Update: {updatedLabel}</p>
               </div>
             </div>
           );
