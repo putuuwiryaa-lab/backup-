@@ -21,7 +21,9 @@ const JUMLAH_PARTIAL_WIN_RATES: Record<number, number> = { 1: 14 / 15, 2: 12 / 1
 const SHIO_PARTIAL_WIN_RATES: Record<number, number> = { 1: 14 / 15, 2: 13 / 15, 3: 12 / 15 };
 
 type RecommendationGroup = "ai" | "mati" | "jumlah" | "shio";
-type RecommendedMap = Record<string, "thumb" | "fire">;
+type RecommendationBadge = "thumb" | "fire";
+type RecommendedMap = Record<string, RecommendationBadge>;
+type ScoredRecommendation = { param: number; badge: RecommendationBadge };
 type PairAiMap = Partial<Record<TargetPair, 2 | 4 | 6 | null>>;
 type PairCountMap = Partial<Record<TargetPair, number | null>>;
 type PairBooleanMap = Partial<Record<TargetPair, boolean>>;
@@ -69,11 +71,25 @@ function scoreParam(rows: any[], param: number, group: RecommendationGroup) {
   return { param, badge: isPerfect ? "fire" as const : "thumb" as const };
 }
 
-function pickRecommendation(rows: any[], params: number[], prefer: "low" | "high", group: RecommendationGroup) {
-  const scored = params.map((param) => scoreParam(rows, param, group)).filter(Boolean) as Array<{ param: number; badge: "thumb" | "fire" }>;
+function scoreParams(rows: any[], params: number[], group: RecommendationGroup) {
+  return params.map((param) => scoreParam(rows, param, group)).filter(Boolean) as ScoredRecommendation[];
+}
+
+function pickRecommendationFromScores(scored: ScoredRecommendation[], prefer: "low" | "high") {
   if (!scored.length) return null;
   const selectedParam = prefer === "low" ? Math.min(...scored.map((item) => item.param)) : Math.max(...scored.map((item) => item.param));
   return scored.find((item) => item.param === selectedParam) || null;
+}
+
+function setBadge(next: RecommendedMap, key: string, badge: RecommendationBadge) {
+  if (badge === "fire" || next[key] !== "fire") next[key] = badge;
+}
+
+function applyRecommendationBadges(next: RecommendedMap, keyForParam: (param: number) => string, rows: any[], params: number[], prefer: "low" | "high", group: RecommendationGroup) {
+  const scored = scoreParams(rows, params, group);
+  const pick = pickRecommendationFromScores(scored, prefer);
+  if (pick) setBadge(next, keyForParam(pick.param), pick.badge);
+  scored.filter((item) => item.badge === "fire").forEach((item) => setBadge(next, keyForParam(item.param), "fire"));
 }
 
 async function loadRows(marketId: string, mode: string, position: string, params: number[], targetPair: TargetPair = "belakang") {
@@ -152,14 +168,10 @@ export default function CustomDigitBuilder({
             loadRows(marketId, "jumlah", "all", [1, 2, 3], pair),
             loadRows(marketId, "shio", "all", [1, 2, 3], pair),
           ]);
-          const aiPick = pickRecommendation(aiRows, [2, 4, 6], "low", "ai");
-          const jumlahPick = pickRecommendation(jumlahRows, [1, 2, 3], "high", "jumlah");
-          const shioPick = pickRecommendation(shioRows, [1, 2, 3], "high", "shio");
-          const bbfsPick = pickRecommendation(bbfsRows, [8], "low", "ai");
-          if (aiPick) next[`ai-${pair}-${aiPick.param}`] = aiPick.badge;
-          if (bbfsPick) next[`bbfs-${pair}`] = bbfsPick.badge;
-          if (jumlahPick) next[`jumlah-${pair}-${jumlahPick.param}`] = jumlahPick.badge;
-          if (shioPick) next[`shio-${pair}-${shioPick.param}`] = shioPick.badge;
+          applyRecommendationBadges(next, (param) => `ai-${pair}-${param}`, aiRows, [2, 4, 6], "low", "ai");
+          applyRecommendationBadges(next, () => `bbfs-${pair}`, bbfsRows, [8], "low", "ai");
+          applyRecommendationBadges(next, (param) => `jumlah-${pair}-${param}`, jumlahRows, [1, 2, 3], "high", "jumlah");
+          applyRecommendationBadges(next, (param) => `shio-${pair}-${param}`, shioRows, [1, 2, 3], "high", "shio");
         }));
 
         const [asRows, kopRows, kepalaRows, ekorRows] = await Promise.all([
@@ -168,14 +180,10 @@ export default function CustomDigitBuilder({
           loadRows(marketId, "mati", "kepala", [1, 2, 3]),
           loadRows(marketId, "mati", "ekor", [1, 2, 3]),
         ]);
-        const asPick = pickRecommendation(asRows, [1, 2, 3], "high", "mati");
-        const kopPick = pickRecommendation(kopRows, [1, 2, 3], "high", "mati");
-        const kepalaPick = pickRecommendation(kepalaRows, [1, 2, 3], "high", "mati");
-        const ekorPick = pickRecommendation(ekorRows, [1, 2, 3], "high", "mati");
-        if (asPick) next[`as-${asPick.param}`] = asPick.badge;
-        if (kopPick) next[`kop-${kopPick.param}`] = kopPick.badge;
-        if (kepalaPick) next[`kepala-${kepalaPick.param}`] = kepalaPick.badge;
-        if (ekorPick) next[`ekor-${ekorPick.param}`] = ekorPick.badge;
+        applyRecommendationBadges(next, (param) => `as-${param}`, asRows, [1, 2, 3], "high", "mati");
+        applyRecommendationBadges(next, (param) => `kop-${param}`, kopRows, [1, 2, 3], "high", "mati");
+        applyRecommendationBadges(next, (param) => `kepala-${param}`, kepalaRows, [1, 2, 3], "high", "mati");
+        applyRecommendationBadges(next, (param) => `ekor-${param}`, ekorRows, [1, 2, 3], "high", "mati");
         if (active) setRecommended(next);
       } catch {
         if (active) setRecommended({});
