@@ -46,7 +46,7 @@ export default function LoginGate({ deviceId, displayCode, onAuthSuccess }: Logi
   const [showPinLogin, setShowPinLogin] = useState(false);
 
   const activationMessage = encodeURIComponent(`Halo, saya ingin aktivasi VIP Analisa Angka. Device Key saya ${displayCode}`);
-  const activationUrl = `https://wa.me/6285792030642?text=${activationMessage}`;
+  const activationUrl = `https://wa.me/6285119341538?text=${activationMessage}`;
 
   const handleStartTrial = async () => {
     setLoading(true);
