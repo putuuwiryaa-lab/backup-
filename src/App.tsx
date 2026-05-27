@@ -392,7 +392,7 @@ function AccountPanel({ open, role, displayCode, onClose, onLogout }: { open: bo
   if (!open) return null;
   const { roleLabel, roleSub } = getAccountInfo(role);
   const activationMessage = encodeURIComponent(`Halo, saya ingin bantuan Analisa Angka. Device Key saya ${displayCode}`);
-  const activationUrl = `https://wa.me/6285792030642?text=${activationMessage}`;
+  const activationUrl = `https://wa.me/6285119341538?text=${activationMessage}`;
 
   const handleCopyDeviceKey = async () => {
     try {
