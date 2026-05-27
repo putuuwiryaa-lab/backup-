@@ -320,17 +320,13 @@ function Dashboard({ markets, onRefresh }: { markets: any[]; onRefresh: () => vo
   return (
     <div className="dashboard-page animate-[riseIn_0.35s_ease-out]">
       <div className="market-section-title mb-4 px-1">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            <h2 className="font-['Orbitron'] text-[15px] font-black uppercase tracking-[4px] text-[var(--text)]">Pilih Pasaran</h2>
-            <p className="mt-1 text-xs text-[var(--text-dim)]">Pilih market untuk mulai analisa.</p>
+        <div className="flex items-center justify-between gap-3">
+          <div className="inline-flex min-w-0 max-w-[calc(100%-4rem)] rounded-full border border-white/10 bg-white/[0.04] px-3 py-2">
+            <span className="truncate text-[9px] font-black uppercase tracking-[1.5px] text-[var(--cyan)]">Data pasar diperbarui: {formatMarketUpdatedAt(latestMarketUpdate)}</span>
           </div>
           <button onClick={onRefresh} className="ghost-button flex h-12 w-12 shrink-0 items-center justify-center text-[var(--text-dim)] active:scale-95" aria-label="Refresh data pasaran">
             <RefreshCw size={18} />
           </button>
-        </div>
-        <div className="mt-3 inline-flex max-w-full rounded-full border border-white/10 bg-white/[0.04] px-3 py-2">
-          <span className="truncate text-[9px] font-black uppercase tracking-[1.5px] text-[var(--cyan)]">Data pasar diperbarui: {formatMarketUpdatedAt(latestMarketUpdate)}</span>
         </div>
       </div>
 
