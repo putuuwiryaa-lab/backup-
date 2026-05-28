@@ -15,8 +15,15 @@ SUPABASE_KEY = os.environ["SUPABASE_" + "SERVICE_ROLE_KEY"]
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-MARKOV_ALPHA = 0.7
+POSITION_WINDOW = 60
+TREND_WINDOW = 10
+GAP_CAP = 40
 TOP_LINE_POSITION_LIMIT = 5
+
+WEIGHT_RECENT_FREQUENCY = 0.35
+WEIGHT_GAP = 0.25
+WEIGHT_HEAD_TAIL_PRESSURE = 0.25
+WEIGHT_SHORT_TREND = 0.15
 
 
 def parse_history(raw, limit=169):
@@ -32,46 +39,100 @@ def parse_history(raw, limit=169):
     return tokens[-limit:]
 
 
+def normalize_score_map(values):
+    max_value = max(values.values()) if values else 0
+
+    if max_value <= 0:
+        return {d: 0.0 for d in range(10)}
+
+    return {d: values[d] / max_value for d in range(10)}
+
+
+def add_weighted_digit(scores, digit, weight):
+    if digit.isdigit() and len(digit) == 1:
+        scores[int(digit)] += weight
+
+
+def compute_recent_frequency(results, pos_out, window=POSITION_WINDOW):
+    scores = {d: 0.0 for d in range(10)}
+    recent = results[-window:]
+
+    for offset, result in enumerate(reversed(recent)):
+        weight = 1 / (1 + offset * 0.08)
+        add_weighted_digit(scores, result[pos_out], weight)
+
+    return normalize_score_map(scores)
+
+
+def compute_gap_score(results, pos_out, cap=GAP_CAP):
+    scores = {d: 0.0 for d in range(10)}
+
+    for digit in range(10):
+        target = str(digit)
+        gap = cap
+
+        for offset, result in enumerate(reversed(results)):
+            if result[pos_out] == target:
+                gap = min(offset, cap)
+                break
+
+        scores[digit] = gap / cap
+
+    return normalize_score_map(scores)
+
+
+def compute_head_tail_pressure(results, pos_out, window=POSITION_WINDOW):
+    scores = {d: 0.0 for d in range(10)}
+    recent = results[-window:]
+
+    pressure_positions = [2, 3]
+    if pos_out in (0, 1):
+        pressure_positions = [0, 1, 2, 3]
+
+    for offset, result in enumerate(reversed(recent)):
+        weight = 1 / (1 + offset * 0.10)
+        for pos in pressure_positions:
+            add_weighted_digit(scores, result[pos], weight)
+
+    return normalize_score_map(scores)
+
+
+def compute_short_trend(results, pos_out, window=TREND_WINDOW):
+    scores = {d: 0.0 for d in range(10)}
+    recent = results[-window:]
+
+    for offset, result in enumerate(reversed(recent)):
+        weight = window - offset
+        add_weighted_digit(scores, result[pos_out], weight)
+
+    return normalize_score_map(scores)
+
+
 def compute_position(results, pos_out):
-    n = len(results)
-    transitions = n - 1
+    if not results:
+        normalized = {d: 1.0 for d in range(10)}
+        return [str(d) for d in range(10)], normalized
 
-    if transitions <= 0:
-        probabilities = {d: 0.1 for d in range(10)}
-        sorted_digits = [str(d) for d in range(10)]
-        return sorted_digits, probabilities
+    recent_frequency = compute_recent_frequency(results, pos_out)
+    gap_score = compute_gap_score(results, pos_out)
+    head_tail_pressure = compute_head_tail_pressure(results, pos_out)
+    short_trend = compute_short_trend(results, pos_out)
 
-    combined_prob = {d: 0.0 for d in range(10)}
-    source_count = 0
+    scores = {}
+    for digit in range(10):
+        scores[digit] = (
+            recent_frequency[digit] * WEIGHT_RECENT_FREQUENCY
+            + gap_score[digit] * WEIGHT_GAP
+            + head_tail_pressure[digit] * WEIGHT_HEAD_TAIL_PRESSURE
+            + short_trend[digit] * WEIGHT_SHORT_TREND
+        )
 
-    for pos_pat in range(4):
-        transition_counts = {k: {d: 0 for d in range(10)} for k in range(10)}
-        transition_totals = {k: 0 for k in range(10)}
-
-        for i in range(transitions):
-            pattern_digit = int(results[i][pos_pat])
-            next_digit = int(results[i + 1][pos_out])
-            transition_counts[pattern_digit][next_digit] += 1
-            transition_totals[pattern_digit] += 1
-
-        last_pattern_digit = int(results[-1][pos_pat])
-        total = transition_totals[last_pattern_digit]
-        denominator = total + MARKOV_ALPHA * 10
-
-        for d in range(10):
-            probability = (transition_counts[last_pattern_digit][d] + MARKOV_ALPHA) / denominator
-            combined_prob[d] += probability
-
-        source_count += 1
-
-    probabilities = {d: combined_prob[d] / source_count for d in range(10)}
-
-    max_probability = max(probabilities.values()) or 1
-    normalized = {d: (probabilities[d] / max_probability) * 10 for d in range(10)}
+    max_score = max(scores.values()) or 1
+    normalized = {d: (scores[d] / max_score) * 10 for d in range(10)}
 
     sorted_digits = [
         str(digit)
-        for digit, score in sorted(normalized.items(), key=lambda x: x[1], reverse=True)
+        for digit, score in sorted(normalized.items(), key=lambda x: (x[1], -x[0]), reverse=True)
     ]
 
     return sorted_digits, normalized
@@ -395,4 +456,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-        
