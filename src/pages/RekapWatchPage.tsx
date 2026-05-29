@@ -1,0 +1,166 @@
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { createClient } from "@supabase/supabase-js";
+import { ArrowLeft, BarChart3, RefreshCw, Sparkles } from "lucide-react";
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+type RekapWatchItem = {
+  id?: string;
+  market_id: string;
+  market_name?: string;
+  focus?: string;
+  focus_label?: string;
+  filter_label?: string;
+  filters?: any;
+  line_count?: number;
+  wins_15?: number;
+  wins_last_5?: number;
+  max_loss_streak?: number;
+  score?: number;
+  is_active?: boolean;
+  updated_at?: string;
+};
+
+function formatFocus(value?: string, label?: string) {
+  if (label) return label;
+  if (value === "depan") return "2D DEPAN";
+  if (value === "tengah") return "2D TENGAH";
+  if (value === "belakang") return "2D BELAKANG";
+  if (value === "3d") return "3D";
+  if (value === "4d") return "4D";
+  return "REKAP";
+}
+
+function formatUpdatedAt(value?: string) {
+  if (!value) return "Belum ada update";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Belum ada update";
+  return date.toLocaleString("id-ID", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+}
+
+function buildFilterLabel(item: RekapWatchItem) {
+  if (item.filter_label) return item.filter_label;
+  const filters = item.filters || {};
+  const parts: string[] = [];
+  Object.entries(filters.aiByPair || {}).forEach(([pair, param]) => parts.push(`AI ${String(pair).toUpperCase()} ${param}D`));
+  Object.entries(filters.bbfsByPair || {}).forEach(([pair]) => parts.push(`BBFS ${String(pair).toUpperCase()}`));
+  Object.entries(filters.jumlahByPair || {}).forEach(([pair, param]) => parts.push(`OFF JML ${String(pair).toUpperCase()} ${param}`));
+  Object.entries(filters.shioByPair || {}).forEach(([pair, param]) => parts.push(`OFF SHIO ${String(pair).toUpperCase()} ${param}`));
+  if (filters.offAs) parts.push(`OFF AS ${filters.offAs}`);
+  if (filters.offKop) parts.push(`OFF KOP ${filters.offKop}`);
+  if (filters.offKepala) parts.push(`OFF KEPALA ${filters.offKepala}`);
+  if (filters.offEkor) parts.push(`OFF EKOR ${filters.offEkor}`);
+  return parts.length ? parts.join(" + ") : "Combo rekap tercatat";
+}
+
+export default function RekapWatchPage() {
+  const navigate = useNavigate();
+  const [items, setItems] = useState<RekapWatchItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const loadWatchlist = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const { data, error: queryError } = await supabase
+        .from("rekap_watchlist")
+        .select("*")
+        .eq("is_active", true)
+        .gte("line_count", 50)
+        .lte("line_count", 65)
+        .order("score", { ascending: false })
+        .order("updated_at", { ascending: false })
+        .limit(100);
+      if (queryError) throw queryError;
+      setItems(data || []);
+    } catch (e: any) {
+      setItems([]);
+      setError(e.message || "Belum bisa membaca pantauan rekap.");
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => { loadWatchlist(); }, []);
+
+  const bestByMarket = useMemo(() => {
+    const map = new Map<string, RekapWatchItem>();
+    items.forEach((item) => {
+      if (!item.market_id) return;
+      const current = map.get(item.market_id);
+      if (!current || Number(item.score || 0) > Number(current.score || 0)) map.set(item.market_id, item);
+    });
+    return Array.from(map.values());
+  }, [items]);
+
+  return (
+    <div className="rekap-watch-page animate-[riseIn_0.35s_ease-out] pb-6">
+      <button onClick={() => navigate("/")} className="ghost-button mb-3 flex items-center gap-2 px-4 py-3 text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)] active:scale-95">
+        <ArrowLeft size={16} /> Beranda
+      </button>
+
+      <div className="premium-panel relative mb-4 overflow-hidden p-5">
+        <div className="absolute -right-12 -top-12 h-28 w-28 rounded-full bg-[var(--cyan-dim)] blur-3xl" />
+        <div className="relative">
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-[var(--gold-dim)] px-3 py-1 text-[9px] font-black uppercase tracking-[1.8px] text-[var(--gold)]">
+            <Sparkles size={12} /> Pantauan
+          </div>
+          <h2 className="font-['Orbitron'] text-[23px] font-black uppercase tracking-[3.5px] text-[var(--text)]">Pantauan Rekap</h2>
+          <p className="mt-3 text-[11px] font-semibold uppercase leading-5 tracking-[1.4px] text-[var(--text-dim)]">Data historis combo rekap 50-65 line. User tetap menentukan rekap sendiri.</p>
+        </div>
+      </div>
+
+      <div className="mb-4 flex items-center justify-between gap-3 px-1">
+        <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-[9px] font-black uppercase tracking-[1.5px] text-[var(--cyan)]">{bestByMarket.length} pasaran tercatat</span>
+        <button onClick={loadWatchlist} className="ghost-button flex h-12 w-12 shrink-0 items-center justify-center text-[var(--text-dim)] active:scale-95" aria-label="Refresh pantauan rekap">
+          <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
+        </button>
+      </div>
+
+      {loading ? (
+        <div className="premium-panel p-6 text-center text-[11px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Membaca pantauan...</div>
+      ) : bestByMarket.length ? (
+        <div className="grid gap-3">
+          {bestByMarket.map((item) => {
+            const marketName = item.market_name || item.market_id;
+            return (
+              <div key={`${item.market_id}-${item.id || item.filter_label || item.focus}`} className="premium-card relative overflow-hidden p-4 text-left">
+                <div className="absolute -right-10 -top-10 h-24 w-24 rounded-full bg-[var(--cyan-dim)] blur-2xl" />
+                <div className="relative flex items-start gap-3">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-[var(--cyan)]/40 bg-[var(--cyan-dim)] text-[var(--cyan)]">
+                    <BarChart3 size={21} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="font-['Orbitron'] text-[15px] font-black uppercase tracking-[2.4px] text-[var(--text)]">{marketName}</p>
+                        <p className="mt-1 text-[9px] font-black uppercase tracking-[1.7px] text-[var(--cyan)]">{formatFocus(item.focus, item.focus_label)}</p>
+                      </div>
+                      <span className="shrink-0 rounded-full bg-white/[0.06] px-3 py-1 text-[9px] font-black uppercase tracking-[1.4px] text-[var(--text-dim)]">STAT</span>
+                    </div>
+                    <p className="mt-3 text-[12px] font-bold leading-5 text-[var(--text)]">{buildFilterLabel(item)}</p>
+                    <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+                      <div className="rounded-2xl border border-white/10 bg-black/18 p-2"><p className="text-[8px] font-black uppercase tracking-[1.4px] text-[var(--text-dim)]">Line</p><p className="mt-1 font-['Orbitron'] text-[13px] font-black text-[var(--cyan)]">{item.line_count || 0}</p></div>
+                      <div className="rounded-2xl border border-white/10 bg-black/18 p-2"><p className="text-[8px] font-black uppercase tracking-[1.4px] text-[var(--text-dim)]">Riwayat</p><p className="mt-1 font-['Orbitron'] text-[13px] font-black text-[var(--gold)]">{item.wins_15 || 0}/15</p></div>
+                      <div className="rounded-2xl border border-white/10 bg-black/18 p-2"><p className="text-[8px] font-black uppercase tracking-[1.4px] text-[var(--text-dim)]">Last 5</p><p className="mt-1 font-['Orbitron'] text-[13px] font-black text-[var(--cyan)]">{item.wins_last_5 || 0}/5</p></div>
+                    </div>
+                    <p className="mt-3 text-[9px] font-bold uppercase tracking-[1.3px] text-[var(--text-soft)]">Max lose {item.max_loss_streak ?? 0} · Update {formatUpdatedAt(item.updated_at)}</p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="premium-panel p-6 text-center">
+          <BarChart3 className="mx-auto mb-3 text-[var(--text-dim)]" />
+          <p className="font-['Orbitron'] text-[13px] font-black uppercase tracking-[2px] text-[var(--text)]">Belum ada pantauan</p>
+          <p className="mt-3 text-[11px] leading-5 text-[var(--text-dim)]">{error ? "Tabel rekap_watchlist belum tersedia atau belum berisi data valid." : "Belum ada combo rekap 50-65 line yang tercatat."}</p>
+        </div>
+      )}
+    </div>
+  );
+}
