@@ -54,6 +54,17 @@ type RekapWatchItem = {
   updated_at?: string;
 };
 
+type ComboComponent = {
+  key: string;
+  kind: "ai" | "bbfs" | "offKepala" | "offEkor" | "offJumlah" | "offShio";
+  label: string;
+  metric: StableMetric;
+  digits: number[];
+  param: number;
+  aiBonus: number;
+  offWeight: number;
+};
+
 const TARGET_PAIR = "belakang";
 const MIN_LINE = 50;
 const MAX_LINE = 65;
@@ -63,6 +74,7 @@ const MIN_WINS_LAST_5 = 3;
 const MAX_LOSS_STREAK = 2;
 const PAGE_SIZE = 1000;
 const MAX_EVALUATION_ROWS = 70000;
+const MAX_COMPONENTS_PER_COMBO = 3;
 
 function formatFocus(value?: string, label?: string) {
   if (label) return label;
@@ -105,6 +117,10 @@ function safeNumberArray(value: any) {
   if (Array.isArray(value?.data)) return value.data.map(Number).filter((n: number) => Number.isFinite(n));
   if (Array.isArray(value?.digits)) return value.digits.map(Number).filter((n: number) => Number.isFinite(n));
   return [];
+}
+
+function uniqNumbers(values: number[]) {
+  return Array.from(new Set(values.map(Number).filter((n) => Number.isFinite(n))));
 }
 
 function getMatiPositionDigits(snapshot: any, position: "kepala" | "ekor") {
@@ -202,87 +218,152 @@ function combineStats(metrics: StableMetric[]) {
   };
 }
 
+function canCombine(next: ComboComponent, combo: ComboComponent[]) {
+  if (combo.some((item) => item.kind === next.kind)) return false;
+  if (next.kind === "ai" && combo.some((item) => item.kind === "bbfs")) return false;
+  if (next.kind === "bbfs" && combo.some((item) => item.kind === "ai")) return false;
+  return true;
+}
+
+function makeComponentCombos(components: ComboComponent[]) {
+  const combos: ComboComponent[][] = [];
+  const sorted = [...components].sort((a, b) => {
+    const stabilityDiff = b.metric.score - a.metric.score;
+    if (stabilityDiff) return stabilityDiff;
+    return b.aiBonus - a.aiBonus || a.offWeight - b.offWeight;
+  });
+
+  const walk = (start: number, current: ComboComponent[]) => {
+    if (current.length) combos.push([...current]);
+    if (current.length >= MAX_COMPONENTS_PER_COMBO) return;
+    for (let i = start; i < sorted.length; i += 1) {
+      const next = sorted[i];
+      if (!canCombine(next, current)) continue;
+      current.push(next);
+      walk(i + 1, current);
+      current.pop();
+    }
+  };
+
+  walk(0, []);
+  return combos;
+}
+
+function scoreCombo(metrics: StableMetric[], lineCount: number, components: ComboComponent[]) {
+  const stats = combineStats(metrics);
+  const lineDistance = Math.abs(lineCount - 55);
+  const aiBonus = Math.max(0, ...components.map((item) => item.aiBonus));
+  const offPenalty = components.reduce((total, item) => total + item.offWeight, 0) * 7;
+  const filterCountPenalty = Math.max(0, components.length - 1) * 5;
+  const stabilityScore = stats.wins_15 * 100 + stats.wins_last_5 * 24 - stats.max_loss_streak * 30;
+  return {
+    ...stats,
+    score: stabilityScore + aiBonus - offPenalty - filterCountPenalty - lineDistance * 2,
+  };
+}
+
+function buildFiltersFromCombo(combo: ComboComponent[]) {
+  const filters: any = {};
+  combo.forEach((item) => {
+    if (item.kind === "ai") filters.aiByPair = { belakang: item.param };
+    if (item.kind === "bbfs") filters.bbfsByPair = { belakang: true };
+    if (item.kind === "offKepala") filters.offKepala = item.param;
+    if (item.kind === "offEkor") filters.offEkor = item.param;
+    if (item.kind === "offJumlah") filters.jumlahByPair = { belakang: item.param };
+    if (item.kind === "offShio") filters.shioByPair = { belakang: item.param };
+  });
+  return filters;
+}
+
+function buildLineFiltersFromCombo(combo: ComboComponent[]) {
+  const filters: any = {};
+  combo.forEach((item) => {
+    if (item.kind === "ai") filters.ai = uniqNumbers([...(filters.ai || []), ...item.digits]);
+    if (item.kind === "bbfs") filters.bbfs = uniqNumbers([...(filters.bbfs || []), ...item.digits]);
+    if (item.kind === "offKepala") filters.offKepala = uniqNumbers([...(filters.offKepala || []), ...item.digits]);
+    if (item.kind === "offEkor") filters.offEkor = uniqNumbers([...(filters.offEkor || []), ...item.digits]);
+    if (item.kind === "offJumlah") filters.offJumlah = uniqNumbers([...(filters.offJumlah || []), ...item.digits]);
+    if (item.kind === "offShio") filters.offShio = uniqNumbers([...(filters.offShio || []), ...item.digits]);
+  });
+  return filters;
+}
+
 function buildWatchItems(rows: EvaluationRow[]): RekapWatchItem[] {
   const stable = groupEvaluationRows(rows);
   const marketIds = Array.from(new Set(rows.map((row) => row.market_id).filter(Boolean)));
   const items: RekapWatchItem[] = [];
+  const seen = new Set<string>();
 
   marketIds.forEach((marketId) => {
-    const aiMetrics = [2, 4, 6]
-      .map((param) => stable.get(metricKey(marketId, "ai", param)))
-      .filter(Boolean) as StableMetric[];
-    const bbfsMetric = stable.get(metricKey(marketId, "ai", 8));
-    const kepalaMetrics = [1, 2, 3]
-      .map((param) => stable.get(metricKey(marketId, "mati", param, "kepala")))
-      .filter(Boolean) as StableMetric[];
-    const ekorMetrics = [1, 2, 3]
-      .map((param) => stable.get(metricKey(marketId, "mati", param, "ekor")))
-      .filter(Boolean) as StableMetric[];
-    const jumlahMetrics = [1, 2, 3]
-      .map((param) => stable.get(metricKey(marketId, "jumlah", param)))
-      .filter(Boolean) as StableMetric[];
-    const shioMetrics = [1, 2, 3]
-      .map((param) => stable.get(metricKey(marketId, "shio", param)))
-      .filter(Boolean) as StableMetric[];
+    const components: ComboComponent[] = [];
 
-    const addItem = (label: string, metrics: StableMetric[], lineCount: number, filters: any) => {
-      if (lineCount < MIN_LINE || lineCount > MAX_LINE || !metrics.length) return;
-      const stats = combineStats(metrics);
-      const lineDistance = Math.abs(lineCount - 55);
-      const score = stats.wins_15 * 10 + stats.wins_last_5 * 5 - stats.max_loss_streak * 8 - lineDistance;
+    [2, 4, 6].forEach((param) => {
+      const metric = stable.get(metricKey(marketId, "ai", param));
+      const digits = metric ? safeNumberArray(metric.result_snapshot) : [];
+      if (metric && digits.length) {
+        components.push({
+          key: `ai-${param}`,
+          kind: "ai",
+          label: `AI BELAKANG ${param}D`,
+          metric,
+          digits,
+          param,
+          aiBonus: param * 8,
+          offWeight: 0,
+        });
+      }
+    });
+
+    const bbfsMetric = stable.get(metricKey(marketId, "ai", 8));
+    const bbfsDigits = bbfsMetric ? safeNumberArray(bbfsMetric.result_snapshot) : [];
+    if (bbfsMetric && bbfsDigits.length) {
+      components.push({ key: "bbfs", kind: "bbfs", label: "BBFS BELAKANG", metric: bbfsMetric, digits: bbfsDigits, param: 8, aiBonus: 18, offWeight: 0 });
+    }
+
+    [1, 2, 3].forEach((param) => {
+      const kepala = stable.get(metricKey(marketId, "mati", param, "kepala"));
+      const kepalaDigits = kepala ? getMatiPositionDigits(kepala.result_snapshot, "kepala") : [];
+      if (kepala && kepalaDigits.length) components.push({ key: `offKepala-${param}`, kind: "offKepala", label: `OFF KEPALA ${param}`, metric: kepala, digits: kepalaDigits, param, aiBonus: 0, offWeight: param });
+
+      const ekor = stable.get(metricKey(marketId, "mati", param, "ekor"));
+      const ekorDigits = ekor ? getMatiPositionDigits(ekor.result_snapshot, "ekor") : [];
+      if (ekor && ekorDigits.length) components.push({ key: `offEkor-${param}`, kind: "offEkor", label: `OFF EKOR ${param}`, metric: ekor, digits: ekorDigits, param, aiBonus: 0, offWeight: param });
+
+      const jumlah = stable.get(metricKey(marketId, "jumlah", param));
+      const jumlahDigits = jumlah ? safeNumberArray(jumlah.result_snapshot) : [];
+      if (jumlah && jumlahDigits.length) components.push({ key: `offJumlah-${param}`, kind: "offJumlah", label: `OFF JML BELAKANG ${param}`, metric: jumlah, digits: jumlahDigits, param, aiBonus: 0, offWeight: param });
+
+      const shio = stable.get(metricKey(marketId, "shio", param));
+      const shioDigits = shio ? safeNumberArray(shio.result_snapshot) : [];
+      if (shio && shioDigits.length) components.push({ key: `offShio-${param}`, kind: "offShio", label: `OFF SHIO BELAKANG ${param}`, metric: shio, digits: shioDigits, param, aiBonus: 0, offWeight: param });
+    });
+
+    makeComponentCombos(components).forEach((combo) => {
+      const lineFilters = buildLineFiltersFromCombo(combo);
+      const lineCount = build2DBelakangLineCount(lineFilters);
+      if (lineCount < MIN_LINE || lineCount > MAX_LINE) return;
+      const metrics = combo.map((item) => item.metric);
+      const stats = scoreCombo(metrics, lineCount, combo);
+      const filterLabel = combo.map((item) => item.label).join(" + ");
+      const id = `${marketId}-${combo.map((item) => item.key).join("-")}`;
+      if (seen.has(id)) return;
+      seen.add(id);
       items.push({
-        id: `${marketId}-${label}`,
+        id,
         market_id: marketId,
         market_name: metrics[0]?.market_name || marketId,
         focus: TARGET_PAIR,
         focus_label: "2D BELAKANG",
-        filter_label: label,
-        filters,
+        filter_label: filterLabel,
+        filters: buildFiltersFromCombo(combo),
         line_count: lineCount,
         wins_15: stats.wins_15,
         wins_last_5: stats.wins_last_5,
         max_loss_streak: stats.max_loss_streak,
-        score,
+        score: stats.score,
         updated_at: metrics[0]?.rows?.[0]?.evaluated_at,
       });
-    };
-
-    aiMetrics.forEach((ai) => {
-      const aiDigits = safeNumberArray(ai.result_snapshot);
-      if (!aiDigits.length) return;
-      kepalaMetrics.forEach((mati) => {
-        const offKepala = getMatiPositionDigits(mati.result_snapshot, "kepala");
-        const lineCount = build2DBelakangLineCount({ ai: aiDigits, offKepala });
-        addItem(`AI BELAKANG ${ai.param}D + OFF KEPALA ${mati.param}`, [ai, mati], lineCount, { aiByPair: { belakang: ai.param }, offKepala: mati.param });
-      });
-      ekorMetrics.forEach((mati) => {
-        const offEkor = getMatiPositionDigits(mati.result_snapshot, "ekor");
-        const lineCount = build2DBelakangLineCount({ ai: aiDigits, offEkor });
-        addItem(`AI BELAKANG ${ai.param}D + OFF EKOR ${mati.param}`, [ai, mati], lineCount, { aiByPair: { belakang: ai.param }, offEkor: mati.param });
-      });
-      jumlahMetrics.forEach((jumlah) => {
-        const offJumlah = safeNumberArray(jumlah.result_snapshot);
-        const lineCount = build2DBelakangLineCount({ ai: aiDigits, offJumlah });
-        addItem(`AI BELAKANG ${ai.param}D + OFF JML BELAKANG ${jumlah.param}`, [ai, jumlah], lineCount, { aiByPair: { belakang: ai.param }, jumlahByPair: { belakang: jumlah.param } });
-      });
-      shioMetrics.forEach((shio) => {
-        const offShio = safeNumberArray(shio.result_snapshot);
-        const lineCount = build2DBelakangLineCount({ ai: aiDigits, offShio });
-        addItem(`AI BELAKANG ${ai.param}D + OFF SHIO BELAKANG ${shio.param}`, [ai, shio], lineCount, { aiByPair: { belakang: ai.param }, shioByPair: { belakang: shio.param } });
-      });
     });
-
-    if (bbfsMetric) {
-      const bbfs = safeNumberArray(bbfsMetric.result_snapshot);
-      if (bbfs.length) {
-        kepalaMetrics.concat(ekorMetrics).forEach((mati) => {
-          const isKepala = mati.position === "kepala";
-          const offDigits = getMatiPositionDigits(mati.result_snapshot, isKepala ? "kepala" : "ekor");
-          const lineCount = build2DBelakangLineCount(isKepala ? { bbfs, offKepala: offDigits } : { bbfs, offEkor: offDigits });
-          addItem(`BBFS BELAKANG + OFF ${isKepala ? "KEPALA" : "EKOR"} ${mati.param}`, [bbfsMetric, mati], lineCount, isKepala ? { bbfsByPair: { belakang: true }, offKepala: mati.param } : { bbfsByPair: { belakang: true }, offEkor: mati.param });
-        });
-      }
-    }
   });
 
   return items.sort((a, b) => Number(b.score || 0) - Number(a.score || 0));
@@ -358,7 +439,7 @@ export default function RekapWatchPage() {
             <Sparkles size={12} /> Pantauan
           </div>
           <h2 className="font-['Orbitron'] text-[23px] font-black uppercase tracking-[3.5px] text-[var(--text)]">Pantauan Rekap</h2>
-          <p className="mt-3 text-[11px] font-semibold uppercase leading-5 tracking-[1.4px] text-[var(--text-dim)]">Dibentuk dari analysis_evaluations. Menampilkan statistik combo 2D Belakang 50-65 line.</p>
+          <p className="mt-3 text-[11px] font-semibold uppercase leading-5 tracking-[1.4px] text-[var(--text-dim)]">Dibentuk dari analysis_evaluations. Combo bebas 2D Belakang 50-65 line, diurutkan stabilitas historis.</p>
         </div>
       </div>
 
