@@ -2,11 +2,12 @@ import React, { useState, useEffect, useMemo } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate, useLocation } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
 import {
-  Zap, ShieldCheck, Search, RefreshCw, Sparkles, Database, MessageCircle, LogOut, Copy
+  Zap, ShieldCheck, Search, RefreshCw, Sparkles, Database, MessageCircle, LogOut, Copy, BarChart3
 } from "lucide-react";
 import { Analytics } from "@vercel/analytics/react";
 import AnalyzeMenu from "./pages/AnalyzeMenu";
 import AdminPage from "./pages/AdminPage";
+import RekapWatchPage from "./pages/RekapWatchPage";
 import LoginGate from "./components/LoginGate";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
@@ -160,6 +161,7 @@ function AppLayout() {
       <main className="min-w-0 flex-1">
         <Routes>
           <Route path="/" element={<Dashboard markets={markets} onRefresh={fetchMarkets} />} />
+          <Route path="/pantauan-rekap" element={<RekapWatchPage />} />
           <Route path="/analyze/:marketId/*" element={<AnalyzeMenu />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="*" element={<Navigate to="/" />} />
@@ -370,17 +372,27 @@ function Dashboard({ markets, onRefresh }: { markets: any[]; onRefresh: () => vo
 }
 
 function BottomAccountNav({ onOpenAccount }: { onOpenAccount: () => void }) {
+  const navigate = useNavigate();
   return (
     <div className="bottom-account-nav fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom))] left-4 right-4 z-40 mx-auto max-w-3xl">
-      <div className="bottom-account-shell rounded-[1.75rem] border border-white/12 bg-black/32 p-2 shadow-2xl backdrop-blur-xl">
+      <div className="bottom-account-shell grid grid-cols-2 gap-2 rounded-[1.75rem] border border-white/12 bg-black/32 p-2 shadow-2xl backdrop-blur-xl">
+        <button
+          type="button"
+          onClick={() => navigate("/pantauan-rekap")}
+          className="bottom-account-button flex h-13 w-full items-center justify-center gap-2 rounded-[1.35rem] text-[10px] font-black uppercase tracking-[1.7px] active:scale-[0.99]"
+          aria-label="Pantauan Rekap"
+        >
+          <BarChart3 className="h-5 w-5" />
+          <span>Pantauan</span>
+        </button>
         <button
           type="button"
           onClick={onOpenAccount}
-          className="bottom-account-button flex h-13 w-full items-center justify-center gap-3 rounded-[1.35rem] text-[11px] font-black uppercase tracking-[2px] active:scale-[0.99]"
+          className="bottom-account-button flex h-13 w-full items-center justify-center gap-2 rounded-[1.35rem] text-[10px] font-black uppercase tracking-[1.7px] active:scale-[0.99]"
           aria-label="Akun Saya"
         >
           <AppLogoMark className="h-5 w-5" />
-          <span>Akun Saya</span>
+          <span>Akun</span>
         </button>
       </div>
     </div>
