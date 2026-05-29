@@ -35,9 +35,9 @@ function formatFocus(value?: string, label?: string) {
 }
 
 function formatUpdatedAt(value?: string) {
-  if (!value) return "Belum ada update";
+  if (!value) return "Belum diperbarui";
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Belum ada update";
+  if (Number.isNaN(date.getTime())) return "Belum diperbarui";
   return date.toLocaleString("id-ID", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
 }
 
@@ -69,7 +69,7 @@ export default function RekapWatchPage() {
       setItems((data || []) as RekapWatchItem[]);
     } catch (e: any) {
       setItems([]);
-      setError(e.message || "Belum bisa membaca rekap_watchlist.");
+      setError(e.message || "Belum bisa memuat pantauan.");
     }
     setLoading(false);
   };
@@ -99,19 +99,19 @@ export default function RekapWatchPage() {
             <Sparkles size={12} /> Pantauan
           </div>
           <h2 className="font-['Orbitron'] text-[23px] font-black uppercase tracking-[3.5px] text-[var(--text)]">Pantauan Rekap</h2>
-          <p className="mt-3 text-[11px] font-semibold uppercase leading-5 tracking-[1.4px] text-[var(--text-dim)]">Data dihitung backend dari analysis_evaluations. Halaman ini hanya membaca hasil olahan rekap_watchlist.</p>
+          <p className="mt-3 text-[11px] font-semibold uppercase leading-5 tracking-[1.4px] text-[var(--text-dim)]">Ringkasan combo rekap yang sedang stabil berdasarkan riwayat terbaru.</p>
         </div>
       </div>
 
       <div className="mb-4 flex items-center justify-between gap-3 px-1">
-        <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-[9px] font-black uppercase tracking-[1.5px] text-[var(--cyan)]">{bestByMarket.length} pasaran tercatat</span>
+        <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-[9px] font-black uppercase tracking-[1.5px] text-[var(--cyan)]">{bestByMarket.length} pasaran terpantau</span>
         <button onClick={loadWatchlist} className="ghost-button flex h-12 w-12 shrink-0 items-center justify-center text-[var(--text-dim)] active:scale-95" aria-label="Refresh pantauan rekap">
           <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
         </button>
       </div>
 
       {loading ? (
-        <div className="premium-panel p-6 text-center text-[11px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Membaca rekap_watchlist...</div>
+        <div className="premium-panel p-6 text-center text-[11px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Memuat pantauan terbaru...</div>
       ) : bestByMarket.length ? (
         <div className="grid gap-3">
           {bestByMarket.map((item) => {
@@ -129,15 +129,15 @@ export default function RekapWatchPage() {
                         <p className="font-['Orbitron'] text-[15px] font-black uppercase tracking-[2.4px] text-[var(--text)]">{marketName}</p>
                         <p className="mt-1 text-[9px] font-black uppercase tracking-[1.7px] text-[var(--cyan)]">{formatFocus(item.focus, item.focus_label)}</p>
                       </div>
-                      <span className="shrink-0 rounded-full bg-white/[0.06] px-3 py-1 text-[9px] font-black uppercase tracking-[1.4px] text-[var(--text-dim)]">STAT</span>
+                      <span className="shrink-0 rounded-full bg-white/[0.06] px-3 py-1 text-[9px] font-black uppercase tracking-[1.4px] text-[var(--text-dim)]">PANTAU</span>
                     </div>
                     <p className="mt-3 text-[12px] font-bold leading-5 text-[var(--text)]">{buildFilterLabel(item)}</p>
                     <div className="mt-4 grid grid-cols-3 gap-2 text-center">
                       <div className="rounded-2xl border border-white/10 bg-black/18 p-2"><p className="text-[8px] font-black uppercase tracking-[1.4px] text-[var(--text-dim)]">Line</p><p className="mt-1 font-['Orbitron'] text-[13px] font-black text-[var(--cyan)]">{item.line_count || 0}</p></div>
                       <div className="rounded-2xl border border-white/10 bg-black/18 p-2"><p className="text-[8px] font-black uppercase tracking-[1.4px] text-[var(--text-dim)]">Riwayat</p><p className="mt-1 font-['Orbitron'] text-[13px] font-black text-[var(--gold)]">{item.wins_15 || 0}/15</p></div>
-                      <div className="rounded-2xl border border-white/10 bg-black/18 p-2"><p className="text-[8px] font-black uppercase tracking-[1.4px] text-[var(--text-dim)]">Last 5</p><p className="mt-1 font-['Orbitron'] text-[13px] font-black text-[var(--cyan)]">{item.wins_last_5 || 0}/5</p></div>
+                      <div className="rounded-2xl border border-white/10 bg-black/18 p-2"><p className="text-[8px] font-black uppercase tracking-[1.4px] text-[var(--text-dim)]">Terbaru</p><p className="mt-1 font-['Orbitron'] text-[13px] font-black text-[var(--cyan)]">{item.wins_last_5 || 0}/5</p></div>
                     </div>
-                    <p className="mt-3 text-[9px] font-bold uppercase tracking-[1.3px] text-[var(--text-soft)]">Max lose {item.max_loss_streak ?? 0} · Update {formatUpdatedAt(item.updated_at)}</p>
+                    <p className="mt-3 text-[9px] font-bold uppercase tracking-[1.3px] text-[var(--text-soft)]">Runtun kosong maks. {item.max_loss_streak ?? 0} · Update {formatUpdatedAt(item.updated_at)}</p>
                   </div>
                 </div>
               </div>
@@ -148,7 +148,7 @@ export default function RekapWatchPage() {
         <div className="premium-panel p-6 text-center">
           <BarChart3 className="mx-auto mb-3 text-[var(--text-dim)]" />
           <p className="font-['Orbitron'] text-[13px] font-black uppercase tracking-[2px] text-[var(--text)]">Belum ada pantauan</p>
-          <p className="mt-3 text-[11px] leading-5 text-[var(--text-dim)]">{error ? "Tabel rekap_watchlist belum tersedia atau belum bisa dibaca." : "Belum ada hasil olahan backend untuk combo 2D Belakang 50-60 line."}</p>
+          <p className="mt-3 text-[11px] leading-5 text-[var(--text-dim)]">{error ? "Pantauan belum bisa dimuat. Coba refresh beberapa saat lagi." : "Belum ada combo rekap 50–60 line yang masuk kriteria pantauan."}</p>
         </div>
       )}
     </div>
