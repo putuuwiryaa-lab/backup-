@@ -61,6 +61,8 @@ const SAMPLE_SIZE = 15;
 const MIN_WINS_15 = 11;
 const MIN_WINS_LAST_5 = 3;
 const MAX_LOSS_STREAK = 2;
+const PAGE_SIZE = 1000;
+const MAX_EVALUATION_ROWS = 70000;
 
 function formatFocus(value?: string, label?: string) {
   if (label) return label;
@@ -101,6 +103,7 @@ function safeNumberArray(value: any) {
   if (Array.isArray(value)) return value.map(Number).filter((n) => Number.isFinite(n));
   if (Array.isArray(value?.result)) return value.result.map(Number).filter((n: number) => Number.isFinite(n));
   if (Array.isArray(value?.data)) return value.data.map(Number).filter((n: number) => Number.isFinite(n));
+  if (Array.isArray(value?.digits)) return value.digits.map(Number).filter((n: number) => Number.isFinite(n));
   return [];
 }
 
@@ -246,6 +249,7 @@ function buildWatchItems(rows: EvaluationRow[]): RekapWatchItem[] {
 
     aiMetrics.forEach((ai) => {
       const aiDigits = safeNumberArray(ai.result_snapshot);
+      if (!aiDigits.length) return;
       kepalaMetrics.forEach((mati) => {
         const offKepala = getMatiPositionDigits(mati.result_snapshot, "kepala");
         const lineCount = build2DBelakangLineCount({ ai: aiDigits, offKepala });
@@ -270,12 +274,14 @@ function buildWatchItems(rows: EvaluationRow[]): RekapWatchItem[] {
 
     if (bbfsMetric) {
       const bbfs = safeNumberArray(bbfsMetric.result_snapshot);
-      kepalaMetrics.concat(ekorMetrics).forEach((mati) => {
-        const isKepala = mati.position === "kepala";
-        const offDigits = getMatiPositionDigits(mati.result_snapshot, isKepala ? "kepala" : "ekor");
-        const lineCount = build2DBelakangLineCount(isKepala ? { bbfs, offKepala: offDigits } : { bbfs, offEkor: offDigits });
-        addItem(`BBFS BELAKANG + OFF ${isKepala ? "KEPALA" : "EKOR"} ${mati.param}`, [bbfsMetric, mati], lineCount, isKepala ? { bbfsByPair: { belakang: true }, offKepala: mati.param } : { bbfsByPair: { belakang: true }, offEkor: mati.param });
-      });
+      if (bbfs.length) {
+        kepalaMetrics.concat(ekorMetrics).forEach((mati) => {
+          const isKepala = mati.position === "kepala";
+          const offDigits = getMatiPositionDigits(mati.result_snapshot, isKepala ? "kepala" : "ekor");
+          const lineCount = build2DBelakangLineCount(isKepala ? { bbfs, offKepala: offDigits } : { bbfs, offEkor: offDigits });
+          addItem(`BBFS BELAKANG + OFF ${isKepala ? "KEPALA" : "EKOR"} ${mati.param}`, [bbfsMetric, mati], lineCount, isKepala ? { bbfsByPair: { belakang: true }, offKepala: mati.param } : { bbfsByPair: { belakang: true }, offEkor: mati.param });
+        });
+      }
     }
   });
 
@@ -292,19 +298,34 @@ export default function RekapWatchPage() {
   const [items, setItems] = useState<RekapWatchItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [rowCount, setRowCount] = useState(0);
 
-  const loadWatchlist = async () => {
-    setLoading(true);
-    setError("");
-    try {
+  const fetchEvaluationRows = async () => {
+    const allRows: EvaluationRow[] = [];
+    for (let from = 0; from < MAX_EVALUATION_ROWS; from += PAGE_SIZE) {
+      const to = from + PAGE_SIZE - 1;
       const { data, error: queryError } = await supabase
         .from("analysis_evaluations")
         .select("id,market_id,market_name,mode,param,position,target_pair,is_hit,status,result_snapshot,detail,evaluated_at")
         .in("mode", ["ai", "mati", "jumlah", "shio"])
         .order("evaluated_at", { ascending: false })
-        .limit(5000);
+        .range(from, to);
       if (queryError) throw queryError;
-      setItems(buildWatchItems((data || []) as EvaluationRow[]));
+      const page = (data || []) as EvaluationRow[];
+      allRows.push(...page);
+      if (page.length < PAGE_SIZE) break;
+    }
+    return allRows;
+  };
+
+  const loadWatchlist = async () => {
+    setLoading(true);
+    setError("");
+    setRowCount(0);
+    try {
+      const rows = await fetchEvaluationRows();
+      setRowCount(rows.length);
+      setItems(buildWatchItems(rows));
     } catch (e: any) {
       setItems([]);
       setError(e.message || "Belum bisa membaca analysis_evaluations.");
@@ -342,7 +363,7 @@ export default function RekapWatchPage() {
       </div>
 
       <div className="mb-4 flex items-center justify-between gap-3 px-1">
-        <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-[9px] font-black uppercase tracking-[1.5px] text-[var(--cyan)]">{bestByMarket.length} pasaran tercatat</span>
+        <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-[9px] font-black uppercase tracking-[1.5px] text-[var(--cyan)]">{bestByMarket.length} pasaran · {rowCount} row</span>
         <button onClick={loadWatchlist} className="ghost-button flex h-12 w-12 shrink-0 items-center justify-center text-[var(--text-dim)] active:scale-95" aria-label="Refresh pantauan rekap">
           <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
         </button>
@@ -386,7 +407,7 @@ export default function RekapWatchPage() {
         <div className="premium-panel p-6 text-center">
           <BarChart3 className="mx-auto mb-3 text-[var(--text-dim)]" />
           <p className="font-['Orbitron'] text-[13px] font-black uppercase tracking-[2px] text-[var(--text)]">Belum ada pantauan</p>
-          <p className="mt-3 text-[11px] leading-5 text-[var(--text-dim)]">{error ? "analysis_evaluations belum bisa dibaca atau format kolom belum sesuai." : "Belum ada kombinasi statistik 2D Belakang 50-65 line dari riwayat evaluasi."}</p>
+          <p className="mt-3 text-[11px] leading-5 text-[var(--text-dim)]">{error ? "analysis_evaluations belum bisa dibaca atau format kolom belum sesuai." : `Sudah membaca ${rowCount} row, tetapi belum ada kombinasi statistik 2D Belakang 50-65 line yang lolos filter.`}</p>
         </div>
       )}
     </div>
