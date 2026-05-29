@@ -108,7 +108,6 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
   const [customOffEkorCount, setCustomOffEkorCount] = useState<number | null>(null);
   const [customOffJumlahCountByPair, setCustomOffJumlahCountByPair] = useState<PairCountMap>({});
   const [customOffShioCountByPair, setCustomOffShioCountByPair] = useState<PairCountMap>({});
-  const [autoRunPreset, setAutoRunPreset] = useState(false);
   const [returnToWatch, setReturnToWatch] = useState(false);
   const meta = typeMeta[type] || typeMeta.ai;
   const isRekapCustom = type === "rekap" && param === 3;
@@ -148,6 +147,75 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
     throw new Error(json.error || "Gagal memproses analisa");
   };
 
+  const generateCustomDigitFromPreset = async (focus: CustomFocus, filters: any) => {
+    const aiPreset = presetAiMap(filters);
+    const bbfsPreset = presetBooleanMap(filters);
+    const jumlahPreset = presetCountMap(filters?.jumlahByPair);
+    const shioPreset = presetCountMap(filters?.shioByPair);
+    const offAsCount = filters?.offAs ? Number(filters.offAs) : null;
+    const offKopCount = filters?.offKop ? Number(filters.offKop) : null;
+    const offKepalaCount = filters?.offKepala ? Number(filters.offKepala) : null;
+    const offEkorCount = filters?.offEkor ? Number(filters.offEkor) : null;
+
+    setParam(3);
+    setCustomFocus(focus);
+    setCustomAiDigitByPair(aiPreset);
+    setCustomIncludeBBFSByPair(bbfsPreset);
+    setCustomOffJumlahCountByPair(jumlahPreset);
+    setCustomOffShioCountByPair(shioPreset);
+    setCustomOffAsCount(offAsCount);
+    setCustomOffKopCount(offKopCount);
+    setCustomOffKepalaCount(offKepalaCount);
+    setCustomOffEkorCount(offEkorCount);
+
+    resetBeforeAnalyze();
+    try {
+      const pairs = customFocusPairs(focus);
+      const hasAnyPairFilter = pairs.some((pair) => aiPreset[pair] || bbfsPreset[pair] || jumlahPreset[pair] || shioPreset[pair]);
+      const hasAnyFilter = Boolean(hasAnyPairFilter || offAsCount || offKopCount || offKepalaCount || offEkorCount);
+      if (!hasAnyFilter) throw new Error("Belum ada filter rekap dari pantauan.");
+
+      const data = await getMarketData();
+      const aiByPair: Partial<Record<TargetPair, number[]>> = {};
+      const bbfsByPair: Partial<Record<TargetPair, number[]>> = {};
+      const jumlahByPair: Partial<Record<TargetPair, number[]>> = {};
+      const shioByPair: Partial<Record<TargetPair, number[]>> = {};
+      const matiCache: Partial<Record<number, any>> = {};
+
+      for (const pair of pairs) {
+        const aiDigit = aiPreset[pair];
+        const useBBFS = Boolean(bbfsPreset[pair]);
+        const jumlahCount = jumlahPreset[pair];
+        const shioCount = shioPreset[pair];
+        if (aiDigit) aiByPair[pair] = toNumberList((await postAnalyze("ai", data, aiDigit, pair))?.result);
+        if (useBBFS) bbfsByPair[pair] = toNumberList((await postAnalyze("ai", data, 8, pair))?.result);
+        if (jumlahCount) jumlahByPair[pair] = toNumberList((await postAnalyze("jumlah", data, jumlahCount, pair))?.result);
+        if (shioCount) shioByPair[pair] = toNumberList((await postAnalyze("shio", data, shioCount, pair))?.result);
+      }
+
+      const getMati = async (count: number | null) => {
+        if (!count) return null;
+        if (!matiCache[count]) matiCache[count] = await postAnalyze("mati", data, count);
+        return matiCache[count];
+      };
+
+      const matiAsData = await getMati(offAsCount);
+      const matiKopData = await getMati(offKopCount);
+      const matiKepalaData = await getMati(offKepalaCount);
+      const matiEkorData = await getMati(offEkorCount);
+      const offAs = offAsCount ? toNumberList(matiAsData?.AS?.result) : [];
+      const offKop = offKopCount ? toNumberList(matiKopData?.KOP?.result) : [];
+      const offKepala = offKepalaCount ? toNumberList(matiKepalaData?.KEPALA?.result) : [];
+      const offEkor = offEkorCount ? toNumberList(matiEkorData?.EKOR?.result) : [];
+      const lines = buildCustomDigitLines({ focus, aiByPair, bbfsByPair, offAs, offKop, offKepala, offEkor, jumlahByPair, shioByPair });
+
+      setResult({ custom: true, customFocus: focus, aiByPair, bbfsByPair, customIncludeBBFSByPair: bbfsPreset, offAs, offKop, offKepala, offEkor, jumlahByPair, shioByPair, lines });
+    } catch (e: any) {
+      setError(e.message || "Gagal generate custom digit");
+    }
+    setLoading(false);
+  };
+
   const handleTargetPairSelect = (pair: TargetPair) => {
     setTargetPair(pair);
     setParam(0);
@@ -170,12 +238,12 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
 
   const stepBack = () => {
     if (loading) {
-      if (returnToWatch) navigate("/pantauan-rekap");
+      if (returnToWatch) navigate("/pantauan-rekap", { replace: true });
       return true;
     }
     if (result) {
       if (returnToWatch && type === "rekap") {
-        navigate("/pantauan-rekap");
+        navigate("/pantauan-rekap", { replace: true });
         return true;
       }
       setResult(null);
@@ -287,28 +355,9 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
     if (type !== "rekap") return;
     const preset = readRekapWatchPreset(marketId);
     if (!preset) return;
-    const filters = preset.filters || {};
-    const focus = (preset.focus || "belakang") as CustomFocus;
     setReturnToWatch(true);
-    setLoading(true);
-    setParam(3);
-    setCustomFocus(focus);
-    setCustomAiDigitByPair(presetAiMap(filters));
-    setCustomIncludeBBFSByPair(presetBooleanMap(filters));
-    setCustomOffJumlahCountByPair(presetCountMap(filters.jumlahByPair));
-    setCustomOffShioCountByPair(presetCountMap(filters.shioByPair));
-    setCustomOffAsCount(filters.offAs ? Number(filters.offAs) : null);
-    setCustomOffKopCount(filters.offKop ? Number(filters.offKop) : null);
-    setCustomOffKepalaCount(filters.offKepala ? Number(filters.offKepala) : null);
-    setCustomOffEkorCount(filters.offEkor ? Number(filters.offEkor) : null);
-    setAutoRunPreset(true);
+    generateCustomDigitFromPreset((preset.focus || "belakang") as CustomFocus, preset.filters || {});
   }, [type, marketId]);
-
-  useEffect(() => {
-    if (!autoRunPreset || !customFocus || result) return;
-    setAutoRunPreset(false);
-    handleCustomDigitGenerate();
-  }, [autoRunPreset, customFocus]);
 
   const showRekapFocusSelector = isRekapCustom && !customFocus && !result && !loading;
   const showCustomDigitBuilder = isRekapCustom && Boolean(customFocus) && !result;
