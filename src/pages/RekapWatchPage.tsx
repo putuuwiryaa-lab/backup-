@@ -67,14 +67,14 @@ type ComboComponent = {
 
 const TARGET_PAIR = "belakang";
 const MIN_LINE = 50;
-const MAX_LINE = 65;
+const MAX_LINE = 60;
 const SAMPLE_SIZE = 15;
-const MIN_WINS_15 = 11;
-const MIN_WINS_LAST_5 = 3;
-const MAX_LOSS_STREAK = 2;
+const MIN_WINS_15 = 12;
+const MIN_WINS_LAST_5 = 4;
+const MAX_LOSS_STREAK = 1;
 const PAGE_SIZE = 1000;
 const MAX_EVALUATION_ROWS = 70000;
-const MAX_COMPONENTS_PER_COMBO = 3;
+const MAX_COMPONENTS_PER_COMBO = 2;
 
 function formatFocus(value?: string, label?: string) {
   if (label) return label;
@@ -439,7 +439,7 @@ export default function RekapWatchPage() {
             <Sparkles size={12} /> Pantauan
           </div>
           <h2 className="font-['Orbitron'] text-[23px] font-black uppercase tracking-[3.5px] text-[var(--text)]">Pantauan Rekap</h2>
-          <p className="mt-3 text-[11px] font-semibold uppercase leading-5 tracking-[1.4px] text-[var(--text-dim)]">Dibentuk dari analysis_evaluations. Combo bebas 2D Belakang 50-65 line, diurutkan stabilitas historis.</p>
+          <p className="mt-3 text-[11px] font-semibold uppercase leading-5 tracking-[1.4px] text-[var(--text-dim)]">Dibentuk dari analysis_evaluations. Combo bebas 2D Belakang 50-60 line, diurutkan stabilitas historis.</p>
         </div>
       </div>
 
@@ -488,7 +488,7 @@ export default function RekapWatchPage() {
         <div className="premium-panel p-6 text-center">
           <BarChart3 className="mx-auto mb-3 text-[var(--text-dim)]" />
           <p className="font-['Orbitron'] text-[13px] font-black uppercase tracking-[2px] text-[var(--text)]">Belum ada pantauan</p>
-          <p className="mt-3 text-[11px] leading-5 text-[var(--text-dim)]">{error ? "analysis_evaluations belum bisa dibaca atau format kolom belum sesuai." : `Sudah membaca ${rowCount} row, tetapi belum ada kombinasi statistik 2D Belakang 50-65 line yang lolos filter.`}</p>
+          <p className="mt-3 text-[11px] leading-5 text-[var(--text-dim)]">{error ? "analysis_evaluations belum bisa dibaca atau format kolom belum sesuai." : `Sudah membaca ${rowCount} row, tetapi belum ada kombinasi statistik 2D Belakang 50-60 line yang lolos filter.`}</p>
         </div>
       )}
     </div>
