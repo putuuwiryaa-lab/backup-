@@ -37,6 +37,9 @@ function AppLayout() {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showAccountPanel, setShowAccountPanel] = useState(false);
   const isAnalyzePage = location.pathname.startsWith("/analyze/");
+  const isStandalonePage = location.pathname === "/pantauan-rekap";
+  const showShellHeader = !isAnalyzePage && !isStandalonePage && location.pathname !== "/admin";
+  const showShellNav = !isAnalyzePage && !isStandalonePage && location.pathname !== "/admin";
 
   const getDeviceIdentity = () => {
     let storedDeviceId = localStorage.getItem("supreme_device_id");
@@ -145,10 +148,10 @@ function AppLayout() {
   if (authStatus === "EXPIRED") return <ExpiredScreen />;
 
   return (
-    <div className={`relative mx-auto flex min-h-screen w-full max-w-3xl flex-col px-4 sm:px-6 ${isAnalyzePage ? "pb-6 pt-4" : "pb-32 pt-4"}`}>
-      {!isAnalyzePage && location.pathname !== "/admin" && <HeroHeader />}
+    <div className={`relative mx-auto flex min-h-screen w-full max-w-3xl flex-col px-4 sm:px-6 ${isAnalyzePage || isStandalonePage ? "pb-6 pt-4" : "pb-32 pt-4"}`}>
+      {showShellHeader && <HeroHeader />}
 
-      {systemSetting?.dbError && !isAnalyzePage && (
+      {systemSetting?.dbError && !isAnalyzePage && !isStandalonePage && (
         <div className="mb-4 flex items-start gap-3 rounded-3xl border border-red-400/25 bg-red-500/10 p-4 shadow-sm">
           <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-[var(--red)]" />
           <div>
@@ -168,7 +171,7 @@ function AppLayout() {
         </Routes>
       </main>
 
-      {!isAnalyzePage && location.pathname !== "/admin" && <BottomAccountNav onOpenAccount={() => setShowAccountPanel(true)} />}
+      {showShellNav && <BottomAccountNav onOpenAccount={() => setShowAccountPanel(true)} />}
 
       <AccountPanel
         open={showAccountPanel}
