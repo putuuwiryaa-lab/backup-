@@ -353,6 +353,10 @@ def build_watchlist_rows(rows):
     return sorted(output, key=lambda item: item["score"], reverse=True)
 
 
+def prune_inactive_watchlist_rows():
+    supabase.table("rekap_watchlist").delete().eq("is_active", False).execute()
+
+
 def refresh_rekap_watchlist():
     rows = fetch_evaluation_rows()
     watch_rows = build_watchlist_rows(rows)
@@ -362,7 +366,9 @@ def refresh_rekap_watchlist():
     if watch_rows:
         supabase.table("rekap_watchlist").upsert(watch_rows, on_conflict="filter_key").execute()
 
-    print(f"REKAP WATCH DONE: source_rows={len(rows)} watch_rows={len(watch_rows)}")
+    prune_inactive_watchlist_rows()
+
+    print(f"REKAP WATCH DONE: source_rows={len(rows)} watch_rows={len(watch_rows)} inactive_pruned=True")
     return watch_rows
 
 
