@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, RefreshCw, Sparkles } from "lucide-react";
 import ParamSelector from "../components/analysis/ParamSelector";
@@ -9,6 +9,7 @@ import { useStepBackNavigation } from "../hooks/useStepBackNavigation";
 import { typeMeta } from "../lib/analysis/constants";
 import { toNumberList } from "../lib/analysis/utils";
 import { buildCustomDigitLines, CUSTOM_FOCUS_OPTIONS, customFocusLabel, customFocusPairs, customFocusSubtitle, type CustomFocus, type TargetPair } from "../lib/analysis/customDigit";
+import { presetAiMap, presetBooleanMap, presetCountMap, readRekapWatchPreset } from "../lib/analysis/rekapWatchPreset";
 
 const TARGET_PAIR_OPTIONS: Array<{ key: TargetPair; title: string; subtitle: string }> = [
   { key: "depan", title: "2D DEPAN", subtitle: "AS - KOP" },
@@ -95,6 +96,7 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
   const [customOffEkorCount, setCustomOffEkorCount] = useState<number | null>(null);
   const [customOffJumlahCountByPair, setCustomOffJumlahCountByPair] = useState<PairCountMap>({});
   const [customOffShioCountByPair, setCustomOffShioCountByPair] = useState<PairCountMap>({});
+  const [autoRunPreset, setAutoRunPreset] = useState(false);
   const meta = typeMeta[type] || typeMeta.ai;
   const isRekapCustom = type === "rekap" && param === 3;
 
@@ -260,6 +262,31 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
     }
     setLoading(false);
   };
+
+  useEffect(() => {
+    if (type !== "rekap") return;
+    const preset = readRekapWatchPreset(marketId);
+    if (!preset) return;
+    const filters = preset.filters || {};
+    const focus = (preset.focus || "belakang") as CustomFocus;
+    setParam(3);
+    setCustomFocus(focus);
+    setCustomAiDigitByPair(presetAiMap(filters));
+    setCustomIncludeBBFSByPair(presetBooleanMap(filters));
+    setCustomOffJumlahCountByPair(presetCountMap(filters.jumlahByPair));
+    setCustomOffShioCountByPair(presetCountMap(filters.shioByPair));
+    setCustomOffAsCount(filters.offAs ? Number(filters.offAs) : null);
+    setCustomOffKopCount(filters.offKop ? Number(filters.offKop) : null);
+    setCustomOffKepalaCount(filters.offKepala ? Number(filters.offKepala) : null);
+    setCustomOffEkorCount(filters.offEkor ? Number(filters.offEkor) : null);
+    setAutoRunPreset(true);
+  }, [type, marketId]);
+
+  useEffect(() => {
+    if (!autoRunPreset || !customFocus || loading || result) return;
+    setAutoRunPreset(false);
+    handleCustomDigitGenerate();
+  }, [autoRunPreset, customFocus]);
 
   const showRekapFocusSelector = isRekapCustom && !customFocus && !result && !loading;
   const showCustomDigitBuilder = isRekapCustom && Boolean(customFocus) && !result;
