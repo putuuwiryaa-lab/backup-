@@ -359,10 +359,11 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
     generateCustomDigitFromPreset((preset.focus || "belakang") as CustomFocus, preset.filters || {});
   }, [type, marketId]);
 
-  const showRekapFocusSelector = isRekapCustom && !customFocus && !result && !loading;
-  const showCustomDigitBuilder = isRekapCustom && Boolean(customFocus) && !result;
-  const showTargetPairSelector = needsTargetPair && !targetPair && !result && !loading;
-  const showParamSelector = !showTargetPairSelector && !showRekapFocusSelector;
+  const hideRekapControls = Boolean(returnToWatch && !result);
+  const showRekapFocusSelector = !hideRekapControls && isRekapCustom && !customFocus && !result && !loading;
+  const showCustomDigitBuilder = !hideRekapControls && isRekapCustom && Boolean(customFocus) && !result;
+  const showTargetPairSelector = !hideRekapControls && needsTargetPair && !targetPair && !result && !loading;
+  const showParamSelector = !hideRekapControls && !showTargetPairSelector && !showRekapFocusSelector;
 
   return (
     <div className={`analysis-mode-${type} ui-motion-in pb-8`}>
@@ -385,7 +386,7 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
         </div>
 
         {needsTargetPair && targetPair && <div className="ui-card ui-motion-in relative mt-3 flex items-center justify-between gap-3 rounded-2xl p-3"><div className="min-w-0 text-left"><span className="mr-2 ui-label text-[9px]">Fokus:</span><span className="font-['Orbitron'] text-[10px] font-black uppercase tracking-[2px]" style={{ color: meta.accent }}>{targetPairLabel(targetPair)}</span></div><button type="button" onClick={handleTargetPairReset} className="ui-motion-soft ui-tap shrink-0 rounded-full border px-3 py-1.5 text-[8px] font-black uppercase tracking-[1px]" style={{ borderColor: `${meta.accent}66`, color: meta.accent }}>Ganti</button></div>}
-        {isRekapCustom && customFocus && <div className="ui-card ui-motion-in relative mt-3 flex items-center justify-between gap-3 rounded-2xl p-3"><div className="min-w-0 text-left"><span className="mr-2 ui-label text-[9px]">Rekap:</span><span className="font-['Orbitron'] text-[10px] font-black uppercase tracking-[2px]" style={{ color: meta.accent }}>{customFocusLabel(customFocus)} · {customFocusSubtitle(customFocus)}</span></div><button type="button" onClick={handleCustomFocusReset} className="ui-motion-soft ui-tap shrink-0 rounded-full border px-3 py-1.5 text-[8px] font-black uppercase tracking-[1px]" style={{ borderColor: `${meta.accent}66`, color: meta.accent }}>Ganti</button></div>}
+        {isRekapCustom && customFocus && !hideRekapControls && <div className="ui-card ui-motion-in relative mt-3 flex items-center justify-between gap-3 rounded-2xl p-3"><div className="min-w-0 text-left"><span className="mr-2 ui-label text-[9px]">Rekap:</span><span className="font-['Orbitron'] text-[10px] font-black uppercase tracking-[2px]" style={{ color: meta.accent }}>{customFocusLabel(customFocus)} · {customFocusSubtitle(customFocus)}</span></div><button type="button" onClick={handleCustomFocusReset} className="ui-motion-soft ui-tap shrink-0 rounded-full border px-3 py-1.5 text-[8px] font-black uppercase tracking-[1px]" style={{ borderColor: `${meta.accent}66`, color: meta.accent }}>Ganti</button></div>}
       </div>
 
       {!result && !loading && param !== 0 && !isRekapCustom && <button onClick={() => handleAnalyze(param || 1)} className="primary-button ui-motion-soft ui-tap mb-4 flex w-full items-center justify-center gap-3 p-5 font-['Orbitron'] text-[12px] font-black uppercase tracking-[4px]"><RefreshCw size={18} /> Mulai Analisa</button>}
@@ -395,7 +396,7 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
 
       {showParamSelector && <ParamSelector type={type} param={param} meta={meta} onAnalyze={handleAnalyze} onCustomDigit={() => { setParam(3); setResult(null); setError(""); }} />}
 
-      {customFocus && <CustomDigitBuilder show={showCustomDigitBuilder} marketId={marketId} meta={meta} customFocus={customFocus} customAiDigitByPair={customAiDigitByPair} setCustomAiDigitForPair={setCustomAiDigitForPair} customIncludeBBFSByPair={customIncludeBBFSByPair} setCustomIncludeBBFSForPair={setCustomIncludeBBFSForPair} customOffAsCount={customOffAsCount} setCustomOffAsCount={setCustomOffAsCount} customOffKopCount={customOffKopCount} setCustomOffKopCount={setCustomOffKopCount} customOffKepalaCount={customOffKepalaCount} setCustomOffKepalaCount={setCustomOffKepalaCount} customOffEkorCount={customOffEkorCount} setCustomOffEkorCount={setCustomOffEkorCount} customOffJumlahCountByPair={customOffJumlahCountByPair} setCustomOffJumlahCountForPair={setCustomOffJumlahCountForPair} customOffShioCountByPair={customOffShioCountByPair} setCustomOffShioCountForPair={setCustomOffShioCountForPair} onGenerate={handleCustomDigitGenerate} />}
+      {customFocus && !hideRekapControls && <CustomDigitBuilder show={showCustomDigitBuilder} marketId={marketId} meta={meta} customFocus={customFocus} customAiDigitByPair={customAiDigitByPair} setCustomAiDigitForPair={setCustomAiDigitForPair} customIncludeBBFSByPair={customIncludeBBFSByPair} setCustomIncludeBBFSForPair={setCustomIncludeBBFSForPair} customOffAsCount={customOffAsCount} setCustomOffAsCount={setCustomOffAsCount} customOffKopCount={customOffKopCount} setCustomOffKopCount={setCustomOffKopCount} customOffKepalaCount={customOffKepalaCount} setCustomOffKepalaCount={setCustomOffKepalaCount} customOffEkorCount={customOffEkorCount} setCustomOffEkorCount={setCustomOffEkorCount} customOffJumlahCountByPair={customOffJumlahCountByPair} setCustomOffJumlahCountForPair={setCustomOffJumlahCountForPair} customOffShioCountByPair={customOffShioCountByPair} setCustomOffShioCountForPair={setCustomOffShioCountForPair} onGenerate={handleCustomDigitGenerate} />}
 
       {loading && <div className="ui-panel ui-motion-in my-4 flex flex-col items-center justify-center gap-4 p-8 text-center"><div className="h-12 w-12 animate-spin rounded-full border-4 border-white/10" style={{ borderTopColor: meta.accent }} /><div className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px]">Memproses Analisa</div></div>}
       {error && <div className="ui-note ui-motion-in my-4 border-red-400/30 bg-red-500/10 p-4 text-center text-[12px] font-bold text-red-300">{error}</div>}
