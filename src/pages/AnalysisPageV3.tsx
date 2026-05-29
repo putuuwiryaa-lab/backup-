@@ -21,6 +21,18 @@ type PairAiMap = Partial<Record<TargetPair, 2 | 4 | 6 | null>>;
 type PairCountMap = Partial<Record<TargetPair, number | null>>;
 type PairBooleanMap = Partial<Record<TargetPair, boolean>>;
 
+function hasPendingRekapPreset(marketId: string, type: string) {
+  if (type !== "rekap") return false;
+  try {
+    const raw = sessionStorage.getItem("supreme_rekap_watch_preset");
+    if (!raw) return false;
+    const preset = JSON.parse(raw);
+    return preset?.market_id === marketId;
+  } catch {
+    return false;
+  }
+}
+
 function TargetPairSelector({ meta, onSelect }: { meta: { accent: string; soft: string }; onSelect: (pair: TargetPair) => void }) {
   return (
     <div className="ui-panel ui-motion-in mt-4 space-y-4 p-4">
@@ -82,7 +94,7 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
   const needsTargetPair = ["ai", "jumlah", "shio"].includes(type);
   const [param, setParam] = useState<number | null>(type === "rekap" ? 3 : 0);
   const [targetPair, setTargetPair] = useState<TargetPair | null>(needsTargetPair ? null : "belakang");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(() => hasPendingRekapPreset(marketId, type));
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState("");
   const [detailValidationOpen, setDetailValidationOpen] = useState(false);
@@ -97,6 +109,7 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
   const [customOffJumlahCountByPair, setCustomOffJumlahCountByPair] = useState<PairCountMap>({});
   const [customOffShioCountByPair, setCustomOffShioCountByPair] = useState<PairCountMap>({});
   const [autoRunPreset, setAutoRunPreset] = useState(false);
+  const [returnToWatch, setReturnToWatch] = useState(false);
   const meta = typeMeta[type] || typeMeta.ai;
   const isRekapCustom = type === "rekap" && param === 3;
 
@@ -156,8 +169,15 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
   };
 
   const stepBack = () => {
-    if (loading) return true;
+    if (loading) {
+      if (returnToWatch) navigate("/pantauan-rekap");
+      return true;
+    }
     if (result) {
+      if (returnToWatch && type === "rekap") {
+        navigate("/pantauan-rekap");
+        return true;
+      }
       setResult(null);
       setError("");
       if (needsTargetPair) {
@@ -269,6 +289,8 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
     if (!preset) return;
     const filters = preset.filters || {};
     const focus = (preset.focus || "belakang") as CustomFocus;
+    setReturnToWatch(true);
+    setLoading(true);
     setParam(3);
     setCustomFocus(focus);
     setCustomAiDigitByPair(presetAiMap(filters));
@@ -283,7 +305,7 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
   }, [type, marketId]);
 
   useEffect(() => {
-    if (!autoRunPreset || !customFocus || loading || result) return;
+    if (!autoRunPreset || !customFocus || result) return;
     setAutoRunPreset(false);
     handleCustomDigitGenerate();
   }, [autoRunPreset, customFocus]);
