@@ -138,6 +138,13 @@ export default function RekapWatchPage() {
                       <div className="rounded-2xl border border-white/10 bg-black/18 p-2"><p className="text-[8px] font-black uppercase tracking-[1.4px] text-[var(--text-dim)]">Terbaru</p><p className="mt-1 font-['Orbitron'] text-[13px] font-black text-[var(--cyan)]">{item.wins_last_5 || 0}/5</p></div>
                     </div>
                     <p className="mt-3 text-[9px] font-bold uppercase tracking-[1.3px] text-[var(--text-soft)]">Runtun kosong maks. {item.max_loss_streak ?? 0} · Update {formatUpdatedAt(item.updated_at)}</p>
+                    <button
+  type="button"
+  onClick={() => navigate(`/analyze/${item.market_id}/rekap`)}
+  className="mt-4 w-full rounded-2xl bg-[var(--cyan)] px-4 py-3 text-[10px] font-black uppercase tracking-[2px] text-black active:scale-[0.985]"
+>
+  Buka Rekap
+</button>
                   </div>
                 </div>
               </div>
