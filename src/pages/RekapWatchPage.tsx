@@ -140,7 +140,10 @@ export default function RekapWatchPage() {
                     <p className="mt-3 text-[9px] font-bold uppercase tracking-[1.3px] text-[var(--text-soft)]">Runtun kosong maks. {item.max_loss_streak ?? 0} · Update {formatUpdatedAt(item.updated_at)}</p>
                     <button
   type="button"
-  onClick={() => navigate(`/analyze/${item.market_id}/rekap`)}
+  onClick={() => {
+  sessionStorage.setItem("supreme_rekap_watch_preset", JSON.stringify(item));
+  navigate(`/analyze/${item.market_id}/rekap`);
+}}
   className="mt-4 w-full rounded-2xl bg-[var(--cyan)] px-4 py-3 text-[10px] font-black uppercase tracking-[2px] text-black active:scale-[0.985]"
 >
   Buka Rekap
