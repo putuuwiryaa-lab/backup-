@@ -11,11 +11,11 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 const RECOMMENDATION_SAMPLE_SIZE = 15;
 const RECOMMENDATION_MIN_SAMPLE = 10;
 
-const AI_WIN_THRESHOLDS: Record<number, number> = { 2: 8, 4: 11, 6: 13, 8: 11 };
+const AI_WIN_THRESHOLDS: Record<number, number> = { 2: 9, 4: 11, 6: 13, 8: 11 };
 const MATI_WIN_THRESHOLDS: Record<number, number> = { 1: 14, 2: 13, 3: 11 };
 const JUMLAH_WIN_THRESHOLDS: Record<number, number> = { 1: 14, 2: 12, 3: 11 };
 const SHIO_WIN_THRESHOLDS: Record<number, number> = { 1: 14, 2: 13, 3: 12 };
-const AI_PARTIAL_WIN_RATES: Record<number, number> = { 2: 8 / 15, 4: 11 / 15, 6: 13 / 15, 8: 11 / 15 };
+const AI_PARTIAL_WIN_RATES: Record<number, number> = { 2: 9 / 15, 4: 11 / 15, 6: 13 / 15, 8: 11 / 15 };
 const MATI_PARTIAL_WIN_RATES: Record<number, number> = { 1: 14 / 15, 2: 13 / 15, 3: 11 / 15 };
 const JUMLAH_PARTIAL_WIN_RATES: Record<number, number> = { 1: 14 / 15, 2: 12 / 15, 3: 11 / 15 };
 const SHIO_PARTIAL_WIN_RATES: Record<number, number> = { 1: 14 / 15, 2: 13 / 15, 3: 12 / 15 };
