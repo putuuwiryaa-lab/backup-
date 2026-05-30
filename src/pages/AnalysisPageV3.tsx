@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, RefreshCw, Sparkles } from "lucide-react";
 import ParamSelector from "../components/analysis/ParamSelector";
 import CustomDigitBuilder from "../components/analysis/CustomDigitBuilder";
@@ -16,9 +16,15 @@ const TARGET_PAIR_OPTIONS: Array<{ key: TargetPair; title: string; subtitle: str
   { key: "belakang", title: "2D BELAKANG", subtitle: "KEPALA - EKOR" },
 ];
 
+const VALID_TARGET_PAIRS: TargetPair[] = ["depan", "tengah", "belakang"];
+
 type PairAiMap = Partial<Record<TargetPair, 2 | 4 | 6 | null>>;
 type PairCountMap = Partial<Record<TargetPair, number | null>>;
 type PairBooleanMap = Partial<Record<TargetPair, boolean>>;
+
+function parseTargetPair(value: string | null): TargetPair {
+  return VALID_TARGET_PAIRS.includes(value as TargetPair) ? (value as TargetPair) : "belakang";
+}
 
 function TargetPairSelector({ meta, onSelect }: { meta: { accent: string; soft: string }; onSelect: (pair: TargetPair) => void }) {
   return (
@@ -78,13 +84,20 @@ function targetPairLabel(pair: TargetPair | null) {
 
 export default function AnalysisPageV3({ type, title, icon, marketId }: { type: string; title: string; icon: string; marketId: string }) {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const autoStartedRef = useRef(false);
   const needsTargetPair = ["ai", "jumlah", "shio"].includes(type);
-  const [param, setParam] = useState<number | null>(type === "rekap" ? 3 : 0);
-  const [targetPair, setTargetPair] = useState<TargetPair | null>(needsTargetPair ? null : "belakang");
+  const autoMode = searchParams.get("auto") === "1";
+  const autoParam = Number(searchParams.get("param"));
+  const autoTargetPair = parseTargetPair(searchParams.get("target_pair"));
+  const initialParam = autoMode && Number.isFinite(autoParam) && autoParam > 0 ? autoParam : type === "rekap" ? 3 : 0;
+
+  const [param, setParam] = useState<number | null>(initialParam);
+  const [targetPair, setTargetPair] = useState<TargetPair | null>(needsTargetPair ? (autoMode ? autoTargetPair : null) : "belakang");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState("");
-  const [detailValidationOpen, setDetailValidationOpen] = useState(false);
+  const [detailValidationOpen, setDetailValidationOpen] = useState(autoMode);
   const [angkaJadiOpen, setAngkaJadiOpen] = useState(false);
   const [customFocus, setCustomFocus] = useState<CustomFocus | null>(type === "rekap" ? null : "belakang");
   const [customAiDigitByPair, setCustomAiDigitByPair] = useState<PairAiMap>({});
@@ -107,7 +120,7 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
     setLoading(true);
     setError("");
     setResult(null);
-    setDetailValidationOpen(false);
+    setDetailValidationOpen(autoMode);
     setAngkaJadiOpen(false);
   };
 
@@ -189,21 +202,31 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
     if (!stepBack()) navigate(-1);
   };
 
-  const handleAnalyze = async (selectedParam: number) => {
-    if (needsTargetPair && !targetPair) {
+  const handleAnalyze = async (selectedParam: number, selectedTargetPair?: TargetPair) => {
+    const finalTargetPair = selectedTargetPair || targetPair || "belakang";
+    if (needsTargetPair && !finalTargetPair) {
       setError("Pilih fokus 2D dulu.");
       return;
     }
+    setTargetPair(finalTargetPair);
     setParam(selectedParam);
     resetBeforeAnalyze();
     try {
       const data = await getMarketData();
-      setResult(await postAnalyze(type, data, selectedParam, targetPair || "belakang"));
+      setResult(await postAnalyze(type, data, selectedParam, finalTargetPair));
+      setDetailValidationOpen(autoMode);
     } catch (e: any) {
       setError(e.message || "Error koneksi server");
     }
     setLoading(false);
   };
+
+  useEffect(() => {
+    if (!autoMode || autoStartedRef.current || type === "rekap") return;
+    if (!Number.isFinite(autoParam) || autoParam <= 0) return;
+    autoStartedRef.current = true;
+    handleAnalyze(autoParam, autoTargetPair);
+  }, [autoMode, autoParam, autoTargetPair, type]);
 
   const handleCustomDigitGenerate = async () => {
     if (!customFocus) {
@@ -253,8 +276,7 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
       const offKepala = customOffKepalaCount ? toNumberList(matiKepalaData?.KEPALA?.result) : [];
       const offEkor = customOffEkorCount ? toNumberList(matiEkorData?.EKOR?.result) : [];
       const lines = buildCustomDigitLines({ focus: customFocus, aiByPair, bbfsByPair, offAs, offKop, offKepala, offEkor, jumlahByPair, shioByPair });
-
-      setResult({ custom: true, customFocus, aiByPair, bbfsByPair, customIncludeBBFSByPair, offAs, offKop, offKepala, offEkor, jumlahByPair, shioByPair, lines });
+      setResult({ lines, focus: customFocus });
     } catch (e: any) {
       setError(e.message || "Gagal generate custom digit");
     }
@@ -290,12 +312,12 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
         {isRekapCustom && customFocus && <div className="ui-card ui-motion-in relative mt-3 flex items-center justify-between gap-3 rounded-2xl p-3"><div className="min-w-0 text-left"><span className="mr-2 ui-label text-[9px]">Rekap:</span><span className="font-['Orbitron'] text-[10px] font-black uppercase tracking-[2px]" style={{ color: meta.accent }}>{customFocusLabel(customFocus)} · {customFocusSubtitle(customFocus)}</span></div><button type="button" onClick={handleCustomFocusReset} className="ui-motion-soft ui-tap shrink-0 rounded-full border px-3 py-1.5 text-[8px] font-black uppercase tracking-[1px]" style={{ borderColor: `${meta.accent}66`, color: meta.accent }}>Ganti</button></div>}
       </div>
 
-      {!result && !loading && param !== 0 && !isRekapCustom && <button onClick={() => handleAnalyze(param || 1)} className="primary-button ui-motion-soft ui-tap mb-4 flex w-full items-center justify-center gap-3 p-5 font-['Orbitron'] text-[12px] font-black uppercase tracking-[4px]"><RefreshCw size={18} /> Mulai Analisa</button>}
+      {!result && !loading && param !== 0 && !isRekapCustom && !autoMode && <button onClick={() => handleAnalyze(param || 1)} className="primary-button ui-motion-soft ui-tap mb-4 flex w-full items-center justify-center gap-3 p-5 font-['Orbitron'] text-[12px] font-black uppercase tracking-[4px]"><RefreshCw size={18} /> Mulai Analisa</button>}
 
       {showTargetPairSelector && <TargetPairSelector meta={meta} onSelect={handleTargetPairSelect} />}
       {showRekapFocusSelector && <RekapFocusSelector meta={meta} onSelect={(focus) => { setCustomFocus(focus); setError(""); }} />}
 
-      {showParamSelector && <ParamSelector type={type} param={param} meta={meta} onAnalyze={handleAnalyze} onCustomDigit={() => { setParam(3); setResult(null); setError(""); }} />}
+      {showParamSelector && !autoMode && <ParamSelector type={type} param={param} meta={meta} onAnalyze={handleAnalyze} onCustomDigit={() => { setParam(3); setResult(null); setError(""); }} />}
 
       {customFocus && <CustomDigitBuilder show={showCustomDigitBuilder} marketId={marketId} meta={meta} customFocus={customFocus} customAiDigitByPair={customAiDigitByPair} setCustomAiDigitForPair={setCustomAiDigitForPair} customIncludeBBFSByPair={customIncludeBBFSByPair} setCustomIncludeBBFSForPair={setCustomIncludeBBFSForPair} customOffAsCount={customOffAsCount} setCustomOffAsCount={setCustomOffAsCount} customOffKopCount={customOffKopCount} setCustomOffKopCount={setCustomOffKopCount} customOffKepalaCount={customOffKepalaCount} setCustomOffKepalaCount={setCustomOffKepalaCount} customOffEkorCount={customOffEkorCount} setCustomOffEkorCount={setCustomOffEkorCount} customOffJumlahCountByPair={customOffJumlahCountByPair} setCustomOffJumlahCountForPair={setCustomOffJumlahCountForPair} customOffShioCountByPair={customOffShioCountByPair} setCustomOffShioCountForPair={setCustomOffShioCountForPair} onGenerate={handleCustomDigitGenerate} />}
 
