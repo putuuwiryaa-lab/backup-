@@ -419,7 +419,38 @@ function AccountPanel({ open, role, displayCode, onClose, onLogout }: { open: bo
     }
   };
 
-  return null;
+  return (
+    <div className="fixed inset-0 z-[70] flex items-end justify-center bg-black/55 p-4 backdrop-blur-sm" onClick={onClose}>
+      <div className="premium-panel w-full max-w-md rounded-[2rem] p-5 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div>
+            <p className="text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Akun Saya</p>
+            <h3 className="mt-1 font-['Orbitron'] text-[18px] font-black uppercase tracking-[3px] text-[var(--text)]">{roleLabel}</h3>
+            <p className="mt-1 text-[11px] font-semibold text-[var(--text-dim)]">{roleSub}</p>
+          </div>
+          <button onClick={onClose} className="ghost-button rounded-2xl px-4 py-3 text-[10px] font-black uppercase tracking-[1.4px] text-[var(--text)]">Tutup</button>
+        </div>
+
+        <div className="rounded-3xl border border-white/10 bg-black/20 p-4 text-center">
+          <p className="text-[9px] font-black uppercase tracking-[1.6px] text-[var(--text-dim)]">Device Key</p>
+          <p className="mt-2 font-['JetBrains_Mono'] text-[24px] font-black tracking-[5px] text-[var(--gold)]">{displayCode}</p>
+        </div>
+
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <button onClick={handleCopyDeviceKey} className="ghost-button flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-[10px] font-black uppercase tracking-[1.2px] text-[var(--text)]">
+            <Copy size={15} /> {copied ? "Tersalin" : "Copy"}
+          </button>
+          <a href={activationUrl} target="_blank" rel="noopener noreferrer" className="ghost-button flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-[10px] font-black uppercase tracking-[1.2px] text-[var(--text)]">
+            <MessageCircle size={15} /> Admin
+          </a>
+        </div>
+
+        <button onClick={onLogout} className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--red)] px-4 py-3 text-[10px] font-black uppercase tracking-[1.5px] text-white active:scale-95">
+          <LogOut size={15} /> Keluar
+        </button>
+      </div>
+    </div>
+  );
 }
 
 function LogoutConfirmModal({ open, onCancel, onConfirm }: { open: boolean; onCancel: () => void; onConfirm: () => void }) {
