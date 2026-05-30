@@ -7,6 +7,7 @@ MIN_WINS_LAST_5 = 3
 MAX_LOSS_STREAK_ALLOWED = 2
 PAGE_SIZE = 1000
 MAX_EVALUATION_ROWS = 70000
+RANK_FALLBACK = 999999
 
 POSITIONS = ("as", "kop", "kepala", "ekor")
 POSITION_2D_PAIRS = {
@@ -251,20 +252,52 @@ def rank_scope_key(item):
     ])
 
 
+def rank_sort_key(item, old_rank_by_stat_key=None):
+    old_rank_by_stat_key = old_rank_by_stat_key or {}
+    old_rank = old_rank_by_stat_key.get(item.get("stat_key")) or item.get("previous_rank") or RANK_FALLBACK
+    return (
+        -(item.get("score") or 0),
+        -(item.get("wins_15") or 0),
+        -(item.get("wins_last_5") or 0),
+        old_rank,
+        str(item.get("market_name") or item.get("market_id") or ""),
+    )
+
+
+def fetch_existing_rank_map():
+    existing = (
+        supabase.table("market_statistics")
+        .select("stat_key,market_id,market_name,group_key,mode,param,position,target_pair,wins_15,wins_last_5,score,previous_rank,is_active")
+        .eq("is_active", True)
+        .execute()
+        .data
+        or []
+    )
+    grouped = {}
+    for row in existing:
+        if row.get("stat_key"):
+            grouped.setdefault(rank_scope_key(row), []).append(row)
+
+    old_rank_by_stat_key = {}
+    for group in grouped.values():
+        ranked = sorted(group, key=lambda item: rank_sort_key(item))
+        for index, item in enumerate(ranked, start=1):
+            old_rank_by_stat_key[item.get("stat_key")] = index
+    return old_rank_by_stat_key
+
+
 def apply_rank_movement(stats):
     if not stats:
         return stats
-    existing = supabase.table("market_statistics").select("stat_key,previous_rank").execute().data or []
-    previous_rank_by_stat_key = {row.get("stat_key"): row.get("previous_rank") for row in existing if row.get("stat_key")}
-
+    old_rank_by_stat_key = fetch_existing_rank_map()
     grouped = {}
     for item in stats:
         grouped.setdefault(rank_scope_key(item), []).append(item)
 
     for group in grouped.values():
-        ranked = sorted(group, key=lambda item: (item.get("score") or 0, item.get("wins_15") or 0, item.get("wins_last_5") or 0), reverse=True)
+        ranked = sorted(group, key=lambda item: rank_sort_key(item, old_rank_by_stat_key))
         for index, item in enumerate(ranked, start=1):
-            previous_rank = previous_rank_by_stat_key.get(item.get("stat_key"))
+            previous_rank = old_rank_by_stat_key.get(item.get("stat_key"))
             item["previous_rank"] = previous_rank
             item["rank_movement"] = int(previous_rank) - index if previous_rank else None
     return stats
@@ -273,7 +306,7 @@ def apply_rank_movement(stats):
 def build_market_statistics(rows):
     output = build_single_statistics(rows)
     output.extend(build_position_2d_statistics(rows))
-    output = sorted(output, key=lambda item: item["score"], reverse=True)
+    output = sorted(output, key=lambda item: rank_sort_key(item))
     return apply_rank_movement(output)
 
 
