@@ -170,13 +170,13 @@ export default function StatisticsPage() {
 
   return (
     <div
-      className="statistics-page relative left-1/2 w-screen -translate-x-1/2 animate-[riseIn_0.35s_ease-out] min-h-screen px-4 py-4 pb-8 sm:px-6"
+      className="statistics-page fixed inset-0 z-50 overflow-y-auto animate-[riseIn_0.35s_ease-out] px-4 py-4 pb-[calc(2rem+env(safe-area-inset-bottom))] sm:px-6"
       style={{
         color: "var(--text)",
         background: "radial-gradient(circle at 12% 8%, rgba(52,211,153,0.16), transparent 34%), radial-gradient(circle at 88% 18%, rgba(246,201,107,0.10), transparent 30%), linear-gradient(180deg, #061512 0%, #09110f 42%, #050708 100%)"
       }}
     >
-      <div className="mx-auto max-w-3xl">
+      <div className="mx-auto w-full max-w-3xl">
         <button onClick={() => navigate("/")} className="mb-4 flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.045] px-4 py-3 text-[11px] font-black uppercase tracking-[2px] text-[var(--text-dim)] active:scale-95">
           <ArrowLeft size={17} /> Beranda
         </button>
