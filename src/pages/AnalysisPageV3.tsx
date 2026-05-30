@@ -276,7 +276,31 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
       const offKepala = customOffKepalaCount ? toNumberList(matiKepalaData?.KEPALA?.result) : [];
       const offEkor = customOffEkorCount ? toNumberList(matiEkorData?.EKOR?.result) : [];
       const lines = buildCustomDigitLines({ focus: customFocus, aiByPair, bbfsByPair, offAs, offKop, offKepala, offEkor, jumlahByPair, shioByPair });
-      setResult({ lines, focus: customFocus });
+      setResult({
+        lines,
+        focus: customFocus,
+        customFocus,
+        aiByPair,
+        bbfsByPair,
+        offAs,
+        offKop,
+        offKepala,
+        offEkor,
+        jumlahByPair,
+        shioByPair,
+        selectedFilters: {
+          aiDigitByPair: customAiDigitByPair,
+          includeBBFSByPair: customIncludeBBFSByPair,
+          offCounts: {
+            as: customOffAsCount,
+            kop: customOffKopCount,
+            kepala: customOffKepalaCount,
+            ekor: customOffEkorCount,
+          },
+          jumlahCountByPair: customOffJumlahCountByPair,
+          shioCountByPair: customOffShioCountByPair,
+        },
+      });
     } catch (e: any) {
       setError(e.message || "Gagal generate custom digit");
     }
