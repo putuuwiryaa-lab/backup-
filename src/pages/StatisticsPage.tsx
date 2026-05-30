@@ -13,11 +13,9 @@ const statGold = "#f6c96b";
 const MIN_WINS_15 = 13;
 const MIN_WINS_LAST_5 = 3;
 const MAX_LOSS_STREAK_ALLOWED = 2;
-const POSITION_SAMPLE_SIZE = 15;
 
 type CategoryKey = "ai" | "bbfs" | "off_digit" | "off_jumlah" | "off_shio";
 type TargetPair = "depan" | "tengah" | "belakang";
-type PositionKey = "as" | "kop" | "kepala" | "ekor";
 
 type MarketStatistic = {
   id?: string;
@@ -38,9 +36,8 @@ type MarketStatistic = {
 };
 
 type RelatedStatsMap = Record<string, MarketStatistic[]>;
-type EvaluationRow = { market_id: string; param: number; position?: string; is_hit?: boolean | null; status?: string | null; evaluated_at?: string | null };
 
-type PositionPairMeta = { label: string; subtitle: string; positions: [PositionKey, PositionKey] };
+type PositionPairMeta = { label: string; subtitle: string };
 
 const categories: Array<{ key: CategoryKey; title: string }> = [
   { key: "ai", title: "AI" },
@@ -57,21 +54,10 @@ const targetPairs: Array<{ key: TargetPair; label: string }> = [
 ];
 
 const positionPairs: Record<TargetPair, PositionPairMeta> = {
-  depan: { label: "Depan", subtitle: "AS + KOP", positions: ["as", "kop"] },
-  tengah: { label: "Tengah", subtitle: "KOP + Kepala", positions: ["kop", "kepala"] },
-  belakang: { label: "Belakang", subtitle: "Kepala + Ekor", positions: ["kepala", "ekor"] },
+  depan: { label: "Depan", subtitle: "AS + KOP" },
+  tengah: { label: "Tengah", subtitle: "KOP + Kepala" },
+  belakang: { label: "Belakang", subtitle: "Kepala + Ekor" },
 };
-
-function isSuccessStatus(row: Pick<EvaluationRow, "status" | "is_hit">) {
-  return row?.status !== "TIDAK MASUK" && row?.status !== "ZONK" && row?.is_hit !== false;
-}
-
-function dateKey(value?: string | null) {
-  if (!value) return "";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return String(value).slice(0, 10);
-  return date.toISOString().slice(0, 10);
-}
 
 function formatUpdatedAt(value?: string) {
   if (!value) return "Belum ada update";
@@ -90,14 +76,6 @@ function targetPairLabel(value?: string) {
 function positionPairSubtitle(value?: string) {
   if (value === "depan" || value === "tengah" || value === "belakang") return positionPairs[value].subtitle;
   return "AS + KOP";
-}
-
-function positionLabel(value?: string) {
-  if (value === "as") return "AS";
-  if (value === "kop") return "KOP";
-  if (value === "kepala") return "Kepala";
-  if (value === "ekor") return "Ekor";
-  return "Semua";
 }
 
 function statTitle(item: MarketStatistic) {
@@ -176,67 +154,6 @@ function marketUrl(item: MarketStatistic) {
   return `/analyze/${item.market_id}`;
 }
 
-function maxLossStreak(hits: boolean[]) {
-  let current = 0;
-  let max = 0;
-  for (const hit of hits) {
-    if (hit) current = 0;
-    else {
-      current += 1;
-      max = Math.max(max, current);
-    }
-  }
-  return max;
-}
-
-function buildPosition2DStatistics(rows: EvaluationRow[], pair: TargetPair, param: number): MarketStatistic[] {
-  const [firstPosition, secondPosition] = positionPairs[pair].positions;
-  const byMarket: Record<string, Record<string, Partial<Record<PositionKey, boolean>>>> = {};
-
-  rows.forEach((row) => {
-    const marketId = row.market_id;
-    const position = row.position as PositionKey;
-    const key = dateKey(row.evaluated_at);
-    if (!marketId || !key || ![firstPosition, secondPosition].includes(position)) return;
-    if (!byMarket[marketId]) byMarket[marketId] = {};
-    if (!byMarket[marketId][key]) byMarket[marketId][key] = {};
-    if (byMarket[marketId][key][position] === undefined) byMarket[marketId][key][position] = isSuccessStatus(row);
-  });
-
-  return Object.entries(byMarket).map(([marketId, dayMap]) => {
-    const samples = Object.entries(dayMap)
-      .filter(([, value]) => value[firstPosition] !== undefined && value[secondPosition] !== undefined)
-      .sort(([a], [b]) => b.localeCompare(a))
-      .slice(0, POSITION_SAMPLE_SIZE)
-      .map(([key, value]) => ({ key, hit: Boolean(value[firstPosition] && value[secondPosition]) }));
-
-    if (samples.length < POSITION_SAMPLE_SIZE) return null;
-    const hits = samples.map((item) => item.hit);
-    const wins15 = hits.filter(Boolean).length;
-    const winsLast5 = hits.slice(0, 5).filter(Boolean).length;
-    const lossStreak = maxLossStreak(hits);
-    if (wins15 < MIN_WINS_15 || winsLast5 < MIN_WINS_LAST_5 || lossStreak > MAX_LOSS_STREAK_ALLOWED) return null;
-
-    return {
-      id: `pos2d-${marketId}-${pair}-${param}`,
-      market_id: marketId,
-      market_name: marketId,
-      group_key: "off_digit" as const,
-      group_label: `2D ${targetPairLabel(pair)} OFF ${param}`,
-      mode: "mati_2d",
-      param,
-      position: `${firstPosition}_${secondPosition}`,
-      target_pair: pair,
-      wins_15: wins15,
-      wins_last_5: winsLast5,
-      max_loss_streak: lossStreak,
-      sample_size: samples.length,
-      score: wins15 * 100 + winsLast5 * 10 - lossStreak,
-      updated_at: samples[0]?.key,
-    };
-  }).filter(Boolean).sort((a, b) => Number((b as MarketStatistic).score || 0) - Number((a as MarketStatistic).score || 0)) as MarketStatistic[];
-}
-
 function SectionLabel({ title, right }: { title: string; right?: string }) {
   return (
     <div className="mb-2 flex items-center gap-3 px-1">
@@ -258,8 +175,8 @@ export default function StatisticsPage() {
   const [error, setError] = useState("");
 
   const categoryMeta = categories.find((item) => item.key === category) || categories[0];
-  const isPairCategory = category === "ai" || category === "bbfs" || category === "off_digit" || category === "off_jumlah" || category === "off_shio";
   const isPositionCategory = category === "off_digit";
+  const isPairCategory = category === "ai" || category === "bbfs" || category === "off_digit" || category === "off_jumlah" || category === "off_shio";
   const paramOptions = category === "ai" ? [2, 4, 6] : category === "bbfs" ? [8] : [1, 2, 3];
   const currentFilterLabel = category === "bbfs"
     ? `${categoryMeta.title} ${targetPairLabel(targetPair)}`
@@ -267,74 +184,55 @@ export default function StatisticsPage() {
       ? `2D ${targetPairLabel(targetPair)} OFF ${param}`
       : `${categoryMeta.title} ${targetPairLabel(targetPair)} ${category === "ai" ? `${param}D` : `OFF ${param}`}`;
 
-  const loadPositionStatistics = async () => {
-    const pairMeta = positionPairs[targetPair];
-    const { data, error: queryError } = await supabase
-      .from("analysis_evaluations")
-      .select("market_id,param,position,is_hit,status,evaluated_at")
-      .eq("mode", "mati")
-      .eq("param", param)
-      .in("position", pairMeta.positions)
-      .order("evaluated_at", { ascending: false })
-      .limit(5000);
-    if (queryError) throw queryError;
-    const rankingRows = buildPosition2DStatistics((data || []) as EvaluationRow[], targetPair, param).slice(0, 200);
-    setItems(rankingRows);
-    setRelatedStats({});
-  };
-
-  const loadMarketStatistics = async () => {
-    let query = supabase
-      .from("market_statistics")
-      .select("id,market_id,market_name,group_key,group_label,mode,param,position,target_pair,wins_15,wins_last_5,max_loss_streak,sample_size,score,updated_at")
-      .eq("is_active", true)
-      .eq("group_key", category)
-      .gte("wins_15", MIN_WINS_15)
-      .gte("wins_last_5", MIN_WINS_LAST_5)
-      .lte("max_loss_streak", MAX_LOSS_STREAK_ALLOWED)
-      .order("score", { ascending: false })
-      .order("updated_at", { ascending: false })
-      .limit(200);
-
-    if (category === "bbfs") query = query.eq("param", 8);
-    else query = query.eq("param", param);
-    if (isPairCategory) query = query.eq("target_pair", targetPair);
-
-    const { data, error: queryError } = await query;
-    if (queryError) throw queryError;
-    const rankingRows = (data || []) as MarketStatistic[];
-    setItems(rankingRows);
-
-    const marketIds = Array.from(new Set(rankingRows.map((item) => item.market_id).filter(Boolean)));
-    if (!marketIds.length) {
-      setRelatedStats({});
-    } else {
-      const { data: relatedData, error: relatedError } = await supabase
-        .from("market_statistics")
-        .select("id,market_id,market_name,group_key,group_label,mode,param,position,target_pair,wins_15,wins_last_5,max_loss_streak,sample_size,score,updated_at")
-        .eq("is_active", true)
-        .in("market_id", marketIds)
-        .gte("wins_15", MIN_WINS_15)
-        .gte("wins_last_5", MIN_WINS_LAST_5)
-        .lte("max_loss_streak", MAX_LOSS_STREAK_ALLOWED)
-        .order("score", { ascending: false })
-        .limit(1000);
-      if (relatedError) throw relatedError;
-      const mapped = ((relatedData || []) as MarketStatistic[]).reduce<RelatedStatsMap>((acc, row) => {
-        if (!acc[row.market_id]) acc[row.market_id] = [];
-        acc[row.market_id].push(row);
-        return acc;
-      }, {});
-      setRelatedStats(mapped);
-    }
-  };
-
   const loadStatistics = async () => {
     setLoading(true);
     setError("");
     try {
-      if (isPositionCategory) await loadPositionStatistics();
-      else await loadMarketStatistics();
+      let query = supabase
+        .from("market_statistics")
+        .select("id,market_id,market_name,group_key,group_label,mode,param,position,target_pair,wins_15,wins_last_5,max_loss_streak,sample_size,score,updated_at")
+        .eq("is_active", true)
+        .eq("group_key", category)
+        .gte("wins_15", MIN_WINS_15)
+        .gte("wins_last_5", MIN_WINS_LAST_5)
+        .lte("max_loss_streak", MAX_LOSS_STREAK_ALLOWED)
+        .order("score", { ascending: false })
+        .order("updated_at", { ascending: false })
+        .limit(200);
+
+      if (isPositionCategory) query = query.eq("mode", "mati_2d").eq("param", param).eq("target_pair", targetPair);
+      else if (category === "bbfs") query = query.eq("param", 8);
+      else query = query.eq("param", param);
+      if (!isPositionCategory && isPairCategory) query = query.eq("target_pair", targetPair);
+
+      const { data, error: queryError } = await query;
+      if (queryError) throw queryError;
+      const rankingRows = (data || []) as MarketStatistic[];
+      setItems(rankingRows);
+
+      const marketIds = Array.from(new Set(rankingRows.map((item) => item.market_id).filter(Boolean)));
+      if (!marketIds.length) {
+        setRelatedStats({});
+      } else {
+        const { data: relatedData, error: relatedError } = await supabase
+          .from("market_statistics")
+          .select("id,market_id,market_name,group_key,group_label,mode,param,position,target_pair,wins_15,wins_last_5,max_loss_streak,sample_size,score,updated_at")
+          .eq("is_active", true)
+          .in("market_id", marketIds)
+          .gte("wins_15", MIN_WINS_15)
+          .gte("wins_last_5", MIN_WINS_LAST_5)
+          .lte("max_loss_streak", MAX_LOSS_STREAK_ALLOWED)
+          .order("score", { ascending: false })
+          .limit(1000);
+        if (relatedError) throw relatedError;
+        const cleanRelated = ((relatedData || []) as MarketStatistic[]).filter((row) => row.group_key !== "off_digit" || row.mode === "mati_2d");
+        const mapped = cleanRelated.reduce<RelatedStatsMap>((acc, row) => {
+          if (!acc[row.market_id]) acc[row.market_id] = [];
+          acc[row.market_id].push(row);
+          return acc;
+        }, {});
+        setRelatedStats(mapped);
+      }
     } catch (e: any) {
       setItems([]);
       setRelatedStats({});
@@ -491,7 +389,7 @@ export default function StatisticsPage() {
             <div className="rounded-[1.45rem] border border-white/10 bg-white/[0.04] p-6 text-center">
               <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-black/20 text-[var(--text-dim)]"><BarChart3 /></div>
               <p className="font-['Orbitron'] text-[14px] font-black uppercase tracking-[2px] text-[var(--text)]">Belum ada ranking</p>
-              <p className="mx-auto mt-3 max-w-sm text-[12px] leading-5 text-[var(--text-dim)]">{error ? "Statistik belum bisa dimuat. Pastikan tabel analysis_evaluations dan market_statistics sudah tersedia." : `Belum ada pasaran yang masuk kriteria ${currentFilterLabel}.`}</p>
+              <p className="mx-auto mt-3 max-w-sm text-[12px] leading-5 text-[var(--text-dim)]">{error ? "Statistik belum bisa dimuat. Pastikan evaluator statistik sudah berjalan." : `Belum ada pasaran yang masuk kriteria ${currentFilterLabel}.`}</p>
               <button onClick={loadStatistics} className="mt-5 rounded-2xl border border-white/10 bg-white/[0.06] px-5 py-3 text-[11px] font-black uppercase tracking-[1.5px] text-[var(--text)] active:scale-[0.985]">Muat Ulang</button>
             </div>
           )}
