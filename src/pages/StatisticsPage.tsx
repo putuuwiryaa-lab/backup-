@@ -32,6 +32,8 @@ type MarketStatistic = {
   max_loss_streak: number;
   sample_size?: number;
   score?: number;
+  previous_rank?: number | null;
+  rank_movement?: number | null;
   updated_at?: string;
 };
 
@@ -154,6 +156,21 @@ function marketUrl(item: MarketStatistic) {
   return `/analyze/${item.market_id}`;
 }
 
+function movementText(value?: number | null) {
+  const movement = Number(value || 0);
+  if (movement > 0) return `▲${movement}`;
+  if (movement < 0) return `▼${Math.abs(movement)}`;
+  if (value === 0) return "●";
+  return "";
+}
+
+function movementColor(value?: number | null) {
+  const movement = Number(value || 0);
+  if (movement > 0) return statAccent;
+  if (movement < 0) return "#f6c96b";
+  return "var(--text-dim)";
+}
+
 function SectionLabel({ title, right }: { title: string; right?: string }) {
   return (
     <div className="mb-2 flex items-center gap-3 px-1">
@@ -190,7 +207,7 @@ export default function StatisticsPage() {
     try {
       let query = supabase
         .from("market_statistics")
-        .select("id,market_id,market_name,group_key,group_label,mode,param,position,target_pair,wins_15,wins_last_5,max_loss_streak,sample_size,score,updated_at")
+        .select("id,market_id,market_name,group_key,group_label,mode,param,position,target_pair,wins_15,wins_last_5,max_loss_streak,sample_size,score,previous_rank,rank_movement,updated_at")
         .eq("is_active", true)
         .eq("group_key", category)
         .gte("wins_15", MIN_WINS_15)
@@ -216,7 +233,7 @@ export default function StatisticsPage() {
       } else {
         const { data: relatedData, error: relatedError } = await supabase
           .from("market_statistics")
-          .select("id,market_id,market_name,group_key,group_label,mode,param,position,target_pair,wins_15,wins_last_5,max_loss_streak,sample_size,score,updated_at")
+          .select("id,market_id,market_name,group_key,group_label,mode,param,position,target_pair,wins_15,wins_last_5,max_loss_streak,sample_size,score,previous_rank,rank_movement,updated_at")
           .eq("is_active", true)
           .in("market_id", marketIds)
           .gte("wins_15", MIN_WINS_15)
@@ -355,10 +372,14 @@ export default function StatisticsPage() {
                 const marketName = item.market_name || item.market_id;
                 const topRank = index === 0;
                 const alsoLabels = relatedLabels(item, relatedStats);
+                const movement = movementText(item.rank_movement);
                 return (
                   <div key={item.id || `${item.market_id}-${item.group_key}-${item.param}-${item.position}-${item.target_pair}`} className="rounded-[1.45rem] border p-3 text-left shadow-xl" style={{ borderColor: topRank ? "rgba(246,201,107,0.55)" : "rgba(255,255,255,0.11)", background: topRank ? "linear-gradient(135deg,rgba(246,201,107,0.14),rgba(52,211,153,0.08))" : "rgba(255,255,255,0.04)" }}>
                     <div className="flex items-start gap-3">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl font-['Orbitron'] text-[13px] font-black" style={{ background: topRank ? statGold : statAccentSoft, color: topRank ? "#120d02" : statAccent }}>#{index + 1}</div>
+                      <div className="flex w-12 shrink-0 flex-col items-center gap-1">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl font-['Orbitron'] text-[13px] font-black" style={{ background: topRank ? statGold : statAccentSoft, color: topRank ? "#120d02" : statAccent }}>#{index + 1}</div>
+                        {movement && <span className="rounded-full bg-black/25 px-2 py-0.5 font-['Orbitron'] text-[9px] font-black leading-none" style={{ color: movementColor(item.rank_movement) }}>{movement}</span>}
+                      </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0">
