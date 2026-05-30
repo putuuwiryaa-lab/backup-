@@ -97,7 +97,7 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState("");
-  const [detailValidationOpen, setDetailValidationOpen] = useState(autoMode);
+  const [detailValidationOpen, setDetailValidationOpen] = useState(false);
   const [angkaJadiOpen, setAngkaJadiOpen] = useState(false);
   const [customFocus, setCustomFocus] = useState<CustomFocus | null>(type === "rekap" ? null : "belakang");
   const [customAiDigitByPair, setCustomAiDigitByPair] = useState<PairAiMap>({});
@@ -120,7 +120,7 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
     setLoading(true);
     setError("");
     setResult(null);
-    setDetailValidationOpen(autoMode);
+    setDetailValidationOpen(false);
     setAngkaJadiOpen(false);
   };
 
@@ -214,7 +214,7 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
     try {
       const data = await getMarketData();
       setResult(await postAnalyze(type, data, selectedParam, finalTargetPair));
-      setDetailValidationOpen(autoMode);
+      setDetailValidationOpen(false);
     } catch (e: any) {
       setError(e.message || "Error koneksi server");
     }
