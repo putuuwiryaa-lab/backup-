@@ -383,10 +383,10 @@ function BottomAccountNav({ onOpenAccount }: { onOpenAccount: () => void }) {
           type="button"
           onClick={() => navigate("/pantauan-rekap")}
           className="bottom-account-button flex h-13 w-full items-center justify-center gap-2 rounded-[1.35rem] text-[10px] font-black uppercase tracking-[1.7px] active:scale-[0.99]"
-          aria-label="Pantauan Rekap"
+          aria-label="Statistik Pasaran"
         >
           <BarChart3 className="h-5 w-5" />
-          <span>Pantauan</span>
+          <span>Statistik</span>
         </button>
         <button
           type="button"
@@ -419,68 +419,19 @@ function AccountPanel({ open, role, displayCode, onClose, onLogout }: { open: bo
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/65 px-4 pb-[calc(1.25rem+env(safe-area-inset-bottom))] backdrop-blur-sm sm:items-center sm:pb-4">
-      <div className="premium-panel w-full max-w-sm p-5 shadow-2xl animate-[riseIn_0.2s_ease-out]">
-        <div className="mb-5 flex items-start justify-between gap-4">
-          <div>
-            <p className="font-['Orbitron'] text-[10px] font-black uppercase tracking-[2px] text-[var(--gold)]">Akun Saya</p>
-            <h3 className="mt-2 font-['Orbitron'] text-[20px] font-black uppercase tracking-[3px] text-[var(--text)]">{roleLabel}</h3>
-          </div>
-          <button type="button" onClick={onClose} className="ghost-button h-10 rounded-2xl px-4 text-[10px] font-black uppercase tracking-[1.6px] active:scale-95">Tutup</button>
-        </div>
-
-        <div className="mb-4 grid gap-3">
-          <div className="rounded-3xl border border-white/10 bg-white/[0.045] p-4">
-            <p className="text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Masa Aktif</p>
-            <p className="mt-2 text-[13px] font-bold text-[var(--text)]">{roleSub}</p>
-          </div>
-
-          <div className="rounded-3xl border border-white/10 bg-black/18 p-4">
-            <div className="mb-3 flex items-center justify-between gap-3">
-              <p className="text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Device Key</p>
-              <button
-                type="button"
-                onClick={handleCopyDeviceKey}
-                className="ghost-button flex h-9 items-center gap-2 rounded-2xl px-3 text-[9px] font-black uppercase tracking-[1.4px] active:scale-95"
-              >
-                <Copy size={14} /> {copied ? "Tersalin" : "Salin"}
-              </button>
-            </div>
-            <p className="font-['JetBrains_Mono'] text-[26px] font-black tracking-[5px] text-[var(--gold-bright)]">{displayCode}</p>
-            <p className="mt-2 text-[10px] leading-4 text-[var(--text-soft)]">Kirim Device Key ini saat aktivasi VIP atau lapor masalah.</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <a href={activationUrl} target="_blank" rel="noopener noreferrer" className="report-floating-button flex h-12 items-center justify-center gap-2 rounded-2xl border text-[11px] font-black uppercase tracking-[1.6px] active:scale-95">
-            <MessageCircle size={17} />
-            <span>Lapor</span>
-          </a>
-          <button type="button" onClick={onLogout} className="rounded-2xl border border-red-400/25 bg-red-500/12 text-[11px] font-black uppercase tracking-[1.6px] text-red-200 active:scale-95">
-            <span className="inline-flex items-center justify-center gap-2"><LogOut size={17} /> Log out</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+  return null;
 }
 
 function LogoutConfirmModal({ open, onCancel, onConfirm }: { open: boolean; onCancel: () => void; onConfirm: () => void }) {
   if (!open) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/65 px-4 pb-[calc(1.25rem+env(safe-area-inset-bottom))] backdrop-blur-sm sm:items-center sm:pb-4">
-      <div className="premium-panel w-full max-w-sm p-5 shadow-2xl animate-[riseIn_0.2s_ease-out]">
-        <div className="mb-5 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-red-500/10 text-red-300 ring-1 ring-red-400/25">
-            <LogOut size={22} />
-          </div>
-          <h3 className="font-['Orbitron'] text-[16px] font-black uppercase tracking-[2px] text-[var(--text)]">Yakin ingin log out?</h3>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <button type="button" onClick={onCancel} className="ghost-button py-3 text-[11px] font-black uppercase tracking-[2px] active:scale-95">Batal</button>
-          <button type="button" onClick={onConfirm} className="rounded-3xl border border-red-400/25 bg-red-500/12 py-3 text-[11px] font-black uppercase tracking-[2px] text-red-200 transition active:scale-95">Log out</button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+      <div className="premium-panel w-full max-w-sm p-6 text-center">
+        <h3 className="font-['Orbitron'] text-[15px] font-black uppercase tracking-[3px] text-[var(--text)]">Keluar akun?</h3>
+        <p className="mt-3 text-[12px] leading-5 text-[var(--text-dim)]">Akses perangkat ini akan dikunci sampai login ulang.</p>
+        <div className="mt-5 grid grid-cols-2 gap-2">
+          <button onClick={onCancel} className="ghost-button rounded-2xl px-4 py-3 text-[10px] font-black uppercase tracking-[1.5px] text-[var(--text)]">Batal</button>
+          <button onClick={onConfirm} className="rounded-2xl bg-[var(--red)] px-4 py-3 text-[10px] font-black uppercase tracking-[1.5px] text-white">Keluar</button>
         </div>
       </div>
     </div>
