@@ -103,12 +103,29 @@ function statIdentity(item: MarketStatistic) {
   return [item.market_id, item.group_key, item.mode, item.param, item.position || "all", item.target_pair || "all"].join("|");
 }
 
+function relatedGroupKey(item: MarketStatistic) {
+  if (item.group_key === "ai" || item.group_key === "bbfs" || item.group_key === "off_jumlah" || item.group_key === "off_shio") {
+    return `${item.group_key}|${item.target_pair || "all"}`;
+  }
+  if (item.group_key === "off_digit") return `${item.group_key}|${item.position || "all"}`;
+  return item.group_key;
+}
+
 function relatedLabels(item: MarketStatistic, relatedStats: RelatedStatsMap) {
   const currentIdentity = statIdentity(item);
-  return (relatedStats[item.market_id] || [])
-    .filter((related) => statIdentity(related) !== currentIdentity)
-    .slice(0, 3)
-    .map(shortStatTitle);
+  const seenGroups = new Set<string>([relatedGroupKey(item)]);
+  const labels: string[] = [];
+
+  for (const related of relatedStats[item.market_id] || []) {
+    if (statIdentity(related) === currentIdentity) continue;
+    const groupKey = relatedGroupKey(related);
+    if (seenGroups.has(groupKey)) continue;
+    seenGroups.add(groupKey);
+    labels.push(shortStatTitle(related));
+    if (labels.length >= 3) break;
+  }
+
+  return labels;
 }
 
 function badgeLabel(item: MarketStatistic) {
