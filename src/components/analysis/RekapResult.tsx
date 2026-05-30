@@ -16,25 +16,34 @@ function formatCompact(value: any) {
   return safeArray(value).map((item: any) => String(item)).join("");
 }
 
+function suffix(value: any, fallback = "") {
+  return value ? ` ${value}${fallback}` : "";
+}
+
 function customRows(result: any) {
-  const focus = result?.customFocus || "belakang";
+  const focus = result?.customFocus || result?.focus || "belakang";
+  const selected = result?.selectedFilters || {};
   const pairs = customFocusPairs(focus);
   const positions = customFocusPositions(focus);
   const rows: any[] = [];
 
   pairs.forEach((pair) => {
-    if (safeArray(result.aiByPair?.[pair]).length) rows.push([`AI ${pairLabel[pair]}`, formatCompact(result.aiByPair[pair]), "🔥", "#f3c14b"]);
+    const aiDigit = selected.aiDigitByPair?.[pair];
+    if (safeArray(result.aiByPair?.[pair]).length) rows.push([`AI ${pairLabel[pair]}${suffix(aiDigit, "D")}`, formatCompact(result.aiByPair[pair]), "🔥", "#f3c14b"]);
     if (safeArray(result.bbfsByPair?.[pair]).length) rows.push([`BBFS ${pairLabel[pair]}`, formatCompact(result.bbfsByPair[pair]), "✨", "#f3c14b"]);
   });
 
   positions.forEach((position) => {
     const key = position === "as" ? "offAs" : position === "kop" ? "offKop" : position === "kepala" ? "offKepala" : "offEkor";
-    if (safeArray(result[key]).length) rows.push([`OFF ${customFocusPositionLabels[position]}`, formatValue(result[key]), "🎯", "#ff647c"]);
+    const count = selected.offCounts?.[position];
+    if (safeArray(result[key]).length) rows.push([`OFF ${customFocusPositionLabels[position]}${suffix(count)}`, formatValue(result[key]), "🎯", "#ff647c"]);
   });
 
   pairs.forEach((pair) => {
-    if (safeArray(result.jumlahByPair?.[pair]).length) rows.push([`OFF JML ${pairLabel[pair]}`, formatValue(result.jumlahByPair[pair]), "🔢", "#b58cff"]);
-    if (safeArray(result.shioByPair?.[pair]).length) rows.push([`OFF SHIO ${pairLabel[pair]}`, formatValue(result.shioByPair[pair], true), "🐲", "#28d7ff"]);
+    const jumlahCount = selected.jumlahCountByPair?.[pair];
+    const shioCount = selected.shioCountByPair?.[pair];
+    if (safeArray(result.jumlahByPair?.[pair]).length) rows.push([`OFF JML ${pairLabel[pair]}${suffix(jumlahCount)}`, formatValue(result.jumlahByPair[pair]), "🔢", "#b58cff"]);
+    if (safeArray(result.shioByPair?.[pair]).length) rows.push([`OFF SHIO ${pairLabel[pair]}${suffix(shioCount)}`, formatValue(result.shioByPair[pair], true), "🐲", "#28d7ff"]);
   });
 
   return rows;
@@ -62,12 +71,14 @@ export default function RekapResult({ result, meta }: {
           <span className="rounded-full px-3 py-1 text-[10px] font-black" style={{ backgroundColor: meta.soft, color: meta.accent }}>READY</span>
         </div>
         <div className="space-y-3">
-          {rows.map(([label, value, emoji, color]: any, index: number) => (
+          {rows.length ? rows.map(([label, value, emoji, color]: any, index: number) => (
             <div key={`${label}-${index}`} className="ui-card ui-motion-soft ui-lift flex items-center justify-between gap-3 rounded-3xl p-3">
               <div className="flex min-w-0 items-center gap-3"><span className="shrink-0 text-base">{emoji}</span><span className="ui-label min-w-0 text-[10px]">{label}</span></div>
               <span className="max-w-[54%] truncate text-right font-['Orbitron'] text-[12px] font-black tracking-[1.5px]" style={{ color }}>{value}</span>
             </div>
-          ))}
+          )) : (
+            <div className="ui-card rounded-3xl p-4 text-center text-[11px] font-bold uppercase tracking-[1.4px] text-[var(--ui-text-muted)]">Filter yang dipilih belum terbaca pada hasil ini.</div>
+          )}
         </div>
       </div>
 
