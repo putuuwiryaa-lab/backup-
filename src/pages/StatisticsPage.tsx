@@ -36,7 +36,7 @@ type MarketStatistic = {
 const categories: Array<{ key: CategoryKey; title: string }> = [
   { key: "ai", title: "AI" },
   { key: "bbfs", title: "BBFS" },
-  { key: "off_digit", title: "Digit" },
+  { key: "off_digit", title: "Posisi" },
   { key: "off_jumlah", title: "Jumlah" },
   { key: "off_shio", title: "Shio" },
 ];
@@ -170,140 +170,141 @@ export default function StatisticsPage() {
 
   return (
     <div
-      className="statistics-page animate-[riseIn_0.35s_ease-out] -mx-4 -my-4 min-h-screen px-4 py-4 pb-8 sm:-mx-6 sm:px-6"
+      className="statistics-page relative left-1/2 w-screen -translate-x-1/2 animate-[riseIn_0.35s_ease-out] min-h-screen px-4 py-4 pb-8 sm:px-6"
       style={{
         color: "var(--text)",
         background: "radial-gradient(circle at 12% 8%, rgba(52,211,153,0.16), transparent 34%), radial-gradient(circle at 88% 18%, rgba(246,201,107,0.10), transparent 30%), linear-gradient(180deg, #061512 0%, #09110f 42%, #050708 100%)"
       }}
     >
-      <button onClick={() => navigate("/")} className="mb-4 flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.045] px-4 py-3 text-[11px] font-black uppercase tracking-[2px] text-[var(--text-dim)] active:scale-95">
-        <ArrowLeft size={17} /> Beranda
-      </button>
+      <div className="mx-auto max-w-3xl">
+        <button onClick={() => navigate("/")} className="mb-4 flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.045] px-4 py-3 text-[11px] font-black uppercase tracking-[2px] text-[var(--text-dim)] active:scale-95">
+          <ArrowLeft size={17} /> Beranda
+        </button>
 
-      <section className="mb-5">
-        <div className="rounded-[1.7rem] border border-white/10 bg-[linear-gradient(135deg,rgba(10,26,24,0.92),rgba(22,16,34,0.70))] p-4 shadow-2xl">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <p className="text-[9px] font-black uppercase tracking-[2px]" style={{ color: statAccent }}>Statistik Pasaran</p>
-              <h2 className="mt-2 font-['Orbitron'] text-[25px] font-black uppercase leading-tight tracking-[3px] text-[var(--text)]">Ranking</h2>
-              <p className="mt-2 text-[11px] font-semibold uppercase leading-5 tracking-[1.2px] text-[var(--text-dim)]">{currentFilterLabel} · {topItems.length} pasaran</p>
+        <section className="mb-5">
+          <div className="rounded-[1.7rem] border border-white/10 bg-[linear-gradient(135deg,rgba(10,26,24,0.92),rgba(22,16,34,0.70))] p-4 shadow-2xl">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-[9px] font-black uppercase tracking-[2px]" style={{ color: statAccent }}>Statistik Pasaran</p>
+                <h2 className="mt-2 font-['Orbitron'] text-[25px] font-black uppercase leading-tight tracking-[3px] text-[var(--text)]">Ranking</h2>
+                <p className="mt-2 text-[11px] font-semibold uppercase leading-5 tracking-[1.2px] text-[var(--text-dim)]">{currentFilterLabel} · {topItems.length} pasaran</p>
+              </div>
+              <button onClick={loadStatistics} className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] text-[var(--text-dim)] active:scale-95" aria-label="Refresh statistik">
+                <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
+              </button>
             </div>
-            <button onClick={loadStatistics} className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] text-[var(--text-dim)] active:scale-95" aria-label="Refresh statistik">
-              <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
-            </button>
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <div className="rounded-2xl border border-white/10 bg-black/24 px-3 py-2.5">
+                <p className="text-[8px] font-black uppercase tracking-[1.4px] text-[var(--text-dim)]">Mode</p>
+                <p className="mt-1 truncate font-['Orbitron'] text-[12px] font-black uppercase tracking-[1.8px]" style={{ color: statAccent }}>{currentFilterLabel}</p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-black/24 px-3 py-2.5">
+                <p className="text-[8px] font-black uppercase tracking-[1.4px] text-[var(--text-dim)]">Update</p>
+                <p className="mt-1 truncate font-['Orbitron'] text-[11px] font-black uppercase tracking-[1.4px]" style={{ color: statGold }}>{formatUpdatedAt(latestUpdate)}</p>
+              </div>
+            </div>
           </div>
-          <div className="mt-4 grid grid-cols-2 gap-2">
-            <div className="rounded-2xl border border-white/10 bg-black/24 px-3 py-2.5">
-              <p className="text-[8px] font-black uppercase tracking-[1.4px] text-[var(--text-dim)]">Mode</p>
-              <p className="mt-1 truncate font-['Orbitron'] text-[12px] font-black uppercase tracking-[1.8px]" style={{ color: statAccent }}>{currentFilterLabel}</p>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-black/24 px-3 py-2.5">
-              <p className="text-[8px] font-black uppercase tracking-[1.4px] text-[var(--text-dim)]">Update</p>
-              <p className="mt-1 truncate font-['Orbitron'] text-[11px] font-black uppercase tracking-[1.4px]" style={{ color: statGold }}>{formatUpdatedAt(latestUpdate)}</p>
-            </div>
-          </div>
-        </div>
-      </section>
+        </section>
 
-      <section className="mb-5">
-        <SectionLabel title="Mode Statistik" />
-        <div className="rounded-[1.45rem] border border-emerald-300/15 bg-[rgba(5,18,16,0.52)] p-2 shadow-[0_14px_32px_rgba(0,0,0,0.22)]">
-          <div className="grid grid-cols-5 gap-1.5">
-            {categories.map((item) => {
-              const active = item.key === category;
-              return (
-                <button
-                  key={item.key}
-                  type="button"
-                  onClick={() => setCategory(item.key)}
-                  className="min-h-[54px] rounded-[1rem] px-1 py-2 text-center active:scale-[0.985]"
-                  style={{ background: active ? statAccentSoft : "rgba(0,0,0,0.26)", border: active ? `1px solid ${statAccent}` : "1px solid rgba(255,255,255,0.06)", boxShadow: active ? "0 0 0 1px rgba(52,211,153,0.12), 0 10px 26px rgba(52,211,153,0.08)" : "none" }}
-                >
-                  <span className="block font-['Orbitron'] text-[10px] font-black uppercase tracking-[1px]" style={{ color: active ? statAccent : "var(--text)" }}>{item.title}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      <section className="mb-5">
-        <SectionLabel title="Filter Ranking" right={currentFilterLabel} />
-        <div className="rounded-[1.45rem] border border-amber-200/15 bg-[rgba(18,14,7,0.40)] p-3 shadow-[0_14px_32px_rgba(0,0,0,0.22)]">
-          <div className="mb-2 flex items-center justify-between">
-            <p className="text-[9px] font-black uppercase tracking-[1.6px] text-[var(--text-dim)]">{isPositionCategory ? "Posisi" : "Fokus"}</p>
-            <span className="rounded-full px-3 py-1 text-[9px] font-black uppercase tracking-[1px] text-black" style={{ background: statGold }}>{currentFilterLabel}</span>
-          </div>
-          <div className="space-y-2">
-            <div className={`grid ${isPositionCategory ? "grid-cols-4" : "grid-cols-3"} gap-2`}>
-              {isPairCategory && targetPairs.map((item) => {
-                const active = targetPair === item.key;
-                return <button key={item.key} type="button" onClick={() => setTargetPair(item.key)} className="rounded-[1rem] px-2 py-3.5 text-[9px] font-black uppercase tracking-[1px] active:scale-[0.985]" style={{ background: active ? statAccent : "rgba(0,0,0,0.30)", color: active ? "#04110d" : "var(--text-dim)", border: active ? "1px solid rgba(52,211,153,0.65)" : "1px solid rgba(255,255,255,0.05)" }}>{item.label}</button>;
-              })}
-              {isPositionCategory && positions.map((item) => {
-                const active = position === item.key;
-                return <button key={item.key} type="button" onClick={() => setPosition(item.key)} className="rounded-[1rem] px-2 py-3.5 text-[9px] font-black uppercase tracking-[1px] active:scale-[0.985]" style={{ background: active ? statAccent : "rgba(0,0,0,0.30)", color: active ? "#04110d" : "var(--text-dim)", border: active ? "1px solid rgba(52,211,153,0.65)" : "1px solid rgba(255,255,255,0.05)" }}>{item.label}</button>;
+        <section className="mb-5">
+          <SectionLabel title="Mode Statistik" />
+          <div className="rounded-[1.45rem] border border-emerald-300/15 bg-[rgba(5,18,16,0.52)] p-2 shadow-[0_14px_32px_rgba(0,0,0,0.22)]">
+            <div className="grid grid-cols-5 gap-1.5">
+              {categories.map((item) => {
+                const active = item.key === category;
+                return (
+                  <button
+                    key={item.key}
+                    type="button"
+                    onClick={() => setCategory(item.key)}
+                    className="min-h-[72px] rounded-[1.15rem] px-1 py-3 text-center active:scale-[0.985]"
+                    style={{ background: active ? statAccentSoft : "rgba(0,0,0,0.28)", border: active ? `1px solid ${statAccent}` : "1px solid rgba(255,255,255,0.07)", boxShadow: active ? "0 0 0 1px rgba(52,211,153,0.14), 0 12px 28px rgba(52,211,153,0.10)" : "none" }}
+                  >
+                    <span className="block font-['Orbitron'] text-[11px] font-black uppercase leading-tight tracking-[0.8px]" style={{ color: active ? statAccent : "var(--text)" }}>{item.title}</span>
+                  </button>
+                );
               })}
             </div>
+          </div>
+        </section>
 
-            {category !== "bbfs" && (
-              <div className="grid grid-cols-3 gap-2 border-t border-white/10 pt-2">
-                {paramOptions.map((value) => {
-                  const active = param === value;
-                  return <button key={value} type="button" onClick={() => setParam(value)} className="rounded-[1rem] px-2 py-3.5 text-[9px] font-black uppercase tracking-[1px] active:scale-[0.985]" style={{ background: active ? statGold : "rgba(0,0,0,0.30)", color: active ? "#120d02" : "var(--text-dim)", border: active ? "1px solid rgba(246,201,107,0.7)" : "1px solid rgba(255,255,255,0.05)" }}>{category === "ai" ? `${value}D` : `OFF ${value}`}</button>;
+        <section className="mb-5">
+          <SectionLabel title="Filter Ranking" right={currentFilterLabel} />
+          <div className="rounded-[1.45rem] border border-amber-200/15 bg-[rgba(18,14,7,0.40)] p-3 shadow-[0_14px_32px_rgba(0,0,0,0.22)]">
+            <div className="mb-2 flex items-center justify-between">
+              <p className="text-[9px] font-black uppercase tracking-[1.6px] text-[var(--text-dim)]">{isPositionCategory ? "Posisi" : "Fokus"}</p>
+              <span className="rounded-full px-3 py-1 text-[9px] font-black uppercase tracking-[1px] text-black" style={{ background: statGold }}>{currentFilterLabel}</span>
+            </div>
+            <div className="space-y-2">
+              <div className={`grid ${isPositionCategory ? "grid-cols-4" : "grid-cols-3"} gap-2`}>
+                {isPairCategory && targetPairs.map((item) => {
+                  const active = targetPair === item.key;
+                  return <button key={item.key} type="button" onClick={() => setTargetPair(item.key)} className="rounded-[1rem] px-2 py-3.5 text-[9px] font-black uppercase tracking-[1px] active:scale-[0.985]" style={{ background: active ? statAccent : "rgba(0,0,0,0.30)", color: active ? "#04110d" : "var(--text-dim)", border: active ? "1px solid rgba(52,211,153,0.65)" : "1px solid rgba(255,255,255,0.05)" }}>{item.label}</button>;
+                })}
+                {isPositionCategory && positions.map((item) => {
+                  const active = position === item.key;
+                  return <button key={item.key} type="button" onClick={() => setPosition(item.key)} className="rounded-[1rem] px-2 py-3.5 text-[9px] font-black uppercase tracking-[1px] active:scale-[0.985]" style={{ background: active ? statAccent : "rgba(0,0,0,0.30)", color: active ? "#04110d" : "var(--text-dim)", border: active ? "1px solid rgba(52,211,153,0.65)" : "1px solid rgba(255,255,255,0.05)" }}>{item.label}</button>;
                 })}
               </div>
-            )}
-          </div>
-        </div>
-      </section>
 
-      <section>
-        <SectionLabel title="Hasil Ranking" right={`${topItems.length} pasaran`} />
-        {loading ? (
-          <div className="rounded-[1.45rem] border border-white/10 bg-white/[0.04] p-6 text-center">
-            <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-white/10" style={{ borderTopColor: statAccent }} />
-            <p className="font-['Orbitron'] text-[12px] font-black uppercase tracking-[2px] text-[var(--text)]">Memuat Ranking</p>
-            <p className="mt-2 text-[12px] leading-5 text-[var(--text-dim)]">Mengambil statistik pasaran terbaru.</p>
+              {category !== "bbfs" && (
+                <div className="grid grid-cols-3 gap-2 border-t border-white/10 pt-2">
+                  {paramOptions.map((value) => {
+                    const active = param === value;
+                    return <button key={value} type="button" onClick={() => setParam(value)} className="rounded-[1rem] px-2 py-3.5 text-[9px] font-black uppercase tracking-[1px] active:scale-[0.985]" style={{ background: active ? statGold : "rgba(0,0,0,0.30)", color: active ? "#120d02" : "var(--text-dim)", border: active ? "1px solid rgba(246,201,107,0.7)" : "1px solid rgba(255,255,255,0.05)" }}>{category === "ai" ? `${value}D` : `OFF ${value}`}</button>;
+                  })}
+                </div>
+              )}
+            </div>
           </div>
-        ) : topItems.length ? (
-          <div className="grid gap-3">
-            {topItems.map((item, index) => {
-              const marketName = item.market_name || item.market_id;
-              const topRank = index === 0;
-              return (
-                <div key={item.id || `${item.market_id}-${item.group_key}-${item.param}-${item.position}-${item.target_pair}`} className="rounded-[1.45rem] border p-3 text-left shadow-xl" style={{ borderColor: topRank ? "rgba(246,201,107,0.55)" : "rgba(255,255,255,0.11)", background: topRank ? "linear-gradient(135deg,rgba(246,201,107,0.14),rgba(52,211,153,0.08))" : "rgba(255,255,255,0.04)" }}>
-                  <div className="flex items-start gap-3">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl font-['Orbitron'] text-[13px] font-black" style={{ background: topRank ? statGold : statAccentSoft, color: topRank ? "#120d02" : statAccent }}>#{index + 1}</div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <p className="truncate font-['Orbitron'] text-[16px] font-black uppercase tracking-[2px] text-[var(--text)]">{marketName}</p>
-                          <p className="mt-1 text-[10px] font-black uppercase tracking-[1.2px]" style={{ color: statAccent }}>{statTitle(item)}</p>
+        </section>
+
+        <section>
+          <SectionLabel title="Hasil Ranking" right={`${topItems.length} pasaran`} />
+          {loading ? (
+            <div className="rounded-[1.45rem] border border-white/10 bg-white/[0.04] p-6 text-center">
+              <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-white/10" style={{ borderTopColor: statAccent }} />
+              <p className="font-['Orbitron'] text-[12px] font-black uppercase tracking-[2px] text-[var(--text)]">Memuat Ranking</p>
+              <p className="mt-2 text-[12px] leading-5 text-[var(--text-dim)]">Mengambil statistik pasaran terbaru.</p>
+            </div>
+          ) : topItems.length ? (
+            <div className="grid gap-3">
+              {topItems.map((item, index) => {
+                const marketName = item.market_name || item.market_id;
+                const topRank = index === 0;
+                return (
+                  <div key={item.id || `${item.market_id}-${item.group_key}-${item.param}-${item.position}-${item.target_pair}`} className="rounded-[1.45rem] border p-3 text-left shadow-xl" style={{ borderColor: topRank ? "rgba(246,201,107,0.55)" : "rgba(255,255,255,0.11)", background: topRank ? "linear-gradient(135deg,rgba(246,201,107,0.14),rgba(52,211,153,0.08))" : "rgba(255,255,255,0.04)" }}>
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl font-['Orbitron'] text-[13px] font-black" style={{ background: topRank ? statGold : statAccentSoft, color: topRank ? "#120d02" : statAccent }}>#{index + 1}</div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <p className="truncate font-['Orbitron'] text-[16px] font-black uppercase tracking-[2px] text-[var(--text)]">{marketName}</p>
+                            <p className="mt-1 text-[10px] font-black uppercase tracking-[1.2px]" style={{ color: statAccent }}>{statTitle(item)}</p>
+                          </div>
+                          <span className="shrink-0 rounded-full bg-white/[0.06] px-2.5 py-1 text-[9px] font-black uppercase tracking-[1px]" style={{ color: statGold }}>{badgeLabel(item)}</span>
                         </div>
-                        <span className="shrink-0 rounded-full bg-white/[0.06] px-2.5 py-1 text-[9px] font-black uppercase tracking-[1px]" style={{ color: statGold }}>{badgeLabel(item)}</span>
+                        <div className="mt-3 grid grid-cols-2 gap-2 text-center">
+                          <div className="rounded-xl bg-black/22 p-2"><p className="text-[8px] font-black uppercase tracking-[1px] text-[var(--text-dim)]">Riwayat</p><p className="font-['Orbitron'] text-[13px] font-black" style={{ color: statGold }}>{item.wins_15}/15</p></div>
+                          <div className="rounded-xl bg-black/22 p-2"><p className="text-[8px] font-black uppercase tracking-[1px] text-[var(--text-dim)]">Terbaru</p><p className="font-['Orbitron'] text-[13px] font-black" style={{ color: statAccent }}>{item.wins_last_5}/5</p></div>
+                        </div>
+                        <button type="button" onClick={() => navigate(`/analyze/${item.market_id}/${analysisPath(item)}`)} className="mt-3 w-full rounded-xl px-4 py-2.5 text-[10px] font-black uppercase tracking-[1.4px] active:scale-[0.985]" style={{ background: topRank ? statGold : statAccentSoft, color: topRank ? "#120d02" : statAccent }}>Buka Analisa</button>
                       </div>
-                      <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-                        <div className="rounded-xl bg-black/22 p-2"><p className="text-[8px] font-black uppercase tracking-[1px] text-[var(--text-dim)]">Riwayat</p><p className="font-['Orbitron'] text-[13px] font-black" style={{ color: statGold }}>{item.wins_15}/15</p></div>
-                        <div className="rounded-xl bg-black/22 p-2"><p className="text-[8px] font-black uppercase tracking-[1px] text-[var(--text-dim)]">Terbaru</p><p className="font-['Orbitron'] text-[13px] font-black" style={{ color: statAccent }}>{item.wins_last_5}/5</p></div>
-                        <div className="rounded-xl bg-black/22 p-2"><p className="text-[8px] font-black uppercase tracking-[1px] text-[var(--text-dim)]">Kosong</p><p className="font-['Orbitron'] text-[13px] font-black" style={{ color: statAccent }}>{item.max_loss_streak}</p></div>
-                      </div>
-                      <button type="button" onClick={() => navigate(`/analyze/${item.market_id}/${analysisPath(item)}`)} className="mt-3 w-full rounded-xl px-4 py-2.5 text-[10px] font-black uppercase tracking-[1.4px] active:scale-[0.985]" style={{ background: topRank ? statGold : statAccentSoft, color: topRank ? "#120d02" : statAccent }}>Buka Analisa</button>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="rounded-[1.45rem] border border-white/10 bg-white/[0.04] p-6 text-center">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-black/20 text-[var(--text-dim)]"><BarChart3 /></div>
-            <p className="font-['Orbitron'] text-[14px] font-black uppercase tracking-[2px] text-[var(--text)]">Belum ada ranking</p>
-            <p className="mx-auto mt-3 max-w-sm text-[12px] leading-5 text-[var(--text-dim)]">{error ? "Statistik belum bisa dimuat. Pastikan tabel market_statistics sudah dibuat dan evaluator sudah berjalan." : `Belum ada pasaran yang masuk kriteria ${currentFilterLabel}.`}</p>
-            <button onClick={loadStatistics} className="mt-5 rounded-2xl border border-white/10 bg-white/[0.06] px-5 py-3 text-[11px] font-black uppercase tracking-[1.5px] text-[var(--text)] active:scale-[0.985]">Muat Ulang</button>
-          </div>
-        )}
-      </section>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="rounded-[1.45rem] border border-white/10 bg-white/[0.04] p-6 text-center">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-black/20 text-[var(--text-dim)]"><BarChart3 /></div>
+              <p className="font-['Orbitron'] text-[14px] font-black uppercase tracking-[2px] text-[var(--text)]">Belum ada ranking</p>
+              <p className="mx-auto mt-3 max-w-sm text-[12px] leading-5 text-[var(--text-dim)]">{error ? "Statistik belum bisa dimuat. Pastikan tabel market_statistics sudah dibuat dan evaluator sudah berjalan." : `Belum ada pasaran yang masuk kriteria ${currentFilterLabel}.`}</p>
+              <button onClick={loadStatistics} className="mt-5 rounded-2xl border border-white/10 bg-white/[0.06] px-5 py-3 text-[11px] font-black uppercase tracking-[1.5px] text-[var(--text)] active:scale-[0.985]">Muat Ulang</button>
+            </div>
+          )}
+        </section>
+      </div>
     </div>
   );
 }
