@@ -10,6 +10,9 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 const statAccent = "#34d399";
 const statAccentSoft = "rgba(52,211,153,0.14)";
 const statGold = "#f6c96b";
+const MIN_WINS_15 = 13;
+const MIN_WINS_LAST_5 = 3;
+const MAX_LOSS_STREAK_ALLOWED = 2;
 
 type CategoryKey = "ai" | "bbfs" | "off_digit" | "off_jumlah" | "off_shio";
 type TargetPair = "depan" | "tengah" | "belakang";
@@ -87,7 +90,7 @@ function statTitle(item: MarketStatistic) {
 
 function badgeLabel(item: MarketStatistic) {
   if (item.wins_15 >= 14) return "Unggulan";
-  if (item.wins_15 >= 12) return "Stabil";
+  if (item.wins_15 >= MIN_WINS_15) return "Stabil";
   if (item.wins_last_5 >= 5) return "Naik";
   return "Cek";
 }
@@ -135,6 +138,9 @@ export default function StatisticsPage() {
         .select("id,market_id,market_name,group_key,group_label,mode,param,position,target_pair,wins_15,wins_last_5,max_loss_streak,sample_size,score,updated_at")
         .eq("is_active", true)
         .eq("group_key", category)
+        .gte("wins_15", MIN_WINS_15)
+        .gte("wins_last_5", MIN_WINS_LAST_5)
+        .lte("max_loss_streak", MAX_LOSS_STREAK_ALLOWED)
         .order("score", { ascending: false })
         .order("updated_at", { ascending: false })
         .limit(200);
