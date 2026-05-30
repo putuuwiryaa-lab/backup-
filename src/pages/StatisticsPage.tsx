@@ -1,11 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
-import { ArrowLeft, BarChart3, RefreshCw, Sparkles } from "lucide-react";
+import { ArrowLeft, BarChart3, RefreshCw } from "lucide-react";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+const statAccent = "#34d399";
+const statAccentSoft = "rgba(52,211,153,0.14)";
+const statGold = "#f6c96b";
 
 type CategoryKey = "ai" | "bbfs" | "off_digit" | "off_jumlah" | "off_shio";
 type TargetPair = "depan" | "tengah" | "belakang";
@@ -29,12 +33,12 @@ type MarketStatistic = {
   updated_at?: string;
 };
 
-const categories: Array<{ key: CategoryKey; title: string; code: string; subtitle: string }> = [
-  { key: "ai", title: "AI", code: "01", subtitle: "Angka ikut" },
-  { key: "bbfs", title: "BBFS", code: "02", subtitle: "Basis 2D" },
-  { key: "off_digit", title: "OFF Digit", code: "03", subtitle: "Posisi digit" },
-  { key: "off_jumlah", title: "OFF Jumlah", code: "04", subtitle: "Jumlah mati" },
-  { key: "off_shio", title: "OFF Shio", code: "05", subtitle: "Shio mati" },
+const categories: Array<{ key: CategoryKey; title: string; subtitle: string }> = [
+  { key: "ai", title: "AI", subtitle: "Ikut" },
+  { key: "bbfs", title: "BBFS", subtitle: "Basis" },
+  { key: "off_digit", title: "OFF Digit", subtitle: "Digit" },
+  { key: "off_jumlah", title: "OFF Jumlah", subtitle: "Jumlah" },
+  { key: "off_shio", title: "OFF Shio", subtitle: "Shio" },
 ];
 
 const targetPairs: Array<{ key: TargetPair; label: string }> = [
@@ -152,136 +156,114 @@ export default function StatisticsPage() {
   useEffect(() => { loadStatistics(); }, [category, targetPair, position, param]);
 
   const topItems = useMemo(() => items.slice(0, 100), [items]);
-  const bestItem = topItems[0];
-  const latestUpdate = bestItem?.updated_at;
+  const latestUpdate = topItems[0]?.updated_at;
 
   return (
-    <div className="statistics-page animate-[riseIn_0.35s_ease-out] pb-6">
-      <button onClick={() => navigate("/")} className="ghost-button mb-3 flex items-center gap-2 px-4 py-3 text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)] active:scale-95">
+    <div className="statistics-page animate-[riseIn_0.35s_ease-out] pb-6" style={{ color: "var(--text)" }}>
+      <button onClick={() => navigate("/")} className="mb-3 flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.035] px-4 py-3 text-[10px] font-black uppercase tracking-[2px] text-[var(--text-dim)] active:scale-95">
         <ArrowLeft size={16} /> Beranda
       </button>
 
-      <div className="relative mb-4 overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.045] p-4 shadow-2xl">
-        <div className="absolute -right-16 -top-16 h-36 w-36 rounded-full bg-[var(--cyan-dim)] blur-3xl" />
-        <div className="absolute -bottom-14 -left-14 h-32 w-32 rounded-full bg-[var(--gold-dim)] blur-3xl" />
-        <div className="relative flex items-start justify-between gap-4">
+      <div className="mb-3 rounded-[1.7rem] border border-white/10 bg-[linear-gradient(135deg,rgba(10,26,24,0.92),rgba(22,16,34,0.86))] p-4 shadow-2xl">
+        <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/[0.06] px-3 py-1 text-[8px] font-black uppercase tracking-[1.8px] text-[var(--gold)]">
-              <Sparkles size={11} /> Ranking Pasaran
-            </div>
-            <h2 className="font-['Orbitron'] text-[20px] font-black uppercase leading-tight tracking-[3px] text-[var(--text)]">Statistik</h2>
-            <p className="mt-2 text-[11px] font-semibold uppercase leading-5 tracking-[1.2px] text-[var(--text-dim)]">Pilih mode. Ranking pasaran tampil dari yang paling stabil.</p>
+            <p className="text-[8px] font-black uppercase tracking-[2px]" style={{ color: statAccent }}>Statistik Pasaran</p>
+            <h2 className="mt-2 font-['Orbitron'] text-[22px] font-black uppercase leading-tight tracking-[3px] text-[var(--text)]">Ranking</h2>
+            <p className="mt-2 text-[10px] font-semibold uppercase leading-4 tracking-[1.2px] text-[var(--text-dim)]">{currentFilterLabel} · {topItems.length} pasaran</p>
           </div>
-          <button onClick={loadStatistics} className="ghost-button flex h-12 w-12 shrink-0 items-center justify-center text-[var(--text-dim)] active:scale-95" aria-label="Refresh statistik">
+          <button onClick={loadStatistics} className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.05] text-[var(--text-dim)] active:scale-95" aria-label="Refresh statistik">
             <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
           </button>
         </div>
-
-        <div className="relative mt-4 grid grid-cols-2 gap-2">
-          <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
-            <p className="text-[8px] font-black uppercase tracking-[1.4px] text-[var(--text-dim)]">Mode Aktif</p>
-            <p className="mt-1 truncate font-['Orbitron'] text-[12px] font-black uppercase tracking-[2px] text-[var(--cyan)]">{currentFilterLabel}</p>
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <div className="rounded-2xl border border-white/10 bg-black/20 px-3 py-2">
+            <p className="text-[7px] font-black uppercase tracking-[1.4px] text-[var(--text-dim)]">Mode</p>
+            <p className="mt-1 truncate font-['Orbitron'] text-[11px] font-black uppercase tracking-[1.8px]" style={{ color: statAccent }}>{currentFilterLabel}</p>
           </div>
-          <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
-            <p className="text-[8px] font-black uppercase tracking-[1.4px] text-[var(--text-dim)]">Update</p>
-            <p className="mt-1 truncate font-['Orbitron'] text-[10px] font-black uppercase tracking-[1.4px] text-[var(--gold)]">{formatUpdatedAt(latestUpdate)}</p>
+          <div className="rounded-2xl border border-white/10 bg-black/20 px-3 py-2">
+            <p className="text-[7px] font-black uppercase tracking-[1.4px] text-[var(--text-dim)]">Update</p>
+            <p className="mt-1 truncate font-['Orbitron'] text-[10px] font-black uppercase tracking-[1.4px]" style={{ color: statGold }}>{formatUpdatedAt(latestUpdate)}</p>
           </div>
         </div>
       </div>
 
-      <div className="mb-4 grid gap-2">
-        {categories.map((item) => {
-          const active = item.key === category;
-          return (
-            <button key={item.key} type="button" onClick={() => setCategory(item.key)} className={`flex items-center gap-3 rounded-[1.5rem] border p-3 text-left active:scale-[0.985] ${active ? "border-[var(--cyan)] bg-[linear-gradient(135deg,rgba(40,215,255,0.18),rgba(255,202,96,0.08))]" : "border-white/10 bg-white/[0.035]"}`}>
-              <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border font-['Orbitron'] text-[11px] font-black ${active ? "border-[var(--cyan)] bg-[var(--cyan-dim)] text-[var(--cyan)]" : "border-white/10 bg-black/20 text-[var(--text-dim)]"}`}>{item.code}</span>
-              <span className="min-w-0 flex-1">
-                <span className={`block font-['Orbitron'] text-[12px] font-black uppercase tracking-[2px] ${active ? "text-[var(--cyan)]" : "text-[var(--text)]"}`}>{item.title}</span>
-                <span className="mt-1 block text-[9px] font-bold uppercase tracking-[1.1px] text-[var(--text-dim)]">{item.subtitle}</span>
-              </span>
-              {active && <span className="rounded-full bg-[var(--gold)] px-3 py-1 text-[8px] font-black uppercase tracking-[1px] text-black">Aktif</span>}
-            </button>
-          );
-        })}
+      <div className="mb-3 rounded-[1.45rem] border border-white/10 bg-white/[0.035] p-2">
+        <div className="grid grid-cols-5 gap-1.5">
+          {categories.map((item) => {
+            const active = item.key === category;
+            return (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() => setCategory(item.key)}
+                className="min-h-[52px] rounded-[1rem] px-1.5 py-2 text-center active:scale-[0.985]"
+                style={{ background: active ? statAccentSoft : "rgba(0,0,0,0.18)", border: active ? `1px solid ${statAccent}` : "1px solid rgba(255,255,255,0.06)" }}
+              >
+                <span className="block font-['Orbitron'] text-[9px] font-black uppercase tracking-[1.1px]" style={{ color: active ? statAccent : "var(--text)" }}>{item.title.replace("OFF ", "")}</span>
+                <span className="mt-1 block text-[6.5px] font-black uppercase tracking-[0.8px] text-[var(--text-dim)]">{item.subtitle}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      <div className="mb-4 rounded-[1.75rem] border border-white/10 bg-black/20 p-3">
-        <div className="mb-3 flex items-center justify-between gap-2">
-          <p className="text-[9px] font-black uppercase tracking-[1.6px] text-[var(--text-dim)]">Atur Statistik</p>
-          <span className="rounded-full bg-white/[0.06] px-3 py-1 text-[8px] font-black uppercase tracking-[1px] text-[var(--cyan)]">{topItems.length} Pasaran</span>
+      <div className="mb-3 rounded-[1.45rem] border border-white/10 bg-white/[0.035] p-3">
+        <div className="mb-2 flex items-center justify-between">
+          <p className="text-[8px] font-black uppercase tracking-[1.6px] text-[var(--text-dim)]">Filter</p>
+          <span className="rounded-full px-3 py-1 text-[8px] font-black uppercase tracking-[1px] text-black" style={{ background: statGold }}>{currentFilterLabel}</span>
         </div>
-
-        <div className="grid grid-cols-1 gap-2">
-          <div className="rounded-[1.25rem] border border-white/10 bg-white/[0.035] p-2">
-            <p className="mb-2 px-1 text-[8px] font-black uppercase tracking-[1.4px] text-[var(--text-dim)]">{isPositionCategory ? "Pilih Posisi" : "Pilih Fokus"}</p>
-            <div className={`grid ${isPositionCategory ? "grid-cols-4" : "grid-cols-3"} gap-2`}>
-              {isPairCategory && targetPairs.map((item) => (
-                <button key={item.key} type="button" onClick={() => setTargetPair(item.key)} className={`rounded-[1rem] px-2 py-3 text-[8px] font-black uppercase tracking-[1px] active:scale-[0.985] ${targetPair === item.key ? "bg-[var(--cyan)] text-black" : "bg-black/24 text-[var(--text-dim)]"}`}>{item.label}</button>
-              ))}
-              {isPositionCategory && positions.map((item) => (
-                <button key={item.key} type="button" onClick={() => setPosition(item.key)} className={`rounded-[1rem] px-2 py-3 text-[8px] font-black uppercase tracking-[1px] active:scale-[0.985] ${position === item.key ? "bg-[var(--cyan)] text-black" : "bg-black/24 text-[var(--text-dim)]"}`}>{item.label}</button>
-              ))}
-            </div>
+        <div className="space-y-2">
+          <div className={`grid ${isPositionCategory ? "grid-cols-4" : "grid-cols-3"} gap-2`}>
+            {isPairCategory && targetPairs.map((item) => {
+              const active = targetPair === item.key;
+              return <button key={item.key} type="button" onClick={() => setTargetPair(item.key)} className="rounded-[1rem] px-2 py-3 text-[8px] font-black uppercase tracking-[1px] active:scale-[0.985]" style={{ background: active ? statAccent : "rgba(0,0,0,0.24)", color: active ? "#04110d" : "var(--text-dim)" }}>{item.label}</button>;
+            })}
+            {isPositionCategory && positions.map((item) => {
+              const active = position === item.key;
+              return <button key={item.key} type="button" onClick={() => setPosition(item.key)} className="rounded-[1rem] px-2 py-3 text-[8px] font-black uppercase tracking-[1px] active:scale-[0.985]" style={{ background: active ? statAccent : "rgba(0,0,0,0.24)", color: active ? "#04110d" : "var(--text-dim)" }}>{item.label}</button>;
+            })}
           </div>
 
           {category !== "bbfs" && (
-            <div className="rounded-[1.25rem] border border-white/10 bg-white/[0.035] p-2">
-              <p className="mb-2 px-1 text-[8px] font-black uppercase tracking-[1.4px] text-[var(--text-dim)]">{category === "ai" ? "Pilih Digit" : "Pilih Jumlah OFF"}</p>
-              <div className="grid grid-cols-3 gap-2">
-                {paramOptions.map((value) => (
-                  <button key={value} type="button" onClick={() => setParam(value)} className={`rounded-[1rem] px-2 py-3 text-[8px] font-black uppercase tracking-[1px] active:scale-[0.985] ${param === value ? "bg-[var(--gold)] text-black" : "bg-black/24 text-[var(--text-dim)]"}`}>{category === "ai" ? `${value}D` : `OFF ${value}`}</button>
-                ))}
-              </div>
+            <div className="grid grid-cols-3 gap-2">
+              {paramOptions.map((value) => {
+                const active = param === value;
+                return <button key={value} type="button" onClick={() => setParam(value)} className="rounded-[1rem] px-2 py-3 text-[8px] font-black uppercase tracking-[1px] active:scale-[0.985]" style={{ background: active ? statGold : "rgba(0,0,0,0.24)", color: active ? "#120d02" : "var(--text-dim)" }}>{category === "ai" ? `${value}D` : `OFF ${value}`}</button>;
+              })}
             </div>
           )}
         </div>
       </div>
 
       {loading ? (
-        <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-6 text-center">
-          <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-white/10 border-t-[var(--cyan)]" />
+        <div className="rounded-[1.45rem] border border-white/10 bg-white/[0.04] p-6 text-center">
+          <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-white/10" style={{ borderTopColor: statAccent }} />
           <p className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[2px] text-[var(--text)]">Memuat Ranking</p>
           <p className="mt-2 text-[11px] leading-5 text-[var(--text-dim)]">Mengambil statistik pasaran terbaru.</p>
         </div>
       ) : topItems.length ? (
-        <div className="grid gap-3">
-          {bestItem && (
-            <div className="relative overflow-hidden rounded-[2rem] border border-[var(--gold)]/40 bg-[linear-gradient(135deg,rgba(255,202,96,0.18),rgba(40,215,255,0.08))] p-4 shadow-2xl">
-              <div className="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-[var(--gold-dim)] blur-3xl" />
-              <div className="relative">
-                <div className="mb-2 inline-flex rounded-full bg-[var(--gold)] px-3 py-1 text-[8px] font-black uppercase tracking-[1.2px] text-black">Teratas</div>
-                <p className="font-['Orbitron'] text-[20px] font-black uppercase tracking-[3px] text-[var(--text)]">{bestItem.market_name || bestItem.market_id}</p>
-                <p className="mt-1 text-[10px] font-black uppercase tracking-[1.5px] text-[var(--gold)]">{statTitle(bestItem)}</p>
-                <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-                  <div className="rounded-2xl bg-black/24 p-2"><p className="text-[8px] font-black uppercase tracking-[1px] text-[var(--text-dim)]">Riwayat</p><p className="font-['Orbitron'] text-[14px] font-black text-[var(--gold)]">{bestItem.wins_15}/15</p></div>
-                  <div className="rounded-2xl bg-black/24 p-2"><p className="text-[8px] font-black uppercase tracking-[1px] text-[var(--text-dim)]">Terbaru</p><p className="font-['Orbitron'] text-[14px] font-black text-[var(--cyan)]">{bestItem.wins_last_5}/5</p></div>
-                  <div className="rounded-2xl bg-black/24 p-2"><p className="text-[8px] font-black uppercase tracking-[1px] text-[var(--text-dim)]">Kosong</p><p className="font-['Orbitron'] text-[14px] font-black text-[var(--cyan)]">{bestItem.max_loss_streak}</p></div>
-                </div>
-                <button type="button" onClick={() => navigate(`/analyze/${bestItem.market_id}/${analysisPath(bestItem)}`)} className="mt-4 w-full rounded-2xl bg-[var(--gold)] px-4 py-3 text-[10px] font-black uppercase tracking-[2px] text-black active:scale-[0.985]">Buka Analisa Teratas</button>
-              </div>
-            </div>
-          )}
-
-          {topItems.slice(1).map((item, index) => {
+        <div className="grid gap-2.5">
+          {topItems.map((item, index) => {
             const marketName = item.market_name || item.market_id;
+            const topRank = index === 0;
             return (
-              <div key={item.id || `${item.market_id}-${item.group_key}-${item.param}-${item.position}-${item.target_pair}`} className="rounded-[1.5rem] border border-white/10 bg-white/[0.035] p-3 text-left">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-black/24 font-['Orbitron'] text-[12px] font-black text-[var(--cyan)]">#{index + 2}</div>
+              <div key={item.id || `${item.market_id}-${item.group_key}-${item.param}-${item.position}-${item.target_pair}`} className="rounded-[1.45rem] border p-3 text-left shadow-xl" style={{ borderColor: topRank ? "rgba(246,201,107,0.45)" : "rgba(255,255,255,0.09)", background: topRank ? "linear-gradient(135deg,rgba(246,201,107,0.14),rgba(52,211,153,0.08))" : "rgba(255,255,255,0.035)" }}>
+                <div className="flex items-start gap-3">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl font-['Orbitron'] text-[12px] font-black" style={{ background: topRank ? statGold : statAccentSoft, color: topRank ? "#120d02" : statAccent }}>#{index + 1}</div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <p className="truncate font-['Orbitron'] text-[13px] font-black uppercase tracking-[2px] text-[var(--text)]">{marketName}</p>
-                        <p className="mt-1 text-[9px] font-black uppercase tracking-[1.2px] text-[var(--cyan)]">{statTitle(item)}</p>
+                        <p className="truncate font-['Orbitron'] text-[14px] font-black uppercase tracking-[2px] text-[var(--text)]">{marketName}</p>
+                        <p className="mt-1 text-[9px] font-black uppercase tracking-[1.2px]" style={{ color: statAccent }}>{statTitle(item)}</p>
                       </div>
-                      <span className="shrink-0 rounded-full bg-white/[0.06] px-2.5 py-1 text-[8px] font-black uppercase tracking-[1px] text-[var(--gold)]">{badgeLabel(item)}</span>
+                      <span className="shrink-0 rounded-full bg-white/[0.06] px-2.5 py-1 text-[8px] font-black uppercase tracking-[1px]" style={{ color: statGold }}>{badgeLabel(item)}</span>
                     </div>
                     <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-                      <div className="rounded-xl bg-black/20 p-2"><p className="text-[7px] font-black uppercase tracking-[1px] text-[var(--text-dim)]">Riwayat</p><p className="font-['Orbitron'] text-[11px] font-black text-[var(--gold)]">{item.wins_15}/15</p></div>
-                      <div className="rounded-xl bg-black/20 p-2"><p className="text-[7px] font-black uppercase tracking-[1px] text-[var(--text-dim)]">Terbaru</p><p className="font-['Orbitron'] text-[11px] font-black text-[var(--cyan)]">{item.wins_last_5}/5</p></div>
-                      <div className="rounded-xl bg-black/20 p-2"><p className="text-[7px] font-black uppercase tracking-[1px] text-[var(--text-dim)]">Kosong</p><p className="font-['Orbitron'] text-[11px] font-black text-[var(--cyan)]">{item.max_loss_streak}</p></div>
+                      <div className="rounded-xl bg-black/20 p-2"><p className="text-[7px] font-black uppercase tracking-[1px] text-[var(--text-dim)]">Riwayat</p><p className="font-['Orbitron'] text-[12px] font-black" style={{ color: statGold }}>{item.wins_15}/15</p></div>
+                      <div className="rounded-xl bg-black/20 p-2"><p className="text-[7px] font-black uppercase tracking-[1px] text-[var(--text-dim)]">Terbaru</p><p className="font-['Orbitron'] text-[12px] font-black" style={{ color: statAccent }}>{item.wins_last_5}/5</p></div>
+                      <div className="rounded-xl bg-black/20 p-2"><p className="text-[7px] font-black uppercase tracking-[1px] text-[var(--text-dim)]">Kosong</p><p className="font-['Orbitron'] text-[12px] font-black" style={{ color: statAccent }}>{item.max_loss_streak}</p></div>
                     </div>
-                    <button type="button" onClick={() => navigate(`/analyze/${item.market_id}/${analysisPath(item)}`)} className="mt-3 w-full rounded-xl border border-white/10 bg-white/[0.06] px-4 py-2.5 text-[9px] font-black uppercase tracking-[1.4px] text-[var(--text)] active:scale-[0.985]">Buka Analisa</button>
+                    <button type="button" onClick={() => navigate(`/analyze/${item.market_id}/${analysisPath(item)}`)} className="mt-3 w-full rounded-xl px-4 py-2.5 text-[9px] font-black uppercase tracking-[1.4px] active:scale-[0.985]" style={{ background: topRank ? statGold : statAccentSoft, color: topRank ? "#120d02" : statAccent }}>Buka Analisa</button>
                   </div>
                 </div>
               </div>
@@ -289,7 +271,7 @@ export default function StatisticsPage() {
           })}
         </div>
       ) : (
-        <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-6 text-center">
+        <div className="rounded-[1.45rem] border border-white/10 bg-white/[0.04] p-6 text-center">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-black/20 text-[var(--text-dim)]"><BarChart3 /></div>
           <p className="font-['Orbitron'] text-[13px] font-black uppercase tracking-[2px] text-[var(--text)]">Belum ada ranking</p>
           <p className="mx-auto mt-3 max-w-sm text-[11px] leading-5 text-[var(--text-dim)]">{error ? "Statistik belum bisa dimuat. Pastikan tabel market_statistics sudah dibuat dan evaluator sudah berjalan." : `Belum ada pasaran yang masuk kriteria ${currentFilterLabel}.`}</p>
