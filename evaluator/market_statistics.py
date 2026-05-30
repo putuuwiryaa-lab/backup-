@@ -8,8 +8,12 @@ MAX_LOSS_STREAK_ALLOWED = 2
 PAGE_SIZE = 1000
 MAX_EVALUATION_ROWS = 70000
 
-TARGET_PAIRS = ("depan", "tengah", "belakang")
 POSITIONS = ("as", "kop", "kepala", "ekor")
+POSITION_2D_PAIRS = {
+    "depan": ("as", "kop"),
+    "tengah": ("kop", "kepala"),
+    "belakang": ("kepala", "ekor"),
+}
 
 
 def is_success(row):
@@ -29,7 +33,27 @@ def max_loss_streak(rows):
     return highest
 
 
-def group_label(group_key):
+def paired_loss_streak(samples):
+    highest = 0
+    current = 0
+    for sample in samples:
+        if sample.get("hit"):
+            current = 0
+        else:
+            current += 1
+            highest = max(highest, current)
+    return highest
+
+
+def date_key(value):
+    if not value:
+        return ""
+    return str(value)[:10]
+
+
+def group_label(group_key, mode=None):
+    if group_key == "off_digit" and mode == "mati_2d":
+        return "2D Posisi"
     labels = {
         "ai": "AI",
         "bbfs": "BBFS",
@@ -105,7 +129,7 @@ def stat_group_key(row):
     return "|".join([str(market_id), group_key, str(mode), str(param), position, target_pair])
 
 
-def build_market_statistics(rows):
+def build_single_statistics(rows):
     groups = {}
     for row in rows:
         key = stat_group_key(row)
@@ -135,7 +159,7 @@ def build_market_statistics(rows):
             "market_id": latest.get("market_id"),
             "market_name": latest.get("market_name") or latest.get("market_id"),
             "group_key": group_key,
-            "group_label": group_label(group_key),
+            "group_label": group_label(group_key, mode),
             "mode": mode,
             "param": param,
             "position": position,
@@ -149,12 +173,83 @@ def build_market_statistics(rows):
             "is_active": True,
             "updated_at": now_iso(),
         })
+    return output
+
+
+def build_position_2d_statistics(rows):
+    day_map = {}
+    market_names = {}
+    for row in rows:
+        if row.get("mode") != "mati":
+            continue
+        market_id = row.get("market_id")
+        market_name = row.get("market_name") or market_id
+        param = int(row.get("param") or 0)
+        position = str(row.get("position") or "").lower()
+        day = date_key(row.get("evaluated_at"))
+        if not market_id or param not in (1, 2, 3) or position not in POSITIONS or not day:
+            continue
+        market_names.setdefault(str(market_id), market_name)
+        key = (str(market_id), param, day)
+        day_map.setdefault(key, {})
+        if position not in day_map[key]:
+            day_map[key][position] = is_success(row)
+
+    grouped = {}
+    for (market_id, param, day), position_hits in day_map.items():
+        for target_pair, pair_positions in POSITION_2D_PAIRS.items():
+            first, second = pair_positions
+            if first not in position_hits or second not in position_hits:
+                continue
+            key = (market_id, target_pair, param)
+            grouped.setdefault(key, []).append({"day": day, "hit": bool(position_hits[first] and position_hits[second])})
+
+    output = []
+    for (market_id, target_pair, param), samples in grouped.items():
+        sample = sorted(samples, key=lambda item: item["day"], reverse=True)[:SAMPLE_SIZE]
+        if len(sample) < SAMPLE_SIZE:
+            continue
+        wins_15 = sum(1 for item in sample if item.get("hit"))
+        wins_last_5 = sum(1 for item in sample[:5] if item.get("hit"))
+        loss_streak = paired_loss_streak(sample)
+        if wins_15 < MIN_WINS_15 or wins_last_5 < MIN_WINS_LAST_5 or loss_streak > MAX_LOSS_STREAK_ALLOWED:
+            continue
+        first, second = POSITION_2D_PAIRS[target_pair]
+        group_key = "off_digit"
+        mode = "mati_2d"
+        position = f"{first}_{second}"
+        score = wins_15 * 100 + wins_last_5 * 25 - loss_streak * 40
+        stat_key = "|".join([market_id, group_key, mode, str(param), position, target_pair])
+        output.append({
+            "market_id": market_id,
+            "market_name": market_names.get(market_id) or market_id,
+            "group_key": group_key,
+            "group_label": group_label(group_key, mode),
+            "mode": mode,
+            "param": param,
+            "position": position,
+            "target_pair": target_pair,
+            "stat_key": stat_key,
+            "wins_15": wins_15,
+            "wins_last_5": wins_last_5,
+            "max_loss_streak": loss_streak,
+            "sample_size": len(sample),
+            "score": score,
+            "is_active": True,
+            "updated_at": now_iso(),
+        })
+    return output
+
+
+def build_market_statistics(rows):
+    output = build_single_statistics(rows)
+    output.extend(build_position_2d_statistics(rows))
     return sorted(output, key=lambda item: item["score"], reverse=True)
 
 
 def is_missing_statistics_table(error):
     text = str(error)
-    return "market_statistics" in text and ("PGRST205" in text or "schema cache" in text or "Could not find the table" in text)
+    return "market_statistics" in text and ("PGRST205" in text or "schema cache" in text or "Could not find the table")
 
 
 def refresh_market_statistics():
