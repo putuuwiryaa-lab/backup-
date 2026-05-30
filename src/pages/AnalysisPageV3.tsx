@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, RefreshCw, Sparkles } from "lucide-react";
 import ParamSelector from "../components/analysis/ParamSelector";
@@ -9,7 +9,6 @@ import { useStepBackNavigation } from "../hooks/useStepBackNavigation";
 import { typeMeta } from "../lib/analysis/constants";
 import { toNumberList } from "../lib/analysis/utils";
 import { buildCustomDigitLines, CUSTOM_FOCUS_OPTIONS, customFocusLabel, customFocusPairs, customFocusSubtitle, type CustomFocus, type TargetPair } from "../lib/analysis/customDigit";
-import { presetAiMap, presetBooleanMap, presetCountMap, readRekapWatchPreset } from "../lib/analysis/rekapWatchPreset";
 
 const TARGET_PAIR_OPTIONS: Array<{ key: TargetPair; title: string; subtitle: string }> = [
   { key: "depan", title: "2D DEPAN", subtitle: "AS - KOP" },
@@ -20,18 +19,6 @@ const TARGET_PAIR_OPTIONS: Array<{ key: TargetPair; title: string; subtitle: str
 type PairAiMap = Partial<Record<TargetPair, 2 | 4 | 6 | null>>;
 type PairCountMap = Partial<Record<TargetPair, number | null>>;
 type PairBooleanMap = Partial<Record<TargetPair, boolean>>;
-
-function hasPendingRekapPreset(marketId: string, type: string) {
-  if (type !== "rekap") return false;
-  try {
-    const raw = sessionStorage.getItem("supreme_rekap_watch_preset");
-    if (!raw) return false;
-    const preset = JSON.parse(raw);
-    return preset?.market_id === marketId;
-  } catch {
-    return false;
-  }
-}
 
 function TargetPairSelector({ meta, onSelect }: { meta: { accent: string; soft: string }; onSelect: (pair: TargetPair) => void }) {
   return (
@@ -94,7 +81,7 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
   const needsTargetPair = ["ai", "jumlah", "shio"].includes(type);
   const [param, setParam] = useState<number | null>(type === "rekap" ? 3 : 0);
   const [targetPair, setTargetPair] = useState<TargetPair | null>(needsTargetPair ? null : "belakang");
-  const [loading, setLoading] = useState(() => hasPendingRekapPreset(marketId, type));
+  const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState("");
   const [detailValidationOpen, setDetailValidationOpen] = useState(false);
@@ -108,7 +95,6 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
   const [customOffEkorCount, setCustomOffEkorCount] = useState<number | null>(null);
   const [customOffJumlahCountByPair, setCustomOffJumlahCountByPair] = useState<PairCountMap>({});
   const [customOffShioCountByPair, setCustomOffShioCountByPair] = useState<PairCountMap>({});
-  const [returnToWatch, setReturnToWatch] = useState(false);
   const meta = typeMeta[type] || typeMeta.ai;
   const isRekapCustom = type === "rekap" && param === 3;
 
@@ -147,75 +133,6 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
     throw new Error(json.error || "Gagal memproses analisa");
   };
 
-  const generateCustomDigitFromPreset = async (focus: CustomFocus, filters: any) => {
-    const aiPreset = presetAiMap(filters);
-    const bbfsPreset = presetBooleanMap(filters);
-    const jumlahPreset = presetCountMap(filters?.jumlahByPair);
-    const shioPreset = presetCountMap(filters?.shioByPair);
-    const offAsCount = filters?.offAs ? Number(filters.offAs) : null;
-    const offKopCount = filters?.offKop ? Number(filters.offKop) : null;
-    const offKepalaCount = filters?.offKepala ? Number(filters.offKepala) : null;
-    const offEkorCount = filters?.offEkor ? Number(filters.offEkor) : null;
-
-    setParam(3);
-    setCustomFocus(focus);
-    setCustomAiDigitByPair(aiPreset);
-    setCustomIncludeBBFSByPair(bbfsPreset);
-    setCustomOffJumlahCountByPair(jumlahPreset);
-    setCustomOffShioCountByPair(shioPreset);
-    setCustomOffAsCount(offAsCount);
-    setCustomOffKopCount(offKopCount);
-    setCustomOffKepalaCount(offKepalaCount);
-    setCustomOffEkorCount(offEkorCount);
-
-    resetBeforeAnalyze();
-    try {
-      const pairs = customFocusPairs(focus);
-      const hasAnyPairFilter = pairs.some((pair) => aiPreset[pair] || bbfsPreset[pair] || jumlahPreset[pair] || shioPreset[pair]);
-      const hasAnyFilter = Boolean(hasAnyPairFilter || offAsCount || offKopCount || offKepalaCount || offEkorCount);
-      if (!hasAnyFilter) throw new Error("Belum ada filter rekap dari pantauan.");
-
-      const data = await getMarketData();
-      const aiByPair: Partial<Record<TargetPair, number[]>> = {};
-      const bbfsByPair: Partial<Record<TargetPair, number[]>> = {};
-      const jumlahByPair: Partial<Record<TargetPair, number[]>> = {};
-      const shioByPair: Partial<Record<TargetPair, number[]>> = {};
-      const matiCache: Partial<Record<number, any>> = {};
-
-      for (const pair of pairs) {
-        const aiDigit = aiPreset[pair];
-        const useBBFS = Boolean(bbfsPreset[pair]);
-        const jumlahCount = jumlahPreset[pair];
-        const shioCount = shioPreset[pair];
-        if (aiDigit) aiByPair[pair] = toNumberList((await postAnalyze("ai", data, aiDigit, pair))?.result);
-        if (useBBFS) bbfsByPair[pair] = toNumberList((await postAnalyze("ai", data, 8, pair))?.result);
-        if (jumlahCount) jumlahByPair[pair] = toNumberList((await postAnalyze("jumlah", data, jumlahCount, pair))?.result);
-        if (shioCount) shioByPair[pair] = toNumberList((await postAnalyze("shio", data, shioCount, pair))?.result);
-      }
-
-      const getMati = async (count: number | null) => {
-        if (!count) return null;
-        if (!matiCache[count]) matiCache[count] = await postAnalyze("mati", data, count);
-        return matiCache[count];
-      };
-
-      const matiAsData = await getMati(offAsCount);
-      const matiKopData = await getMati(offKopCount);
-      const matiKepalaData = await getMati(offKepalaCount);
-      const matiEkorData = await getMati(offEkorCount);
-      const offAs = offAsCount ? toNumberList(matiAsData?.AS?.result) : [];
-      const offKop = offKopCount ? toNumberList(matiKopData?.KOP?.result) : [];
-      const offKepala = offKepalaCount ? toNumberList(matiKepalaData?.KEPALA?.result) : [];
-      const offEkor = offEkorCount ? toNumberList(matiEkorData?.EKOR?.result) : [];
-      const lines = buildCustomDigitLines({ focus, aiByPair, bbfsByPair, offAs, offKop, offKepala, offEkor, jumlahByPair, shioByPair });
-
-      setResult({ custom: true, customFocus: focus, aiByPair, bbfsByPair, customIncludeBBFSByPair: bbfsPreset, offAs, offKop, offKepala, offEkor, jumlahByPair, shioByPair, lines });
-    } catch (e: any) {
-      setError(e.message || "Gagal generate custom digit");
-    }
-    setLoading(false);
-  };
-
   const handleTargetPairSelect = (pair: TargetPair) => {
     setTargetPair(pair);
     setParam(0);
@@ -237,15 +154,8 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
   };
 
   const stepBack = () => {
-    if (loading) {
-      if (returnToWatch) navigate("/pantauan-rekap", { replace: true });
-      return true;
-    }
+    if (loading) return true;
     if (result) {
-      if (returnToWatch && type === "rekap") {
-        navigate("/pantauan-rekap", { replace: true });
-        return true;
-      }
       setResult(null);
       setError("");
       if (needsTargetPair) {
@@ -351,19 +261,10 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
     setLoading(false);
   };
 
-  useEffect(() => {
-    if (type !== "rekap") return;
-    const preset = readRekapWatchPreset(marketId);
-    if (!preset) return;
-    setReturnToWatch(true);
-    generateCustomDigitFromPreset((preset.focus || "belakang") as CustomFocus, preset.filters || {});
-  }, [type, marketId]);
-
-  const hideRekapControls = Boolean(returnToWatch && !result);
-  const showRekapFocusSelector = !hideRekapControls && isRekapCustom && !customFocus && !result && !loading;
-  const showCustomDigitBuilder = !hideRekapControls && isRekapCustom && Boolean(customFocus) && !result;
-  const showTargetPairSelector = !hideRekapControls && needsTargetPair && !targetPair && !result && !loading;
-  const showParamSelector = !hideRekapControls && !showTargetPairSelector && !showRekapFocusSelector;
+  const showRekapFocusSelector = isRekapCustom && !customFocus && !result && !loading;
+  const showCustomDigitBuilder = isRekapCustom && Boolean(customFocus) && !result;
+  const showTargetPairSelector = needsTargetPair && !targetPair && !result && !loading;
+  const showParamSelector = !showTargetPairSelector && !showRekapFocusSelector;
 
   return (
     <div className={`analysis-mode-${type} ui-motion-in pb-8`}>
@@ -386,7 +287,7 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
         </div>
 
         {needsTargetPair && targetPair && <div className="ui-card ui-motion-in relative mt-3 flex items-center justify-between gap-3 rounded-2xl p-3"><div className="min-w-0 text-left"><span className="mr-2 ui-label text-[9px]">Fokus:</span><span className="font-['Orbitron'] text-[10px] font-black uppercase tracking-[2px]" style={{ color: meta.accent }}>{targetPairLabel(targetPair)}</span></div><button type="button" onClick={handleTargetPairReset} className="ui-motion-soft ui-tap shrink-0 rounded-full border px-3 py-1.5 text-[8px] font-black uppercase tracking-[1px]" style={{ borderColor: `${meta.accent}66`, color: meta.accent }}>Ganti</button></div>}
-        {isRekapCustom && customFocus && !hideRekapControls && <div className="ui-card ui-motion-in relative mt-3 flex items-center justify-between gap-3 rounded-2xl p-3"><div className="min-w-0 text-left"><span className="mr-2 ui-label text-[9px]">Rekap:</span><span className="font-['Orbitron'] text-[10px] font-black uppercase tracking-[2px]" style={{ color: meta.accent }}>{customFocusLabel(customFocus)} · {customFocusSubtitle(customFocus)}</span></div><button type="button" onClick={handleCustomFocusReset} className="ui-motion-soft ui-tap shrink-0 rounded-full border px-3 py-1.5 text-[8px] font-black uppercase tracking-[1px]" style={{ borderColor: `${meta.accent}66`, color: meta.accent }}>Ganti</button></div>}
+        {isRekapCustom && customFocus && <div className="ui-card ui-motion-in relative mt-3 flex items-center justify-between gap-3 rounded-2xl p-3"><div className="min-w-0 text-left"><span className="mr-2 ui-label text-[9px]">Rekap:</span><span className="font-['Orbitron'] text-[10px] font-black uppercase tracking-[2px]" style={{ color: meta.accent }}>{customFocusLabel(customFocus)} · {customFocusSubtitle(customFocus)}</span></div><button type="button" onClick={handleCustomFocusReset} className="ui-motion-soft ui-tap shrink-0 rounded-full border px-3 py-1.5 text-[8px] font-black uppercase tracking-[1px]" style={{ borderColor: `${meta.accent}66`, color: meta.accent }}>Ganti</button></div>}
       </div>
 
       {!result && !loading && param !== 0 && !isRekapCustom && <button onClick={() => handleAnalyze(param || 1)} className="primary-button ui-motion-soft ui-tap mb-4 flex w-full items-center justify-center gap-3 p-5 font-['Orbitron'] text-[12px] font-black uppercase tracking-[4px]"><RefreshCw size={18} /> Mulai Analisa</button>}
@@ -396,7 +297,7 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
 
       {showParamSelector && <ParamSelector type={type} param={param} meta={meta} onAnalyze={handleAnalyze} onCustomDigit={() => { setParam(3); setResult(null); setError(""); }} />}
 
-      {customFocus && !hideRekapControls && <CustomDigitBuilder show={showCustomDigitBuilder} marketId={marketId} meta={meta} customFocus={customFocus} customAiDigitByPair={customAiDigitByPair} setCustomAiDigitForPair={setCustomAiDigitForPair} customIncludeBBFSByPair={customIncludeBBFSByPair} setCustomIncludeBBFSForPair={setCustomIncludeBBFSForPair} customOffAsCount={customOffAsCount} setCustomOffAsCount={setCustomOffAsCount} customOffKopCount={customOffKopCount} setCustomOffKopCount={setCustomOffKopCount} customOffKepalaCount={customOffKepalaCount} setCustomOffKepalaCount={setCustomOffKepalaCount} customOffEkorCount={customOffEkorCount} setCustomOffEkorCount={setCustomOffEkorCount} customOffJumlahCountByPair={customOffJumlahCountByPair} setCustomOffJumlahCountForPair={setCustomOffJumlahCountForPair} customOffShioCountByPair={customOffShioCountByPair} setCustomOffShioCountForPair={setCustomOffShioCountForPair} onGenerate={handleCustomDigitGenerate} />}
+      {customFocus && <CustomDigitBuilder show={showCustomDigitBuilder} marketId={marketId} meta={meta} customFocus={customFocus} customAiDigitByPair={customAiDigitByPair} setCustomAiDigitForPair={setCustomAiDigitForPair} customIncludeBBFSByPair={customIncludeBBFSByPair} setCustomIncludeBBFSForPair={setCustomIncludeBBFSForPair} customOffAsCount={customOffAsCount} setCustomOffAsCount={setCustomOffAsCount} customOffKopCount={customOffKopCount} setCustomOffKopCount={setCustomOffKopCount} customOffKepalaCount={customOffKepalaCount} setCustomOffKepalaCount={setCustomOffKepalaCount} customOffEkorCount={customOffEkorCount} setCustomOffEkorCount={setCustomOffEkorCount} customOffJumlahCountByPair={customOffJumlahCountByPair} setCustomOffJumlahCountForPair={setCustomOffJumlahCountForPair} customOffShioCountByPair={customOffShioCountByPair} setCustomOffShioCountForPair={setCustomOffShioCountForPair} onGenerate={handleCustomDigitGenerate} />}
 
       {loading && <div className="ui-panel ui-motion-in my-4 flex flex-col items-center justify-center gap-4 p-8 text-center"><div className="h-12 w-12 animate-spin rounded-full border-4 border-white/10" style={{ borderTopColor: meta.accent }} /><div className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px]">Memproses Analisa</div></div>}
       {error && <div className="ui-note ui-motion-in my-4 border-red-400/30 bg-red-500/10 p-4 text-center text-[12px] font-bold text-red-300">{error}</div>}
