@@ -92,34 +92,8 @@ function badgeLabel(item: MarketStatistic) {
   return "Cek";
 }
 
-function analysisPath(item: MarketStatistic) {
-  if (item.group_key === "off_digit") return "mati";
-  if (item.group_key === "off_jumlah") return "jumlah";
-  if (item.group_key === "off_shio") return "shio";
-  return "ai";
-}
-
-function analysisParam(item: MarketStatistic) {
-  if (item.group_key === "bbfs") return 8;
-  return item.param || 1;
-}
-
-function analysisTargetPair(item: MarketStatistic) {
-  if (item.target_pair === "depan" || item.target_pair === "tengah" || item.target_pair === "belakang") return item.target_pair;
-  return "belakang";
-}
-
-function analysisUrl(item: MarketStatistic) {
-  const params = new URLSearchParams({
-    auto: "1",
-    param: String(analysisParam(item)),
-    target_pair: analysisTargetPair(item),
-  });
-
-  if (item.position) params.set("position", item.position);
-  params.set("from", "statistik");
-
-  return `/analyze/${item.market_id}/${analysisPath(item)}?${params.toString()}`;
+function marketUrl(item: MarketStatistic) {
+  return `/analyze/${item.market_id}`;
 }
 
 function SectionLabel({ title, right }: { title: string; right?: string }) {
@@ -311,7 +285,7 @@ export default function StatisticsPage() {
                           <div className="rounded-xl bg-black/22 p-2"><p className="text-[8px] font-black uppercase tracking-[1px] text-[var(--text-dim)]">Riwayat</p><p className="font-['Orbitron'] text-[13px] font-black" style={{ color: statGold }}>{item.wins_15}/15</p></div>
                           <div className="rounded-xl bg-black/22 p-2"><p className="text-[8px] font-black uppercase tracking-[1px] text-[var(--text-dim)]">Terbaru</p><p className="font-['Orbitron'] text-[13px] font-black" style={{ color: statAccent }}>{item.wins_last_5}/5</p></div>
                         </div>
-                        <button type="button" onClick={() => navigate(analysisUrl(item))} className="mt-3 w-full rounded-xl px-4 py-2.5 text-[10px] font-black uppercase tracking-[1.4px] active:scale-[0.985]" style={{ background: topRank ? statGold : statAccentSoft, color: topRank ? "#120d02" : statAccent }}>Buka Analisa</button>
+                        <button type="button" onClick={() => navigate(marketUrl(item))} className="mt-3 w-full rounded-xl px-4 py-2.5 text-[10px] font-black uppercase tracking-[1.4px] active:scale-[0.985]" style={{ background: topRank ? statGold : statAccentSoft, color: topRank ? "#120d02" : statAccent }}>Buka Pasaran</button>
                       </div>
                     </div>
                   </div>
