@@ -16,34 +16,25 @@ function formatCompact(value: any) {
   return safeArray(value).map((item: any) => String(item)).join("");
 }
 
-function suffix(value: any, fallback = "") {
-  return value ? ` ${value}${fallback}` : "";
-}
-
 function customRows(result: any) {
   const focus = result?.customFocus || result?.focus || "belakang";
-  const selected = result?.selectedFilters || {};
   const pairs = customFocusPairs(focus);
   const positions = customFocusPositions(focus);
   const rows: any[] = [];
 
   pairs.forEach((pair) => {
-    const aiDigit = selected.aiDigitByPair?.[pair];
-    if (safeArray(result.aiByPair?.[pair]).length) rows.push([`AI ${pairLabel[pair]}${suffix(aiDigit, "D")}`, formatCompact(result.aiByPair[pair]), "🔥", "#f3c14b"]);
+    if (safeArray(result.aiByPair?.[pair]).length) rows.push([`AI ${pairLabel[pair]}`, formatCompact(result.aiByPair[pair]), "🔥", "#f3c14b"]);
     if (safeArray(result.bbfsByPair?.[pair]).length) rows.push([`BBFS ${pairLabel[pair]}`, formatCompact(result.bbfsByPair[pair]), "✨", "#f3c14b"]);
   });
 
   positions.forEach((position) => {
     const key = position === "as" ? "offAs" : position === "kop" ? "offKop" : position === "kepala" ? "offKepala" : "offEkor";
-    const count = selected.offCounts?.[position];
-    if (safeArray(result[key]).length) rows.push([`OFF ${customFocusPositionLabels[position]}${suffix(count)}`, formatValue(result[key]), "🎯", "#ff647c"]);
+    if (safeArray(result[key]).length) rows.push([`OFF ${customFocusPositionLabels[position]}`, formatValue(result[key]), "🎯", "#ff647c"]);
   });
 
   pairs.forEach((pair) => {
-    const jumlahCount = selected.jumlahCountByPair?.[pair];
-    const shioCount = selected.shioCountByPair?.[pair];
-    if (safeArray(result.jumlahByPair?.[pair]).length) rows.push([`OFF JML ${pairLabel[pair]}${suffix(jumlahCount)}`, formatValue(result.jumlahByPair[pair]), "🔢", "#b58cff"]);
-    if (safeArray(result.shioByPair?.[pair]).length) rows.push([`OFF SHIO ${pairLabel[pair]}${suffix(shioCount)}`, formatValue(result.shioByPair[pair], true), "🐲", "#28d7ff"]);
+    if (safeArray(result.jumlahByPair?.[pair]).length) rows.push([`OFF JML ${pairLabel[pair]}`, formatValue(result.jumlahByPair[pair]), "🔢", "#b58cff"]);
+    if (safeArray(result.shioByPair?.[pair]).length) rows.push([`OFF SHIO ${pairLabel[pair]}`, formatValue(result.shioByPair[pair], true), "🐲", "#28d7ff"]);
   });
 
   return rows;
