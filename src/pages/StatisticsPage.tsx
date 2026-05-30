@@ -36,6 +36,8 @@ type MarketStatistic = {
   updated_at?: string;
 };
 
+type RelatedStatsMap = Record<string, MarketStatistic[]>;
+
 const categories: Array<{ key: CategoryKey; title: string }> = [
   { key: "ai", title: "AI" },
   { key: "bbfs", title: "BBFS" },
@@ -88,6 +90,27 @@ function statTitle(item: MarketStatistic) {
   return item.group_label || "Statistik";
 }
 
+function shortStatTitle(item: MarketStatistic) {
+  if (item.group_key === "ai") return `AI ${item.param}D ${targetPairLabel(item.target_pair)}`;
+  if (item.group_key === "bbfs") return `BBFS ${targetPairLabel(item.target_pair)}`;
+  if (item.group_key === "off_digit") return `OFF ${positionLabel(item.position)} ${item.param}`;
+  if (item.group_key === "off_jumlah") return `Jumlah ${item.param} ${targetPairLabel(item.target_pair)}`;
+  if (item.group_key === "off_shio") return `Shio ${item.param} ${targetPairLabel(item.target_pair)}`;
+  return item.group_label || "Statistik";
+}
+
+function statIdentity(item: MarketStatistic) {
+  return [item.market_id, item.group_key, item.mode, item.param, item.position || "all", item.target_pair || "all"].join("|");
+}
+
+function relatedLabels(item: MarketStatistic, relatedStats: RelatedStatsMap) {
+  const currentIdentity = statIdentity(item);
+  return (relatedStats[item.market_id] || [])
+    .filter((related) => statIdentity(related) !== currentIdentity)
+    .slice(0, 3)
+    .map(shortStatTitle);
+}
+
 function badgeLabel(item: MarketStatistic) {
   if (item.wins_15 >= 14) return "Unggulan";
   if (item.wins_15 >= MIN_WINS_15) return "Stabil";
@@ -116,6 +139,7 @@ export default function StatisticsPage() {
   const [position, setPosition] = useState<PositionKey>("kepala");
   const [param, setParam] = useState<number>(4);
   const [items, setItems] = useState<MarketStatistic[]>([]);
+  const [relatedStats, setRelatedStats] = useState<RelatedStatsMap>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -152,9 +176,34 @@ export default function StatisticsPage() {
 
       const { data, error: queryError } = await query;
       if (queryError) throw queryError;
-      setItems((data || []) as MarketStatistic[]);
+      const rankingRows = (data || []) as MarketStatistic[];
+      setItems(rankingRows);
+
+      const marketIds = Array.from(new Set(rankingRows.map((item) => item.market_id).filter(Boolean)));
+      if (!marketIds.length) {
+        setRelatedStats({});
+      } else {
+        const { data: relatedData, error: relatedError } = await supabase
+          .from("market_statistics")
+          .select("id,market_id,market_name,group_key,group_label,mode,param,position,target_pair,wins_15,wins_last_5,max_loss_streak,sample_size,score,updated_at")
+          .eq("is_active", true)
+          .in("market_id", marketIds)
+          .gte("wins_15", MIN_WINS_15)
+          .gte("wins_last_5", MIN_WINS_LAST_5)
+          .lte("max_loss_streak", MAX_LOSS_STREAK_ALLOWED)
+          .order("score", { ascending: false })
+          .limit(1000);
+        if (relatedError) throw relatedError;
+        const mapped = ((relatedData || []) as MarketStatistic[]).reduce<RelatedStatsMap>((acc, row) => {
+          if (!acc[row.market_id]) acc[row.market_id] = [];
+          acc[row.market_id].push(row);
+          return acc;
+        }, {});
+        setRelatedStats(mapped);
+      }
     } catch (e: any) {
       setItems([]);
+      setRelatedStats({});
       setError(e.message || "Belum bisa memuat statistik.");
     }
     setLoading(false);
@@ -275,6 +324,7 @@ export default function StatisticsPage() {
               {topItems.map((item, index) => {
                 const marketName = item.market_name || item.market_id;
                 const topRank = index === 0;
+                const alsoLabels = relatedLabels(item, relatedStats);
                 return (
                   <div key={item.id || `${item.market_id}-${item.group_key}-${item.param}-${item.position}-${item.target_pair}`} className="rounded-[1.45rem] border p-3 text-left shadow-xl" style={{ borderColor: topRank ? "rgba(246,201,107,0.55)" : "rgba(255,255,255,0.11)", background: topRank ? "linear-gradient(135deg,rgba(246,201,107,0.14),rgba(52,211,153,0.08))" : "rgba(255,255,255,0.04)" }}>
                     <div className="flex items-start gap-3">
@@ -291,6 +341,12 @@ export default function StatisticsPage() {
                           <div className="rounded-xl bg-black/22 p-2"><p className="text-[8px] font-black uppercase tracking-[1px] text-[var(--text-dim)]">Riwayat</p><p className="font-['Orbitron'] text-[13px] font-black" style={{ color: statGold }}>{item.wins_15}/15</p></div>
                           <div className="rounded-xl bg-black/22 p-2"><p className="text-[8px] font-black uppercase tracking-[1px] text-[var(--text-dim)]">Terbaru</p><p className="font-['Orbitron'] text-[13px] font-black" style={{ color: statAccent }}>{item.wins_last_5}/5</p></div>
                         </div>
+                        {alsoLabels.length > 0 && (
+                          <div className="mt-3 rounded-xl border border-emerald-300/15 bg-emerald-300/[0.07] px-3 py-2">
+                            <p className="text-[8px] font-black uppercase tracking-[1.4px] text-[var(--text-dim)]">Juga unggul</p>
+                            <p className="mt-1 text-[10px] font-black uppercase leading-4 tracking-[1px]" style={{ color: statAccent }}>{alsoLabels.join(" · ")}</p>
+                          </div>
+                        )}
                         <button type="button" onClick={() => navigate(marketUrl(item))} className="mt-3 w-full rounded-xl px-4 py-2.5 text-[10px] font-black uppercase tracking-[1.4px] active:scale-[0.985]" style={{ background: topRank ? statGold : statAccentSoft, color: topRank ? "#120d02" : statAccent }}>Buka Pasaran</button>
                       </div>
                     </div>
