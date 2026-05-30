@@ -241,10 +241,40 @@ def build_position_2d_statistics(rows):
     return output
 
 
+def rank_scope_key(item):
+    return "|".join([
+        str(item.get("group_key") or ""),
+        str(item.get("mode") or ""),
+        str(item.get("param") or ""),
+        str(item.get("position") or ""),
+        str(item.get("target_pair") or ""),
+    ])
+
+
+def apply_rank_movement(stats):
+    if not stats:
+        return stats
+    existing = supabase.table("market_statistics").select("stat_key,previous_rank").execute().data or []
+    previous_rank_by_stat_key = {row.get("stat_key"): row.get("previous_rank") for row in existing if row.get("stat_key")}
+
+    grouped = {}
+    for item in stats:
+        grouped.setdefault(rank_scope_key(item), []).append(item)
+
+    for group in grouped.values():
+        ranked = sorted(group, key=lambda item: (item.get("score") or 0, item.get("wins_15") or 0, item.get("wins_last_5") or 0), reverse=True)
+        for index, item in enumerate(ranked, start=1):
+            previous_rank = previous_rank_by_stat_key.get(item.get("stat_key"))
+            item["previous_rank"] = previous_rank
+            item["rank_movement"] = int(previous_rank) - index if previous_rank else None
+    return stats
+
+
 def build_market_statistics(rows):
     output = build_single_statistics(rows)
     output.extend(build_position_2d_statistics(rows))
-    return sorted(output, key=lambda item: item["score"], reverse=True)
+    output = sorted(output, key=lambda item: item["score"], reverse=True)
+    return apply_rank_movement(output)
 
 
 def is_missing_statistics_table(error):
