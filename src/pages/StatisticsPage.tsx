@@ -111,21 +111,39 @@ function relatedGroupKey(item: MarketStatistic) {
   return item.group_key;
 }
 
+function strictnessValue(item: MarketStatistic) {
+  if (item.group_key === "ai") return -Number(item.param || 99);
+  if (item.group_key === "off_digit" || item.group_key === "off_jumlah" || item.group_key === "off_shio") return Number(item.param || 0);
+  return 0;
+}
+
+function preferredRelated(a: MarketStatistic, b: MarketStatistic) {
+  const strictA = strictnessValue(a);
+  const strictB = strictnessValue(b);
+  if (strictA !== strictB) return strictA > strictB ? a : b;
+  const scoreA = Number(a.score || 0);
+  const scoreB = Number(b.score || 0);
+  if (scoreA !== scoreB) return scoreA > scoreB ? a : b;
+  return Number(a.wins_last_5 || 0) >= Number(b.wins_last_5 || 0) ? a : b;
+}
+
 function relatedLabels(item: MarketStatistic, relatedStats: RelatedStatsMap) {
   const currentIdentity = statIdentity(item);
-  const seenGroups = new Set<string>([relatedGroupKey(item)]);
-  const labels: string[] = [];
+  const currentGroup = relatedGroupKey(item);
+  const bestByGroup = new Map<string, MarketStatistic>();
 
   for (const related of relatedStats[item.market_id] || []) {
     if (statIdentity(related) === currentIdentity) continue;
     const groupKey = relatedGroupKey(related);
-    if (seenGroups.has(groupKey)) continue;
-    seenGroups.add(groupKey);
-    labels.push(shortStatTitle(related));
-    if (labels.length >= 3) break;
+    if (groupKey === currentGroup) continue;
+    const existing = bestByGroup.get(groupKey);
+    bestByGroup.set(groupKey, existing ? preferredRelated(existing, related) : related);
   }
 
-  return labels;
+  return Array.from(bestByGroup.values())
+    .sort((a, b) => Number(b.score || 0) - Number(a.score || 0))
+    .slice(0, 3)
+    .map(shortStatTitle);
 }
 
 function badgeLabel(item: MarketStatistic) {
