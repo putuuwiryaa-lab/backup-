@@ -10,9 +10,11 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 const statAccent = "#34d399";
 const statAccentSoft = "rgba(52,211,153,0.14)";
 const statGold = "#f6c96b";
+const statRed = "#ff4d5e";
 const MIN_WINS_15 = 13;
 const MIN_WINS_LAST_5 = 3;
 const MAX_LOSS_STREAK_ALLOWED = 2;
+const MARKET_STAT_SELECT = "id,market_id,market_name,group_key,group_label,mode,param,position,target_pair,wins_15,wins_last_5,max_loss_streak,sample_size,score,previous_rank,rank_movement,latest_is_hit,latest_status,updated_at";
 
 type CategoryKey = "ai" | "bbfs" | "off_digit" | "off_jumlah" | "off_shio";
 type TargetPair = "depan" | "tengah" | "belakang";
@@ -34,6 +36,8 @@ type MarketStatistic = {
   score?: number;
   previous_rank?: number | null;
   rank_movement?: number | null;
+  latest_is_hit?: boolean | null;
+  latest_status?: string | null;
   updated_at?: string;
 };
 
@@ -164,11 +168,19 @@ function movementText(value?: number | null) {
   return "";
 }
 
-function movementColor(value?: number | null) {
-  const movement = Number(value || 0);
-  if (movement > 0) return statAccent;
-  if (movement < 0) return "#f6c96b";
-  return "var(--text-dim)";
+function movementTone(item: MarketStatistic) {
+  const movement = Number(item.rank_movement || 0);
+  if (movement > 0) {
+    return { text: "#04110d", bg: statAccent, border: "rgba(52,211,153,0.85)", shadow: "0 0 14px rgba(52,211,153,0.22)" };
+  }
+  if (movement < 0) {
+    const latestZonk = item.latest_is_hit === false || item.latest_status === "ZONK" || item.latest_status === "TIDAK MASUK";
+    if (latestZonk) {
+      return { text: "#190404", bg: statRed, border: "rgba(255,77,94,0.85)", shadow: "0 0 14px rgba(255,77,94,0.22)" };
+    }
+    return { text: "#120d02", bg: statGold, border: "rgba(246,201,107,0.85)", shadow: "0 0 14px rgba(246,201,107,0.22)" };
+  }
+  return { text: "var(--text-dim)", bg: "rgba(255,255,255,0.08)", border: "rgba(255,255,255,0.14)", shadow: "none" };
 }
 
 function SectionLabel({ title, right }: { title: string; right?: string }) {
@@ -207,7 +219,7 @@ export default function StatisticsPage() {
     try {
       let query = supabase
         .from("market_statistics")
-        .select("id,market_id,market_name,group_key,group_label,mode,param,position,target_pair,wins_15,wins_last_5,max_loss_streak,sample_size,score,previous_rank,rank_movement,updated_at")
+        .select(MARKET_STAT_SELECT)
         .eq("is_active", true)
         .eq("group_key", category)
         .gte("wins_15", MIN_WINS_15)
@@ -233,7 +245,7 @@ export default function StatisticsPage() {
       } else {
         const { data: relatedData, error: relatedError } = await supabase
           .from("market_statistics")
-          .select("id,market_id,market_name,group_key,group_label,mode,param,position,target_pair,wins_15,wins_last_5,max_loss_streak,sample_size,score,previous_rank,rank_movement,updated_at")
+          .select(MARKET_STAT_SELECT)
           .eq("is_active", true)
           .in("market_id", marketIds)
           .gte("wins_15", MIN_WINS_15)
@@ -373,6 +385,7 @@ export default function StatisticsPage() {
                 const topRank = index === 0;
                 const alsoLabels = relatedLabels(item, relatedStats);
                 const movement = movementText(item.rank_movement);
+                const tone = movementTone(item);
                 return (
                   <div key={item.id || `${item.market_id}-${item.group_key}-${item.param}-${item.position}-${item.target_pair}`} className="rounded-[1.45rem] border p-3 text-left shadow-xl" style={{ borderColor: topRank ? "rgba(246,201,107,0.55)" : "rgba(255,255,255,0.11)", background: topRank ? "linear-gradient(135deg,rgba(246,201,107,0.14),rgba(52,211,153,0.08))" : "rgba(255,255,255,0.04)" }}>
                     <div className="flex items-start gap-3">
@@ -380,12 +393,8 @@ export default function StatisticsPage() {
                         <div className="flex h-12 w-12 items-center justify-center rounded-2xl font-['Orbitron'] text-[13px] font-black" style={{ background: topRank ? statGold : statAccentSoft, color: topRank ? "#120d02" : statAccent }}>#{index + 1}</div>
                         {movement && (
                           <span
-                            className="mt-1 flex min-h-6 min-w-12 items-center justify-center rounded-full border px-2.5 py-1 font-['Orbitron'] text-[11px] font-black leading-none shadow-[0_0_14px_rgba(52,211,153,0.18)]"
-                            style={{
-                              color: movementColor(item.rank_movement),
-                              backgroundColor: "rgba(0,0,0,0.38)",
-                              borderColor: `${movementColor(item.rank_movement)}55`,
-                            }}
+                            className="mt-1 flex min-h-6 min-w-12 items-center justify-center rounded-full border px-2.5 py-1 font-['Orbitron'] text-[11px] font-black leading-none"
+                            style={{ color: tone.text, backgroundColor: tone.bg, borderColor: tone.border, boxShadow: tone.shadow }}
                           >
                             {movement}
                           </span>
