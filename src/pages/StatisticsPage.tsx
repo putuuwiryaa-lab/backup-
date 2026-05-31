@@ -378,7 +378,18 @@ export default function StatisticsPage() {
                     <div className="flex items-start gap-3">
                       <div className="flex w-12 shrink-0 flex-col items-center gap-1">
                         <div className="flex h-12 w-12 items-center justify-center rounded-2xl font-['Orbitron'] text-[13px] font-black" style={{ background: topRank ? statGold : statAccentSoft, color: topRank ? "#120d02" : statAccent }}>#{index + 1}</div>
-                        {movement && <span className="rounded-full bg-black/25 px-2 py-0.5 font-['Orbitron'] text-[9px] font-black leading-none" style={{ color: movementColor(item.rank_movement) }}>{movement}</span>}
+                        {movement && (
+                          <span
+                            className="mt-1 flex min-h-6 min-w-12 items-center justify-center rounded-full border px-2.5 py-1 font-['Orbitron'] text-[11px] font-black leading-none shadow-[0_0_14px_rgba(52,211,153,0.18)]"
+                            style={{
+                              color: movementColor(item.rank_movement),
+                              backgroundColor: "rgba(0,0,0,0.38)",
+                              borderColor: `${movementColor(item.rank_movement)}55`,
+                            }}
+                          >
+                            {movement}
+                          </span>
+                        )}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-start justify-between gap-2">
