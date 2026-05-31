@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { RefreshCw } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
-import { customFocusPairs, customFocusPositionLabels, customFocusPositions, type CustomFocus, type PositionKey, type TargetPair } from "../../lib/analysis/customDigit";
+import { customFocusPairs, customFocusPositionLabels, customFocusPositions, customFocusToBBFSScope, type CustomFocus, type PositionKey, type TargetPair } from "../../lib/analysis/customDigit";
 import { MiniLabel } from "./Shared";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
@@ -11,22 +11,24 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 const RECOMMENDATION_SAMPLE_SIZE = 15;
 const RECOMMENDATION_MIN_SAMPLE = 10;
 
-const AI_WIN_THRESHOLDS: Record<number, number> = { 2: 9, 4: 11, 6: 13, 8: 11 };
+const AI_WIN_THRESHOLDS: Record<number, number> = { 2: 9, 4: 11, 6: 13 };
+const BBFS_WIN_THRESHOLDS: Record<number, number> = { 7: 8, 8: 10, 9: 12 };
 const MATI_WIN_THRESHOLDS: Record<number, number> = { 1: 14, 2: 13, 3: 11 };
 const JUMLAH_WIN_THRESHOLDS: Record<number, number> = { 1: 14, 2: 12, 3: 11 };
 const SHIO_WIN_THRESHOLDS: Record<number, number> = { 1: 14, 2: 13, 3: 12 };
-const AI_PARTIAL_WIN_RATES: Record<number, number> = { 2: 9 / 15, 4: 11 / 15, 6: 13 / 15, 8: 11 / 15 };
+const AI_PARTIAL_WIN_RATES: Record<number, number> = { 2: 9 / 15, 4: 11 / 15, 6: 13 / 15 };
+const BBFS_PARTIAL_WIN_RATES: Record<number, number> = { 7: 8 / 15, 8: 10 / 15, 9: 12 / 15 };
 const MATI_PARTIAL_WIN_RATES: Record<number, number> = { 1: 14 / 15, 2: 13 / 15, 3: 11 / 15 };
 const JUMLAH_PARTIAL_WIN_RATES: Record<number, number> = { 1: 14 / 15, 2: 12 / 15, 3: 11 / 15 };
 const SHIO_PARTIAL_WIN_RATES: Record<number, number> = { 1: 14 / 15, 2: 13 / 15, 3: 12 / 15 };
 
-type RecommendationGroup = "ai" | "mati" | "jumlah" | "shio";
+type RecommendationGroup = "ai" | "bbfs" | "mati" | "jumlah" | "shio";
 type RecommendationBadge = "thumb" | "fire";
 type RecommendedMap = Record<string, RecommendationBadge>;
 type ScoredRecommendation = { param: number; badge: RecommendationBadge };
 type PairAiMap = Partial<Record<TargetPair, 2 | 4 | 6 | null>>;
 type PairCountMap = Partial<Record<TargetPair, number | null>>;
-type PairBooleanMap = Partial<Record<TargetPair, boolean>>;
+type BBFSDigit = 7 | 8 | 9;
 
 const pairLabel: Record<TargetPair, string> = {
   depan: "DEPAN",
@@ -46,6 +48,7 @@ function isSuccessStatus(row: any) {
 
 function getFullThreshold(group: RecommendationGroup, param: number) {
   if (group === "ai") return AI_WIN_THRESHOLDS[param];
+  if (group === "bbfs") return BBFS_WIN_THRESHOLDS[param];
   if (group === "jumlah") return JUMLAH_WIN_THRESHOLDS[param];
   if (group === "shio") return SHIO_WIN_THRESHOLDS[param];
   return MATI_WIN_THRESHOLDS[param];
@@ -53,6 +56,7 @@ function getFullThreshold(group: RecommendationGroup, param: number) {
 
 function getPartialWinRate(group: RecommendationGroup, param: number) {
   if (group === "ai") return AI_PARTIAL_WIN_RATES[param];
+  if (group === "bbfs") return BBFS_PARTIAL_WIN_RATES[param];
   if (group === "jumlah") return JUMLAH_PARTIAL_WIN_RATES[param];
   if (group === "shio") return SHIO_PARTIAL_WIN_RATES[param];
   return MATI_PARTIAL_WIN_RATES[param];
@@ -92,14 +96,15 @@ function applyRecommendationBadges(next: RecommendedMap, keyForParam: (param: nu
   scored.filter((item) => item.badge === "fire").forEach((item) => setBadge(next, keyForParam(item.param), "fire"));
 }
 
-async function loadRows(marketId: string, mode: string, position: string, params: number[], targetPair: TargetPair = "belakang") {
+async function loadRows(marketId: string, mode: string, position: string, params: number[], targetPair: TargetPair = "belakang", analysisScope = "default") {
   const { data, error } = await supabase
     .from("analysis_evaluations")
-    .select("param,is_hit,status,evaluated_at,target_pair")
+    .select("param,is_hit,status,evaluated_at,target_pair,analysis_scope")
     .eq("market_id", marketId)
     .eq("mode", mode)
     .eq("position", position)
     .eq("target_pair", targetPair)
+    .eq("analysis_scope", analysisScope)
     .in("param", params)
     .order("evaluated_at", { ascending: false })
     .limit(80);
@@ -114,8 +119,8 @@ export default function CustomDigitBuilder({
   customFocus,
   customAiDigitByPair,
   setCustomAiDigitForPair,
-  customIncludeBBFSByPair,
-  setCustomIncludeBBFSForPair,
+  customBBFSDigit,
+  setCustomBBFSDigit,
   customOffAsCount,
   setCustomOffAsCount,
   customOffKopCount,
@@ -136,8 +141,8 @@ export default function CustomDigitBuilder({
   customFocus: CustomFocus;
   customAiDigitByPair: PairAiMap;
   setCustomAiDigitForPair: (pair: TargetPair, value: 2 | 4 | 6 | null) => void;
-  customIncludeBBFSByPair: PairBooleanMap;
-  setCustomIncludeBBFSForPair: (pair: TargetPair, value: boolean) => void;
+  customBBFSDigit: BBFSDigit | null;
+  setCustomBBFSDigit: (value: BBFSDigit | null) => void;
   customOffAsCount: number | null;
   setCustomOffAsCount: (value: number | null) => void;
   customOffKopCount: number | null;
@@ -160,19 +165,20 @@ export default function CustomDigitBuilder({
       if (!show || !marketId) return;
       try {
         const pairs = customFocusPairs(customFocus);
+        const bbfsScope = customFocusToBBFSScope(customFocus);
         const next: RecommendedMap = {};
         await Promise.all(pairs.map(async (pair) => {
-          const [aiRows, bbfsRows, jumlahRows, shioRows] = await Promise.all([
+          const [aiRows, jumlahRows, shioRows] = await Promise.all([
             loadRows(marketId, "ai", "all", [2, 4, 6], pair),
-            loadRows(marketId, "ai", "all", [8], pair),
             loadRows(marketId, "jumlah", "all", [1, 2, 3], pair),
             loadRows(marketId, "shio", "all", [1, 2, 3], pair),
           ]);
           applyRecommendationBadges(next, (param) => `ai-${pair}-${param}`, aiRows, [2, 4, 6], "low", "ai");
-          applyRecommendationBadges(next, () => `bbfs-${pair}`, bbfsRows, [8], "low", "ai");
           applyRecommendationBadges(next, (param) => `jumlah-${pair}-${param}`, jumlahRows, [1, 2, 3], "high", "jumlah");
           applyRecommendationBadges(next, (param) => `shio-${pair}-${param}`, shioRows, [1, 2, 3], "high", "shio");
         }));
+        const bbfsRows = await loadRows(marketId, "bbfs", "all", [7, 8, 9], bbfsScope.includes("2d_") ? (bbfsScope === "2d_depan" ? "depan" : bbfsScope === "2d_tengah" ? "tengah" : "belakang") : "belakang", bbfsScope);
+        applyRecommendationBadges(next, (param) => `bbfs-${param}`, bbfsRows, [7, 8, 9], "low", "bbfs");
 
         const [asRows, kopRows, kepalaRows, ekorRows] = await Promise.all([
           loadRows(marketId, "mati", "as", [1, 2, 3]),
@@ -196,6 +202,7 @@ export default function CustomDigitBuilder({
   const badges = useMemo(() => recommended, [recommended]);
   const visiblePositions = customFocusPositions(customFocus);
   const visiblePairs = customFocusPairs(customFocus);
+  const bbfsScope = customFocusToBBFSScope(customFocus);
   const positionValues: Record<PositionKey, number | null> = { as: customOffAsCount, kop: customOffKopCount, kepala: customOffKepalaCount, ekor: customOffEkorCount };
   const positionSetters: Record<PositionKey, (value: number | null) => void> = { as: setCustomOffAsCount, kop: setCustomOffKopCount, kepala: setCustomOffKepalaCount, ekor: setCustomOffEkorCount };
 
@@ -233,12 +240,12 @@ export default function CustomDigitBuilder({
         </section>
       ))}
 
-      {visiblePairs.map((pair) => (
-        <section key={`bbfs-${pair}`} className="ui-card space-y-2 rounded-3xl p-3">
-          <MiniLabel>BBFS {pairLabel[pair]} · {pairSubtitle[pair]}</MiniLabel>
-          {optionButton(Boolean(customIncludeBBFSByPair[pair]), "Include BBFS", () => setCustomIncludeBBFSForPair(pair, !customIncludeBBFSByPair[pair]), "w-full", `bbfs-${pair}`)}
-        </section>
-      ))}
+      <section className="ui-card space-y-2 rounded-3xl p-3">
+        <MiniLabel>BBFS {bbfsScope.toUpperCase().replaceAll("_", " ")}</MiniLabel>
+        <div className="grid grid-cols-3 gap-2">
+          {[7, 8, 9].map((n) => optionButton(customBBFSDigit === n, `${n} Digit`, () => setCustomBBFSDigit(customBBFSDigit === n ? null : n as BBFSDigit), "", `bbfs-${n}`))}
+        </div>
+      </section>
 
       {visiblePositions.map((position) => (
         <section key={position} className="ui-card space-y-2 rounded-3xl p-3">
