@@ -171,16 +171,16 @@ function movementText(value?: number | null) {
 function movementTone(item: MarketStatistic) {
   const movement = Number(item.rank_movement || 0);
   if (movement > 0) {
-    return { text: "#04110d", bg: statAccent, border: "rgba(52,211,153,0.85)", shadow: "0 0 14px rgba(52,211,153,0.22)" };
+    return { text: "#03120d", bg: "#4ade80", border: "#bbf7d0", shadow: "0 0 0 1px rgba(255,255,255,0.22) inset, 0 0 20px rgba(74,222,128,0.55)" };
   }
   if (movement < 0) {
     const latestZonk = item.latest_is_hit === false || item.latest_status === "ZONK" || item.latest_status === "TIDAK MASUK";
     if (latestZonk) {
-      return { text: "#190404", bg: statRed, border: "rgba(255,77,94,0.85)", shadow: "0 0 14px rgba(255,77,94,0.22)" };
+      return { text: "#190407", bg: "#fb7185", border: "#fecdd3", shadow: "0 0 0 1px rgba(255,255,255,0.22) inset, 0 0 20px rgba(251,113,133,0.58)" };
     }
-    return { text: "#120d02", bg: statGold, border: "rgba(246,201,107,0.85)", shadow: "0 0 14px rgba(246,201,107,0.22)" };
+    return { text: "#171002", bg: "#facc15", border: "#fef08a", shadow: "0 0 0 1px rgba(255,255,255,0.22) inset, 0 0 20px rgba(250,204,21,0.55)" };
   }
-  return { text: "var(--text-dim)", bg: "rgba(255,255,255,0.08)", border: "rgba(255,255,255,0.14)", shadow: "none" };
+  return { text: "#d1d5db", bg: "rgba(255,255,255,0.12)", border: "rgba(255,255,255,0.24)", shadow: "0 0 12px rgba(255,255,255,0.08)" };
 }
 
 function SectionLabel({ title, right }: { title: string; right?: string }) {
@@ -389,11 +389,11 @@ export default function StatisticsPage() {
                 return (
                   <div key={item.id || `${item.market_id}-${item.group_key}-${item.param}-${item.position}-${item.target_pair}`} className="rounded-[1.45rem] border p-3 text-left shadow-xl" style={{ borderColor: topRank ? "rgba(246,201,107,0.55)" : "rgba(255,255,255,0.11)", background: topRank ? "linear-gradient(135deg,rgba(246,201,107,0.14),rgba(52,211,153,0.08))" : "rgba(255,255,255,0.04)" }}>
                     <div className="flex items-start gap-3">
-                      <div className="flex w-12 shrink-0 flex-col items-center gap-1">
+                      <div className="flex w-14 shrink-0 flex-col items-center gap-1.5">
                         <div className="flex h-12 w-12 items-center justify-center rounded-2xl font-['Orbitron'] text-[13px] font-black" style={{ background: topRank ? statGold : statAccentSoft, color: topRank ? "#120d02" : statAccent }}>#{index + 1}</div>
                         {movement && (
                           <span
-                            className="mt-1 flex min-h-6 min-w-12 items-center justify-center rounded-full border px-2.5 py-1 font-['Orbitron'] text-[11px] font-black leading-none"
+                            className="mt-1 flex min-h-7 min-w-14 items-center justify-center rounded-xl border px-3 py-1.5 font-['Orbitron'] text-[12px] font-black leading-none tracking-[0.7px]"
                             style={{ color: tone.text, backgroundColor: tone.bg, borderColor: tone.border, boxShadow: tone.shadow }}
                           >
                             {movement}
