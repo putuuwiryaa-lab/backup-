@@ -2,22 +2,23 @@ from .client import get_one, supabase
 from .utils import now_iso
 
 
-def save_snapshot(market_id, market_name, mode, param, target_pair, base_result, result, payload):
+def save_snapshot(market_id, market_name, mode, param, target_pair, analysis_scope, base_result, result, payload):
     row = {
         "market_id": market_id,
         "market_name": market_name,
         "mode": mode,
         "param": param,
         "target_pair": target_pair,
+        "analysis_scope": analysis_scope,
         "base_result": base_result,
         "result": result,
         "payload": payload,
         "updated_at": now_iso(),
     }
-    supabase.table("analysis_snapshots").upsert(row, on_conflict="market_id,mode,param,target_pair").execute()
+    supabase.table("analysis_snapshots").upsert(row, on_conflict="market_id,mode,param,target_pair,analysis_scope").execute()
 
 
-def insert_evaluation_row(market_id, market_name, mode, param, position, target_pair, from_result, new_result, is_hit, target, status, snapshot_result, detail):
+def insert_evaluation_row(market_id, market_name, mode, param, position, target_pair, analysis_scope, from_result, new_result, is_hit, target, status, snapshot_result, detail):
     duplicate = get_one(
         "analysis_evaluations",
         market_id=market_id,
@@ -25,11 +26,12 @@ def insert_evaluation_row(market_id, market_name, mode, param, position, target_
         param=param,
         position=position,
         target_pair=target_pair,
+        analysis_scope=analysis_scope,
         from_result=from_result,
         new_result=new_result,
     )
     if duplicate:
-        print(f"ANALYSIS EVAL SKIP DUPLICATE: {market_id} {mode} {param} {position} {target_pair} {from_result}->{new_result}")
+        print(f"ANALYSIS EVAL SKIP DUPLICATE: {market_id} {mode} {param} {position} {target_pair} {analysis_scope}")
         return False
     row = {
         "market_id": market_id,
@@ -38,6 +40,7 @@ def insert_evaluation_row(market_id, market_name, mode, param, position, target_
         "param": param,
         "position": position,
         "target_pair": target_pair,
+        "analysis_scope": analysis_scope,
         "from_result": from_result,
         "new_result": new_result,
         "is_hit": is_hit,
@@ -48,5 +51,5 @@ def insert_evaluation_row(market_id, market_name, mode, param, position, target_
         "evaluated_at": now_iso(),
     }
     supabase.table("analysis_evaluations").insert(row).execute()
-    print(f"ANALYSIS EVAL OK: {market_id} {mode} {param} {position} {target_pair} {from_result}->{new_result} {status}")
+    print(f"ANALYSIS EVAL OK: {market_id} {mode} {param} {position} {target_pair} {analysis_scope} {status}")
     return True
