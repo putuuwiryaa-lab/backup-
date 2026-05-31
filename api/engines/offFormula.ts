@@ -1,5 +1,18 @@
 import { TBL_I, TBL_L, TBL_B, TBL_T, _0xJ2d, _0xc3c54e } from './tables.js';
 
+const R56_ALDY_BUSTER: Record<number, number> = {
+  0: 3,
+  1: 2,
+  2: 3,
+  3: 6,
+  4: 5,
+  5: 6,
+  6: 9,
+  7: 2,
+  8: 1,
+  9: 4,
+};
+
 export const RM_NAMES = [
   "R01 Phantom Edge","R02 Shadow Index","R03 Night Blade","R04 Void Pulse","R05 Ghost Bridge",
   "R06 Dark Mirror","R07 Venom Drift","R08 Silent Spike","R09 Dead Zone","R10 Hex Cutter",
@@ -11,7 +24,8 @@ export const RM_NAMES = [
   "R36 Double Mistis Core","R37 Outer Cross Index","R38 Biji 2D Backward","R39 Absolute Delta 4D","R40 Phantom Tesson Strike",
   "R41 Double Tail Strike","R42 Kop-Kepala Cross Index","R43 Mystic 3D Rear","R44 As-Ekor Multiplier","R45 Inner Resonance Mist",
   "R46 Taysen Alpha-Omega","R47 Cross Wing Squared","R48 Index Gap Shift","R49 Past Biji Multiplier","R50 Taysen Triple Front",
-  "R51 Master Moegywara666","R52 Nexus Index","R53 Tri Shift","R54 Alpha Shift Four","R55 Rear Drop Sum"
+  "R51 Master Moegywara666","R52 Nexus Index","R53 Tri Shift","R54 Alpha Shift Four","R55 Rear Drop Sum",
+  "R56 Aldy Buster"
 ];
 
 export function _0x3ca571(a: string, b: string) {
@@ -41,5 +55,6 @@ export function _0x3ca571(a: string, b: string) {
     aaa: (c2.as + c2.kop + 3) % 10,
     bbb: _0xc3c54e(_0xJ2d(c2.as, c2.kop) + 4),
     ccc: _0xc3c54e(c2.kpl + c2.ekr - 1),
+    ddd: R56_ALDY_BUSTER[c2.ekr],
   };
 }
