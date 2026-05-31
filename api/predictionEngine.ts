@@ -116,10 +116,8 @@ export function runAnalysis(type: string, payload: string[], param: number) {
 
       const sr = Object.keys(ct).sort((a, b) => {
         if (ct[b] !== ct[a]) return ct[b] - ct[a];
-        const ga = (rc[a] || 99) === 99 ? 1 : 0, gb = (rc[b] || 99) === 99 ? 1 : 0;
-        if (ga !== gb) return ga - gb;
-        if ((fq[b] || 0) !== (fq[a] || 0)) return (fq[b] || 0) - (fq[a] || 0);
-        return (rc[a] || 99) - (rc[b] || 99);
+        if ((fq[a] || 0) !== (fq[b] || 0)) return (fq[a] || 0) - (fq[b] || 0);
+        return (rc[b] || 99) - (rc[a] || 99);
       });
 
       const offDigits = sr.slice(0, param);
