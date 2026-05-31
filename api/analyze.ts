@@ -27,9 +27,21 @@ function sanitizeData(data: any) {
 }
 
 type TargetPair = "depan" | "tengah" | "belakang";
+type AnalysisScope = "default" | "4d" | "3d" | "2d_depan" | "2d_tengah" | "2d_belakang";
 
 function sanitizeTargetPair(value: any): TargetPair {
   return value === "depan" || value === "tengah" || value === "belakang" ? value : "belakang";
+}
+
+function sanitizeAnalysisScope(value: any): AnalysisScope {
+  return value === "4d" || value === "3d" || value === "2d_depan" || value === "2d_tengah" || value === "2d_belakang" ? value : "default";
+}
+
+function targetPairFromScope(scope: AnalysisScope, fallback: TargetPair): TargetPair {
+  if (scope === "2d_depan") return "depan";
+  if (scope === "2d_tengah") return "tengah";
+  if (scope === "2d_belakang") return "belakang";
+  return fallback;
 }
 
 function getTarget2D(result: string, targetPair: TargetPair) {
@@ -113,19 +125,26 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    const { type, data, param, target_pair } = req.body;
-    const allowedTypes = new Set(["ai", "mati", "jumlah", "shio", "rekap"]);
+    const { type, data, param, target_pair, analysis_scope } = req.body;
+    const allowedTypes = new Set(["ai", "bbfs", "mati", "jumlah", "shio", "rekap"]);
     const cleanedData = sanitizeData(data);
     const safeParam = Number(param || 1);
-    const targetPair = sanitizeTargetPair(target_pair);
+    const safeScope = sanitizeAnalysisScope(analysis_scope);
+    const isBBFS = type === "bbfs";
+    const engineType = isBBFS ? "ai" : type;
+    const targetPair = isBBFS ? targetPairFromScope(safeScope, sanitizeTargetPair(target_pair)) : sanitizeTargetPair(target_pair);
+    const paramIsValid = isBBFS
+      ? [7, 8, 9].includes(safeParam)
+      : Number.isInteger(safeParam) && safeParam >= 1 && safeParam <= 8;
 
-    if (!allowedTypes.has(type) || !cleanedData || !Number.isInteger(safeParam) || safeParam < 1 || safeParam > 8) {
+    if (!allowedTypes.has(type) || !cleanedData || !Number.isInteger(safeParam) || !paramIsValid || (isBBFS && safeScope === "default")) {
       return res.status(400).json({ error: "Invalid request" });
     }
 
-    const analysisData = remapDataForTargetPair(type, cleanedData, targetPair);
-    const result = runAnalysis(type, analysisData, safeParam);
-    return res.json({ ...result, target_pair: targetPair });
+    const shouldRemap = isBBFS && safeScope.startsWith("2d_");
+    const analysisData = shouldRemap ? remapDataForTargetPair("ai", cleanedData, targetPair) : remapDataForTargetPair(engineType, cleanedData, targetPair);
+    const result = runAnalysis(engineType, analysisData, safeParam);
+    return res.json({ ...result, target_pair: targetPair, analysis_scope: safeScope });
   } catch (e: any) {
     return res.status(500).json({ error: "Gagal memproses analisa" });
   }
