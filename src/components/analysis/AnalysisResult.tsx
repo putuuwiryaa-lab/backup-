@@ -129,7 +129,7 @@ export default function AnalysisResult({ type, result, param, marketId, meta, ta
     const totalActive = POS.reduce((acc, p) => acc + statsFrom(result[p]).length, 0);
     return (
       <div className="ui-motion-in space-y-4">
-        <ResultHeader label="HASIL ANALISA" value={`RUMUS ACTIVE ${totalActive}/55`} accent={meta.accent} />
+        <ResultHeader label="HASIL ANALISA" value={`RUMUS ACTIVE ${totalActive}/56`} accent={meta.accent} />
         <div className="ui-panel space-y-3 p-4">{POS.map((p) => <ResultRow key={p} label={`OFF ${p}`} values={result[p]?.result} accent={meta.accent} />)}</div>
         <div className="ui-panel space-y-5 p-4">
           <div className="flex items-center justify-between gap-3"><SectionTitle accent={meta.accent} title="Detail Validasi" /><DetailToggle open={detailValidationOpen} accent={meta.accent} onClick={() => setDetailValidationOpen((open) => !open)} /></div>
@@ -144,7 +144,7 @@ export default function AnalysisResult({ type, result, param, marketId, meta, ta
   const stats = safeArray(result.stats);
   const displayResult = safeArray(result.result);
   const active = result.elitCount ?? result.eliteTotal ?? stats.length;
-  const formulaTotal = type === "ai" ? 35 : type === "jumlah" ? 55 : type === "shio" ? 60 : 50;
+  const formulaTotal = type === "ai" ? 35 : type === "jumlah" ? 56 : type === "shio" ? 60 : 50;
   const isBBFSResult = type === "ai" && param === 8;
   const resultLabel = isBBFSResult ? "BBFS" : meta.label;
 
