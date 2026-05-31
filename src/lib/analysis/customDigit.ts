@@ -3,6 +3,7 @@ import { SHIO_2D } from "./constants";
 export type TargetPair = "depan" | "tengah" | "belakang";
 export type CustomFocus = TargetPair | "3d" | "4d";
 export type PositionKey = "as" | "kop" | "kepala" | "ekor";
+export type BBFSAnalysisScope = "4d" | "3d" | "2d_depan" | "2d_tengah" | "2d_belakang";
 
 export const CUSTOM_FOCUS_OPTIONS: Array<{ key: CustomFocus; title: string; subtitle: string }> = [
   { key: "depan", title: "2D DEPAN", subtitle: "AS - KOP" },
@@ -29,6 +30,20 @@ export const customFocusPairs = (focus: CustomFocus): TargetPair[] => {
   if (focus === "3d") return ["tengah", "belakang"];
   if (focus === "4d") return ["depan", "tengah", "belakang"];
   return ["belakang"];
+};
+
+export const customFocusToBBFSScope = (focus: CustomFocus): BBFSAnalysisScope => {
+  if (focus === "4d") return "4d";
+  if (focus === "3d") return "3d";
+  if (focus === "depan") return "2d_depan";
+  if (focus === "tengah") return "2d_tengah";
+  return "2d_belakang";
+};
+
+export const bbfsScopeToTargetPair = (scope: BBFSAnalysisScope): TargetPair => {
+  if (scope === "2d_depan") return "depan";
+  if (scope === "2d_tengah") return "tengah";
+  return "belakang";
 };
 
 export const customFocusPositionLabels: Record<PositionKey, string> = {
@@ -60,6 +75,7 @@ export const buildCustomDigitLines = ({
   focus = "belakang",
   aiByPair,
   bbfsByPair,
+  bbfsGlobal = [],
   offAs = [],
   offKop = [],
   offKepala = [],
@@ -70,6 +86,7 @@ export const buildCustomDigitLines = ({
   focus?: CustomFocus;
   aiByPair?: Partial<Record<TargetPair, number[]>>;
   bbfsByPair?: Partial<Record<TargetPair, number[]>>;
+  bbfsGlobal?: number[];
   includeBBFS?: boolean;
   offAs?: number[];
   offKop?: number[];
@@ -86,6 +103,7 @@ export const buildCustomDigitLines = ({
   const isAllowed = (line: Record<PositionKey, number>) => {
     for (const position of positions) {
       if ((offByPosition[position] || []).includes(line[position])) return false;
+      if (bbfsGlobal.length && !bbfsGlobal.includes(line[position])) return false;
     }
     for (const pair of pairs) {
       const [a, b] = pairDigits(line, pair);
