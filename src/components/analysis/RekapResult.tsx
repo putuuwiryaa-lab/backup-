@@ -1,6 +1,6 @@
 import { Copy } from "lucide-react";
 import { safeArray } from "../../lib/analysis/utils";
-import { customFocusPairs, customFocusPositionLabels, customFocusPositions, type TargetPair } from "../../lib/analysis/customDigit";
+import { customFocusPairs, customFocusPositionLabels, customFocusPositions, customFocusToBBFSScope, type TargetPair } from "../../lib/analysis/customDigit";
 
 const pairLabel: Record<TargetPair, string> = {
   depan: "DEPAN",
@@ -16,6 +16,15 @@ function formatCompact(value: any) {
   return safeArray(value).map((item: any) => String(item)).join("");
 }
 
+function bbfsLabelFromFocus(focus: any) {
+  const scope = customFocusToBBFSScope(focus);
+  if (scope === "4d") return "BBFS 4D";
+  if (scope === "3d") return "BBFS 3D";
+  if (scope === "2d_depan") return "BBFS DEPAN";
+  if (scope === "2d_tengah") return "BBFS TENGAH";
+  return "BBFS BELAKANG";
+}
+
 function customRows(result: any) {
   const focus = result?.customFocus || result?.focus || "belakang";
   const pairs = customFocusPairs(focus);
@@ -24,7 +33,14 @@ function customRows(result: any) {
 
   pairs.forEach((pair) => {
     if (safeArray(result.aiByPair?.[pair]).length) rows.push([`AI ${pairLabel[pair]}`, formatCompact(result.aiByPair[pair]), "🔥", "#f3c14b"]);
-    if (safeArray(result.bbfsByPair?.[pair]).length) rows.push([`BBFS ${pairLabel[pair]}`, formatCompact(result.bbfsByPair[pair]), "✨", "#f3c14b"]);
+  });
+
+  if (safeArray(result.bbfsGlobal).length) {
+    rows.push([bbfsLabelFromFocus(focus), formatCompact(result.bbfsGlobal), "▦", "#ff9f43"]);
+  }
+
+  pairs.forEach((pair) => {
+    if (safeArray(result.bbfsByPair?.[pair]).length) rows.push([`BBFS ${pairLabel[pair]}`, formatCompact(result.bbfsByPair[pair]), "▦", "#ff9f43"]);
   });
 
   positions.forEach((position) => {
@@ -62,9 +78,9 @@ export default function RekapResult({ result, meta }: {
           <span className="rounded-full px-3 py-1 text-[10px] font-black" style={{ backgroundColor: meta.soft, color: meta.accent }}>READY</span>
         </div>
         <div className="space-y-3">
-          {rows.length ? rows.map(([label, value, emoji, color]: any, index: number) => (
+          {rows.length ? rows.map(([label, value, icon, color]: any, index: number) => (
             <div key={`${label}-${index}`} className="ui-card ui-motion-soft ui-lift flex items-center justify-between gap-3 rounded-3xl p-3">
-              <div className="flex min-w-0 items-center gap-3"><span className="shrink-0 text-base">{emoji}</span><span className="ui-label min-w-0 text-[10px]">{label}</span></div>
+              <div className="flex min-w-0 items-center gap-3"><span className="shrink-0 text-base">{icon}</span><span className="ui-label min-w-0 text-[10px]">{label}</span></div>
               <span className="max-w-[54%] truncate text-right font-['Orbitron'] text-[12px] font-black tracking-[1.5px]" style={{ color }}>{value}</span>
             </div>
           )) : (
