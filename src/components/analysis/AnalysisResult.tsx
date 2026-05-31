@@ -7,6 +7,7 @@ import { DetailToggle, ResultHeader, SectionTitle, ShioChip } from "./Shared";
 import AngkaJadiPanel from "./AngkaJadiPanel";
 
 type TargetPair = "depan" | "tengah" | "belakang";
+type AnalysisScope = "default" | "4d" | "3d" | "2d_depan" | "2d_tengah" | "2d_belakang";
 
 function StatsList({ stats, accent }: { stats: any[]; accent: string }) {
   if (!stats.length) return <div className="ui-card ui-motion-in rounded-3xl p-4 text-center text-[11px] font-bold uppercase tracking-[2px] text-[var(--ui-text-muted)]">Belum ada statistik aktif</div>;
@@ -112,13 +113,14 @@ function MatiEvaluationTabs({ marketId, param, accent, soft }: { marketId: strin
   );
 }
 
-export default function AnalysisResult({ type, result, param, marketId, meta, targetPair = "belakang", detailValidationOpen, setDetailValidationOpen, angkaJadiOpen, setAngkaJadiOpen }: {
+export default function AnalysisResult({ type, result, param, marketId, meta, targetPair = "belakang", analysisScope = "default", detailValidationOpen, setDetailValidationOpen, angkaJadiOpen, setAngkaJadiOpen }: {
   type: string;
   result: any;
   param: number | null;
   marketId: string;
   meta: { accent: string; soft: string; label: string };
   targetPair?: TargetPair;
+  analysisScope?: AnalysisScope;
   detailValidationOpen: boolean;
   setDetailValidationOpen: (fn: (value: boolean) => boolean) => void;
   angkaJadiOpen: boolean;
@@ -144,20 +146,20 @@ export default function AnalysisResult({ type, result, param, marketId, meta, ta
   const stats = safeArray(result.stats);
   const displayResult = safeArray(result.result);
   const active = result.elitCount ?? result.eliteTotal ?? stats.length;
-  const formulaTotal = type === "ai" ? 35 : type === "jumlah" ? 56 : type === "shio" ? 60 : 50;
-  const isBBFSResult = type === "ai" && param === 8;
+  const formulaTotal = type === "ai" || type === "bbfs" ? 35 : type === "jumlah" ? 56 : type === "shio" ? 60 : 50;
+  const isBBFSResult = type === "bbfs";
   const resultLabel = isBBFSResult ? "BBFS" : meta.label;
 
   return (
     <div className="ui-motion-in space-y-4">
-      <MainResultCard label={resultLabel} values={displayResult} accent={meta.accent} shio={type === "shio"} singleLine={isBBFSResult} stacked={type === "ai"} />
+      <MainResultCard label={resultLabel} values={displayResult} accent={meta.accent} shio={type === "shio"} singleLine={isBBFSResult} stacked={type === "ai" || type === "bbfs"} />
       <ResultHeader label="VALIDASI" value={`RUMUS ACTIVE ${active}/${formulaTotal}`} accent={meta.accent} />
       <div className="ui-panel p-4">
         <div className="flex items-center justify-between gap-3"><SectionTitle accent={meta.accent} title="Detail Validasi" /><DetailToggle open={detailValidationOpen} accent={meta.accent} onClick={() => setDetailValidationOpen((open) => !open)} /></div>
         {detailValidationOpen && <div className="mt-4"><StatsList stats={stats} accent={meta.accent} /></div>}
       </div>
       <AngkaJadiPanel type={type} result={result} open={angkaJadiOpen} setOpen={setAngkaJadiOpen} meta={meta} />
-      {evaluationModes.has(type) && param !== 0 && <div className="ui-panel ui-motion-in space-y-3 p-4"><EvaluationHistory marketId={marketId} mode={type as any} param={param || 1} targetPair={targetPair} /></div>}
+      {evaluationModes.has(type) && param !== 0 && <div className="ui-panel ui-motion-in space-y-3 p-4"><EvaluationHistory marketId={marketId} mode={type as any} param={param || 1} targetPair={targetPair} analysisScope={analysisScope} /></div>}
     </div>
   );
 }

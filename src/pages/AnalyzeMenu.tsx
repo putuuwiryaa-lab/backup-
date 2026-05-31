@@ -5,6 +5,7 @@ import AnalysisPage from "./AnalysisPageV3";
 
 const MODE_META: any = {
   ai: { icon: "✦", lucide: Activity, accent: "#f3c14b", glow: "rgba(243, 193, 75, 0.10)" },
+  bbfs: { icon: "▦", lucide: Activity, accent: "#ff9f43", glow: "rgba(255, 159, 67, 0.10)" },
   mati: { icon: "×", lucide: ShieldAlert, accent: "#ff647c", glow: "rgba(255, 100, 124, 0.10)" },
   jumlah: { icon: "#", lucide: Hash, accent: "#b58cff", glow: "rgba(181, 140, 255, 0.10)" },
   shio: { icon: "◎", lucide: Gauge, accent: "#28d7ff", glow: "rgba(40, 215, 255, 0.10)" },
@@ -15,7 +16,8 @@ export default function AnalyzeMenu() {
   return (
     <Routes>
       <Route index element={<AnalyzeList />} />
-      <Route path="ai" element={<AnalysisWrapper type="ai" title="ANGKA IKUT / BBFS" />} />
+      <Route path="ai" element={<AnalysisWrapper type="ai" title="ANGKA IKUT" />} />
+      <Route path="bbfs" element={<AnalysisWrapper type="bbfs" title="BBFS" />} />
       <Route path="mati" element={<AnalysisWrapper type="mati" title="ANGKA MATI 4D" />} />
       <Route path="jumlah" element={<AnalysisWrapper type="jumlah" title="JUMLAH MATI 2D" />} />
       <Route path="shio" element={<AnalysisWrapper type="shio" title="SHIO MATI" />} />
@@ -56,7 +58,8 @@ function AnalyzeList() {
   useEffect(() => { if (marketId) fetchData(); }, [marketId]);
 
   const menuItems = [
-    { label: "ANGKA IKUT / BBFS", meta: MODE_META.ai, path: "ai" },
+    { label: "ANGKA IKUT", meta: MODE_META.ai, path: "ai" },
+    { label: "BBFS", meta: MODE_META.bbfs, path: "bbfs" },
     { label: "ANGKA MATI 4D", meta: MODE_META.mati, path: "mati" },
     { label: "JUMLAH MATI 2D", meta: MODE_META.jumlah, path: "jumlah" },
     { label: "SHIO MATI", meta: MODE_META.shio, path: "shio" },

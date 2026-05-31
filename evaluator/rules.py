@@ -7,6 +7,21 @@ def calculate_shio_from_2d(two_digit):
     return str(SHIO_TABLE.get(value, SHIO_TABLE.get(value % 100, 1)))
 
 
+def get_bbfs_target_digits(result, analysis_scope):
+    text = str(result or "").zfill(4)[-4:]
+    if analysis_scope == "4d":
+        return list(text)
+    if analysis_scope == "3d":
+        return list(text[1:4])
+    if analysis_scope == "2d_depan":
+        return list(text[0:2])
+    if analysis_scope == "2d_tengah":
+        return list(text[1:3])
+    if analysis_scope == "2d_belakang":
+        return list(text[2:4])
+    raise RuntimeError(f"Unknown bbfs scope={analysis_scope}")
+
+
 def evaluate_mati_position(snapshot_result, new_result, position_key, position_label, index):
     target = new_result[index]
     off_digits = normalize_digit_list((snapshot_result or {}).get(position_label))
@@ -22,14 +37,29 @@ def evaluate_mati_position(snapshot_result, new_result, position_key, position_l
     }
 
 
-def evaluate_snapshot(mode, param, snapshot_result, new_result, target_pair="belakang"):
+def evaluate_snapshot(mode, param, snapshot_result, new_result, target_pair="belakang", analysis_scope="default"):
     target_2d = get_target_2d(new_result, target_pair)
+    if mode == "bbfs":
+        digits = normalize_digit_list(snapshot_result)
+        target_digits = get_bbfs_target_digits(new_result, analysis_scope)
+        digit_set = set(digits)
+        target_set = set(target_digits)
+        matched = sorted(target_set.intersection(digit_set), key=lambda x: int(x))
+        is_hit = target_set.issubset(digit_set)
+        status = "MASUK" if is_hit else "TIDAK MASUK"
+        return is_hit, "".join(target_digits), status, {
+            "analysis_scope": analysis_scope,
+            "target_digits": target_digits,
+            "digits": digits,
+            "matched_digits": matched,
+            "rule": "bbfs_all_scope_digits",
+        }
     if mode == "ai":
         digits = normalize_digit_list(snapshot_result)
         target_set = set(target_2d)
         digit_set = set(digits)
         matched = sorted(target_set.intersection(digit_set), key=lambda x: int(x))
-        is_hit = target_set.issubset(digit_set) if param == 8 else bool(matched)
+        is_hit = bool(matched)
         status = "MASUK" if is_hit else "TIDAK MASUK"
         return is_hit, target_2d, status, {
             "target_pair": target_pair,
@@ -37,7 +67,7 @@ def evaluate_snapshot(mode, param, snapshot_result, new_result, target_pair="bel
             "target_2d": target_2d,
             "digits": digits,
             "matched_digits": matched,
-            "rule": "bbfs_all_2d_digits" if param == 8 else "ai_any_2d_digit",
+            "rule": "ai_any_2d_digit",
         }
     if mode == "jumlah":
         off_jumlah = normalize_digit_list(snapshot_result)

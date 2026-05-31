@@ -70,7 +70,7 @@ def group_key_for_row(row):
     param = int(row.get("param") or 0)
     if mode == "ai" and param in (2, 4, 6):
         return "ai"
-    if mode == "ai" and param == 8:
+    if mode == "bbfs" and param in (7, 8, 9):
         return "bbfs"
     if mode == "mati":
         return "off_digit"
@@ -92,9 +92,14 @@ def normalize_position(row):
 def normalize_target_pair(row):
     mode = row.get("mode")
     target_pair = row.get("target_pair") or "all"
-    if mode in ("ai", "jumlah", "shio"):
+    if mode in ("ai", "bbfs", "jumlah", "shio"):
         return str(target_pair).lower()
     return "all"
+
+
+def normalize_analysis_scope(row):
+    scope = row.get("analysis_scope") or "default"
+    return str(scope).lower()
 
 
 def fetch_evaluation_rows():
@@ -103,8 +108,8 @@ def fetch_evaluation_rows():
         end = start + PAGE_SIZE - 1
         result = (
             supabase.table("analysis_evaluations")
-            .select("id,market_id,market_name,mode,param,position,target_pair,is_hit,status,evaluated_at")
-            .in_("mode", ["ai", "mati", "jumlah", "shio"])
+            .select("id,market_id,market_name,mode,param,position,target_pair,analysis_scope,is_hit,status,evaluated_at")
+            .in_("mode", ["ai", "bbfs", "mati", "jumlah", "shio"])
             .order("evaluated_at", desc=True)
             .range(start, end)
             .execute()
@@ -125,9 +130,10 @@ def stat_group_key(row):
     param = int(row.get("param") or 0)
     position = normalize_position(row)
     target_pair = normalize_target_pair(row)
+    analysis_scope = normalize_analysis_scope(row)
     if not market_id or not param:
         return None
-    return "|".join([str(market_id), group_key, str(mode), str(param), position, target_pair])
+    return "|".join([str(market_id), group_key, str(mode), str(param), position, target_pair, analysis_scope])
 
 
 def build_single_statistics(rows):
@@ -155,8 +161,9 @@ def build_single_statistics(rows):
         param = int(latest.get("param") or 0)
         position = normalize_position(latest)
         target_pair = normalize_target_pair(latest)
+        analysis_scope = normalize_analysis_scope(latest)
         score = wins_15 * 100 + wins_last_5 * 25 - loss_streak * 40
-        stat_key = "|".join([str(latest.get("market_id")), group_key, str(mode), str(param), position, target_pair])
+        stat_key = "|".join([str(latest.get("market_id")), group_key, str(mode), str(param), position, target_pair, analysis_scope])
         output.append({
             "market_id": latest.get("market_id"),
             "market_name": latest.get("market_name") or latest.get("market_id"),
@@ -166,6 +173,7 @@ def build_single_statistics(rows):
             "param": param,
             "position": position,
             "target_pair": target_pair,
+            "analysis_scope": analysis_scope,
             "stat_key": stat_key,
             "wins_15": wins_15,
             "wins_last_5": wins_last_5,
@@ -223,8 +231,9 @@ def build_position_2d_statistics(rows):
         group_key = "off_digit"
         mode = "mati_2d"
         position = f"{first}_{second}"
+        analysis_scope = "default"
         score = wins_15 * 100 + wins_last_5 * 25 - loss_streak * 40
-        stat_key = "|".join([market_id, group_key, mode, str(param), position, target_pair])
+        stat_key = "|".join([market_id, group_key, mode, str(param), position, target_pair, analysis_scope])
         output.append({
             "market_id": market_id,
             "market_name": market_names.get(market_id) or market_id,
@@ -234,6 +243,7 @@ def build_position_2d_statistics(rows):
             "param": param,
             "position": position,
             "target_pair": target_pair,
+            "analysis_scope": analysis_scope,
             "stat_key": stat_key,
             "wins_15": wins_15,
             "wins_last_5": wins_last_5,
@@ -255,6 +265,7 @@ def rank_scope_key(item):
         str(item.get("param") or ""),
         str(item.get("position") or ""),
         str(item.get("target_pair") or ""),
+        str(item.get("analysis_scope") or "default"),
     ])
 
 
@@ -273,7 +284,7 @@ def rank_sort_key(item, old_rank_by_stat_key=None):
 def fetch_existing_rank_map():
     existing = (
         supabase.table("market_statistics")
-        .select("stat_key,market_id,market_name,group_key,mode,param,position,target_pair,wins_15,wins_last_5,score,previous_rank,is_active")
+        .select("stat_key,market_id,market_name,group_key,mode,param,position,target_pair,analysis_scope,wins_15,wins_last_5,score,previous_rank,is_active")
         .eq("is_active", True)
         .execute()
         .data
