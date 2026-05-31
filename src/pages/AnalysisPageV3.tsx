@@ -8,7 +8,7 @@ import AnalysisResult from "../components/analysis/AnalysisResult";
 import { useStepBackNavigation } from "../hooks/useStepBackNavigation";
 import { typeMeta } from "../lib/analysis/constants";
 import { toNumberList } from "../lib/analysis/utils";
-import { buildCustomDigitLines, CUSTOM_FOCUS_OPTIONS, customFocusLabel, customFocusPairs, customFocusSubtitle, type CustomFocus, type TargetPair } from "../lib/analysis/customDigit";
+import { buildCustomDigitLines, bbfsScopeToTargetPair, CUSTOM_FOCUS_OPTIONS, customFocusLabel, customFocusPairs, customFocusSubtitle, customFocusToBBFSScope, type BBFSAnalysisScope, type CustomFocus, type TargetPair } from "../lib/analysis/customDigit";
 
 const TARGET_PAIR_OPTIONS: Array<{ key: TargetPair; title: string; subtitle: string }> = [
   { key: "depan", title: "2D DEPAN", subtitle: "AS - KOP" },
@@ -17,7 +17,8 @@ const TARGET_PAIR_OPTIONS: Array<{ key: TargetPair; title: string; subtitle: str
 ];
 
 const VALID_TARGET_PAIRS: TargetPair[] = ["depan", "tengah", "belakang"];
-type AnalysisScope = "default" | "4d" | "3d" | "2d_depan" | "2d_tengah" | "2d_belakang";
+type AnalysisScope = "default" | BBFSAnalysisScope;
+type BBFSDigit = 7 | 8 | 9;
 
 const BBFS_SCOPE_OPTIONS: Array<{ key: Exclude<AnalysisScope, "default">; title: string; subtitle: string }> = [
   { key: "4d", title: "BBFS 4D", subtitle: "AS - KOP - KEPALA - EKOR" },
@@ -29,7 +30,6 @@ const BBFS_SCOPE_OPTIONS: Array<{ key: Exclude<AnalysisScope, "default">; title:
 
 type PairAiMap = Partial<Record<TargetPair, 2 | 4 | 6 | null>>;
 type PairCountMap = Partial<Record<TargetPair, number | null>>;
-type PairBooleanMap = Partial<Record<TargetPair, boolean>>;
 
 function parseTargetPair(value: string | null): TargetPair {
   return VALID_TARGET_PAIRS.includes(value as TargetPair) ? (value as TargetPair) : "belakang";
@@ -40,9 +40,8 @@ function parseAnalysisScope(value: string | null): AnalysisScope {
 }
 
 function targetPairFromScope(scope: AnalysisScope): TargetPair {
-  if (scope === "2d_depan") return "depan";
-  if (scope === "2d_tengah") return "tengah";
-  return "belakang";
+  if (scope === "default") return "belakang";
+  return bbfsScopeToTargetPair(scope);
 }
 
 function analysisScopeLabel(scope: AnalysisScope | null) {
@@ -154,7 +153,7 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
   const [angkaJadiOpen, setAngkaJadiOpen] = useState(false);
   const [customFocus, setCustomFocus] = useState<CustomFocus | null>(type === "rekap" ? null : "belakang");
   const [customAiDigitByPair, setCustomAiDigitByPair] = useState<PairAiMap>({});
-  const [customIncludeBBFSByPair, setCustomIncludeBBFSByPair] = useState<PairBooleanMap>({});
+  const [customBBFSDigit, setCustomBBFSDigit] = useState<BBFSDigit | null>(null);
   const [customOffAsCount, setCustomOffAsCount] = useState<number | null>(null);
   const [customOffKopCount, setCustomOffKopCount] = useState<number | null>(null);
   const [customOffKepalaCount, setCustomOffKepalaCount] = useState<number | null>(null);
@@ -165,7 +164,6 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
   const isRekapCustom = type === "rekap" && param === 3;
 
   const setCustomAiDigitForPair = (pair: TargetPair, value: 2 | 4 | 6 | null) => setCustomAiDigitByPair((prev) => ({ ...prev, [pair]: value }));
-  const setCustomIncludeBBFSForPair = (pair: TargetPair, value: boolean) => setCustomIncludeBBFSByPair((prev) => ({ ...prev, [pair]: value }));
   const setCustomOffJumlahCountForPair = (pair: TargetPair, value: number | null) => setCustomOffJumlahCountByPair((prev) => ({ ...prev, [pair]: value }));
   const setCustomOffShioCountForPair = (pair: TargetPair, value: number | null) => setCustomOffShioCountByPair((prev) => ({ ...prev, [pair]: value }));
 
@@ -230,6 +228,7 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
 
   const handleCustomFocusReset = () => {
     setCustomFocus(null);
+    setCustomBBFSDigit(null);
     setResult(null);
     setError("");
   };
@@ -317,8 +316,8 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
       return;
     }
     const pairs = customFocusPairs(customFocus);
-    const hasAnyPairFilter = pairs.some((pair) => customAiDigitByPair[pair] || customIncludeBBFSByPair[pair] || customOffJumlahCountByPair[pair] || customOffShioCountByPair[pair]);
-    const hasAnyFilter = Boolean(hasAnyPairFilter || customOffAsCount || customOffKopCount || customOffKepalaCount || customOffEkorCount);
+    const hasAnyPairFilter = pairs.some((pair) => customAiDigitByPair[pair] || customOffJumlahCountByPair[pair] || customOffShioCountByPair[pair]);
+    const hasAnyFilter = Boolean(hasAnyPairFilter || customBBFSDigit || customOffAsCount || customOffKopCount || customOffKepalaCount || customOffEkorCount);
     if (!hasAnyFilter) {
       setError("Pilih minimal satu filter dulu.");
       return;
@@ -328,20 +327,24 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
     try {
       const data = await getMarketData();
       const aiByPair: Partial<Record<TargetPair, number[]>> = {};
-      const bbfsByPair: Partial<Record<TargetPair, number[]>> = {};
       const jumlahByPair: Partial<Record<TargetPair, number[]>> = {};
       const shioByPair: Partial<Record<TargetPair, number[]>> = {};
       const matiCache: Partial<Record<number, any>> = {};
+      let bbfsGlobal: number[] = [];
 
       for (const pair of pairs) {
         const aiDigit = customAiDigitByPair[pair];
-        const useBBFS = Boolean(customIncludeBBFSByPair[pair]);
         const jumlahCount = customOffJumlahCountByPair[pair];
         const shioCount = customOffShioCountByPair[pair];
         if (aiDigit) aiByPair[pair] = toNumberList((await postAnalyze("ai", data, aiDigit, pair))?.result);
-        if (useBBFS) bbfsByPair[pair] = toNumberList((await postAnalyze("ai", data, 8, pair))?.result);
         if (jumlahCount) jumlahByPair[pair] = toNumberList((await postAnalyze("jumlah", data, jumlahCount, pair))?.result);
         if (shioCount) shioByPair[pair] = toNumberList((await postAnalyze("shio", data, shioCount, pair))?.result);
+      }
+
+      if (customBBFSDigit) {
+        const bbfsScope = customFocusToBBFSScope(customFocus);
+        const bbfsTargetPair = bbfsScopeToTargetPair(bbfsScope);
+        bbfsGlobal = toNumberList((await postAnalyze("bbfs", data, customBBFSDigit, bbfsTargetPair, bbfsScope))?.result);
       }
 
       const getMati = async (count: number | null) => {
@@ -358,13 +361,13 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
       const offKop = customOffKopCount ? toNumberList(matiKopData?.KOP?.result) : [];
       const offKepala = customOffKepalaCount ? toNumberList(matiKepalaData?.KEPALA?.result) : [];
       const offEkor = customOffEkorCount ? toNumberList(matiEkorData?.EKOR?.result) : [];
-      const lines = buildCustomDigitLines({ focus: customFocus, aiByPair, bbfsByPair, offAs, offKop, offKepala, offEkor, jumlahByPair, shioByPair });
+      const lines = buildCustomDigitLines({ focus: customFocus, aiByPair, bbfsGlobal, offAs, offKop, offKepala, offEkor, jumlahByPair, shioByPair });
       setResult({
         lines,
         focus: customFocus,
         customFocus,
         aiByPair,
-        bbfsByPair,
+        bbfsGlobal,
         offAs,
         offKop,
         offKepala,
@@ -373,7 +376,7 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
         shioByPair,
         selectedFilters: {
           aiDigitByPair: customAiDigitByPair,
-          includeBBFSByPair: customIncludeBBFSByPair,
+          bbfsDigit: customBBFSDigit,
           offCounts: {
             as: customOffAsCount,
             kop: customOffKopCount,
@@ -425,11 +428,11 @@ export default function AnalysisPageV3({ type, title, icon, marketId }: { type: 
 
       {showTargetPairSelector && <TargetPairSelector meta={meta} onSelect={handleTargetPairSelect} />}
       {showBBFSScopeSelector && <BBFSScopeSelector meta={meta} onSelect={handleBBFSScopeSelect} />}
-      {showRekapFocusSelector && <RekapFocusSelector meta={meta} onSelect={(focus) => { setCustomFocus(focus); setError(""); }} />}
+      {showRekapFocusSelector && <RekapFocusSelector meta={meta} onSelect={(focus) => { setCustomFocus(focus); setCustomBBFSDigit(null); setError(""); }} />}
 
       {showParamSelector && !autoMode && <ParamSelector type={type} param={param} meta={meta} onAnalyze={handleAnalyze} onCustomDigit={() => { setParam(3); setResult(null); setError(""); }} />}
 
-      {customFocus && <CustomDigitBuilder show={showCustomDigitBuilder} marketId={marketId} meta={meta} customFocus={customFocus} customAiDigitByPair={customAiDigitByPair} setCustomAiDigitForPair={setCustomAiDigitForPair} customIncludeBBFSByPair={customIncludeBBFSByPair} setCustomIncludeBBFSForPair={setCustomIncludeBBFSForPair} customOffAsCount={customOffAsCount} setCustomOffAsCount={setCustomOffAsCount} customOffKopCount={customOffKopCount} setCustomOffKopCount={setCustomOffKopCount} customOffKepalaCount={customOffKepalaCount} setCustomOffKepalaCount={setCustomOffKepalaCount} customOffEkorCount={customOffEkorCount} setCustomOffEkorCount={setCustomOffEkorCount} customOffJumlahCountByPair={customOffJumlahCountByPair} setCustomOffJumlahCountForPair={setCustomOffJumlahCountForPair} customOffShioCountByPair={customOffShioCountByPair} setCustomOffShioCountForPair={setCustomOffShioCountForPair} onGenerate={handleCustomDigitGenerate} />}
+      {customFocus && <CustomDigitBuilder show={showCustomDigitBuilder} marketId={marketId} meta={meta} customFocus={customFocus} customAiDigitByPair={customAiDigitByPair} setCustomAiDigitForPair={setCustomAiDigitForPair} customBBFSDigit={customBBFSDigit} setCustomBBFSDigit={setCustomBBFSDigit} customOffAsCount={customOffAsCount} setCustomOffAsCount={setCustomOffAsCount} customOffKopCount={customOffKopCount} setCustomOffKopCount={setCustomOffKopCount} customOffKepalaCount={customOffKepalaCount} setCustomOffKepalaCount={setCustomOffKepalaCount} customOffEkorCount={customOffEkorCount} setCustomOffEkorCount={setCustomOffEkorCount} customOffJumlahCountByPair={customOffJumlahCountByPair} setCustomOffJumlahCountForPair={setCustomOffJumlahCountForPair} customOffShioCountByPair={customOffShioCountByPair} setCustomOffShioCountForPair={setCustomOffShioCountForPair} onGenerate={handleCustomDigitGenerate} />}
 
       {loading && <div className="ui-panel ui-motion-in my-4 flex flex-col items-center justify-center gap-4 p-8 text-center"><div className="h-12 w-12 animate-spin rounded-full border-4 border-white/10" style={{ borderTopColor: meta.accent }} /><div className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px]">Memproses Analisa</div></div>}
       {error && <div className="ui-note ui-motion-in my-4 border-red-400/30 bg-red-500/10 p-4 text-center text-[12px] font-bold text-red-300">{error}</div>}
