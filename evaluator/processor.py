@@ -1,8 +1,18 @@
 from .client import analyze_mode, get_one, supabase
-from .config import BBFS_SCOPES, MATI_POSITIONS, MODES, TARGET_PAIRS
+from .config import MATI_POSITIONS, TARGET_PAIRS
 from .rules import evaluate_mati_position, evaluate_snapshot
 from .store import insert_evaluation_row, save_snapshot
 from .utils import parse_history
+
+EVALUATOR_MODES = {
+    "ai": [2, 4, 6],
+    "bbfs": [7, 8, 9],
+    "mati": [1, 2, 3],
+    "jumlah": [1, 2, 3],
+    "shio": [1, 2, 3],
+}
+
+BBFS_SCOPES = ["4d", "3d", "2d_depan", "2d_tengah", "2d_belakang"]
 
 
 def get_mode_target_pairs(mode):
@@ -11,6 +21,14 @@ def get_mode_target_pairs(mode):
 
 def get_mode_scopes(mode):
     return BBFS_SCOPES if mode == "bbfs" else ["default"]
+
+
+def target_pair_for_scope(scope):
+    if scope == "2d_depan":
+        return "depan"
+    if scope == "2d_tengah":
+        return "tengah"
+    return "belakang"
 
 
 def save_evaluation(market_id, market_name, mode, param, target_pair, analysis_scope, snapshot, new_result):
@@ -66,30 +84,32 @@ def process_market(market):
         print(f"ANALYSIS SKIP: {market_id or '-'} data kurang ({len(history)})")
         return False
     latest_result = history[-1]
-    for mode, params in MODES.items():
+    for mode, params in EVALUATOR_MODES.items():
         for analysis_scope in get_mode_scopes(mode):
             for target_pair in get_mode_target_pairs(mode):
+                resolved_target_pair = target_pair_for_scope(analysis_scope) if mode == "bbfs" else target_pair
                 for param in params:
                     snapshot = get_one(
                         "analysis_snapshots",
                         market_id=market_id,
                         mode=mode,
                         param=param,
-                        target_pair=target_pair,
+                        target_pair=resolved_target_pair,
                         analysis_scope=analysis_scope,
                     )
                     try:
-                        payload, result = analyze_mode(history, mode, param, target_pair, analysis_scope)
+                        api_mode = "ai" if mode == "bbfs" else mode
+                        payload, result = analyze_mode(history, api_mode, param, resolved_target_pair)
                     except Exception as error:
-                        print(f"ANALYSIS ERROR: {market_id} {mode} {param} {target_pair} {analysis_scope} {error}")
+                        print(f"ANALYSIS ERROR: {market_id} {mode} {param} {resolved_target_pair} {analysis_scope} {error}")
                         continue
                     if snapshot and snapshot.get("base_result") != latest_result:
-                        save_evaluation(market_id, market_name, mode, param, target_pair, analysis_scope, snapshot, latest_result)
+                        save_evaluation(market_id, market_name, mode, param, resolved_target_pair, analysis_scope, snapshot, latest_result)
                     if not snapshot or snapshot.get("base_result") != latest_result:
-                        save_snapshot(market_id, market_name, mode, param, target_pair, analysis_scope, latest_result, result, payload)
-                        print(f"ANALYSIS SNAPSHOT OK: {market_id} {mode} {param} {target_pair} {analysis_scope} base={latest_result}")
+                        save_snapshot(market_id, market_name, mode, param, resolved_target_pair, analysis_scope, latest_result, result, payload)
+                        print(f"ANALYSIS SNAPSHOT OK: {market_id} {mode} {param} {resolved_target_pair} {analysis_scope} base={latest_result}")
                     else:
-                        print(f"ANALYSIS NO CHANGE: {market_id} {mode} {param} {target_pair} {analysis_scope} result masih {latest_result}")
+                        print(f"ANALYSIS NO CHANGE: {market_id} {mode} {param} {resolved_target_pair} {analysis_scope} result masih {latest_result}")
     return True
 
 
