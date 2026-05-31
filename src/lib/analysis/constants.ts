@@ -19,7 +19,7 @@ export const SHIO_2D: Record<number, number[]> = {
 
 export const typeMeta: Record<string, { accent: string; soft: string; label: string; formula: string }> = {
   ai: { accent: "#f3c14b", soft: "rgba(243, 193, 75, 0.16)", label: "ANGKA IKUT", formula: "35 RUMUS" },
-  bbfs: { accent: "#49e6a5", soft: "rgba(73, 230, 165, 0.14)", label: "BBFS", formula: "35 RUMUS" },
+  bbfs: { accent: "#ff9f43", soft: "rgba(255, 159, 67, 0.14)", label: "BBFS", formula: "35 RUMUS" },
   mati: { accent: "#ff647c", soft: "rgba(255, 100, 124, 0.16)", label: "ANGKA MATI", formula: "56 RUMUS" },
   jumlah: { accent: "#b58cff", soft: "rgba(181, 140, 255, 0.16)", label: "JUMLAH MATI", formula: "56 RUMUS" },
   shio: { accent: "#28d7ff", soft: "rgba(40, 215, 255, 0.14)", label: "SHIO MATI", formula: "60 RUMUS" },
