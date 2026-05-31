@@ -95,7 +95,7 @@ function AnalyzeList() {
       </div>
 
       <div className="analyze-section-title mb-3 mt-5 px-1">
-        <p className="font-['Orbitron'] text-[10px] font-black uppercase tracking-[3px] text-[var(--text-dim)]">Custom Rekap</p>
+        <p className="font-['Orbitron'] text-[10px] font-black uppercase tracking-[3px] text-[var(--text-dim)]">Racik Angka</p>
       </div>
 
       <div className="analyze-menu-grid grid grid-cols-1 gap-3">
