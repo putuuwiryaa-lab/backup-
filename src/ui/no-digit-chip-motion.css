@@ -1,0 +1,9 @@
+/* Disable per-digit chip animations that can cause jank on result render. */
+
+.main-digit-chip,
+.premium-panel.result-glow > .relative.rounded-3xl > .mt-4 > div > div,
+.ui-motion-soft.flex.items-center.justify-center.rounded-2xl,
+.ui-motion-soft.ui-tap.flex.items-center.justify-center.rounded-2xl {
+  animation: none !important;
+  animation-delay: 0ms !important;
+}
