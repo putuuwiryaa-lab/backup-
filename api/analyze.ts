@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import { createClient } from "@supabase/supabase-js";
 import { runAnalysis } from "./predictionEngine.js";
 
 function requireEnv(name: string) {
@@ -43,6 +44,48 @@ function remapDataForTargetPair(type: string, data: string[], targetPair: Target
   return data.map((result) => `00${getTarget2D(result, targetPair)}`);
 }
 
+async function validateAccessToken(req: any, jwtSecret: string) {
+  const token = getBearerToken(req);
+  if (!token) return { ok: false, status: 401, error: "Unauthorized" };
+
+  let decoded: any;
+  try {
+    decoded = jwt.verify(token, jwtSecret) as any;
+  } catch {
+    return { ok: false, status: 401, error: "Token invalid" };
+  }
+
+  const expectedVersion = Number(process.env.TOKEN_VERSION || 2);
+  if (decoded.tokenVersion !== expectedVersion) {
+    return { ok: false, status: 401, error: "Sesi lama. Silakan login ulang." };
+  }
+
+  if (!["TRIAL", "PRO", "MASTER"].includes(String(decoded.role || ""))) {
+    return { ok: false, status: 403, error: "Akses tidak valid" };
+  }
+
+  if (!decoded.deviceId || String(decoded.deviceId).length < 20) {
+    return { ok: false, status: 401, error: "Token perangkat tidak valid" };
+  }
+
+  if (decoded.role === "TRIAL") {
+    const supabase = createClient(requireEnv("SUPABASE_URL"), requireEnv("SUPABASE_SERVICE_ROLE_KEY"));
+    const { data, error } = await supabase
+      .from("trial_activations_v2")
+      .select("expires_at")
+      .eq("device_id", String(decoded.deviceId))
+      .maybeSingle();
+
+    if (error) return { ok: false, status: 500, error: "Gagal memeriksa akses trial" };
+    if (!data?.expires_at) return { ok: false, status: 403, error: "Trial tidak ditemukan" };
+    if (new Date(data.expires_at).getTime() <= Date.now()) {
+      return { ok: false, status: 403, error: "Trial sudah habis. Silakan aktivasi VIP." };
+    }
+  }
+
+  return { ok: true, role: decoded.role };
+}
+
 export default async function handler(req: any, res: any) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -65,14 +108,8 @@ export default async function handler(req: any, res: any) {
   );
 
   if (!isInternalRequest) {
-    const token = getBearerToken(req);
-    if (!token) return res.status(401).json({ error: "Unauthorized" });
-
-    try {
-      jwt.verify(token, JWT_SECRET);
-    } catch {
-      return res.status(401).json({ error: "Token invalid" });
-    }
+    const access = await validateAccessToken(req, JWT_SECRET);
+    if (!access.ok) return res.status(access.status).json({ error: access.error });
   }
 
   try {
