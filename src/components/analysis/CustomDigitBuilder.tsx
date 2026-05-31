@@ -235,7 +235,7 @@ export default function CustomDigitBuilder({
         <section key={`ai-${pair}`} className="ui-card space-y-2 rounded-3xl p-3">
           <MiniLabel>AI {pairLabel[pair]} · {pairSubtitle[pair]}</MiniLabel>
           <div className="grid grid-cols-3 gap-2">
-            {[2, 4, 6].map((n) => optionButton(customAiDigitByPair[pair] === n, `${n} Digit`, () => setCustomAiDigitForPair(pair, customAiDigitByPair[pair] === n ? null : n as 2 | 4 | 6), "", `ai-${pair}-${n}`))}
+            {[2, 4, 6].map((n) => optionButton(customAiDigitByPair[pair] === n, String(n), () => setCustomAiDigitForPair(pair, customAiDigitByPair[pair] === n ? null : n as 2 | 4 | 6), "", `ai-${pair}-${n}`))}
           </div>
         </section>
       ))}
@@ -243,7 +243,7 @@ export default function CustomDigitBuilder({
       <section className="ui-card space-y-2 rounded-3xl p-3">
         <MiniLabel>BBFS {bbfsScope.toUpperCase().replaceAll("_", " ")}</MiniLabel>
         <div className="grid grid-cols-3 gap-2">
-          {[7, 8, 9].map((n) => optionButton(customBBFSDigit === n, `${n} Digit`, () => setCustomBBFSDigit(customBBFSDigit === n ? null : n as BBFSDigit), "", `bbfs-${n}`))}
+          {[7, 8, 9].map((n) => optionButton(customBBFSDigit === n, String(n), () => setCustomBBFSDigit(customBBFSDigit === n ? null : n as BBFSDigit), "", `bbfs-${n}`))}
         </div>
       </section>
 
