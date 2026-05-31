@@ -1,11 +1,28 @@
 import React, { useState } from "react";
-import { KeyRound, Lock, MessageCircle, Sparkles } from "lucide-react";
+import { KeyRound, Lock, MessageCircle } from "lucide-react";
 
 type LoginGateProps = {
   deviceId: string;
   displayCode: string;
   onAuthSuccess: (role: string, token: string) => void;
 };
+
+function getTrialFingerprint() {
+  return {
+    userAgent: navigator.userAgent || "",
+    platform: navigator.platform || "",
+    language: navigator.language || "",
+    languages: Array.isArray(navigator.languages) ? navigator.languages.join(",") : "",
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "",
+    screen: `${window.screen.width}x${window.screen.height}x${window.screen.colorDepth}`,
+    availScreen: `${window.screen.availWidth}x${window.screen.availHeight}`,
+    pixelRatio: String(window.devicePixelRatio || ""),
+    hardwareConcurrency: String(navigator.hardwareConcurrency || ""),
+    deviceMemory: String((navigator as any).deviceMemory || ""),
+    maxTouchPoints: String(navigator.maxTouchPoints || 0),
+    vendor: navigator.vendor || "",
+  };
+}
 
 function AppLogoMark({ className = "h-9 w-9" }: { className?: string }) {
   return (
@@ -56,7 +73,7 @@ export default function LoginGate({ deviceId, displayCode, onAuthSuccess }: Logi
       const res = await fetch("/api/trial", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ deviceId, displayCode })
+        body: JSON.stringify({ deviceId, displayCode, fingerprint: getTrialFingerprint() })
       });
 
       const json = await res.json();
