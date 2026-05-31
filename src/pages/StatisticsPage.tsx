@@ -10,14 +10,14 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 const statAccent = "#34d399";
 const statAccentSoft = "rgba(52,211,153,0.14)";
 const statGold = "#f6c96b";
-const statRed = "#ff4d5e";
 const MIN_WINS_15 = 13;
 const MIN_WINS_LAST_5 = 3;
 const MAX_LOSS_STREAK_ALLOWED = 2;
-const MARKET_STAT_SELECT = "id,market_id,market_name,group_key,group_label,mode,param,position,target_pair,wins_15,wins_last_5,max_loss_streak,sample_size,score,previous_rank,rank_movement,latest_is_hit,latest_status,updated_at";
+const MARKET_STAT_SELECT = "id,market_id,market_name,group_key,group_label,mode,param,position,target_pair,analysis_scope,wins_15,wins_last_5,max_loss_streak,sample_size,score,previous_rank,rank_movement,latest_is_hit,latest_status,updated_at";
 
 type CategoryKey = "ai" | "bbfs" | "off_digit" | "off_jumlah" | "off_shio";
 type TargetPair = "depan" | "tengah" | "belakang";
+type AnalysisScope = "4d" | "3d" | "2d_depan" | "2d_tengah" | "2d_belakang";
 
 type MarketStatistic = {
   id?: string;
@@ -29,6 +29,7 @@ type MarketStatistic = {
   param: number;
   position?: string;
   target_pair?: string;
+  analysis_scope?: string;
   wins_15: number;
   wins_last_5: number;
   max_loss_streak: number;
@@ -42,7 +43,6 @@ type MarketStatistic = {
 };
 
 type RelatedStatsMap = Record<string, MarketStatistic[]>;
-
 type PositionPairMeta = { label: string; subtitle: string };
 
 const categories: Array<{ key: CategoryKey; title: string }> = [
@@ -57,6 +57,14 @@ const targetPairs: Array<{ key: TargetPair; label: string }> = [
   { key: "depan", label: "Depan" },
   { key: "tengah", label: "Tengah" },
   { key: "belakang", label: "Belakang" },
+];
+
+const bbfsScopes: Array<{ key: AnalysisScope; label: string; subtitle: string; targetPair: TargetPair }> = [
+  { key: "4d", label: "4D", subtitle: "AS + KOP + Kepala + Ekor", targetPair: "belakang" },
+  { key: "3d", label: "3D", subtitle: "KOP + Kepala + Ekor", targetPair: "belakang" },
+  { key: "2d_depan", label: "2D Depan", subtitle: "AS + KOP", targetPair: "depan" },
+  { key: "2d_tengah", label: "2D Tengah", subtitle: "KOP + Kepala", targetPair: "tengah" },
+  { key: "2d_belakang", label: "2D Belakang", subtitle: "Kepala + Ekor", targetPair: "belakang" },
 ];
 
 const positionPairs: Record<TargetPair, PositionPairMeta> = {
@@ -79,6 +87,18 @@ function targetPairLabel(value?: string) {
   return "Semua";
 }
 
+function bbfsScopeMeta(value?: string) {
+  return bbfsScopes.find((item) => item.key === value) || bbfsScopes[4];
+}
+
+function bbfsScopeLabel(value?: string) {
+  return bbfsScopeMeta(value).label;
+}
+
+function bbfsScopeSubtitle(value?: string) {
+  return bbfsScopeMeta(value).subtitle;
+}
+
 function positionPairSubtitle(value?: string) {
   if (value === "depan" || value === "tengah" || value === "belakang") return positionPairs[value].subtitle;
   return "AS + KOP";
@@ -86,7 +106,7 @@ function positionPairSubtitle(value?: string) {
 
 function statTitle(item: MarketStatistic) {
   if (item.group_key === "ai") return `AI ${targetPairLabel(item.target_pair)} ${item.param}D`;
-  if (item.group_key === "bbfs") return `BBFS ${targetPairLabel(item.target_pair)}`;
+  if (item.group_key === "bbfs") return `BBFS ${bbfsScopeLabel(item.analysis_scope)} ${item.param}`;
   if (item.group_key === "off_digit") return `2D ${targetPairLabel(item.target_pair)} · OFF ${item.param}`;
   if (item.group_key === "off_jumlah") return `OFF Jumlah ${targetPairLabel(item.target_pair)} ${item.param}`;
   if (item.group_key === "off_shio") return `OFF Shio ${targetPairLabel(item.target_pair)} ${item.param}`;
@@ -95,7 +115,7 @@ function statTitle(item: MarketStatistic) {
 
 function shortStatTitle(item: MarketStatistic) {
   if (item.group_key === "ai") return `AI ${item.param}D ${targetPairLabel(item.target_pair)}`;
-  if (item.group_key === "bbfs") return `BBFS ${targetPairLabel(item.target_pair)}`;
+  if (item.group_key === "bbfs") return `BBFS ${bbfsScopeLabel(item.analysis_scope)} ${item.param}`;
   if (item.group_key === "off_digit") return `2D ${targetPairLabel(item.target_pair)} OFF ${item.param}`;
   if (item.group_key === "off_jumlah") return `Jumlah ${item.param} ${targetPairLabel(item.target_pair)}`;
   if (item.group_key === "off_shio") return `Shio ${item.param} ${targetPairLabel(item.target_pair)}`;
@@ -103,19 +123,18 @@ function shortStatTitle(item: MarketStatistic) {
 }
 
 function statIdentity(item: MarketStatistic) {
-  return [item.market_id, item.group_key, item.mode, item.param, item.position || "all", item.target_pair || "all"].join("|");
+  return [item.market_id, item.group_key, item.mode, item.param, item.position || "all", item.target_pair || "all", item.analysis_scope || "default"].join("|");
 }
 
 function relatedGroupKey(item: MarketStatistic) {
-  if (item.group_key === "ai" || item.group_key === "bbfs" || item.group_key === "off_jumlah" || item.group_key === "off_shio") {
-    return `${item.group_key}|${item.target_pair || "all"}`;
-  }
+  if (item.group_key === "bbfs") return `${item.group_key}|${item.analysis_scope || "default"}`;
+  if (item.group_key === "ai" || item.group_key === "off_jumlah" || item.group_key === "off_shio") return `${item.group_key}|${item.target_pair || "all"}`;
   if (item.group_key === "off_digit") return `${item.group_key}|${item.target_pair || "all"}`;
   return item.group_key;
 }
 
 function strictnessValue(item: MarketStatistic) {
-  if (item.group_key === "ai") return -Number(item.param || 99);
+  if (item.group_key === "ai" || item.group_key === "bbfs") return -Number(item.param || 99);
   if (item.group_key === "off_digit" || item.group_key === "off_jumlah" || item.group_key === "off_shio") return Number(item.param || 0);
   return 0;
 }
@@ -170,14 +189,10 @@ function movementText(value?: number | null) {
 
 function movementTone(item: MarketStatistic) {
   const movement = Number(item.rank_movement || 0);
-  if (movement > 0) {
-    return { text: "#03120d", bg: "#4ade80", border: "#bbf7d0", shadow: "0 0 0 1px rgba(255,255,255,0.22) inset, 0 0 20px rgba(74,222,128,0.55)" };
-  }
+  if (movement > 0) return { text: "#03120d", bg: "#4ade80", border: "#bbf7d0", shadow: "0 0 0 1px rgba(255,255,255,0.22) inset, 0 0 20px rgba(74,222,128,0.55)" };
   if (movement < 0) {
     const latestZonk = item.latest_is_hit === false || item.latest_status === "ZONK" || item.latest_status === "TIDAK MASUK";
-    if (latestZonk) {
-      return { text: "#190407", bg: "#fb7185", border: "#fecdd3", shadow: "0 0 0 1px rgba(255,255,255,0.22) inset, 0 0 20px rgba(251,113,133,0.58)" };
-    }
+    if (latestZonk) return { text: "#190407", bg: "#fb7185", border: "#fecdd3", shadow: "0 0 0 1px rgba(255,255,255,0.22) inset, 0 0 20px rgba(251,113,133,0.58)" };
     return { text: "#171002", bg: "#facc15", border: "#fef08a", shadow: "0 0 0 1px rgba(255,255,255,0.22) inset, 0 0 20px rgba(250,204,21,0.55)" };
   }
   return { text: "#d1d5db", bg: "rgba(255,255,255,0.12)", border: "rgba(255,255,255,0.24)", shadow: "0 0 12px rgba(255,255,255,0.08)" };
@@ -197,6 +212,7 @@ export default function StatisticsPage() {
   const navigate = useNavigate();
   const [category, setCategory] = useState<CategoryKey>("ai");
   const [targetPair, setTargetPair] = useState<TargetPair>("belakang");
+  const [bbfsScope, setBbfsScope] = useState<AnalysisScope>("2d_belakang");
   const [param, setParam] = useState<number>(4);
   const [items, setItems] = useState<MarketStatistic[]>([]);
   const [relatedStats, setRelatedStats] = useState<RelatedStatsMap>({});
@@ -205,10 +221,13 @@ export default function StatisticsPage() {
 
   const categoryMeta = categories.find((item) => item.key === category) || categories[0];
   const isPositionCategory = category === "off_digit";
-  const isPairCategory = category === "ai" || category === "bbfs" || category === "off_digit" || category === "off_jumlah" || category === "off_shio";
-  const paramOptions = category === "ai" ? [2, 4, 6] : category === "bbfs" ? [8] : [1, 2, 3];
-  const currentFilterLabel = category === "bbfs"
-    ? `${categoryMeta.title} ${targetPairLabel(targetPair)}`
+  const isBBFSCategory = category === "bbfs";
+  const isPairCategory = category === "ai" || category === "off_digit" || category === "off_jumlah" || category === "off_shio";
+  const selectedBBFS = bbfsScopeMeta(bbfsScope);
+  const effectiveTargetPair = isBBFSCategory ? selectedBBFS.targetPair : targetPair;
+  const paramOptions = category === "ai" ? [2, 4, 6] : category === "bbfs" ? [7, 8, 9] : [1, 2, 3];
+  const currentFilterLabel = isBBFSCategory
+    ? `${categoryMeta.title} ${selectedBBFS.label} ${param}`
     : isPositionCategory
       ? `2D ${targetPairLabel(targetPair)} OFF ${param}`
       : `${categoryMeta.title} ${targetPairLabel(targetPair)} ${category === "ai" ? `${param}D` : `OFF ${param}`}`;
@@ -229,10 +248,10 @@ export default function StatisticsPage() {
         .order("updated_at", { ascending: false })
         .limit(200);
 
-      if (isPositionCategory) query = query.eq("mode", "mati_2d").eq("param", param).eq("target_pair", targetPair);
-      else if (category === "bbfs") query = query.eq("param", 8);
-      else query = query.eq("param", param);
-      if (!isPositionCategory && isPairCategory) query = query.eq("target_pair", targetPair);
+      if (isPositionCategory) query = query.eq("mode", "mati_2d").eq("param", param).eq("target_pair", targetPair).eq("analysis_scope", "default");
+      else if (isBBFSCategory) query = query.eq("mode", "bbfs").eq("param", param).eq("target_pair", effectiveTargetPair).eq("analysis_scope", bbfsScope);
+      else query = query.eq("param", param).eq("analysis_scope", "default");
+      if (isPairCategory) query = query.eq("target_pair", targetPair);
 
       const { data, error: queryError } = await query;
       if (queryError) throw queryError;
@@ -272,11 +291,11 @@ export default function StatisticsPage() {
 
   useEffect(() => {
     if (category === "ai" && ![2, 4, 6].includes(param)) setParam(4);
-    if (category === "bbfs" && param !== 8) setParam(8);
+    if (category === "bbfs" && ![7, 8, 9].includes(param)) setParam(8);
     if (!["ai", "bbfs"].includes(category) && ![1, 2, 3].includes(param)) setParam(1);
   }, [category]);
 
-  useEffect(() => { loadStatistics(); }, [category, targetPair, param]);
+  useEffect(() => { loadStatistics(); }, [category, targetPair, bbfsScope, param]);
 
   const topItems = useMemo(() => items.slice(0, 100), [items]);
   const latestUpdate = topItems[0]?.updated_at;
@@ -284,10 +303,7 @@ export default function StatisticsPage() {
   return (
     <div
       className="statistics-page fixed inset-0 z-50 overflow-y-auto animate-[riseIn_0.35s_ease-out] px-4 py-4 pb-[calc(2rem+env(safe-area-inset-bottom))] sm:px-6"
-      style={{
-        color: "var(--text)",
-        background: "radial-gradient(circle at 12% 8%, rgba(52,211,153,0.16), transparent 34%), radial-gradient(circle at 88% 18%, rgba(246,201,107,0.10), transparent 30%), linear-gradient(180deg, #061512 0%, #09110f 42%, #050708 100%)"
-      }}
+      style={{ color: "var(--text)", background: "radial-gradient(circle at 12% 8%, rgba(52,211,153,0.16), transparent 34%), radial-gradient(circle at 88% 18%, rgba(246,201,107,0.10), transparent 30%), linear-gradient(180deg, #061512 0%, #09110f 42%, #050708 100%)" }}
     >
       <div className="mx-auto w-full max-w-3xl">
         <button onClick={() => navigate("/")} className="mb-4 flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.045] px-4 py-3 text-[11px] font-black uppercase tracking-[2px] text-[var(--text-dim)] active:scale-95">
@@ -326,13 +342,7 @@ export default function StatisticsPage() {
               {categories.map((item) => {
                 const active = item.key === category;
                 return (
-                  <button
-                    key={item.key}
-                    type="button"
-                    onClick={() => setCategory(item.key)}
-                    className="min-h-[72px] rounded-[1.15rem] px-1 py-3 text-center active:scale-[0.985]"
-                    style={{ background: active ? statAccentSoft : "rgba(0,0,0,0.28)", border: active ? `1px solid ${statAccent}` : "1px solid rgba(255,255,255,0.07)", boxShadow: active ? "0 0 0 1px rgba(52,211,153,0.14), 0 12px 28px rgba(52,211,153,0.10)" : "none" }}
-                  >
+                  <button key={item.key} type="button" onClick={() => setCategory(item.key)} className="min-h-[72px] rounded-[1.15rem] px-1 py-3 text-center active:scale-[0.985]" style={{ background: active ? statAccentSoft : "rgba(0,0,0,0.28)", border: active ? `1px solid ${statAccent}` : "1px solid rgba(255,255,255,0.07)", boxShadow: active ? "0 0 0 1px rgba(52,211,153,0.14), 0 12px 28px rgba(52,211,153,0.10)" : "none" }}>
                     <span className="block font-['Orbitron'] text-[11px] font-black uppercase leading-tight tracking-[0.8px]" style={{ color: active ? statAccent : "var(--text)" }}>{item.title}</span>
                   </button>
                 );
@@ -345,27 +355,38 @@ export default function StatisticsPage() {
           <SectionLabel title="Filter Ranking" right={currentFilterLabel} />
           <div className="rounded-[1.45rem] border border-amber-200/15 bg-[rgba(18,14,7,0.40)] p-3 shadow-[0_14px_32px_rgba(0,0,0,0.22)]">
             <div className="mb-2 flex items-center justify-between">
-              <p className="text-[9px] font-black uppercase tracking-[1.6px] text-[var(--text-dim)]">{isPositionCategory ? "2D Posisi" : "Fokus"}</p>
+              <p className="text-[9px] font-black uppercase tracking-[1.6px] text-[var(--text-dim)]">{isBBFSCategory ? "Scope BBFS" : isPositionCategory ? "2D Posisi" : "Fokus"}</p>
               <span className="rounded-full px-3 py-1 text-[9px] font-black uppercase tracking-[1px] text-black" style={{ background: statGold }}>{currentFilterLabel}</span>
             </div>
             <div className="space-y-2">
-              <div className="grid grid-cols-3 gap-2">
-                {targetPairs.map((item) => {
-                  const active = targetPair === item.key;
-                  return <button key={item.key} type="button" onClick={() => setTargetPair(item.key)} className="rounded-[1rem] px-2 py-3.5 text-[9px] font-black uppercase tracking-[1px] active:scale-[0.985]" style={{ background: active ? statAccent : "rgba(0,0,0,0.30)", color: active ? "#04110d" : "var(--text-dim)", border: active ? "1px solid rgba(52,211,153,0.65)" : "1px solid rgba(255,255,255,0.05)" }}>{item.label}</button>;
+              {isBBFSCategory ? (
+                <>
+                  <div className="grid grid-cols-2 gap-2">
+                    {bbfsScopes.map((item) => {
+                      const active = bbfsScope === item.key;
+                      return <button key={item.key} type="button" onClick={() => setBbfsScope(item.key)} className="rounded-[1rem] px-2 py-3.5 text-[9px] font-black uppercase tracking-[1px] active:scale-[0.985]" style={{ background: active ? statAccent : "rgba(0,0,0,0.30)", color: active ? "#04110d" : "var(--text-dim)", border: active ? "1px solid rgba(52,211,153,0.65)" : "1px solid rgba(255,255,255,0.05)" }}>{item.label}</button>;
+                    })}
+                  </div>
+                  <p className="rounded-xl bg-black/20 px-3 py-2 text-center text-[9px] font-black uppercase tracking-[1.2px] text-[var(--text-dim)]">{selectedBBFS.subtitle}</p>
+                </>
+              ) : (
+                <>
+                  <div className="grid grid-cols-3 gap-2">
+                    {targetPairs.map((item) => {
+                      const active = targetPair === item.key;
+                      return <button key={item.key} type="button" onClick={() => setTargetPair(item.key)} className="rounded-[1rem] px-2 py-3.5 text-[9px] font-black uppercase tracking-[1px] active:scale-[0.985]" style={{ background: active ? statAccent : "rgba(0,0,0,0.30)", color: active ? "#04110d" : "var(--text-dim)", border: active ? "1px solid rgba(52,211,153,0.65)" : "1px solid rgba(255,255,255,0.05)" }}>{item.label}</button>;
+                    })}
+                  </div>
+                  {isPositionCategory && <p className="rounded-xl bg-black/20 px-3 py-2 text-center text-[9px] font-black uppercase tracking-[1.2px] text-[var(--text-dim)]">{positionPairSubtitle(targetPair)}</p>}
+                </>
+              )}
+
+              <div className="grid grid-cols-3 gap-2 border-t border-white/10 pt-2">
+                {paramOptions.map((value) => {
+                  const active = param === value;
+                  return <button key={value} type="button" onClick={() => setParam(value)} className="rounded-[1rem] px-2 py-3.5 text-[9px] font-black uppercase tracking-[1px] active:scale-[0.985]" style={{ background: active ? statGold : "rgba(0,0,0,0.30)", color: active ? "#120d02" : "var(--text-dim)", border: active ? "1px solid rgba(246,201,107,0.7)" : "1px solid rgba(255,255,255,0.05)" }}>{category === "ai" ? `${value}D` : String(value)}</button>;
                 })}
               </div>
-
-              {isPositionCategory && <p className="rounded-xl bg-black/20 px-3 py-2 text-center text-[9px] font-black uppercase tracking-[1.2px] text-[var(--text-dim)]">{positionPairSubtitle(targetPair)}</p>}
-
-              {category !== "bbfs" && (
-                <div className="grid grid-cols-3 gap-2 border-t border-white/10 pt-2">
-                  {paramOptions.map((value) => {
-                    const active = param === value;
-                    return <button key={value} type="button" onClick={() => setParam(value)} className="rounded-[1rem] px-2 py-3.5 text-[9px] font-black uppercase tracking-[1px] active:scale-[0.985]" style={{ background: active ? statGold : "rgba(0,0,0,0.30)", color: active ? "#120d02" : "var(--text-dim)", border: active ? "1px solid rgba(246,201,107,0.7)" : "1px solid rgba(255,255,255,0.05)" }}>{category === "ai" ? `${value}D` : `OFF ${value}`}</button>;
-                  })}
-                </div>
-              )}
             </div>
           </div>
         </section>
@@ -387,18 +408,11 @@ export default function StatisticsPage() {
                 const movement = movementText(item.rank_movement);
                 const tone = movementTone(item);
                 return (
-                  <div key={item.id || `${item.market_id}-${item.group_key}-${item.param}-${item.position}-${item.target_pair}`} className="rounded-[1.45rem] border p-3 text-left shadow-xl" style={{ borderColor: topRank ? "rgba(246,201,107,0.55)" : "rgba(255,255,255,0.11)", background: topRank ? "linear-gradient(135deg,rgba(246,201,107,0.14),rgba(52,211,153,0.08))" : "rgba(255,255,255,0.04)" }}>
+                  <div key={item.id || `${item.market_id}-${item.group_key}-${item.param}-${item.position}-${item.target_pair}-${item.analysis_scope}`} className="rounded-[1.45rem] border p-3 text-left shadow-xl" style={{ borderColor: topRank ? "rgba(246,201,107,0.55)" : "rgba(255,255,255,0.11)", background: topRank ? "linear-gradient(135deg,rgba(246,201,107,0.14),rgba(52,211,153,0.08))" : "rgba(255,255,255,0.04)" }}>
                     <div className="flex items-start gap-3">
                       <div className="flex w-14 shrink-0 flex-col items-center gap-1.5">
                         <div className="flex h-12 w-12 items-center justify-center rounded-2xl font-['Orbitron'] text-[13px] font-black" style={{ background: topRank ? statGold : statAccentSoft, color: topRank ? "#120d02" : statAccent }}>#{index + 1}</div>
-                        {movement && (
-                          <span
-                            className="mt-1 flex min-h-7 min-w-14 items-center justify-center rounded-xl border px-3 py-1.5 font-['Orbitron'] text-[12px] font-black leading-none tracking-[0.7px]"
-                            style={{ color: tone.text, backgroundColor: tone.bg, borderColor: tone.border, boxShadow: tone.shadow }}
-                          >
-                            {movement}
-                          </span>
-                        )}
+                        {movement && <span className="mt-1 flex min-h-7 min-w-14 items-center justify-center rounded-xl border px-3 py-1.5 font-['Orbitron'] text-[12px] font-black leading-none tracking-[0.7px]" style={{ color: tone.text, backgroundColor: tone.bg, borderColor: tone.border, boxShadow: tone.shadow }}>{movement}</span>}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-start justify-between gap-2">
@@ -406,6 +420,7 @@ export default function StatisticsPage() {
                             <p className="truncate font-['Orbitron'] text-[16px] font-black uppercase tracking-[2px] text-[var(--text)]">{marketName}</p>
                             <p className="mt-1 text-[10px] font-black uppercase tracking-[1.2px]" style={{ color: statAccent }}>{statTitle(item)}</p>
                             {item.group_key === "off_digit" && <p className="mt-1 text-[9px] font-black uppercase tracking-[1px] text-[var(--text-dim)]">{positionPairSubtitle(item.target_pair)}</p>}
+                            {item.group_key === "bbfs" && <p className="mt-1 text-[9px] font-black uppercase tracking-[1px] text-[var(--text-dim)]">{bbfsScopeSubtitle(item.analysis_scope)}</p>}
                           </div>
                           <span className="shrink-0 rounded-full bg-white/[0.06] px-2.5 py-1 text-[9px] font-black uppercase tracking-[1px]" style={{ color: statGold }}>{badgeLabel(item)}</span>
                         </div>
