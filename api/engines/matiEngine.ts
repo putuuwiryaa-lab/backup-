@@ -38,10 +38,8 @@ export function _0xEngineMatiPos(D: string[], posIdx: number, param: number = 1)
 
   const sr = Object.keys(ct).sort((a, b) => {
     if (ct[b] !== ct[a]) return ct[b] - ct[a];
-    const ga = (rc[a] || 99) === 99 ? 1 : 0, gb = (rc[b] || 99) === 99 ? 1 : 0;
-    if (ga !== gb) return ga - gb;
-    if ((fq[b] || 0) !== (fq[a] || 0)) return (fq[b] || 0) - (fq[a] || 0);
-    return (rc[a] || 99) - (rc[b] || 99);
+    if ((fq[a] || 0) !== (fq[b] || 0)) return (fq[a] || 0) - (fq[b] || 0);
+    return (rc[b] || 99) - (rc[a] || 99);
   });
 
   let hasil: string[] = [];
@@ -49,7 +47,10 @@ export function _0xEngineMatiPos(D: string[], posIdx: number, param: number = 1)
     hasil.push(sr[fi]);
   }
   if (hasil.length < param) {
-    const fb = Object.keys(fq).sort((a, b) => fq[b] - fq[a]);
+    const fb = Object.keys(fq).sort((a, b) => {
+      if (fq[a] !== fq[b]) return fq[a] - fq[b];
+      return (rc[b] || 99) - (rc[a] || 99);
+    });
     for (let fi = 0; fi < fb.length && hasil.length < param; fi++) {
       if (!hasil.includes(fb[fi])) hasil.push(fb[fi]);
     }
