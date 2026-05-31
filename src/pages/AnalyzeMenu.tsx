@@ -5,7 +5,7 @@ import AnalysisPage from "./AnalysisPageV3";
 
 const MODE_META: any = {
   ai: { icon: "✦", lucide: Activity, accent: "#f3c14b", glow: "rgba(243, 193, 75, 0.10)" },
-  bbfs: { icon: "▦", lucide: Activity, accent: "#49e6a5", glow: "rgba(73, 230, 165, 0.10)" },
+  bbfs: { icon: "▦", lucide: Activity, accent: "#ff9f43", glow: "rgba(255, 159, 67, 0.10)" },
   mati: { icon: "×", lucide: ShieldAlert, accent: "#ff647c", glow: "rgba(255, 100, 124, 0.10)" },
   jumlah: { icon: "#", lucide: Hash, accent: "#b58cff", glow: "rgba(181, 140, 255, 0.10)" },
   shio: { icon: "◎", lucide: Gauge, accent: "#28d7ff", glow: "rgba(40, 215, 255, 0.10)" },
