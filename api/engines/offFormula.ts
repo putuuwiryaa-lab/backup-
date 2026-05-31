@@ -24,7 +24,7 @@ export const RM_NAMES = [
   "R36 Double Mistis Core","R37 Outer Cross Index","R38 Biji 2D Backward","R39 Absolute Delta 4D","R40 Phantom Tesson Strike",
   "R41 Double Tail Strike","R42 Kop-Kepala Cross Index","R43 Mystic 3D Rear","R44 As-Ekor Multiplier","R45 Inner Resonance Mist",
   "R46 Taysen Alpha-Omega","R47 Cross Wing Squared","R48 Index Gap Shift","R49 Past Biji Multiplier","R50 Taysen Triple Front",
-  "R51 Master Moegywara666","R52 Nexus Index","R53 Tri Shift","R54 Alpha Shift Four","R55 Rear Drop Sum",
+  "R51 Moegywara666","R52 Nexus Index","R53 Tri Shift","R54 Alpha Shift Four","R55 Rear Drop Sum",
   "R56 Aldy Buster"
 ];
 
@@ -49,7 +49,7 @@ export function _0x3ca571(a: string, b: string) {
     pp: TBL_I[Math.abs(p.kop - c2.kpl)], qq: TBL_L[(c2.kop + c2.kpl + c2.ekr) % 10], rr: (c2.as * p.ekr) % 10,
     ss: TBL_B[(p.kop + p.kpl + c2.kop + c2.kpl) % 10], tt: Math.abs(TBL_T[c2.as] - TBL_T[c2.ekr]), uu: ((p.as + c2.ekr) * (p.ekr + c2.as)) % 10,
     vv: TBL_I[Math.abs(c2.kop - p.kpl)], ww: (((p.as + p.kop + p.kpl + p.ekr) % 10) * c2.ekr) % 10, xx: TBL_T[(c2.as + c2.kop + c2.kpl) % 10],
-    // R51 Rumus Master Moegywara666
+    // R51 Rumus Moegywara666
     yy: _0xJ2d(_0xJ2d(c2.kpl, c2.ekr), 6),
     zz: TBL_I[(c2.as + c2.kop) % 10],
     aaa: (c2.as + c2.kop + 3) % 10,
