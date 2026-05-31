@@ -1,12 +1,9 @@
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-
-// Simple in-memory rate limiter. Untuk proteksi produksi yang lebih kuat,
-// pindahkan counter ini ke database/Redis agar tetap konsisten di serverless.
-const attempts: Record<string, { count: number; lastAttempt: number }> = {};
+import { createClient } from "@supabase/supabase-js";
 
 const LIMIT = 5;
-const WINDOW = 15 * 60 * 1000;
+const WINDOW_MINUTES = 15;
 
 function requireEnv(name: string) {
   const value = process.env[name];
@@ -30,6 +27,52 @@ function getClientIp(req: any) {
         .trim();
 }
 
+function hashValue(value: string, secret: string) {
+  return crypto
+    .createHmac("sha256", secret)
+    .update(value)
+    .digest("hex");
+}
+
+async function countFailedAttempts(
+  supabase: any,
+  field: "ip_hash" | "device_id",
+  value: string,
+  sinceIso: string
+) {
+  if (!value) return 0;
+
+  const { count, error } = await supabase
+    .from("pin_auth_attempts")
+    .select("id", { count: "exact", head: true })
+    .eq(field, value)
+    .eq("success", false)
+    .gte("attempted_at", sinceIso);
+
+  if (error) throw error;
+  return count || 0;
+}
+
+async function logAttempt(
+  supabase: any,
+  payload: {
+    ip_hash: string;
+    device_id: string;
+    display_code: string;
+    success: boolean;
+    reason: string;
+  }
+) {
+  const { error } = await supabase
+    .from("pin_auth_attempts")
+    .insert({
+      ...payload,
+      attempted_at: new Date().toISOString(),
+    });
+
+  if (error) console.error("PIN_ATTEMPT_LOG_ERROR", error);
+}
+
 export default async function handler(req: any, res: any) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -47,90 +90,150 @@ export default async function handler(req: any, res: any) {
     console.error(e.message);
     return res.status(500).json({
       success: false,
-      error: "Kesalahan konfigurasi server"
+      error: "Kesalahan konfigurasi server",
     });
   }
 
-  const ip = getClientIp(req);
-  const now = Date.now();
-
-  if (!attempts[ip]) attempts[ip] = { count: 0, lastAttempt: now };
-  const record = attempts[ip];
-
-  if (now - record.lastAttempt > WINDOW) {
-    record.count = 0;
-    record.lastAttempt = now;
-  }
-
-  if (record.count >= LIMIT) {
-    const sisaWaktu = Math.ceil((WINDOW - (now - record.lastAttempt)) / 60000);
-    return res.status(429).json({
-      success: false,
-      error: `Terlalu banyak percobaan! Coba lagi ${sisaWaktu} menit lagi.`
-    });
-  }
+  const supabase = createClient(
+    requireEnv("SUPABASE_URL"),
+    requireEnv("SUPABASE_SERVICE_ROLE_KEY")
+  );
 
   const { pin, deviceId, displayCode } = req.body;
+
   const submittedPin = String(pin || "").trim();
   const deviceIdStr = String(deviceId || "").trim();
   const displayCodeStr = String(displayCode || "").trim();
 
-  if (
-    !deviceIdStr ||
-    deviceIdStr.length < 20 ||
-    !/^\d{6}$/.test(displayCodeStr) ||
-    !/^\d{6}$/.test(submittedPin)
-  ) {
-    record.count++;
-    record.lastAttempt = now;
-    return res.status(401).json({ success: false, error: "PIN SALAH!" });
-  }
+  const ipHash = hashValue(getClientIp(req), JWT_SECRET);
+  const sinceIso = new Date(
+    Date.now() - WINDOW_MINUTES * 60 * 1000
+  ).toISOString();
 
-  const generateSecurePin = (id: string, rolePrefix: string) => {
-    const hash = crypto
-      .createHmac("sha256", PIN_SECRET)
-      .update(id + rolePrefix)
-      .digest("hex");
+  try {
+    const ipFailures = await countFailedAttempts(
+      supabase,
+      "ip_hash",
+      ipHash,
+      sinceIso
+    );
 
-    const numericOnly = hash.replace(/\D/g, "");
-    return numericOnly.substring(0, 6).padStart(6, "0");
-  };
+    const deviceFailures = await countFailedAttempts(
+      supabase,
+      "device_id",
+      deviceIdStr,
+      sinceIso
+    );
 
-  const proPin = generateSecurePin(displayCodeStr, "PRO");
+    if (ipFailures >= LIMIT || deviceFailures >= LIMIT) {
+      await logAttempt(supabase, {
+        ip_hash: ipHash,
+        device_id: deviceIdStr,
+        display_code: displayCodeStr,
+        success: false,
+        reason: "rate_limited",
+      });
 
-  let role: "MASTER" | "PRO" | null = null;
+      return res.status(429).json({
+        success: false,
+        error: `Terlalu banyak percobaan. Coba lagi ${WINDOW_MINUTES} menit lagi.`,
+      });
+    }
 
-  if (safeCompare(submittedPin, MASTER_PIN)) role = "MASTER";
-  else if (safeCompare(submittedPin, proPin)) role = "PRO";
+    if (
+      !deviceIdStr ||
+      deviceIdStr.length < 20 ||
+      !/^\d{6}$/.test(displayCodeStr) ||
+      !/^\d{6}$/.test(submittedPin)
+    ) {
+      await logAttempt(supabase, {
+        ip_hash: ipHash,
+        device_id: deviceIdStr,
+        display_code: displayCodeStr,
+        success: false,
+        reason: "invalid_payload",
+      });
 
-  if (!role) {
-    record.count++;
-    record.lastAttempt = now;
-    const sisaCoba = LIMIT - record.count;
+      return res.status(401).json({
+        success: false,
+        error: "PIN SALAH!",
+      });
+    }
 
-    return res.status(401).json({
+    const generateSecurePin = (id: string, rolePrefix: string) => {
+      const hash = crypto
+        .createHmac("sha256", PIN_SECRET)
+        .update(id + rolePrefix)
+        .digest("hex");
+
+      const numericOnly = hash.replace(/\D/g, "");
+      return numericOnly.substring(0, 6).padStart(6, "0");
+    };
+
+    const proPin = generateSecurePin(displayCodeStr, "PRO");
+
+    let role: "MASTER" | "PRO" | null = null;
+
+    if (safeCompare(submittedPin, MASTER_PIN)) {
+      role = "MASTER";
+    } else if (safeCompare(submittedPin, proPin)) {
+      role = "PRO";
+    }
+
+    if (!role) {
+      await logAttempt(supabase, {
+        ip_hash: ipHash,
+        device_id: deviceIdStr,
+        display_code: displayCodeStr,
+        success: false,
+        reason: "wrong_pin",
+      });
+
+      const remaining = Math.max(
+        0,
+        LIMIT - Math.max(ipFailures, deviceFailures) - 1
+      );
+
+      return res.status(401).json({
+        success: false,
+        error:
+          remaining > 0
+            ? `PIN SALAH! Sisa ${remaining} percobaan.`
+            : "Akses diblokir 15 menit!",
+      });
+    }
+
+    await logAttempt(supabase, {
+      ip_hash: ipHash,
+      device_id: deviceIdStr,
+      display_code: displayCodeStr,
+      success: true,
+      reason: role,
+    });
+
+    const expiresIn = role === "PRO" ? "60d" : "365d";
+
+    const token = jwt.sign(
+      {
+        role,
+        deviceId: deviceIdStr,
+        displayCode: displayCodeStr,
+        tokenVersion: Number(process.env.TOKEN_VERSION || 2),
+      },
+      JWT_SECRET,
+      { expiresIn }
+    );
+
+    return res.json({
+      success: true,
+      role,
+      token,
+    });
+  } catch (e: any) {
+    console.error("PIN_AUTH_ERROR", e);
+    return res.status(500).json({
       success: false,
-      error:
-        sisaCoba > 0
-          ? `PIN SALAH! Sisa ${sisaCoba} percobaan.`
-          : "Akses diblokir 15 menit!"
+      error: "Gagal memverifikasi PIN",
     });
   }
-
-  record.count = 0;
-
-  const expiresIn = role === "PRO" ? "60d" : "365d";
-
-  const token = jwt.sign(
-    {
-      role,
-      deviceId: deviceIdStr,
-      displayCode: displayCodeStr,
-      tokenVersion: Number(process.env.TOKEN_VERSION || 2)
-    },
-    JWT_SECRET,
-    { expiresIn }
-  );
-
-  return res.json({ success: true, role, token });
 }
