@@ -149,6 +149,7 @@ def build_single_statistics(rows):
         if wins_15 < MIN_WINS_15 or wins_last_5 < MIN_WINS_LAST_5 or loss_streak > MAX_LOSS_STREAK_ALLOWED:
             continue
         latest = sample[0]
+        latest_is_hit = is_success(latest)
         group_key = group_key_for_row(latest)
         mode = latest.get("mode")
         param = int(latest.get("param") or 0)
@@ -171,6 +172,8 @@ def build_single_statistics(rows):
             "max_loss_streak": loss_streak,
             "sample_size": len(sample),
             "score": score,
+            "latest_is_hit": latest_is_hit,
+            "latest_status": latest.get("status") or ("MASUK" if latest_is_hit else "ZONK"),
             "is_active": True,
             "updated_at": now_iso(),
         })
@@ -215,6 +218,7 @@ def build_position_2d_statistics(rows):
         loss_streak = paired_loss_streak(sample)
         if wins_15 < MIN_WINS_15 or wins_last_5 < MIN_WINS_LAST_5 or loss_streak > MAX_LOSS_STREAK_ALLOWED:
             continue
+        latest_is_hit = bool(sample[0].get("hit"))
         first, second = POSITION_2D_PAIRS[target_pair]
         group_key = "off_digit"
         mode = "mati_2d"
@@ -236,6 +240,8 @@ def build_position_2d_statistics(rows):
             "max_loss_streak": loss_streak,
             "sample_size": len(sample),
             "score": score,
+            "latest_is_hit": latest_is_hit,
+            "latest_status": "MASUK" if latest_is_hit else "ZONK",
             "is_active": True,
             "updated_at": now_iso(),
         })
