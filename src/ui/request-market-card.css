@@ -1,0 +1,99 @@
+/* Request market card: keep it visually aligned with market cards.
+   This file is imported last because older market-card rules force display:block. */
+
+.dashboard-page .market-grid.market-grid-compact > a[aria-label="Request penambahan pasaran via WhatsApp"],
+.dashboard-page .grid.grid-cols-2.gap-3.pb-6.market-grid-compact > a[aria-label="Request penambahan pasaran via WhatsApp"] {
+  position: relative !important;
+  display: block !important;
+  min-height: 108px !important;
+  height: 108px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+.dashboard-page a[aria-label="Request penambahan pasaran via WhatsApp"] > div {
+  position: absolute !important;
+  top: 20px !important;
+  left: 50% !important;
+  width: 42px !important;
+  height: 42px !important;
+  min-width: 42px !important;
+  min-height: 42px !important;
+  transform: translateX(-50%) !important;
+  border-radius: 15px !important;
+  background: linear-gradient(135deg, rgba(124, 77, 255, 0.36), rgba(248, 203, 111, 0.12)) !important;
+  border: 1px solid rgba(248, 203, 111, 0.28) !important;
+  color: #f8cb6f !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 8px 18px rgba(0,0,0,0.18) !important;
+}
+
+.dashboard-page a[aria-label="Request penambahan pasaran via WhatsApp"] > div svg {
+  width: 23px !important;
+  height: 23px !important;
+  color: #f8cb6f !important;
+}
+
+.dashboard-page a[aria-label="Request penambahan pasaran via WhatsApp"] > span:first-of-type {
+  position: absolute !important;
+  top: 73px !important;
+  left: 8px !important;
+  right: 8px !important;
+  margin: 0 !important;
+  display: block !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+  text-align: center !important;
+  font-size: 0.62rem !important;
+  line-height: 1 !important;
+  letter-spacing: 0.09rem !important;
+  color: rgba(250, 246, 255, 0.96) !important;
+}
+
+.dashboard-page a[aria-label="Request penambahan pasaran via WhatsApp"] > span:last-of-type {
+  display: none !important;
+}
+
+@media (max-width: 420px) {
+  .dashboard-page .market-grid.market-grid-compact > a[aria-label="Request penambahan pasaran via WhatsApp"],
+  .dashboard-page .grid.grid-cols-2.gap-3.pb-6.market-grid-compact > a[aria-label="Request penambahan pasaran via WhatsApp"] {
+    min-height: 106px !important;
+    height: 106px !important;
+  }
+
+  .dashboard-page a[aria-label="Request penambahan pasaran via WhatsApp"] > div {
+    top: 19px !important;
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
+  }
+
+  .dashboard-page a[aria-label="Request penambahan pasaran via WhatsApp"] > span:first-of-type {
+    top: 71px !important;
+    font-size: 0.58rem !important;
+    letter-spacing: 0.075rem !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .dashboard-page .market-grid.market-grid-compact > a[aria-label="Request penambahan pasaran via WhatsApp"],
+  .dashboard-page .grid.grid-cols-2.gap-3.pb-6.market-grid-compact > a[aria-label="Request penambahan pasaran via WhatsApp"] {
+    min-height: 102px !important;
+    height: 102px !important;
+  }
+
+  .dashboard-page a[aria-label="Request penambahan pasaran via WhatsApp"] > div {
+    top: 17px !important;
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    min-height: 38px !important;
+  }
+
+  .dashboard-page a[aria-label="Request penambahan pasaran via WhatsApp"] > span:first-of-type {
+    top: 67px !important;
+    font-size: 0.54rem !important;
+    letter-spacing: 0.055rem !important;
+  }
+}
