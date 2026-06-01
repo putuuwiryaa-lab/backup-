@@ -40,40 +40,126 @@ export const _0x9a025f = [
   { n: "R35 Step Six", f: (c: string, p: string, p2: string) => { const X = _0xc3c54e(+c[3] - 1); return Array.from(new Set([X, _0xc3c54e(X + 1), _0xc3c54e(X + 2), _0xc3c54e(X + 3), _0xc3c54e(X + 4), _0xc3c54e(X + 5)])); }, dg: 6 },
 ];
 
+function _0xSeedRank(seed: string, digit: number) {
+  let h = 2166136261;
+  const s = `${seed}:${digit}`;
+
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+
+  return h >>> 0;
+}
+
 export function _0xEngineAI(D: string[], param: number = 6) {
   const U = D.slice(-17);
   const vote: Record<number, number> = {};
+
   for (let d = 0; d <= 9; d++) vote[d] = 0;
+
   let elit = 0;
+
   for (let r = 0; r < _0x9a025f.length; r++) {
     const rm = _0x9a025f[r];
     let hits = 0;
+
     for (let i = 0; i < 14; i++) {
       const prev2 = U[i], prev = U[i + 1], curr = U[i + 2], tgt = U[i + 3];
       const ai = rm.f(curr, prev, prev2);
+
       if (ai === null) continue;
       if (ai.includes(parseInt(tgt[2])) || ai.includes(parseInt(tgt[3]))) hits++;
     }
+
     const thr = _0xe57f0c[rm.dg] || 10;
+
     if (hits >= thr) {
       const fp = rm.f(D[D.length - 1], D[D.length - 2], D[D.length - 3]);
-      if (fp !== null) { elit++; for (let j = 0; j < fp.length; j++) vote[fp[j]]++; }
+
+      if (fp !== null) {
+        elit++;
+        for (let j = 0; j < fp.length; j++) vote[fp[j]]++;
+      }
     }
   }
+
   if (elit === 0) {
     for (let r = 0; r < _0x9a025f.length; r++) {
       const fp = _0x9a025f[r].f(D[D.length - 1], D[D.length - 2], D[D.length - 3]);
-      if (fp !== null) for (let j = 0; j < fp.length; j++) vote[fp[j] as number]++;
+
+      if (fp !== null) {
+        for (let j = 0; j < fp.length; j++) vote[fp[j] as number]++;
+      }
     }
   }
-  const gap: Record<number, number> = {};
-  for (let d = 0; d <= 9; d++) gap[d] = U.length;
-  for (let j = U.length - 1; j >= 0; j--) {
-    const gk = parseInt(U[j][2]), ge = parseInt(U[j][3]);
-    if (gap[gk] === U.length) gap[gk] = U.length - 1 - j;
-    if (gap[ge] === U.length) gap[ge] = U.length - 1 - j;
+
+  const windowSize = Math.max(1, Math.min(param, U.length));
+  const recentWindow = U.slice(-windowSize);
+
+  const freq: Record<number, number> = {};
+  const latest: Record<number, number> = {};
+
+  for (let d = 0; d <= 9; d++) {
+    freq[d] = 0;
+    latest[d] = 0;
   }
-  const sorted = Object.keys(vote).map(k => ({ d: parseInt(k), v: vote[parseInt(k)], g: gap[parseInt(k)] }));
-  sorted.sort((a, b) => { if (b.v !== a.v) return b.v - a.v; return b.g - a.g; });
-  return sorted.slice(0, param).map(x => x.d).sort((a, b) => a - b);
-}
+
+  recentWindow.forEach((r) => {
+    freq[parseInt(r[2])] += 1;
+    freq[parseInt(r[3])] += 1;
+  });
+
+  const latestResult = recentWindow[recentWindow.length - 1] || U[U.length - 1] || "0000";
+  latest[parseInt(latestResult[2])] = 1;
+  latest[parseInt(latestResult[3])] = 1;
+
+  const seed = U.join("|");
+
+  const remaining = Object.keys(vote).map((k) => {
+    const d = parseInt(k);
+
+    return {
+      d,
+      v: vote[d],
+      f: freq[d],
+      recent: latest[d],
+      seed: _0xSeedRank(seed, d),
+    };
+  });
+
+  const selected: number[] = [];
+
+  while (selected.length < param && remaining.length > 0) {
+    const oddCount = selected.filter((d) => d % 2 === 1).length;
+    const evenCount = selected.length - oddCount;
+
+    const bigCount = selected.filter((d) => d >= 5).length;
+    const smallCount = selected.length - bigCount;
+
+    remaining.sort((a, b) => {
+      if (b.v !== a.v) return b.v - a.v;
+      if (b.f !== a.f) return b.f - a.f;
+      if (b.recent !== a.recent) return b.recent - a.recent;
+
+      const aParityNeed = a.d % 2 === 1 ? evenCount - oddCount : oddCount - evenCount;
+      const bParityNeed = b.d % 2 === 1 ? evenCount - oddCount : oddCount - evenCount;
+
+      if (bParityNeed !== aParityNeed) return bParityNeed - aParityNeed;
+
+      const aSizeNeed = a.d >= 5 ? smallCount - bigCount : bigCount - smallCount;
+      const bSizeNeed = b.d >= 5 ? smallCount - bigCount : bigCount - smallCount;
+
+      if (bSizeNeed !== aSizeNeed) return bSizeNeed - aSizeNeed;
+
+      return b.seed - a.seed;
+    });
+
+    const picked = remaining.shift();
+    if (!picked) break;
+
+    selected.push(picked.d);
+  }
+
+  return selected.sort((a, b) => a - b);
+                                                                                                                                                                           }
