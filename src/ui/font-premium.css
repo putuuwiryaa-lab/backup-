@@ -4,43 +4,49 @@
   --font-body: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-display: 'Orbitron', 'Syne', 'Outfit', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', 'DM Mono', 'SFMono-Regular', ui-monospace, 'Cascadia Mono', monospace;
+  --app-font-ui: var(--font-body);
+  --app-font-display: var(--font-display);
+  --app-font-mono: var(--font-mono);
 }
 
 body,
 button,
 input,
 textarea,
-select {
+select,
+.app-container,
+.app-container * {
   font-family: var(--font-body) !important;
 }
 
 .font-\['Orbitron'\],
-.font-\['Space_Grotesk'\] {
+.font-\['Space_Grotesk'\],
+.app-container [class*="font-['Orbitron']"],
+.app-container [class*="font-['Space_Grotesk']"],
+.app-container h1,
+.app-container h2,
+.app-container h3,
+.app-container .market-name,
+.app-container .market-section-title,
+.app-container .market-name-strip,
+.app-container .primary-button,
+.app-container .ghost-button,
+.app-container .report-floating-button,
+.app-container .bottom-account-button {
   font-family: var(--font-display) !important;
   font-optical-sizing: auto;
-  letter-spacing: clamp(0.055rem, 0.55vw, 0.14rem);
-}
-
-.font-\['JetBrains_Mono'\],
-.font-\['DM_Mono'\] {
-  font-family: var(--font-mono) !important;
-  font-variant-numeric: tabular-nums slashed-zero;
-  font-feature-settings: 'tnum' 1, 'zero' 1;
-  letter-spacing: clamp(0.025rem, 0.3vw, 0.065rem);
-}
-
-h1,
-h2,
-h3,
-.market-name,
-.hero-badge,
-.bottom-account-button,
-.market-section-title span {
   text-rendering: geometricPrecision;
 }
 
-.market-last-value,
-.main-digit-chip,
-.font-\['JetBrains_Mono'\] {
+.font-\['JetBrains_Mono'\],
+.font-\['DM_Mono'\],
+.app-container [class*="font-['JetBrains_Mono']"],
+.app-container [class*="font-['DM_Mono']"],
+.app-container .market-last-value,
+.app-container .custom-scrollbar,
+.app-container .main-digit-chip {
+  font-family: var(--font-mono) !important;
+  font-variant-numeric: tabular-nums slashed-zero;
+  font-feature-settings: 'tnum' 1, 'zero' 1;
   text-rendering: optimizeLegibility;
 }
