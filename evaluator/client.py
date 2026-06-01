@@ -7,19 +7,28 @@ from .utils import get_payload_data, normalize_mati_result, normalize_simple_res
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 
-def analyze_mode(history, mode, param, target_pair="belakang"):
+def analyze_mode(history, mode, param, target_pair="belakang", analysis_scope="default"):
     headers = {}
     if INTERNAL_API_SECRET:
         headers["x-internal-secret"] = INTERNAL_API_SECRET
+
     response = requests.post(
         ANALYZE_API_URL,
         headers=headers,
-        json={"type": mode, "data": history, "param": param, "target_pair": target_pair},
+        json={
+            "type": mode,
+            "data": history,
+            "param": param,
+            "target_pair": target_pair,
+            "analysis_scope": analysis_scope,
+        },
         timeout=25,
     )
     response.raise_for_status()
+
     raw_payload = response.json()
     payload = get_payload_data(raw_payload)
+
     if mode == "mati":
         result = normalize_mati_result(payload)
         if not any(result.values()):
@@ -27,7 +36,10 @@ def analyze_mode(history, mode, param, target_pair="belakang"):
     else:
         result = normalize_simple_result(payload)
         if not result:
-            raise RuntimeError(f"Empty {mode} result param={param} target_pair={target_pair}")
+            raise RuntimeError(
+                f"Empty {mode} result param={param} target_pair={target_pair} analysis_scope={analysis_scope}"
+            )
+
     return payload, result
 
 
