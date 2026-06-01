@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate, useLocation } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
 import {
-  Zap, ShieldCheck, Search, RefreshCw, Sparkles, Database, MessageCircle, LogOut, Copy, BarChart3
+  Zap, ShieldCheck, Search, RefreshCw, Sparkles, Database, MessageCircle, LogOut, Copy, BarChart3, Plus
 } from "lucide-react";
 import { Analytics } from "@vercel/analytics/react";
 import AnalyzeMenu from "./pages/AnalyzeMenu";
@@ -306,6 +306,8 @@ function formatMarketUpdatedAt(value: any) {
 function Dashboard({ markets, onRefresh }: { markets: any[]; onRefresh: () => void }) {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
+  const requestMarketMessage = encodeURIComponent("Halo, saya ingin request penambahan pasaran.");
+  const requestMarketUrl = `https://wa.me/6285119341538?text=${requestMarketMessage}`;
 
   const latestMarketUpdate = useMemo(() => {
     const timestamps = markets
@@ -341,7 +343,7 @@ function Dashboard({ markets, onRefresh }: { markets: any[]; onRefresh: () => vo
       </div>
 
       <div className="market-grid market-grid-compact grid grid-cols-2 gap-3 pb-6 sm:grid-cols-3">
-        {filteredMarkets.length > 0 ? filteredMarkets.map((m) => {
+        {filteredMarkets.map((m) => {
           const title = m.name || m.id;
           const lastResult = m.lastResult || "----";
           return (
@@ -363,7 +365,27 @@ function Dashboard({ markets, onRefresh }: { markets: any[]; onRefresh: () => vo
               </div>
             </div>
           );
-        }) : (
+        })}
+
+        <a
+          href={requestMarketUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="market-card market-card-compact premium-card relative flex cursor-pointer flex-col items-center justify-center overflow-hidden text-center transition active:scale-[0.985]"
+          aria-label="Request penambahan pasaran via WhatsApp"
+        >
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/12 bg-white/[0.06] text-[var(--gold)]">
+            <Plus size={24} strokeWidth={3} />
+          </div>
+          <span className="mt-3 block font-['Orbitron'] text-[11px] font-black uppercase tracking-[1.8px] text-[var(--text)]">
+            Request Pasaran
+          </span>
+          <span className="mt-1 text-[9px] font-bold uppercase tracking-[1.2px] text-[var(--text-dim)]">
+            Hubungi Admin
+          </span>
+        </a>
+
+        {filteredMarkets.length === 0 && (
           <div className="col-span-2 rounded-3xl border border-dashed border-white/14 bg-white/5 py-12 text-center sm:col-span-3">
             <Database className="mx-auto mb-3 text-[var(--text-dim)]" />
             <p className="text-[12px] uppercase tracking-[2px] text-[var(--text-dim)]">Pasaran tidak ditemukan</p>
