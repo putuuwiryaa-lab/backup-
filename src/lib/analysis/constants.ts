@@ -26,5 +26,5 @@ export const typeMeta: Record<string, { accent: string; soft: string; label: str
   rekap: { accent: "#6ea8ff", soft: "rgba(110, 168, 255, 0.16)", label: "MENU REKAP", formula: "LINE GENERATOR" },
 };
 
-export const evaluationModes = new Set(["ai", "bbfs", "mati", "jumlah", "shio"]);
+export const evaluationModes = new Set(["ai", "ai_parity", "ai_size", "bbfs", "mati", "jumlah", "shio"]);
 export const angkaJadiModes = new Set(["mati", "jumlah", "shio"]);
