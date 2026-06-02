@@ -57,6 +57,8 @@ def group_label(group_key, mode=None):
         return "2D Posisi"
     labels = {
         "ai": "AI",
+        "ai_parity": "AI Ganjil Genap",
+        "ai_size": "AI Besar Kecil",
         "bbfs": "BBFS",
         "off_digit": "OFF Digit",
         "off_jumlah": "OFF Jumlah",
@@ -70,6 +72,10 @@ def group_key_for_row(row):
     param = int(row.get("param") or 0)
     if mode == "ai" and param in (2, 4, 6):
         return "ai"
+    if mode == "ai_parity" and param == 1:
+        return "ai_parity"
+    if mode == "ai_size" and param == 1:
+        return "ai_size"
     if mode == "bbfs" and param in (7, 8, 9):
         return "bbfs"
     if mode == "mati":
@@ -92,7 +98,7 @@ def normalize_position(row):
 def normalize_target_pair(row):
     mode = row.get("mode")
     target_pair = row.get("target_pair") or "all"
-    if mode in ("ai", "bbfs", "jumlah", "shio"):
+    if mode in ("ai", "ai_parity", "ai_size", "bbfs", "jumlah", "shio"):
         return str(target_pair).lower()
     return "all"
 
@@ -109,7 +115,7 @@ def fetch_evaluation_rows():
         result = (
             supabase.table("analysis_evaluations")
             .select("id,market_id,market_name,mode,param,position,target_pair,analysis_scope,is_hit,status,evaluated_at")
-            .in_("mode", ["ai", "bbfs", "mati", "jumlah", "shio"])
+            .in_("mode", ["ai", "ai_parity", "ai_size", "bbfs", "mati", "jumlah", "shio"])
             .order("evaluated_at", desc=True)
             .range(start, end)
             .execute()
