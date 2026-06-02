@@ -67,10 +67,19 @@ def group_label(group_key, mode=None):
     return labels.get(group_key, group_key)
 
 
+def ai_param_is_valid(param, analysis_scope):
+    if analysis_scope == "3d":
+        return param in (1, 3, 5)
+    if analysis_scope == "4d":
+        return param in (1, 2, 4)
+    return param in (2, 4, 6)
+
+
 def group_key_for_row(row):
     mode = row.get("mode")
     param = int(row.get("param") or 0)
-    if mode == "ai" and param in (2, 4, 6):
+    analysis_scope = normalize_analysis_scope(row)
+    if mode == "ai" and ai_param_is_valid(param, analysis_scope):
         return "ai"
     if mode == "ai_parity" and param == 1:
         return "ai_parity"
