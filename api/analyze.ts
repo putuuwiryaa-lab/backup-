@@ -46,6 +46,15 @@ function sanitizeAnalysisScope(value: any): AnalysisScope {
     : "default";
 }
 
+function isAi2DScope(scope: AnalysisScope): boolean {
+  return scope === "2d_depan" || scope === "2d_tengah" || scope === "2d_belakang";
+}
+
+function normalizeScopeForType(type: string, scope: AnalysisScope): AnalysisScope {
+  if (type === "ai" && isAi2DScope(scope)) return "default";
+  return scope;
+}
+
 function targetPairFromScope(scope: AnalysisScope, fallback: TargetPair): TargetPair {
   if (scope === "2d_depan") return "depan";
   if (scope === "2d_tengah") return "tengah";
@@ -169,14 +178,15 @@ export default async function handler(req: any, res: any) {
     const allowedTypes = new Set(["ai", "bbfs", "mati", "jumlah", "shio", "rekap"]);
     const cleanedData = sanitizeData(data);
     const safeParam = Number(param || 1);
-    const safeScope = sanitizeAnalysisScope(analysis_scope);
+    const rawScope = sanitizeAnalysisScope(analysis_scope);
 
     const isBBFS = type === "bbfs";
     const isAI = type === "ai";
+    const safeScope = normalizeScopeForType(type, rawScope);
     const engineType = isBBFS ? "ai" : type;
 
-    const targetPair = isBBFS
-      ? targetPairFromScope(safeScope, sanitizeTargetPair(target_pair))
+    const targetPair = isBBFS || isAI
+      ? targetPairFromScope(rawScope, sanitizeTargetPair(target_pair))
       : sanitizeTargetPair(target_pair);
 
     const paramIsValid = isBBFS
@@ -204,9 +214,9 @@ export default async function handler(req: any, res: any) {
         : remapDataForTargetPair(engineType, cleanedData, targetPair);
 
     const result = runAnalysis(engineType, analysisData, safeParam, {
-  analysisScope: safeScope,
-  forceDigitResult: isBBFS,
-});
+      analysisScope: safeScope,
+      forceDigitResult: isBBFS,
+    });
 
     return res.json({
       ...result,
@@ -216,4 +226,4 @@ export default async function handler(req: any, res: any) {
   } catch (e: any) {
     return res.status(500).json({ error: "Gagal memproses analisa" });
   }
-    }
+}
