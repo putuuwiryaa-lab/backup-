@@ -13,7 +13,7 @@ export function DetailToggle({ open, accent, onClick }: { open: boolean; accent:
   return <button type="button" onClick={onClick} className="ui-motion-soft ui-tap inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[9px] font-black uppercase tracking-[1px]" style={{ borderColor: `${accent}55`, backgroundColor: `${accent}18`, color: accent }} aria-label={open ? "Tutup" : "Buka"}>{open ? <ChevronUp size={13} /> : <ChevronDown size={13} />}{open ? "Tutup" : "Buka"}</button>;
 }
 
-export function ResultHeader({ label, value, accent }: { label: string; value: string }) {
+export function ResultHeader({ label, value, accent }: { label: string; value: string; accent: string }) {
   return <div className="ui-panel ui-motion-in flex items-center justify-between gap-3 p-4"><span className="ui-label text-[10px]">{label}</span><span className="rounded-full px-3 py-1 text-[9px] font-black uppercase tracking-[1px]" style={{ backgroundColor: `${accent}1f`, color: accent }}>{value}</span></div>;
 }
 
