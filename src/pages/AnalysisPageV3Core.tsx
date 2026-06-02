@@ -131,7 +131,7 @@ export default function AnalysisPageV3Core({ type, title, icon, marketId }: { ty
       body: JSON.stringify({ type: analysisType, data, param: analysisParam, target_pair: analysisTargetPair, analysis_scope: scope }),
     });
     const json = await res.json();
-    if (json.success || json.data) return json.data || json;
+    if (json.success || json.data) return { ...(json.data || json), target_pair: json.target_pair, analysis_scope: json.analysis_scope };
     throw new Error(json.error || "Gagal memproses analisa");
   };
 
