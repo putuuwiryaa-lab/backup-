@@ -90,12 +90,8 @@ function scoreParam(rows: any[], param: number, group: RecommendationGroup) {
 
   if (!fullThreshold || !partialWinRate) return null;
 
-  const isRecommended = sample.length >= RECOMMENDATION_SAMPLE_SIZE
-    ? wins >= fullThreshold
-    : wins / sample.length >= partialWinRate;
-
+  const isRecommended = sample.length >= RECOMMENDATION_SAMPLE_SIZE ? wins >= fullThreshold : wins / sample.length >= partialWinRate;
   if (!isRecommended) return null;
-
   return { param, badge: isPerfect ? "fire" as const : "thumb" as const };
 }
 
@@ -113,14 +109,7 @@ function setBadge(next: RecommendedMap, key: string, badge: RecommendationBadge)
   if (badge === "fire" || next[key] !== "fire") next[key] = badge;
 }
 
-function applyRecommendationBadges(
-  next: RecommendedMap,
-  keyForParam: (param: number) => string,
-  rows: any[],
-  params: number[],
-  prefer: "low" | "high",
-  group: RecommendationGroup
-) {
+function applyRecommendationBadges(next: RecommendedMap, keyForParam: (param: number) => string, rows: any[], params: number[], prefer: "low" | "high", group: RecommendationGroup) {
   const scored = scoreParams(rows, params, group);
   const pick = pickRecommendationFromScores(scored, prefer);
   if (pick) setBadge(next, keyForParam(pick.param), pick.badge);
@@ -217,32 +206,27 @@ export default function CustomDigitBuilder({
 
   useEffect(() => {
     let active = true;
-
     const loadRecommendations = async () => {
       if (!show || !marketId) return;
-
       try {
         const pairs = customFocusPairs(customFocus);
         const bbfsScope = customFocusToBBFSScope(customFocus);
         const next: RecommendedMap = {};
 
-        await Promise.all(
-          pairs.map(async (pair) => {
-            const [aiRows, aiParityRows, aiSizeRows, jumlahRows, shioRows] = await Promise.all([
-              loadRows(marketId, "ai", "all", [2, 4, 6], pair),
-              loadRows(marketId, "ai_parity", "all", [1], pair),
-              loadRows(marketId, "ai_size", "all", [1], pair),
-              loadRows(marketId, "jumlah", "all", [1, 2, 3], pair),
-              loadRows(marketId, "shio", "all", [1, 2, 3], pair),
-            ]);
-
-            applyRecommendationBadges(next, (param) => `ai-${pair}-${param}`, aiRows, [2, 4, 6], "low", "ai");
-            applyRecommendationBadges(next, () => `ai-${pair}-7`, aiParityRows, [1], "low", "ai_parity");
-            applyRecommendationBadges(next, () => `ai-${pair}-8`, aiSizeRows, [1], "low", "ai_size");
-            applyRecommendationBadges(next, (param) => `jumlah-${pair}-${param}`, jumlahRows, [1, 2, 3], "high", "jumlah");
-            applyRecommendationBadges(next, (param) => `shio-${pair}-${param}`, shioRows, [1, 2, 3], "high", "shio");
-          })
-        );
+        await Promise.all(pairs.map(async (pair) => {
+          const [aiRows, aiParityRows, aiSizeRows, jumlahRows, shioRows] = await Promise.all([
+            loadRows(marketId, "ai", "all", [2, 4, 6], pair),
+            loadRows(marketId, "ai_parity", "all", [1], pair),
+            loadRows(marketId, "ai_size", "all", [1], pair),
+            loadRows(marketId, "jumlah", "all", [1, 2, 3], pair),
+            loadRows(marketId, "shio", "all", [1, 2, 3], pair),
+          ]);
+          applyRecommendationBadges(next, (param) => `ai-${pair}-${param}`, aiRows, [2, 4, 6], "low", "ai");
+          applyRecommendationBadges(next, () => `ai-${pair}-7`, aiParityRows, [1], "low", "ai_parity");
+          applyRecommendationBadges(next, () => `ai-${pair}-8`, aiSizeRows, [1], "low", "ai_size");
+          applyRecommendationBadges(next, (param) => `jumlah-${pair}-${param}`, jumlahRows, [1, 2, 3], "high", "jumlah");
+          applyRecommendationBadges(next, (param) => `shio-${pair}-${param}`, shioRows, [1, 2, 3], "high", "shio");
+        }));
 
         if (customFocus === "3d" || customFocus === "4d") {
           const [ai3dRows, ai3dParityRows, ai3dSizeRows] = await Promise.all([
@@ -260,15 +244,7 @@ export default function CustomDigitBuilder({
           applyRecommendationBadges(next, (param) => `ai4d-${param}`, ai4dRows, [1, 2, 4], "low", "ai");
         }
 
-        const bbfsRows = await loadRows(
-          marketId,
-          "bbfs",
-          "all",
-          [7, 8, 9],
-          bbfsScope.includes("2d_") ? bbfsScope === "2d_depan" ? "depan" : bbfsScope === "2d_tengah" ? "tengah" : "belakang" : "belakang",
-          bbfsScope
-        );
-
+        const bbfsRows = await loadRows(marketId, "bbfs", "all", [7, 8, 9], bbfsScope.includes("2d_") ? bbfsScope === "2d_depan" ? "depan" : bbfsScope === "2d_tengah" ? "tengah" : "belakang" : "belakang", bbfsScope);
         applyRecommendationBadges(next, (param) => `bbfs-${param}`, bbfsRows, [7, 8, 9], "low", "bbfs");
 
         const [asRows, kopRows, kepalaRows, ekorRows] = await Promise.all([
@@ -277,23 +253,17 @@ export default function CustomDigitBuilder({
           loadRows(marketId, "mati", "kepala", [1, 2, 3]),
           loadRows(marketId, "mati", "ekor", [1, 2, 3]),
         ]);
-
         applyRecommendationBadges(next, (param) => `as-${param}`, asRows, [1, 2, 3], "high", "mati");
         applyRecommendationBadges(next, (param) => `kop-${param}`, kopRows, [1, 2, 3], "high", "mati");
         applyRecommendationBadges(next, (param) => `kepala-${param}`, kepalaRows, [1, 2, 3], "high", "mati");
         applyRecommendationBadges(next, (param) => `ekor-${param}`, ekorRows, [1, 2, 3], "high", "mati");
-
         if (active) setRecommended(next);
       } catch {
         if (active) setRecommended({});
       }
     };
-
     loadRecommendations();
-
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, [show, marketId, customFocus]);
 
   const badges = useMemo(() => recommended, [recommended]);
@@ -303,37 +273,16 @@ export default function CustomDigitBuilder({
   const showAi3d = customFocus === "3d" || customFocus === "4d";
   const showAi4d = customFocus === "4d";
 
-  const positionValues: Record<PositionKey, number | null> = {
-    as: customOffAsCount,
-    kop: customOffKopCount,
-    kepala: customOffKepalaCount,
-    ekor: customOffEkorCount,
-  };
-
-  const positionSetters: Record<PositionKey, (value: number | null) => void> = {
-    as: setCustomOffAsCount,
-    kop: setCustomOffKopCount,
-    kepala: setCustomOffKepalaCount,
-    ekor: setCustomOffEkorCount,
-  };
+  const positionValues: Record<PositionKey, number | null> = { as: customOffAsCount, kop: customOffKopCount, kepala: customOffKepalaCount, ekor: customOffEkorCount };
+  const positionSetters: Record<PositionKey, (value: number | null) => void> = { as: setCustomOffAsCount, kop: setCustomOffKopCount, kepala: setCustomOffKepalaCount, ekor: setCustomOffEkorCount };
 
   if (!show) return null;
 
   const optionButton = (active: boolean, label: string, onClick: () => void, extraClass = "", recommendKey?: string) => {
     const badge = recommendKey ? badges[recommendKey] : undefined;
     const isRecommended = Boolean(badge);
-
     return (
-      <button
-        type="button"
-        onClick={onClick}
-        className={`${extraClass} ui-motion-soft ui-tap ui-lift relative rounded-3xl border p-4 text-center`}
-        style={{
-          borderColor: active ? meta.accent : isRecommended ? `${meta.accent}88` : "rgba(255,255,255,0.14)",
-          backgroundColor: active ? meta.soft : "rgba(255,255,255,0.04)",
-          color: active ? meta.accent : "var(--ui-text-muted)",
-        }}
-      >
+      <button type="button" onClick={onClick} className={`${extraClass} ui-motion-soft ui-tap ui-lift relative rounded-3xl border p-4 text-center`} style={{ borderColor: active ? meta.accent : isRecommended ? `${meta.accent}88` : "rgba(255,255,255,0.14)", backgroundColor: active ? meta.soft : "rgba(255,255,255,0.04)", color: active ? meta.accent : "var(--ui-text-muted)" }}>
         {badge && <span className="absolute right-3 top-2 text-[15px] leading-none">{badge === "fire" ? "🔥" : "👍"}</span>}
         <span className="block font-['Orbitron'] text-[13px] font-black uppercase tracking-[2px]">{label}</span>
       </button>
@@ -347,6 +296,15 @@ export default function CustomDigitBuilder({
         <p className="mt-2 text-[10px] font-semibold uppercase tracking-[1.5px] text-[var(--ui-text-muted)]">Pilih filter yang mau dipakai, lalu generate.</p>
       </div>
 
+      {showAi4d && (
+        <section className="ui-card space-y-2 rounded-3xl p-3">
+          <MiniLabel>AI 4D · AS - KOP - KEPALA - EKOR</MiniLabel>
+          <div className="grid grid-cols-3 gap-2">
+            {[1, 2, 4].map((n) => optionButton(customAi4dDigit === n, String(n), () => setCustomAi4dDigit(customAi4dDigit === n ? null : (n as Ai4DDigit)), "", `ai4d-${n}`))}
+          </div>
+        </section>
+      )}
+
       {showAi3d && (
         <section className="ui-card space-y-2 rounded-3xl p-3">
           <MiniLabel>AI 3D · KOP - KEPALA - EKOR</MiniLabel>
@@ -356,15 +314,6 @@ export default function CustomDigitBuilder({
           <div className="grid grid-cols-1 gap-2">
             {optionButton(customAi3dParity, "GENAP GANJIL", () => setCustomAi3dParity(!customAi3dParity), "", "ai3d-7")}
             {optionButton(customAi3dSize, "BESAR KECIL", () => setCustomAi3dSize(!customAi3dSize), "", "ai3d-8")}
-          </div>
-        </section>
-      )}
-
-      {showAi4d && (
-        <section className="ui-card space-y-2 rounded-3xl p-3">
-          <MiniLabel>AI 4D · AS - KOP - KEPALA - EKOR</MiniLabel>
-          <div className="grid grid-cols-3 gap-2">
-            {[1, 2, 4].map((n) => optionButton(customAi4dDigit === n, String(n), () => setCustomAi4dDigit(customAi4dDigit === n ? null : (n as Ai4DDigit)), "", `ai4d-${n}`))}
           </div>
         </section>
       )}
