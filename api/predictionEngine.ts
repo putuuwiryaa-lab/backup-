@@ -6,6 +6,14 @@ import { _0x9a025f, _0xe57f0c, _0xEngineAI } from './engines/aiEngine.js';
 import { runRekap } from './engines/rekapEngine.js';
 
 type AiVote = Record<number, number>;
+type AnalysisScope = 'default' | '4d' | '3d' | '2d_depan' | '2d_tengah' | '2d_belakang';
+type RunAnalysisOptions = { analysisScope?: AnalysisScope };
+
+function aiTargetIndexes(scope: AnalysisScope = 'default') {
+  if (scope === '4d') return [0, 1, 2, 3];
+  if (scope === '3d') return [1, 2, 3];
+  return [2, 3];
+}
 
 function topVoteDigit(vote: AiVote) {
   return Object.keys(vote)
@@ -29,7 +37,7 @@ function buildAiSize(vote: AiVote) {
   return { dominant, bigVote, smallVote };
 }
 
-function buildAiVote(D: string[]) {
+function buildAiVote(D: string[], targetIndexes = [2, 3]) {
   const U = D.slice(-17);
   const sr = [];
   let elitCount = 0;
@@ -44,7 +52,7 @@ function buildAiVote(D: string[]) {
       const ai = rm.f(curr, prev, prev2);
       if (ai === null) continue;
       valid++;
-      if (ai.includes(parseInt(tgt[2])) || ai.includes(parseInt(tgt[3]))) hits++;
+      if (targetIndexes.some((index) => ai.includes(parseInt(tgt[index])))) hits++;
     }
     const thr = _0xe57f0c[rm.dg] || 10;
     const lolos = hits >= thr;
@@ -74,9 +82,10 @@ function buildAiVote(D: string[]) {
   return { sr, elitCount, vote, fallback };
 }
 
-export function runAnalysis(type: string, payload: string[], param: number) {
+export function runAnalysis(type: string, payload: string[], param: number, options: RunAnalysisOptions = {}) {
   const D = payload;
   const U = D.slice(-17);
+  const analysisScope = options.analysisScope || 'default';
 
   // ── REKAP ─────────────────────────────────────────────────────────────────
   if (type === 'rekap') {
@@ -85,7 +94,8 @@ export function runAnalysis(type: string, payload: string[], param: number) {
 
   // ── AI ────────────────────────────────────────────────────────────────────
   if (type === 'ai' || type === 'ai_parity' || type === 'ai_size') {
-    const { sr, elitCount, vote, fallback } = buildAiVote(D);
+    const targetIndexes = aiTargetIndexes(analysisScope);
+    const { sr, elitCount, vote, fallback } = buildAiVote(D, targetIndexes);
     const aiResult = _0xEngineAI(D, type === 'ai' && param !== 7 && param !== 8 ? param : 6);
     const parity = buildAiParity(vote);
     const size = buildAiSize(vote);
