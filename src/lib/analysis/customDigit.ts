@@ -71,6 +71,11 @@ const pairDigits = (line: Record<PositionKey, number>, pair: TargetPair) => {
   return [line.kepala, line.ekor];
 };
 
+const scopeDigits = (line: Record<PositionKey, number>, scope: "3d" | "4d") => {
+  if (scope === "3d") return [line.kop, line.kepala, line.ekor];
+  return [line.as, line.kop, line.kepala, line.ekor];
+};
+
 const digitParity = (digit: number) => digit % 2 === 0 ? "GENAP" : "GANJIL";
 const digitSize = (digit: number) => digit >= 5 ? "BESAR" : "KECIL";
 
@@ -79,6 +84,10 @@ export const buildCustomDigitLines = ({
   aiByPair,
   aiParityByPair,
   aiSizeByPair,
+  ai3d = [],
+  ai3dParity = "",
+  ai3dSize = "",
+  ai4d = [],
   bbfsByPair,
   bbfsGlobal = [],
   offAs = [],
@@ -92,6 +101,10 @@ export const buildCustomDigitLines = ({
   aiByPair?: Partial<Record<TargetPair, number[]>>;
   aiParityByPair?: Partial<Record<TargetPair, string>>;
   aiSizeByPair?: Partial<Record<TargetPair, string>>;
+  ai3d?: number[];
+  ai3dParity?: string;
+  ai3dSize?: string;
+  ai4d?: number[];
   bbfsByPair?: Partial<Record<TargetPair, number[]>>;
   bbfsGlobal?: number[];
   includeBBFS?: boolean;
@@ -112,6 +125,19 @@ export const buildCustomDigitLines = ({
       if ((offByPosition[position] || []).includes(line[position])) return false;
       if (bbfsGlobal.length && !bbfsGlobal.includes(line[position])) return false;
     }
+
+    if (focus === "3d" || focus === "4d") {
+      const digits3d = scopeDigits(line, "3d");
+      if (ai3d.length && !digits3d.some((digit) => ai3d.includes(digit))) return false;
+      if (ai3dParity && !digits3d.some((digit) => digitParity(digit) === ai3dParity)) return false;
+      if (ai3dSize && !digits3d.some((digit) => digitSize(digit) === ai3dSize)) return false;
+    }
+
+    if (focus === "4d") {
+      const digits4d = scopeDigits(line, "4d");
+      if (ai4d.length && !digits4d.some((digit) => ai4d.includes(digit))) return false;
+    }
+
     for (const pair of pairs) {
       const [a, b] = pairDigits(line, pair);
       const ai = aiByPair?.[pair] || [];
