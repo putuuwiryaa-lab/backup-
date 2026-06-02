@@ -10,7 +10,7 @@ export type CategoryKey = "ai" | "ai_parity" | "ai_size" | "bbfs" | "off_digit" 
 export type VisibleCategoryKey = "ai" | "bbfs" | "off_digit" | "off_jumlah" | "off_shio";
 export type TargetPair = "depan" | "tengah" | "belakang";
 export type AnalysisScope = "default" | "4d" | "3d" | "2d_depan" | "2d_tengah" | "2d_belakang";
-export type AiStatScope = "default" | "3d" | "4d";
+export type AiStatScope = "4d" | "3d" | "2d_depan" | "2d_tengah" | "2d_belakang";
 
 export type MarketStatistic = {
   id?: string;
@@ -52,10 +52,12 @@ export const targetPairs: Array<{ key: TargetPair; label: string }> = [
   { key: "belakang", label: "Belakang" },
 ];
 
-export const aiScopes: Array<{ key: AiStatScope; label: string; subtitle: string }> = [
-  { key: "default", label: "AI 2D", subtitle: "Depan / Tengah / Belakang" },
-  { key: "3d", label: "AI 3D", subtitle: "KOP + Kepala + Ekor" },
-  { key: "4d", label: "AI 4D", subtitle: "AS + KOP + Kepala + Ekor" },
+export const aiScopes: Array<{ key: AiStatScope; label: string; subtitle: string; targetPair: TargetPair; analysisScope: "default" | "3d" | "4d" }> = [
+  { key: "4d", label: "4D", subtitle: "AS + KOP + Kepala + Ekor", targetPair: "belakang", analysisScope: "4d" },
+  { key: "3d", label: "3D", subtitle: "KOP + Kepala + Ekor", targetPair: "belakang", analysisScope: "3d" },
+  { key: "2d_depan", label: "2D Depan", subtitle: "AS + KOP", targetPair: "depan", analysisScope: "default" },
+  { key: "2d_tengah", label: "2D Tengah", subtitle: "KOP + Kepala", targetPair: "tengah", analysisScope: "default" },
+  { key: "2d_belakang", label: "2D Belakang", subtitle: "Kepala + Ekor", targetPair: "belakang", analysisScope: "default" },
 ];
 
 export const bbfsScopes: Array<{ key: AnalysisScope; label: string; subtitle: string; targetPair: TargetPair }> = [
@@ -87,10 +89,11 @@ export function targetPairLabel(value?: string) {
 }
 
 export function aiScopeMeta(value?: string) {
-  return aiScopes.find((item) => item.key === value) || aiScopes[0];
+  return aiScopes.find((item) => item.key === value) || aiScopes[4];
 }
 
 export function aiScopeLabel(value?: string) {
+  if (value === "default") return "AI 2D";
   return aiScopeMeta(value).label;
 }
 
@@ -101,7 +104,7 @@ export function aiScopeSubtitle(value?: string) {
 export function aiParamLabel(value: number) {
   if (value === 7) return "Ganjil Genap";
   if (value === 8) return "Besar Kecil";
-  return `${value}D`;
+  return `${value} Angka`;
 }
 
 export function aiParamGroupKey(value: number): CategoryKey {
@@ -131,11 +134,15 @@ export function positionPairSubtitle(value?: string) {
   return "AS + KOP";
 }
 
+function cleanLabel(value: string) {
+  return value.replace(/\s+/g, " ").trim();
+}
+
 export function statTitle(item: MarketStatistic) {
-  if (item.group_key === "ai") return `${aiScopeLabel(item.analysis_scope)} ${item.analysis_scope === "default" ? targetPairLabel(item.target_pair) : ""} ${item.param}D`.replace(/\s+/g, " ").trim();
-  if (item.group_key === "ai_parity") return `${aiScopeLabel(item.analysis_scope)} Ganjil Genap ${item.analysis_scope === "default" ? targetPairLabel(item.target_pair) : ""}`.replace(/\s+/g, " ").trim();
-  if (item.group_key === "ai_size") return `${aiScopeLabel(item.analysis_scope)} Besar Kecil ${item.analysis_scope === "default" ? targetPairLabel(item.target_pair) : ""}`.replace(/\s+/g, " ").trim();
-  if (item.group_key === "bbfs") return `BBFS ${bbfsScopeLabel(item.analysis_scope)} ${item.param}`;
+  if (item.group_key === "ai") return cleanLabel(`${aiScopeLabel(item.analysis_scope)} ${item.analysis_scope === "default" ? targetPairLabel(item.target_pair) : ""} ${aiParamLabel(item.param)}`);
+  if (item.group_key === "ai_parity") return cleanLabel(`${aiScopeLabel(item.analysis_scope)} Ganjil Genap ${item.analysis_scope === "default" ? targetPairLabel(item.target_pair) : ""}`);
+  if (item.group_key === "ai_size") return cleanLabel(`${aiScopeLabel(item.analysis_scope)} Besar Kecil ${item.analysis_scope === "default" ? targetPairLabel(item.target_pair) : ""}`);
+  if (item.group_key === "bbfs") return `BBFS ${bbfsScopeLabel(item.analysis_scope)} ${item.param} Angka`;
   if (item.group_key === "off_digit") return `2D ${targetPairLabel(item.target_pair)} · OFF ${item.param}`;
   if (item.group_key === "off_jumlah") return `OFF Jumlah ${targetPairLabel(item.target_pair)} ${item.param}`;
   if (item.group_key === "off_shio") return `OFF Shio ${targetPairLabel(item.target_pair)} ${item.param}`;
@@ -143,10 +150,10 @@ export function statTitle(item: MarketStatistic) {
 }
 
 export function shortStatTitle(item: MarketStatistic) {
-  if (item.group_key === "ai") return `${aiScopeLabel(item.analysis_scope)} ${item.param}D ${item.analysis_scope === "default" ? targetPairLabel(item.target_pair) : ""}`.replace(/\s+/g, " ").trim();
-  if (item.group_key === "ai_parity") return `${aiScopeLabel(item.analysis_scope)} Ganjil Genap ${item.analysis_scope === "default" ? targetPairLabel(item.target_pair) : ""}`.replace(/\s+/g, " ").trim();
-  if (item.group_key === "ai_size") return `${aiScopeLabel(item.analysis_scope)} Besar Kecil ${item.analysis_scope === "default" ? targetPairLabel(item.target_pair) : ""}`.replace(/\s+/g, " ").trim();
-  if (item.group_key === "bbfs") return `BBFS ${bbfsScopeLabel(item.analysis_scope)} ${item.param}`;
+  if (item.group_key === "ai") return cleanLabel(`${aiScopeLabel(item.analysis_scope)} ${item.analysis_scope === "default" ? targetPairLabel(item.target_pair) : ""} ${aiParamLabel(item.param)}`);
+  if (item.group_key === "ai_parity") return cleanLabel(`${aiScopeLabel(item.analysis_scope)} Ganjil Genap ${item.analysis_scope === "default" ? targetPairLabel(item.target_pair) : ""}`);
+  if (item.group_key === "ai_size") return cleanLabel(`${aiScopeLabel(item.analysis_scope)} Besar Kecil ${item.analysis_scope === "default" ? targetPairLabel(item.target_pair) : ""}`);
+  if (item.group_key === "bbfs") return `BBFS ${bbfsScopeLabel(item.analysis_scope)} ${item.param} Angka`;
   if (item.group_key === "off_digit") return `2D ${targetPairLabel(item.target_pair)} OFF ${item.param}`;
   if (item.group_key === "off_jumlah") return `Jumlah ${item.param} ${targetPairLabel(item.target_pair)}`;
   if (item.group_key === "off_shio") return `Shio ${item.param} ${targetPairLabel(item.target_pair)}`;
