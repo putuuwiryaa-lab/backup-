@@ -9,11 +9,11 @@ export const TARGET_PAIR_OPTIONS: Array<{ key: TargetPair; title: string; subtit
 ];
 
 export const BBFS_SCOPE_OPTIONS: Array<{ key: Exclude<AnalysisScope, "default">; title: string; subtitle: string }> = [
-  { key: "4d", title: "4D", subtitle: "AS - KOP - KEPALA - EKOR" },
-  { key: "3d", title: "3D", subtitle: "KOP - KEPALA - EKOR" },
   { key: "2d_depan", title: "2D DEPAN", subtitle: "AS - KOP" },
   { key: "2d_tengah", title: "2D TENGAH", subtitle: "KOP - KEPALA" },
   { key: "2d_belakang", title: "2D BELAKANG", subtitle: "KEPALA - EKOR" },
+  { key: "3d", title: "3D", subtitle: "KOP - KEPALA - EKOR" },
+  { key: "4d", title: "4D", subtitle: "AS - KOP - KEPALA - EKOR" },
 ];
 
 export const AI_SCOPE_OPTIONS: Array<{ key: Exclude<AnalysisScope, "default">; title: string; subtitle: string }> = [
