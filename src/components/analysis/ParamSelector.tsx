@@ -1,17 +1,21 @@
-export default function ParamSelector({ type, param, meta, onAnalyze, onCustomDigit }: {
+export default function ParamSelector({ type, param, meta, analysisScope = "default", onAnalyze, onCustomDigit }: {
   type: string;
   param: number | null;
   meta: { accent: string; soft: string };
+  analysisScope?: string;
   onAnalyze: (param: number) => void;
   onCustomDigit: () => void;
 }) {
   if (type === "rekap" || param !== 0) return null;
 
+  const aiValues = analysisScope === "3d" ? [1, 3, 5, 7, 8] : analysisScope === "4d" ? [1, 2, 4] : [2, 4, 6, 7, 8];
+  const aiTitle = analysisScope === "3d" ? "PILIH JENIS ANGKA IKUT 3D" : analysisScope === "4d" ? "PILIH JENIS ANGKA IKUT 4D" : "PILIH JENIS ANGKA IKUT 2D";
+
   const options: any = {
     ai: {
-      title: "PILIH JENIS ANGKA IKUT",
-      values: [2, 4, 6, 7, 8],
-      labels: { 7: "GANJIL GENAP", 8: "BESAR KECIL" }
+      title: aiTitle,
+      values: aiValues,
+      labels: { 7: "GENAP GANJIL", 8: "BESAR KECIL" }
     },
     bbfs: { title: "PILIH JUMLAH DIGIT BBFS", values: [7, 8, 9] },
     mati: { title: "PILIH JUMLAH DIGIT OFF", values: [1, 2, 3], hints: { 1: "RINGAN", 2: "SEIMBANG", 3: "KETAT" } },
