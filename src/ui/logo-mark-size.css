@@ -14,6 +14,36 @@
   filter: drop-shadow(0 0 8px rgba(248, 199, 106, 0.20));
 }
 
+/* Home bottom nav emphasis: Statistik is primary, Akun is secondary. */
+.bottom-account-shell {
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.82fr) !important;
+}
+
+.bottom-account-shell .bottom-account-button:first-child {
+  background:
+    linear-gradient(135deg, rgba(52,211,153,0.30), rgba(16,185,129,0.16)),
+    rgba(255,255,255,0.04) !important;
+  border-color: rgba(52,211,153,0.52) !important;
+  color: #d1fae5 !important;
+  box-shadow:
+    0 0 22px rgba(52,211,153,0.18),
+    inset 0 1px 0 rgba(255,255,255,0.11) !important;
+}
+
+.bottom-account-shell .bottom-account-button:first-child svg {
+  color: #34d399 !important;
+  filter: drop-shadow(0 0 10px rgba(52,211,153,0.42));
+}
+
+.bottom-account-shell .bottom-account-button:first-child span {
+  color: #d1fae5 !important;
+}
+
+.bottom-account-shell .bottom-account-button:nth-child(2) {
+  opacity: 0.82;
+  background: linear-gradient(135deg, rgba(124,77,255,0.16), rgba(246,198,106,0.08)) !important;
+}
+
 @media (max-width: 420px) {
   .hero-crown .app-logo-mark {
     width: 2.55rem !important;
