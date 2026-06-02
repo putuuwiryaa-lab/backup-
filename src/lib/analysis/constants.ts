@@ -21,7 +21,7 @@ export const typeMeta: Record<string, { accent: string; soft: string; label: str
   ai: { accent: "#f3c14b", soft: "rgba(243, 193, 75, 0.16)", label: "ANGKA IKUT", formula: "35 RUMUS" },
   bbfs: { accent: "#ff9f43", soft: "rgba(255, 159, 67, 0.14)", label: "BBFS", formula: "35 RUMUS" },
   mati: { accent: "#ff647c", soft: "rgba(255, 100, 124, 0.16)", label: "ANGKA MATI", formula: "56 RUMUS" },
-  jumlah: { accent: "#b58cff", soft: "rgba(181, 140, 255, 0.16)", label: "JUMLAH MATI", formula: "56 RUMUS" },
+  jumlah: { accent: "#14b8a6", soft: "rgba(20, 184, 166, 0.14)", label: "JUMLAH MATI", formula: "56 RUMUS" },
   shio: { accent: "#28d7ff", soft: "rgba(40, 215, 255, 0.14)", label: "SHIO MATI", formula: "60 RUMUS" },
   rekap: { accent: "#6ea8ff", soft: "rgba(110, 168, 255, 0.16)", label: "MENU REKAP", formula: "LINE GENERATOR" },
 };
