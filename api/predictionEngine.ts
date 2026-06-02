@@ -15,6 +15,16 @@ function aiTargetIndexes(scope: AnalysisScope = 'default') {
   return [2, 3];
 }
 
+function aiThresholds(scope: AnalysisScope = 'default'): Record<number, number> {
+  if (scope === '4d') return { 3: 12, 4: 13, 5: 14, 6: 14 };
+  if (scope === '3d') return { 3: 11, 4: 12, 5: 13, 6: 14 };
+  return { 3: 10, 4: 11, 5: 12, 6: 13 };
+}
+
+function thresholdForDigitCount(dg: number, thresholds: Record<number, number>) {
+  return thresholds[dg] ?? _0xe57f0c[dg] ?? 10;
+}
+
 function topVoteDigit(vote: AiVote) {
   return Object.keys(vote)
     .map((k) => ({ d: parseInt(k), v: vote[parseInt(k)] }))
@@ -37,7 +47,7 @@ function buildAiSize(vote: AiVote) {
   return { dominant, bigVote, smallVote };
 }
 
-function buildAiVote(D: string[], targetIndexes = [2, 3]) {
+function buildAiVote(D: string[], targetIndexes = [2, 3], thresholds: Record<number, number> = aiThresholds()) {
   const U = D.slice(-17);
   const sr = [];
   let elitCount = 0;
@@ -54,7 +64,7 @@ function buildAiVote(D: string[], targetIndexes = [2, 3]) {
       valid++;
       if (targetIndexes.some((index) => ai.includes(parseInt(tgt[index])))) hits++;
     }
-    const thr = _0xe57f0c[rm.dg] || 10;
+    const thr = thresholdForDigitCount(rm.dg, thresholds);
     const lolos = hits >= thr;
     sr.push({ name: rm.n, dg: rm.dg, hits, valid, thresh: thr, lolos });
 
@@ -96,9 +106,10 @@ export function runAnalysis(type: string, payload: string[], param: number, opti
   // ── AI ────────────────────────────────────────────────────────────────────
   if (type === 'ai' || type === 'ai_parity' || type === 'ai_size') {
     const targetIndexes = aiTargetIndexes(analysisScope);
-    const { sr, elitCount, vote, fallback } = buildAiVote(D, targetIndexes);
+    const thresholds = aiThresholds(analysisScope);
+    const { sr, elitCount, vote, fallback } = buildAiVote(D, targetIndexes, thresholds);
     const aiResultParam = forceDigitResult ? param : type === 'ai' && param !== 7 && param !== 8 ? param : 6;
-    const aiResult = _0xEngineAI(D, aiResultParam);
+    const aiResult = _0xEngineAI(D, aiResultParam, { targetIndexes, thresholds });
     const parity = buildAiParity(vote);
     const size = buildAiSize(vote);
     const stats = sr.filter(s => s.lolos);
