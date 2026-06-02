@@ -9,7 +9,8 @@ export const MARKET_STAT_SELECT = "id,market_id,market_name,group_key,group_labe
 export type CategoryKey = "ai" | "ai_parity" | "ai_size" | "bbfs" | "off_digit" | "off_jumlah" | "off_shio";
 export type VisibleCategoryKey = "ai" | "bbfs" | "off_digit" | "off_jumlah" | "off_shio";
 export type TargetPair = "depan" | "tengah" | "belakang";
-export type AnalysisScope = "4d" | "3d" | "2d_depan" | "2d_tengah" | "2d_belakang";
+export type AnalysisScope = "default" | "4d" | "3d" | "2d_depan" | "2d_tengah" | "2d_belakang";
+export type AiStatScope = "default" | "3d" | "4d";
 
 export type MarketStatistic = {
   id?: string;
@@ -51,6 +52,12 @@ export const targetPairs: Array<{ key: TargetPair; label: string }> = [
   { key: "belakang", label: "Belakang" },
 ];
 
+export const aiScopes: Array<{ key: AiStatScope; label: string; subtitle: string }> = [
+  { key: "default", label: "AI 2D", subtitle: "Depan / Tengah / Belakang" },
+  { key: "3d", label: "AI 3D", subtitle: "KOP + Kepala + Ekor" },
+  { key: "4d", label: "AI 4D", subtitle: "AS + KOP + Kepala + Ekor" },
+];
+
 export const bbfsScopes: Array<{ key: AnalysisScope; label: string; subtitle: string; targetPair: TargetPair }> = [
   { key: "4d", label: "4D", subtitle: "AS + KOP + Kepala + Ekor", targetPair: "belakang" },
   { key: "3d", label: "3D", subtitle: "KOP + Kepala + Ekor", targetPair: "belakang" },
@@ -77,6 +84,18 @@ export function targetPairLabel(value?: string) {
   if (value === "tengah") return "Tengah";
   if (value === "belakang") return "Belakang";
   return "Semua";
+}
+
+export function aiScopeMeta(value?: string) {
+  return aiScopes.find((item) => item.key === value) || aiScopes[0];
+}
+
+export function aiScopeLabel(value?: string) {
+  return aiScopeMeta(value).label;
+}
+
+export function aiScopeSubtitle(value?: string) {
+  return aiScopeMeta(value).subtitle;
 }
 
 export function aiParamLabel(value: number) {
@@ -113,9 +132,9 @@ export function positionPairSubtitle(value?: string) {
 }
 
 export function statTitle(item: MarketStatistic) {
-  if (item.group_key === "ai") return `AI ${targetPairLabel(item.target_pair)} ${item.param}D`;
-  if (item.group_key === "ai_parity") return `AI Ganjil Genap ${targetPairLabel(item.target_pair)}`;
-  if (item.group_key === "ai_size") return `AI Besar Kecil ${targetPairLabel(item.target_pair)}`;
+  if (item.group_key === "ai") return `${aiScopeLabel(item.analysis_scope)} ${item.analysis_scope === "default" ? targetPairLabel(item.target_pair) : ""} ${item.param}D`.replace(/\s+/g, " ").trim();
+  if (item.group_key === "ai_parity") return `${aiScopeLabel(item.analysis_scope)} Ganjil Genap ${item.analysis_scope === "default" ? targetPairLabel(item.target_pair) : ""}`.replace(/\s+/g, " ").trim();
+  if (item.group_key === "ai_size") return `${aiScopeLabel(item.analysis_scope)} Besar Kecil ${item.analysis_scope === "default" ? targetPairLabel(item.target_pair) : ""}`.replace(/\s+/g, " ").trim();
   if (item.group_key === "bbfs") return `BBFS ${bbfsScopeLabel(item.analysis_scope)} ${item.param}`;
   if (item.group_key === "off_digit") return `2D ${targetPairLabel(item.target_pair)} · OFF ${item.param}`;
   if (item.group_key === "off_jumlah") return `OFF Jumlah ${targetPairLabel(item.target_pair)} ${item.param}`;
@@ -124,9 +143,9 @@ export function statTitle(item: MarketStatistic) {
 }
 
 export function shortStatTitle(item: MarketStatistic) {
-  if (item.group_key === "ai") return `AI ${item.param}D ${targetPairLabel(item.target_pair)}`;
-  if (item.group_key === "ai_parity") return `Ganjil Genap ${targetPairLabel(item.target_pair)}`;
-  if (item.group_key === "ai_size") return `Besar Kecil ${targetPairLabel(item.target_pair)}`;
+  if (item.group_key === "ai") return `${aiScopeLabel(item.analysis_scope)} ${item.param}D ${item.analysis_scope === "default" ? targetPairLabel(item.target_pair) : ""}`.replace(/\s+/g, " ").trim();
+  if (item.group_key === "ai_parity") return `${aiScopeLabel(item.analysis_scope)} Ganjil Genap ${item.analysis_scope === "default" ? targetPairLabel(item.target_pair) : ""}`.replace(/\s+/g, " ").trim();
+  if (item.group_key === "ai_size") return `${aiScopeLabel(item.analysis_scope)} Besar Kecil ${item.analysis_scope === "default" ? targetPairLabel(item.target_pair) : ""}`.replace(/\s+/g, " ").trim();
   if (item.group_key === "bbfs") return `BBFS ${bbfsScopeLabel(item.analysis_scope)} ${item.param}`;
   if (item.group_key === "off_digit") return `2D ${targetPairLabel(item.target_pair)} OFF ${item.param}`;
   if (item.group_key === "off_jumlah") return `Jumlah ${item.param} ${targetPairLabel(item.target_pair)}`;
@@ -140,7 +159,8 @@ export function statIdentity(item: MarketStatistic) {
 
 export function relatedGroupKey(item: MarketStatistic) {
   if (item.group_key === "bbfs") return `${item.group_key}|${item.analysis_scope || "default"}`;
-  if (item.group_key === "ai" || item.group_key === "ai_parity" || item.group_key === "ai_size" || item.group_key === "off_jumlah" || item.group_key === "off_shio") return `${item.group_key}|${item.target_pair || "all"}`;
+  if (item.group_key === "ai" || item.group_key === "ai_parity" || item.group_key === "ai_size") return `${item.group_key}|${item.analysis_scope || "default"}|${item.target_pair || "all"}`;
+  if (item.group_key === "off_jumlah" || item.group_key === "off_shio") return `${item.group_key}|${item.target_pair || "all"}`;
   if (item.group_key === "off_digit") return `${item.group_key}|${item.target_pair || "all"}`;
   return item.group_key;
 }
