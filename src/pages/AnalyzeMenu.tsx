@@ -7,7 +7,7 @@ const MODE_META: any = {
   ai: { icon: "✦", lucide: Activity, accent: "#f3c14b", glow: "rgba(243, 193, 75, 0.10)" },
   bbfs: { icon: "▦", lucide: Grid3X3, accent: "#ff9f43", glow: "rgba(255, 159, 67, 0.10)" },
   mati: { icon: "×", lucide: ShieldAlert, accent: "#ff647c", glow: "rgba(255, 100, 124, 0.10)" },
-  jumlah: { icon: "#", lucide: Hash, accent: "#b58cff", glow: "rgba(181, 140, 255, 0.10)" },
+  jumlah: { icon: "#", lucide: Hash, accent: "#14b8a6", glow: "rgba(20, 184, 166, 0.10)" },
   shio: { icon: "◎", lucide: Gauge, accent: "#28d7ff", glow: "rgba(40, 215, 255, 0.10)" },
   rekap: { icon: "◆", lucide: Trophy, accent: "#6ea8ff", glow: "rgba(110, 168, 255, 0.10)" },
 };
