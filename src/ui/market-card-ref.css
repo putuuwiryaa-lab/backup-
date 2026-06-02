@@ -155,14 +155,14 @@ header p {
 }
 
 .analysis-mode-jumlah {
-  --mode-accent: #b58cff;
-  --mode-soft: rgba(181, 140, 255, 0.16);
-  --mode-panel: #1f1730;
-  --mode-panel-2: #130e1f;
-  --mode-border: rgba(181, 140, 255, 0.36);
-  --mode-border-soft: rgba(181, 140, 255, 0.22);
-  --mode-inner: #120b1d;
-  --mode-text: #d8c3ff;
+  --mode-accent: #14b8a6;
+  --mode-soft: rgba(20, 184, 166, 0.14);
+  --mode-panel: #0f2420;
+  --mode-panel-2: #0a1715;
+  --mode-border: rgba(20, 184, 166, 0.36);
+  --mode-border-soft: rgba(20, 184, 166, 0.22);
+  --mode-inner: #071512;
+  --mode-text: #8ff2e6;
 }
 
 .analysis-mode-shio {
