@@ -86,17 +86,17 @@ export function runAnalysis(type: string, payload: string[], param: number) {
   // ── AI ────────────────────────────────────────────────────────────────────
   if (type === 'ai' || type === 'ai_parity' || type === 'ai_size') {
     const { sr, elitCount, vote, fallback } = buildAiVote(D);
-    const aiResult = _0xEngineAI(D, type === 'ai' ? param : 6);
+    const aiResult = _0xEngineAI(D, type === 'ai' && param !== 7 && param !== 8 ? param : 6);
     const parity = buildAiParity(vote);
     const size = buildAiSize(vote);
     const stats = sr.filter(s => s.lolos);
 
-    if (type === 'ai_parity') {
-      return { success: true, data: { stats, elitCount, fallback, result: parity.dominant, parity, sourceResult: aiResult } };
+    if (type === 'ai_parity' || (type === 'ai' && param === 7)) {
+      return { success: true, data: { stats, elitCount, fallback, result: [parity.dominant], parity, sourceResult: aiResult, displayLabel: 'GANJIL GENAP', evaluationMode: 'ai_parity', evaluationParam: 1 } };
     }
 
-    if (type === 'ai_size') {
-      return { success: true, data: { stats, elitCount, fallback, result: size.dominant, size, sourceResult: aiResult } };
+    if (type === 'ai_size' || (type === 'ai' && param === 8)) {
+      return { success: true, data: { stats, elitCount, fallback, result: [size.dominant], size, sourceResult: aiResult, displayLabel: 'BESAR KECIL', evaluationMode: 'ai_size', evaluationParam: 1 } };
     }
 
     return {
