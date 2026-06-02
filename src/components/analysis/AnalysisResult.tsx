@@ -21,7 +21,7 @@ function StatsList({ stats, accent }: { stats: any[]; accent: string }) {
             <span className="rounded-full border px-2 py-1 text-[7px] font-black uppercase tracking-[1px]" style={{ borderColor: accent, color: accent }}>Elite</span>
             <div className="min-w-0">
               <div className="truncate text-[9.5px] font-semibold uppercase tracking-[1px] text-[var(--ui-text)] opacity-90">{s.name || `Rumus ${i + 1}`}</div>
-              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full ui-motion-soft" style={{ width: `${pct}%`, backgroundColor: accent }} /></div>
+              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full ui-motion-soft" style={{ width: `${pct}%`, background: accent, backgroundColor: accent }} /></div>
             </div>
             <span className="font-['JetBrains_Mono'] text-[9px] font-black" style={{ color: accent }}>{score}/14</span>
           </div>
