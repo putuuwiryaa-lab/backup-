@@ -19,14 +19,14 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 const RECOMMENDATION_SAMPLE_SIZE = 15;
 const RECOMMENDATION_MIN_SAMPLE = 10;
 
-const AI_WIN_THRESHOLDS: Record<number, number> = { 2: 9, 4: 11, 6: 13 };
+const AI_WIN_THRESHOLDS: Record<number, number> = { 1: 9, 2: 9, 3: 11, 4: 11, 5: 13, 6: 13 };
 const AI_DERIVED_WIN_THRESHOLDS: Record<number, number> = { 1: 9 };
 const BBFS_WIN_THRESHOLDS: Record<number, number> = { 7: 8, 8: 10, 9: 12 };
 const MATI_WIN_THRESHOLDS: Record<number, number> = { 1: 14, 2: 13, 3: 11 };
 const JUMLAH_WIN_THRESHOLDS: Record<number, number> = { 1: 14, 2: 12, 3: 11 };
 const SHIO_WIN_THRESHOLDS: Record<number, number> = { 1: 14, 2: 13, 3: 12 };
 
-const AI_PARTIAL_WIN_RATES: Record<number, number> = { 2: 9 / 15, 4: 11 / 15, 6: 13 / 15 };
+const AI_PARTIAL_WIN_RATES: Record<number, number> = { 1: 9 / 15, 2: 9 / 15, 3: 11 / 15, 4: 11 / 15, 5: 13 / 15, 6: 13 / 15 };
 const AI_DERIVED_PARTIAL_WIN_RATES: Record<number, number> = { 1: 9 / 15 };
 const BBFS_PARTIAL_WIN_RATES: Record<number, number> = { 7: 8 / 15, 8: 10 / 15, 9: 12 / 15 };
 const MATI_PARTIAL_WIN_RATES: Record<number, number> = { 1: 14 / 15, 2: 13 / 15, 3: 11 / 15 };
@@ -42,6 +42,8 @@ type PairAiMap = Partial<Record<TargetPair, 2 | 4 | 6 | null>>;
 type PairBoolMap = Partial<Record<TargetPair, boolean>>;
 type PairCountMap = Partial<Record<TargetPair, number | null>>;
 type BBFSDigit = 7 | 8 | 9;
+type Ai3DDigit = 1 | 3 | 5;
+type Ai4DDigit = 1 | 2 | 4;
 
 const pairLabel: Record<TargetPair, string> = {
   depan: "DEPAN",
@@ -103,11 +105,7 @@ function scoreParams(rows: any[], params: number[], group: RecommendationGroup) 
 
 function pickRecommendationFromScores(scored: ScoredRecommendation[], prefer: "low" | "high") {
   if (!scored.length) return null;
-
-  const selectedParam = prefer === "low"
-    ? Math.min(...scored.map((item) => item.param))
-    : Math.max(...scored.map((item) => item.param));
-
+  const selectedParam = prefer === "low" ? Math.min(...scored.map((item) => item.param)) : Math.max(...scored.map((item) => item.param));
   return scored.find((item) => item.param === selectedParam) || null;
 }
 
@@ -125,22 +123,11 @@ function applyRecommendationBadges(
 ) {
   const scored = scoreParams(rows, params, group);
   const pick = pickRecommendationFromScores(scored, prefer);
-
   if (pick) setBadge(next, keyForParam(pick.param), pick.badge);
-
-  scored
-    .filter((item) => item.badge === "fire")
-    .forEach((item) => setBadge(next, keyForParam(item.param), "fire"));
+  scored.filter((item) => item.badge === "fire").forEach((item) => setBadge(next, keyForParam(item.param), "fire"));
 }
 
-async function loadRows(
-  marketId: string,
-  mode: string,
-  position: string,
-  params: number[],
-  targetPair: TargetPair = "belakang",
-  analysisScope = "default"
-) {
+async function loadRows(marketId: string, mode: string, position: string, params: number[], targetPair: TargetPair = "belakang", analysisScope = "default") {
   const { data, error } = await supabase
     .from("analysis_evaluations")
     .select("param,is_hit,status,evaluated_at,target_pair,analysis_scope")
@@ -154,7 +141,6 @@ async function loadRows(
     .limit(80);
 
   if (error) throw error;
-
   return data || [];
 }
 
@@ -169,6 +155,14 @@ export default function CustomDigitBuilder({
   setCustomAiParityForPair,
   customAiSizeByPair,
   setCustomAiSizeForPair,
+  customAi3dDigit,
+  setCustomAi3dDigit,
+  customAi3dParity,
+  setCustomAi3dParity,
+  customAi3dSize,
+  setCustomAi3dSize,
+  customAi4dDigit,
+  setCustomAi4dDigit,
   customBBFSDigit,
   setCustomBBFSDigit,
   customOffAsCount,
@@ -189,37 +183,34 @@ export default function CustomDigitBuilder({
   marketId: string;
   meta: { accent: string; soft: string };
   customFocus: CustomFocus;
-
   customAiDigitByPair: PairAiMap;
   setCustomAiDigitForPair: (pair: TargetPair, value: 2 | 4 | 6 | null) => void;
-
   customAiParityByPair: PairBoolMap;
   setCustomAiParityForPair: (pair: TargetPair, value: boolean) => void;
-
   customAiSizeByPair: PairBoolMap;
   setCustomAiSizeForPair: (pair: TargetPair, value: boolean) => void;
-
+  customAi3dDigit: Ai3DDigit | null;
+  setCustomAi3dDigit: (value: Ai3DDigit | null) => void;
+  customAi3dParity: boolean;
+  setCustomAi3dParity: (value: boolean) => void;
+  customAi3dSize: boolean;
+  setCustomAi3dSize: (value: boolean) => void;
+  customAi4dDigit: Ai4DDigit | null;
+  setCustomAi4dDigit: (value: Ai4DDigit | null) => void;
   customBBFSDigit: BBFSDigit | null;
   setCustomBBFSDigit: (value: BBFSDigit | null) => void;
-
   customOffAsCount: number | null;
   setCustomOffAsCount: (value: number | null) => void;
-
   customOffKopCount: number | null;
   setCustomOffKopCount: (value: number | null) => void;
-
   customOffKepalaCount: number | null;
   setCustomOffKepalaCount: (value: number | null) => void;
-
   customOffEkorCount: number | null;
   setCustomOffEkorCount: (value: number | null) => void;
-
   customOffJumlahCountByPair: PairCountMap;
   setCustomOffJumlahCountForPair: (pair: TargetPair, value: number | null) => void;
-
   customOffShioCountByPair: PairCountMap;
   setCustomOffShioCountForPair: (pair: TargetPair, value: number | null) => void;
-
   onGenerate: () => void;
 }) {
   const [recommended, setRecommended] = useState<RecommendedMap>({});
@@ -253,18 +244,28 @@ export default function CustomDigitBuilder({
           })
         );
 
+        if (customFocus === "3d" || customFocus === "4d") {
+          const [ai3dRows, ai3dParityRows, ai3dSizeRows] = await Promise.all([
+            loadRows(marketId, "ai", "all", [1, 3, 5], "belakang", "3d"),
+            loadRows(marketId, "ai_parity", "all", [1], "belakang", "3d"),
+            loadRows(marketId, "ai_size", "all", [1], "belakang", "3d"),
+          ]);
+          applyRecommendationBadges(next, (param) => `ai3d-${param}`, ai3dRows, [1, 3, 5], "low", "ai");
+          applyRecommendationBadges(next, () => "ai3d-7", ai3dParityRows, [1], "low", "ai_parity");
+          applyRecommendationBadges(next, () => "ai3d-8", ai3dSizeRows, [1], "low", "ai_size");
+        }
+
+        if (customFocus === "4d") {
+          const ai4dRows = await loadRows(marketId, "ai", "all", [1, 2, 4], "belakang", "4d");
+          applyRecommendationBadges(next, (param) => `ai4d-${param}`, ai4dRows, [1, 2, 4], "low", "ai");
+        }
+
         const bbfsRows = await loadRows(
           marketId,
           "bbfs",
           "all",
           [7, 8, 9],
-          bbfsScope.includes("2d_")
-            ? bbfsScope === "2d_depan"
-              ? "depan"
-              : bbfsScope === "2d_tengah"
-                ? "tengah"
-                : "belakang"
-            : "belakang",
+          bbfsScope.includes("2d_") ? bbfsScope === "2d_depan" ? "depan" : bbfsScope === "2d_tengah" ? "tengah" : "belakang" : "belakang",
           bbfsScope
         );
 
@@ -299,6 +300,8 @@ export default function CustomDigitBuilder({
   const visiblePositions = customFocusPositions(customFocus);
   const visiblePairs = customFocusPairs(customFocus);
   const bbfsScope = customFocusToBBFSScope(customFocus);
+  const showAi3d = customFocus === "3d" || customFocus === "4d";
+  const showAi4d = customFocus === "4d";
 
   const positionValues: Record<PositionKey, number | null> = {
     as: customOffAsCount,
@@ -316,13 +319,7 @@ export default function CustomDigitBuilder({
 
   if (!show) return null;
 
-  const optionButton = (
-    active: boolean,
-    label: string,
-    onClick: () => void,
-    extraClass = "",
-    recommendKey?: string
-  ) => {
+  const optionButton = (active: boolean, label: string, onClick: () => void, extraClass = "", recommendKey?: string) => {
     const badge = recommendKey ? badges[recommendKey] : undefined;
     const isRecommended = Boolean(badge);
 
@@ -337,15 +334,8 @@ export default function CustomDigitBuilder({
           color: active ? meta.accent : "var(--ui-text-muted)",
         }}
       >
-        {badge && (
-          <span className="absolute right-3 top-2 text-[15px] leading-none">
-            {badge === "fire" ? "🔥" : "👍"}
-          </span>
-        )}
-
-        <span className="block font-['Orbitron'] text-[13px] font-black uppercase tracking-[2px]">
-          {label}
-        </span>
+        {badge && <span className="absolute right-3 top-2 text-[15px] leading-none">{badge === "fire" ? "🔥" : "👍"}</span>}
+        <span className="block font-['Orbitron'] text-[13px] font-black uppercase tracking-[2px]">{label}</span>
       </button>
     );
   };
@@ -353,132 +343,82 @@ export default function CustomDigitBuilder({
   return (
     <div className="ui-panel ui-motion-in mt-4 space-y-4 p-4">
       <div className="text-center">
-        <div className="ui-title text-[10px]" style={{ color: meta.accent }}>
-          Custom Digit
-        </div>
-        <p className="mt-2 text-[10px] font-semibold uppercase tracking-[1.5px] text-[var(--ui-text-muted)]">
-          Pilih filter yang mau dipakai, lalu generate.
-        </p>
+        <div className="ui-title text-[10px]" style={{ color: meta.accent }}>Custom Digit</div>
+        <p className="mt-2 text-[10px] font-semibold uppercase tracking-[1.5px] text-[var(--ui-text-muted)]">Pilih filter yang mau dipakai, lalu generate.</p>
       </div>
+
+      {showAi3d && (
+        <section className="ui-card space-y-2 rounded-3xl p-3">
+          <MiniLabel>AI 3D · KOP - KEPALA - EKOR</MiniLabel>
+          <div className="grid grid-cols-3 gap-2">
+            {[1, 3, 5].map((n) => optionButton(customAi3dDigit === n, String(n), () => setCustomAi3dDigit(customAi3dDigit === n ? null : (n as Ai3DDigit)), "", `ai3d-${n}`))}
+          </div>
+          <div className="grid grid-cols-1 gap-2">
+            {optionButton(customAi3dParity, "GENAP GANJIL", () => setCustomAi3dParity(!customAi3dParity), "", "ai3d-7")}
+            {optionButton(customAi3dSize, "BESAR KECIL", () => setCustomAi3dSize(!customAi3dSize), "", "ai3d-8")}
+          </div>
+        </section>
+      )}
+
+      {showAi4d && (
+        <section className="ui-card space-y-2 rounded-3xl p-3">
+          <MiniLabel>AI 4D · AS - KOP - KEPALA - EKOR</MiniLabel>
+          <div className="grid grid-cols-3 gap-2">
+            {[1, 2, 4].map((n) => optionButton(customAi4dDigit === n, String(n), () => setCustomAi4dDigit(customAi4dDigit === n ? null : (n as Ai4DDigit)), "", `ai4d-${n}`))}
+          </div>
+        </section>
+      )}
 
       {visiblePairs.map((pair) => (
         <section key={`ai-${pair}`} className="ui-card space-y-2 rounded-3xl p-3">
-          <MiniLabel>
-            AI {pairLabel[pair]} · {pairSubtitle[pair]}
-          </MiniLabel>
-
+          <MiniLabel>AI {pairLabel[pair]} · {pairSubtitle[pair]}</MiniLabel>
           <div className="grid grid-cols-3 gap-2">
-            {[2, 4, 6].map((n) =>
-              optionButton(
-                customAiDigitByPair[pair] === n,
-                String(n),
-                () => setCustomAiDigitForPair(pair, customAiDigitByPair[pair] === n ? null : (n as 2 | 4 | 6)),
-                "",
-                `ai-${pair}-${n}`
-              )
-            )}
+            {[2, 4, 6].map((n) => optionButton(customAiDigitByPair[pair] === n, String(n), () => setCustomAiDigitForPair(pair, customAiDigitByPair[pair] === n ? null : (n as 2 | 4 | 6)), "", `ai-${pair}-${n}`))}
           </div>
-
           <div className="grid grid-cols-1 gap-2">
-            {optionButton(
-              Boolean(customAiParityByPair[pair]),
-              "GANJIL GENAP",
-              () => setCustomAiParityForPair(pair, !customAiParityByPair[pair]),
-              "",
-              `ai-${pair}-7`
-            )}
-
-            {optionButton(
-              Boolean(customAiSizeByPair[pair]),
-              "BESAR KECIL",
-              () => setCustomAiSizeForPair(pair, !customAiSizeByPair[pair]),
-              "",
-              `ai-${pair}-8`
-            )}
+            {optionButton(Boolean(customAiParityByPair[pair]), "GENAP GANJIL", () => setCustomAiParityForPair(pair, !customAiParityByPair[pair]), "", `ai-${pair}-7`)}
+            {optionButton(Boolean(customAiSizeByPair[pair]), "BESAR KECIL", () => setCustomAiSizeForPair(pair, !customAiSizeByPair[pair]), "", `ai-${pair}-8`)}
           </div>
         </section>
       ))}
 
       <section className="ui-card space-y-2 rounded-3xl p-3">
         <MiniLabel>BBFS {bbfsScope.toUpperCase().replaceAll("_", " ")}</MiniLabel>
-
         <div className="grid grid-cols-3 gap-2">
-          {[7, 8, 9].map((n) =>
-            optionButton(
-              customBBFSDigit === n,
-              String(n),
-              () => setCustomBBFSDigit(customBBFSDigit === n ? null : (n as BBFSDigit)),
-              "",
-              `bbfs-${n}`
-            )
-          )}
+          {[7, 8, 9].map((n) => optionButton(customBBFSDigit === n, String(n), () => setCustomBBFSDigit(customBBFSDigit === n ? null : (n as BBFSDigit)), "", `bbfs-${n}`))}
         </div>
       </section>
 
       {visiblePositions.map((position) => (
         <section key={position} className="ui-card space-y-2 rounded-3xl p-3">
           <MiniLabel>Angka Mati {customFocusPositionLabels[position]}</MiniLabel>
-
           <div className="grid grid-cols-3 gap-2">
-            {[1, 2, 3].map((n) =>
-              optionButton(
-                positionValues[position] === n,
-                String(n),
-                () => positionSetters[position](positionValues[position] === n ? null : n),
-                "",
-                `${position}-${n}`
-              )
-            )}
+            {[1, 2, 3].map((n) => optionButton(positionValues[position] === n, String(n), () => positionSetters[position](positionValues[position] === n ? null : n), "", `${position}-${n}`))}
           </div>
         </section>
       ))}
 
       {visiblePairs.map((pair) => (
         <section key={`jumlah-${pair}`} className="ui-card space-y-2 rounded-3xl p-3">
-          <MiniLabel>
-            Jumlah Mati {pairLabel[pair]} · {pairSubtitle[pair]}
-          </MiniLabel>
-
+          <MiniLabel>Jumlah Mati {pairLabel[pair]} · {pairSubtitle[pair]}</MiniLabel>
           <div className="grid grid-cols-3 gap-2">
-            {[1, 2, 3].map((n) =>
-              optionButton(
-                customOffJumlahCountByPair[pair] === n,
-                String(n),
-                () => setCustomOffJumlahCountForPair(pair, customOffJumlahCountByPair[pair] === n ? null : n),
-                "",
-                `jumlah-${pair}-${n}`
-              )
-            )}
+            {[1, 2, 3].map((n) => optionButton(customOffJumlahCountByPair[pair] === n, String(n), () => setCustomOffJumlahCountForPair(pair, customOffJumlahCountByPair[pair] === n ? null : n), "", `jumlah-${pair}-${n}`))}
           </div>
         </section>
       ))}
 
       {visiblePairs.map((pair) => (
         <section key={`shio-${pair}`} className="ui-card space-y-2 rounded-3xl p-3">
-          <MiniLabel>
-            Shio Mati {pairLabel[pair]} · {pairSubtitle[pair]}
-          </MiniLabel>
-
+          <MiniLabel>Shio Mati {pairLabel[pair]} · {pairSubtitle[pair]}</MiniLabel>
           <div className="grid grid-cols-3 gap-2">
-            {[1, 2, 3].map((n) =>
-              optionButton(
-                customOffShioCountByPair[pair] === n,
-                String(n),
-                () => setCustomOffShioCountForPair(pair, customOffShioCountByPair[pair] === n ? null : n),
-                "",
-                `shio-${pair}-${n}`
-              )
-            )}
+            {[1, 2, 3].map((n) => optionButton(customOffShioCountByPair[pair] === n, String(n), () => setCustomOffShioCountForPair(pair, customOffShioCountByPair[pair] === n ? null : n), "", `shio-${pair}-${n}`))}
           </div>
         </section>
       ))}
 
-      <button
-        onClick={onGenerate}
-        className="primary-button ui-motion-soft ui-tap flex w-full items-center justify-center gap-3 p-5 font-['Orbitron'] text-[12px] font-black uppercase tracking-[4px]"
-      >
+      <button onClick={onGenerate} className="primary-button ui-motion-soft ui-tap flex w-full items-center justify-center gap-3 p-5 font-['Orbitron'] text-[12px] font-black uppercase tracking-[4px]">
         <RefreshCw size={18} /> Generate
       </button>
     </div>
   );
-                                      }
+}
