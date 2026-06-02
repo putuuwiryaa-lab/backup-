@@ -5,6 +5,75 @@ import { _0x2d4get, _0xRumusShio, SHIO_RUMUS_NAMES, _0xEngineShioMati } from './
 import { _0x9a025f, _0xe57f0c, _0xEngineAI } from './engines/aiEngine.js';
 import { runRekap } from './engines/rekapEngine.js';
 
+type AiVote = Record<number, number>;
+
+function topVoteDigit(vote: AiVote) {
+  return Object.keys(vote)
+    .map((k) => ({ d: parseInt(k), v: vote[parseInt(k)] }))
+    .sort((a, b) => (b.v !== a.v ? b.v - a.v : a.d - b.d))[0]?.d ?? 0;
+}
+
+function buildAiParity(vote: AiVote) {
+  const evenVote = vote[0] + vote[2] + vote[4] + vote[6] + vote[8];
+  const oddVote = vote[1] + vote[3] + vote[5] + vote[7] + vote[9];
+  const tieDigit = topVoteDigit(vote);
+  const dominant = evenVote > oddVote ? 'GENAP' : oddVote > evenVote ? 'GANJIL' : tieDigit % 2 === 0 ? 'GENAP' : 'GANJIL';
+  return { dominant, evenVote, oddVote };
+}
+
+function buildAiSize(vote: AiVote) {
+  const smallVote = vote[0] + vote[1] + vote[2] + vote[3] + vote[4];
+  const bigVote = vote[5] + vote[6] + vote[7] + vote[8] + vote[9];
+  const tieDigit = topVoteDigit(vote);
+  const dominant = bigVote > smallVote ? 'BESAR' : smallVote > bigVote ? 'KECIL' : tieDigit >= 5 ? 'BESAR' : 'KECIL';
+  return { dominant, bigVote, smallVote };
+}
+
+function buildAiVote(D: string[]) {
+  const U = D.slice(-17);
+  const sr = [];
+  let elitCount = 0;
+  const vote: AiVote = {};
+  for (let d = 0; d <= 9; d++) vote[d] = 0;
+
+  for (let r = 0; r < _0x9a025f.length; r++) {
+    const rm = _0x9a025f[r];
+    let hits = 0, valid = 0;
+    for (let i = 0; i < 14; i++) {
+      const prev2 = U[i], prev = U[i + 1], curr = U[i + 2], tgt = U[i + 3];
+      const ai = rm.f(curr, prev, prev2);
+      if (ai === null) continue;
+      valid++;
+      if (ai.includes(parseInt(tgt[2])) || ai.includes(parseInt(tgt[3]))) hits++;
+    }
+    const thr = _0xe57f0c[rm.dg] || 10;
+    const lolos = hits >= thr;
+    sr.push({ name: rm.n, dg: rm.dg, hits, valid, thresh: thr, lolos });
+
+    if (lolos) {
+      const fp = rm.f(D[D.length - 1], D[D.length - 2], D[D.length - 3]);
+      if (fp !== null) {
+        elitCount++;
+        for (let j = 0; j < fp.length; j++) vote[fp[j] as number]++;
+      }
+    }
+  }
+
+  let fallback = false;
+  if (elitCount === 0) {
+    fallback = true;
+    for (let r = 0; r < _0x9a025f.length; r++) {
+      const fp = _0x9a025f[r].f(D[D.length - 1], D[D.length - 2], D[D.length - 3]);
+      if (fp !== null) {
+        elitCount++;
+        for (let j = 0; j < fp.length; j++) vote[fp[j] as number]++;
+      }
+    }
+  }
+
+  return { sr, elitCount, vote, fallback };
+}
+
 export function runAnalysis(type: string, payload: string[], param: number) {
   const D = payload;
   const U = D.slice(-17);
@@ -15,62 +84,24 @@ export function runAnalysis(type: string, payload: string[], param: number) {
   }
 
   // ── AI ────────────────────────────────────────────────────────────────────
-  if (type === 'ai') {
-    const sr = [];
-    let elitCount = 0;
-    const vote: Record<number, number> = {};
-    for (let d = 0; d <= 9; d++) vote[d] = 0;
+  if (type === 'ai' || type === 'ai_parity' || type === 'ai_size') {
+    const { sr, elitCount, vote, fallback } = buildAiVote(D);
+    const aiResult = _0xEngineAI(D, type === 'ai' ? param : 6);
+    const parity = buildAiParity(vote);
+    const size = buildAiSize(vote);
+    const stats = sr.filter(s => s.lolos);
 
-    for (let r = 0; r < _0x9a025f.length; r++) {
-      const rm = _0x9a025f[r];
-      let hits = 0, valid = 0;
-      for (let i = 0; i < 14; i++) {
-        const prev2 = U[i], prev = U[i + 1], curr = U[i + 2], tgt = U[i + 3];
-        const ai = rm.f(curr, prev, prev2);
-        if (ai === null) continue;
-        valid++;
-        if (ai.includes(parseInt(tgt[2])) || ai.includes(parseInt(tgt[3]))) hits++;
-      }
-      const thr = _0xe57f0c[rm.dg] || 10;
-      const lolos = hits >= thr;
-      sr.push({ name: rm.n, dg: rm.dg, hits, valid, thresh: thr, lolos });
-
-      if (lolos) {
-        const fp = rm.f(D[D.length - 1], D[D.length - 2], D[D.length - 3]);
-        if (fp !== null) {
-          elitCount++;
-          for (let j = 0; j < fp.length; j++) vote[fp[j]]++;
-        }
-      }
+    if (type === 'ai_parity') {
+      return { success: true, data: { stats, elitCount, fallback, result: parity.dominant, parity, sourceResult: aiResult } };
     }
 
-    let fallback = false;
-    if (elitCount === 0) {
-      fallback = true;
-      for (let r = 0; r < _0x9a025f.length; r++) {
-        const fp = _0x9a025f[r].f(D[D.length - 1], D[D.length - 2], D[D.length - 3]);
-        if (fp !== null) {
-          elitCount++;
-          for (let j = 0; j < fp.length; j++) vote[fp[j] as number]++;
-        }
-      }
+    if (type === 'ai_size') {
+      return { success: true, data: { stats, elitCount, fallback, result: size.dominant, size, sourceResult: aiResult } };
     }
-
-    const gap: Record<number, number> = {};
-    for (let d = 0; d <= 9; d++) gap[d] = U.length;
-    for (let j = U.length - 1; j >= 0; j--) {
-      const gk = parseInt(U[j][2]), ge = parseInt(U[j][3]);
-      if (gap[gk] === U.length) gap[gk] = U.length - 1 - j;
-      if (gap[ge] === U.length) gap[ge] = U.length - 1 - j;
-    }
-
-    const sorted = Object.keys(vote).map(k => ({ d: parseInt(k), v: vote[parseInt(k)], g: gap[parseInt(k)] }));
-    sorted.sort((a, b) => { if (b.v !== a.v) return b.v - a.v; return b.g - a.g; });
-    const aiResult = _0xEngineAI(D, param);
 
     return {
       success: true,
-      data: { stats: sr.filter(s => s.lolos), elitCount, fallback, result: aiResult }
+      data: { stats, elitCount, fallback, result: aiResult, parity, size }
     };
   }
 
