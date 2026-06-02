@@ -70,7 +70,7 @@ export default function StatisticsPage() {
 
   const [category, setCategory] = useState<VisibleCategoryKey>("ai");
   const [targetPair, setTargetPair] = useState<TargetPair>("belakang");
-  const [aiScope, setAiScope] = useState<AiStatScope>("default");
+  const [aiScope, setAiScope] = useState<AiStatScope>("2d_belakang");
   const [bbfsScope, setBbfsScope] = useState<AnalysisScope>("2d_belakang");
   const [param, setParam] = useState<number>(4);
   const [items, setItems] = useState<MarketStatistic[]>([]);
@@ -83,11 +83,13 @@ export default function StatisticsPage() {
   const isPositionCategory = category === "off_digit";
   const isBBFSCategory = category === "bbfs";
   const isAICategory = category === "ai";
-  const isPairCategory = (category === "ai" && aiScope === "default") || category === "off_digit" || category === "off_jumlah" || category === "off_shio";
+  const isPairCategory = category === "off_digit" || category === "off_jumlah" || category === "off_shio";
 
   const selectedBBFS = bbfsScopeMeta(bbfsScope);
   const selectedAI = aiScopeMeta(aiScope);
   const effectiveTargetPair = isBBFSCategory ? selectedBBFS.targetPair : targetPair;
+  const effectiveAIAnalysisScope = selectedAI.analysisScope;
+  const effectiveAITargetPair = selectedAI.targetPair;
 
   const queryGroupKey = category === "ai" ? aiParamGroupKey(param) : category;
   const queryParam = category === "ai" ? aiParamStatParam(param) : param;
@@ -95,9 +97,9 @@ export default function StatisticsPage() {
   const paramOptions = category === "ai" ? aiParamOptions(aiScope) : category === "bbfs" ? [7, 8, 9] : [1, 2, 3];
 
   const currentFilterLabel = isBBFSCategory
-    ? `${categoryMeta.title} ${selectedBBFS.label} ${param}`
+    ? `${categoryMeta.title} ${selectedBBFS.label} ${param} Angka`
     : isAICategory
-      ? `${selectedAI.label} ${aiScope === "default" ? targetPairLabel(targetPair) : ""} ${aiParamLabel(param)}`.replace(/\s+/g, " ").trim()
+      ? `${selectedAI.label} ${aiParamLabel(param)}`
       : isPositionCategory
         ? `2D ${targetPairLabel(targetPair)} OFF ${param}`
         : `${categoryMeta.title} ${targetPairLabel(targetPair)} ${`OFF ${param}`}`;
@@ -134,7 +136,8 @@ export default function StatisticsPage() {
       } else if (isAICategory) {
         query = query
           .eq("param", queryParam)
-          .eq("analysis_scope", aiScope);
+          .eq("target_pair", effectiveAITargetPair)
+          .eq("analysis_scope", effectiveAIAnalysisScope);
       } else {
         query = query
           .eq("param", queryParam)
@@ -142,7 +145,6 @@ export default function StatisticsPage() {
       }
 
       if (isPairCategory) query = query.eq("target_pair", targetPair);
-      if (isAICategory && aiScope !== "default") query = query.eq("target_pair", "belakang");
 
       const { data, error: queryError } = await query;
       if (queryError) throw queryError;
@@ -310,13 +312,13 @@ export default function StatisticsPage() {
                 className="max-w-[62%] truncate rounded-full px-3 py-1.5 text-[9px] font-black uppercase tracking-[1px] text-black"
                 style={{ background: statGold }}
               >
-                {currentFilterLabel}
+                {isAICategory ? selectedAI.label : currentFilterLabel}
               </span>
             </div>
 
             {isAICategory && (
               <div className="space-y-3 rounded-[1.35rem] border border-white/[0.08] bg-black/20 p-3">
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   {aiScopes.map((item) => {
                     const active = aiScope === item.key;
 
@@ -325,7 +327,7 @@ export default function StatisticsPage() {
                         key={item.key}
                         type="button"
                         onClick={() => setAiScope(item.key)}
-                        className="min-h-[54px] rounded-[1.05rem] px-2 py-3 text-[9px] font-black uppercase tracking-[1px] transition active:scale-[0.985]"
+                        className={`${item.key === "2d_belakang" ? "col-span-2" : ""} min-h-[54px] rounded-[1.05rem] px-2 py-3 text-[9px] font-black uppercase tracking-[1px] transition active:scale-[0.985]`}
                         style={{
                           background: active ? "linear-gradient(135deg,#34d399,#22c55e)" : "rgba(255,255,255,0.045)",
                           color: active ? "#03120d" : "var(--text-dim)",
@@ -402,30 +404,6 @@ export default function StatisticsPage() {
                     {positionPairSubtitle(targetPair)}
                   </p>
                 )}
-              </div>
-            ) : aiScope === "default" ? (
-              <div className="space-y-3 rounded-[1.35rem] border border-white/[0.08] bg-black/20 p-3">
-                <div className="grid grid-cols-3 gap-2">
-                  {targetPairs.map((item) => {
-                    const active = targetPair === item.key;
-
-                    return (
-                      <button
-                        key={item.key}
-                        type="button"
-                        onClick={() => setTargetPair(item.key)}
-                        className="min-h-[52px] rounded-[1.05rem] px-2 py-3 text-[9px] font-black uppercase tracking-[1px] transition active:scale-[0.985]"
-                        style={{
-                          background: active ? "linear-gradient(135deg,#34d399,#22c55e)" : "rgba(255,255,255,0.045)",
-                          color: active ? "#03120d" : "var(--text-dim)",
-                          border: active ? "1px solid rgba(187,247,208,0.75)" : "1px solid rgba(255,255,255,0.075)",
-                        }}
-                      >
-                        {item.label}
-                      </button>
-                    );
-                  })}
-                </div>
               </div>
             ) : null}
 
