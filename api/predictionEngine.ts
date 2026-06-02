@@ -7,7 +7,7 @@ import { runRekap } from './engines/rekapEngine.js';
 
 type AiVote = Record<number, number>;
 type AnalysisScope = 'default' | '4d' | '3d' | '2d_depan' | '2d_tengah' | '2d_belakang';
-type RunAnalysisOptions = { analysisScope?: AnalysisScope };
+type RunAnalysisOptions = { analysisScope?: AnalysisScope; forceDigitResult?: boolean };
 
 function aiTargetIndexes(scope: AnalysisScope = 'default') {
   if (scope === '4d') return [0, 1, 2, 3];
@@ -86,6 +86,7 @@ export function runAnalysis(type: string, payload: string[], param: number, opti
   const D = payload;
   const U = D.slice(-17);
   const analysisScope = options.analysisScope || 'default';
+  const forceDigitResult = options.forceDigitResult === true;
 
   // ── REKAP ─────────────────────────────────────────────────────────────────
   if (type === 'rekap') {
@@ -96,16 +97,17 @@ export function runAnalysis(type: string, payload: string[], param: number, opti
   if (type === 'ai' || type === 'ai_parity' || type === 'ai_size') {
     const targetIndexes = aiTargetIndexes(analysisScope);
     const { sr, elitCount, vote, fallback } = buildAiVote(D, targetIndexes);
-    const aiResult = _0xEngineAI(D, type === 'ai' && param !== 7 && param !== 8 ? param : 6);
+    const aiResultParam = forceDigitResult ? param : type === 'ai' && param !== 7 && param !== 8 ? param : 6;
+    const aiResult = _0xEngineAI(D, aiResultParam);
     const parity = buildAiParity(vote);
     const size = buildAiSize(vote);
     const stats = sr.filter(s => s.lolos);
 
-    if (type === 'ai_parity' || (type === 'ai' && param === 7)) {
+    if (!forceDigitResult && (type === 'ai_parity' || (type === 'ai' && param === 7))) {
       return { success: true, data: { stats, elitCount, fallback, result: [parity.dominant], parity, sourceResult: aiResult, displayLabel: 'GANJIL GENAP', evaluationMode: 'ai_parity', evaluationParam: 1 } };
     }
 
-    if (type === 'ai_size' || (type === 'ai' && param === 8)) {
+    if (!forceDigitResult && (type === 'ai_size' || (type === 'ai' && param === 8))) {
       return { success: true, data: { stats, elitCount, fallback, result: [size.dominant], size, sourceResult: aiResult, displayLabel: 'BESAR KECIL', evaluationMode: 'ai_size', evaluationParam: 1 } };
     }
 
