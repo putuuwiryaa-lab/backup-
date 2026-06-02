@@ -15,7 +15,6 @@ import {
   customFocusPairs,
   customFocusSubtitle,
   customFocusToBBFSScope,
-  type BBFSAnalysisScope,
   type CustomFocus,
   type TargetPair,
 } from "../lib/analysis/customDigit";
@@ -33,6 +32,8 @@ import {
 const VALID_TARGET_PAIRS: TargetPair[] = ["depan", "tengah", "belakang"];
 
 type BBFSDigit = 7 | 8 | 9;
+type Ai3DDigit = 1 | 3 | 5;
+type Ai4DDigit = 1 | 2 | 4;
 type PairAiMap = Partial<Record<TargetPair, 2 | 4 | 6 | null>>;
 type PairBoolMap = Partial<Record<TargetPair, boolean>>;
 type PairCountMap = Partial<Record<TargetPair, number | null>>;
@@ -75,6 +76,10 @@ export default function AnalysisPageV3Core({ type, title, icon, marketId }: { ty
   const [customAiDigitByPair, setCustomAiDigitByPair] = useState<PairAiMap>({});
   const [customAiParityByPair, setCustomAiParityByPair] = useState<PairBoolMap>({});
   const [customAiSizeByPair, setCustomAiSizeByPair] = useState<PairBoolMap>({});
+  const [customAi3dDigit, setCustomAi3dDigit] = useState<Ai3DDigit | null>(null);
+  const [customAi3dParity, setCustomAi3dParity] = useState(false);
+  const [customAi3dSize, setCustomAi3dSize] = useState(false);
+  const [customAi4dDigit, setCustomAi4dDigit] = useState<Ai4DDigit | null>(null);
   const [customBBFSDigit, setCustomBBFSDigit] = useState<BBFSDigit | null>(null);
   const [customOffAsCount, setCustomOffAsCount] = useState<number | null>(null);
   const [customOffKopCount, setCustomOffKopCount] = useState<number | null>(null);
@@ -167,6 +172,10 @@ export default function AnalysisPageV3Core({ type, title, icon, marketId }: { ty
 
   const handleCustomFocusReset = () => {
     setCustomFocus(null);
+    setCustomAi3dDigit(null);
+    setCustomAi3dParity(false);
+    setCustomAi3dSize(false);
+    setCustomAi4dDigit(null);
     setCustomBBFSDigit(null);
     setResult(null);
     setError("");
@@ -267,7 +276,8 @@ export default function AnalysisPageV3Core({ type, title, icon, marketId }: { ty
     }
     const pairs = customFocusPairs(customFocus);
     const hasAnyPairFilter = pairs.some((pair) => customAiDigitByPair[pair] || customAiParityByPair[pair] || customAiSizeByPair[pair] || customOffJumlahCountByPair[pair] || customOffShioCountByPair[pair]);
-    const hasAnyFilter = Boolean(hasAnyPairFilter || customBBFSDigit || customOffAsCount || customOffKopCount || customOffKepalaCount || customOffEkorCount);
+    const hasScopedAiFilter = Boolean(customAi3dDigit || customAi3dParity || customAi3dSize || customAi4dDigit);
+    const hasAnyFilter = Boolean(hasAnyPairFilter || hasScopedAiFilter || customBBFSDigit || customOffAsCount || customOffKopCount || customOffKepalaCount || customOffEkorCount);
     if (!hasAnyFilter) {
       setError("Pilih minimal satu filter dulu.");
       return;
@@ -281,6 +291,10 @@ export default function AnalysisPageV3Core({ type, title, icon, marketId }: { ty
       const jumlahByPair: Partial<Record<TargetPair, number[]>> = {};
       const shioByPair: Partial<Record<TargetPair, number[]>> = {};
       const matiCache: Partial<Record<number, any>> = {};
+      let ai3d: number[] = [];
+      let ai3dParity = "";
+      let ai3dSize = "";
+      let ai4d: number[] = [];
       let bbfsGlobal: number[] = [];
 
       for (const pair of pairs) {
@@ -300,6 +314,23 @@ export default function AnalysisPageV3Core({ type, title, icon, marketId }: { ty
         }
         if (jumlahCount) jumlahByPair[pair] = toNumberList((await postAnalyze("jumlah", data, jumlahCount, pair))?.result);
         if (shioCount) shioByPair[pair] = toNumberList((await postAnalyze("shio", data, shioCount, pair))?.result);
+      }
+
+      if ((customFocus === "3d" || customFocus === "4d") && customAi3dDigit) {
+        ai3d = toNumberList((await postAnalyze("ai", data, customAi3dDigit, "belakang", "3d"))?.result);
+      }
+      if ((customFocus === "3d" || customFocus === "4d") && customAi3dParity) {
+        const rawResult = (await postAnalyze("ai", data, 7, "belakang", "3d"))?.result;
+        const value = Array.isArray(rawResult) ? rawResult[0] : rawResult;
+        ai3dParity = String(value || "").trim().toUpperCase();
+      }
+      if ((customFocus === "3d" || customFocus === "4d") && customAi3dSize) {
+        const rawResult = (await postAnalyze("ai", data, 8, "belakang", "3d"))?.result;
+        const value = Array.isArray(rawResult) ? rawResult[0] : rawResult;
+        ai3dSize = String(value || "").trim().toUpperCase();
+      }
+      if (customFocus === "4d" && customAi4dDigit) {
+        ai4d = toNumberList((await postAnalyze("ai", data, customAi4dDigit, "belakang", "4d"))?.result);
       }
 
       if (customBBFSDigit) {
@@ -322,7 +353,7 @@ export default function AnalysisPageV3Core({ type, title, icon, marketId }: { ty
       const offKop = customOffKopCount ? toNumberList(matiKopData?.KOP?.result) : [];
       const offKepala = customOffKepalaCount ? toNumberList(matiKepalaData?.KEPALA?.result) : [];
       const offEkor = customOffEkorCount ? toNumberList(matiEkorData?.EKOR?.result) : [];
-      const lines = buildCustomDigitLines({ focus: customFocus, aiByPair, aiParityByPair, aiSizeByPair, bbfsGlobal, offAs, offKop, offKepala, offEkor, jumlahByPair, shioByPair });
+      const lines = buildCustomDigitLines({ focus: customFocus, aiByPair, aiParityByPair, aiSizeByPair, ai3d, ai3dParity, ai3dSize, ai4d, bbfsGlobal, offAs, offKop, offKepala, offEkor, jumlahByPair, shioByPair });
       setResult({
         lines,
         focus: customFocus,
@@ -330,6 +361,10 @@ export default function AnalysisPageV3Core({ type, title, icon, marketId }: { ty
         aiByPair,
         aiParityByPair,
         aiSizeByPair,
+        ai3d,
+        ai3dParity,
+        ai3dSize,
+        ai4d,
         bbfsGlobal,
         offAs,
         offKop,
@@ -343,6 +378,12 @@ export default function AnalysisPageV3Core({ type, title, icon, marketId }: { ty
           aiSizeEnabledByPair: customAiSizeByPair,
           aiParityByPair,
           aiSizeByPair,
+          ai3dDigit: customAi3dDigit,
+          ai3dParityEnabled: customAi3dParity,
+          ai3dSizeEnabled: customAi3dSize,
+          ai3dParity,
+          ai3dSize,
+          ai4dDigit: customAi4dDigit,
           bbfsDigit: customBBFSDigit,
           offCounts: { as: customOffAsCount, kop: customOffKopCount, kepala: customOffKepalaCount, ekor: customOffEkorCount },
           jumlahCountByPair: customOffJumlahCountByPair,
@@ -389,9 +430,9 @@ export default function AnalysisPageV3Core({ type, title, icon, marketId }: { ty
       {showAIScopeSelector && <AIScopeSelector meta={meta} onSelect={handleAIScopeSelect} />}
       {showTargetPairSelector && <TargetPairSelector meta={meta} onSelect={handleTargetPairSelect} />}
       {showBBFSScopeSelector && <BBFSScopeSelector meta={meta} onSelect={handleBBFSScopeSelect} />}
-      {showRekapFocusSelector && <RekapFocusSelector meta={meta} onSelect={(focus) => { setCustomFocus(focus); setCustomBBFSDigit(null); setError(""); }} />}
+      {showRekapFocusSelector && <RekapFocusSelector meta={meta} onSelect={(focus) => { setCustomFocus(focus); setCustomAi3dDigit(null); setCustomAi3dParity(false); setCustomAi3dSize(false); setCustomAi4dDigit(null); setCustomBBFSDigit(null); setError(""); }} />}
       {showParamSelector && !autoMode && <ParamSelector type={type} param={param} meta={meta} analysisScope={analysisScope || "default"} onAnalyze={handleAnalyze} onCustomDigit={() => { setParam(3); setResult(null); setError(""); }} />}
-      {customFocus && <CustomDigitBuilder show={showCustomDigitBuilder} marketId={marketId} meta={meta} customFocus={customFocus} customAiDigitByPair={customAiDigitByPair} setCustomAiDigitForPair={setCustomAiDigitForPair} customAiParityByPair={customAiParityByPair} setCustomAiParityForPair={setCustomAiParityForPair} customAiSizeByPair={customAiSizeByPair} setCustomAiSizeForPair={setCustomAiSizeForPair} customBBFSDigit={customBBFSDigit} setCustomBBFSDigit={setCustomBBFSDigit} customOffAsCount={customOffAsCount} setCustomOffAsCount={setCustomOffAsCount} customOffKopCount={customOffKopCount} setCustomOffKopCount={setCustomOffKopCount} customOffKepalaCount={customOffKepalaCount} setCustomOffKepalaCount={setCustomOffKepalaCount} customOffEkorCount={customOffEkorCount} setCustomOffEkorCount={setCustomOffEkorCount} customOffJumlahCountByPair={customOffJumlahCountByPair} setCustomOffJumlahCountForPair={setCustomOffJumlahCountForPair} customOffShioCountByPair={customOffShioCountByPair} setCustomOffShioCountForPair={setCustomOffShioCountForPair} onGenerate={handleCustomDigitGenerate} />}
+      {customFocus && <CustomDigitBuilder show={showCustomDigitBuilder} marketId={marketId} meta={meta} customFocus={customFocus} customAiDigitByPair={customAiDigitByPair} setCustomAiDigitForPair={setCustomAiDigitForPair} customAiParityByPair={customAiParityByPair} setCustomAiParityForPair={setCustomAiParityForPair} customAiSizeByPair={customAiSizeByPair} setCustomAiSizeForPair={setCustomAiSizeForPair} customAi3dDigit={customAi3dDigit} setCustomAi3dDigit={setCustomAi3dDigit} customAi3dParity={customAi3dParity} setCustomAi3dParity={setCustomAi3dParity} customAi3dSize={customAi3dSize} setCustomAi3dSize={setCustomAi3dSize} customAi4dDigit={customAi4dDigit} setCustomAi4dDigit={setCustomAi4dDigit} customBBFSDigit={customBBFSDigit} setCustomBBFSDigit={setCustomBBFSDigit} customOffAsCount={customOffAsCount} setCustomOffAsCount={setCustomOffAsCount} customOffKopCount={customOffKopCount} setCustomOffKopCount={setCustomOffKopCount} customOffKepalaCount={customOffKepalaCount} setCustomOffKepalaCount={setCustomOffKepalaCount} customOffEkorCount={customOffEkorCount} setCustomOffEkorCount={setCustomOffEkorCount} customOffJumlahCountByPair={customOffJumlahCountByPair} setCustomOffJumlahCountForPair={setCustomOffJumlahCountForPair} customOffShioCountByPair={customOffShioCountByPair} setCustomOffShioCountForPair={setCustomOffShioCountForPair} onGenerate={handleCustomDigitGenerate} />}
       {loading && <div className="ui-panel ui-motion-in my-4 flex flex-col items-center justify-center gap-4 p-8 text-center"><div className="h-12 w-12 animate-spin rounded-full border-4 border-white/10" style={{ borderTopColor: meta.accent }} /><div className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px]">Memproses Analisa</div></div>}
       {error && <div className="ui-note ui-motion-in my-4 border-red-400/30 bg-red-500/10 p-4 text-center text-[12px] font-bold text-red-300">{error}</div>}
       {result && type === "rekap" && <RekapResult result={result} param={param} marketId={marketId} meta={meta} />}
