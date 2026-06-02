@@ -6,6 +6,8 @@ from .utils import parse_history
 
 EVALUATOR_MODES = {
     "ai": [2, 4, 6],
+    "ai_parity": [1],
+    "ai_size": [1],
     "bbfs": [7, 8, 9],
     "mati": [1, 2, 3],
     "jumlah": [1, 2, 3],
@@ -16,7 +18,7 @@ BBFS_SCOPES = ["4d", "3d", "2d_depan", "2d_tengah", "2d_belakang"]
 
 
 def get_mode_target_pairs(mode):
-    return TARGET_PAIRS if mode in ["ai", "jumlah", "shio"] else ["belakang"]
+    return TARGET_PAIRS if mode in ["ai", "ai_parity", "ai_size", "jumlah", "shio"] else ["belakang"]
 
 
 def get_mode_scopes(mode):
