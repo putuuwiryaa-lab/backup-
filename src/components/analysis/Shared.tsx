@@ -6,7 +6,7 @@ export function MiniLabel({ children }: { children: React.ReactNode }) {
 }
 
 export function SectionTitle({ title, accent }: { title: string; accent: string }) {
-  return <div className="flex items-center gap-2"><BarChart3 size={16} style={{ color: accent }} /><span className="ui-title text-[11px]">{title}</span></div>;
+  return <div className="flex items-center gap-2"><BarChart3 size={16} style={{ color: accent }} /><span className="ui-title text-[11px]" style={{ color: accent }}>{title}</span></div>;
 }
 
 export function DetailToggle({ open, accent, onClick }: { open: boolean; accent: string; onClick: () => void }) {
