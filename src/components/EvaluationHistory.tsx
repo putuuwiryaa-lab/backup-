@@ -5,7 +5,7 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-type EvaluationMode = "ai" | "bbfs" | "mati" | "jumlah" | "shio";
+type EvaluationMode = "ai" | "ai_parity" | "ai_size" | "bbfs" | "mati" | "jumlah" | "shio";
 type EvaluationPosition = "all" | "as" | "kop" | "kepala" | "ekor";
 type TargetPair = "depan" | "tengah" | "belakang";
 type AnalysisScope = "default" | "4d" | "3d" | "2d_depan" | "2d_tengah" | "2d_belakang";
