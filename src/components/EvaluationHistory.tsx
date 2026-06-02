@@ -34,6 +34,14 @@ function displayLabel(row: any, mode: EvaluationMode) {
   return rawLabel === "TIDAK MASUK" ? "ZONK" : rawLabel;
 }
 
+function legacyAi2DScope(targetPair: TargetPair): AnalysisScope {
+  return `2d_${targetPair}` as AnalysisScope;
+}
+
+function shouldUseAi2DScopeFallback(mode: EvaluationMode, analysisScope: AnalysisScope) {
+  return mode === "ai" && analysisScope !== "3d" && analysisScope !== "4d";
+}
+
 export default function EvaluationHistory({
   marketId,
   mode,
@@ -69,12 +77,17 @@ export default function EvaluationHistory({
           .eq("market_id", marketId)
           .eq("mode", mode)
           .eq("param", param)
-          .eq("analysis_scope", analysisScope)
           .order("evaluated_at", { ascending: false })
           .limit(EVALUATION_HISTORY_LIMIT);
 
         if (position) query = query.eq("position", position);
         if (mode !== "mati") query = query.eq("target_pair", targetPair);
+
+        if (shouldUseAi2DScopeFallback(mode, analysisScope)) {
+          query = query.in("analysis_scope", ["default", legacyAi2DScope(targetPair)]);
+        } else {
+          query = query.eq("analysis_scope", analysisScope);
+        }
 
         const { data, error } = await query;
         if (error) throw error;
