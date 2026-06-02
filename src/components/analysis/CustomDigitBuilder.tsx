@@ -12,21 +12,23 @@ const RECOMMENDATION_SAMPLE_SIZE = 15;
 const RECOMMENDATION_MIN_SAMPLE = 10;
 
 const AI_WIN_THRESHOLDS: Record<number, number> = { 2: 9, 4: 11, 6: 13 };
+const AI_DERIVED_WIN_THRESHOLDS: Record<number, number> = { 1: 9 };
 const BBFS_WIN_THRESHOLDS: Record<number, number> = { 7: 8, 8: 10, 9: 12 };
 const MATI_WIN_THRESHOLDS: Record<number, number> = { 1: 14, 2: 13, 3: 11 };
 const JUMLAH_WIN_THRESHOLDS: Record<number, number> = { 1: 14, 2: 12, 3: 11 };
 const SHIO_WIN_THRESHOLDS: Record<number, number> = { 1: 14, 2: 13, 3: 12 };
 const AI_PARTIAL_WIN_RATES: Record<number, number> = { 2: 9 / 15, 4: 11 / 15, 6: 13 / 15 };
+const AI_DERIVED_PARTIAL_WIN_RATES: Record<number, number> = { 1: 9 / 15 };
 const BBFS_PARTIAL_WIN_RATES: Record<number, number> = { 7: 8 / 15, 8: 10 / 15, 9: 12 / 15 };
 const MATI_PARTIAL_WIN_RATES: Record<number, number> = { 1: 14 / 15, 2: 13 / 15, 3: 11 / 15 };
 const JUMLAH_PARTIAL_WIN_RATES: Record<number, number> = { 1: 14 / 15, 2: 12 / 15, 3: 11 / 15 };
 const SHIO_PARTIAL_WIN_RATES: Record<number, number> = { 1: 14 / 15, 2: 13 / 15, 3: 12 / 15 };
 
-type RecommendationGroup = "ai" | "bbfs" | "mati" | "jumlah" | "shio";
+type RecommendationGroup = "ai" | "ai_parity" | "ai_size" | "bbfs" | "mati" | "jumlah" | "shio";
 type RecommendationBadge = "thumb" | "fire";
 type RecommendedMap = Record<string, RecommendationBadge>;
 type ScoredRecommendation = { param: number; badge: RecommendationBadge };
-type PairAiMap = Partial<Record<TargetPair, 2 | 4 | 6 | null>>;
+type PairAiMap = Partial<Record<TargetPair, 2 | 4 | 6 | 7 | 8 | null>>;
 type PairCountMap = Partial<Record<TargetPair, number | null>>;
 type BBFSDigit = 7 | 8 | 9;
 
@@ -48,6 +50,7 @@ function isSuccessStatus(row: any) {
 
 function getFullThreshold(group: RecommendationGroup, param: number) {
   if (group === "ai") return AI_WIN_THRESHOLDS[param];
+  if (group === "ai_parity" || group === "ai_size") return AI_DERIVED_WIN_THRESHOLDS[param];
   if (group === "bbfs") return BBFS_WIN_THRESHOLDS[param];
   if (group === "jumlah") return JUMLAH_WIN_THRESHOLDS[param];
   if (group === "shio") return SHIO_WIN_THRESHOLDS[param];
@@ -56,6 +59,7 @@ function getFullThreshold(group: RecommendationGroup, param: number) {
 
 function getPartialWinRate(group: RecommendationGroup, param: number) {
   if (group === "ai") return AI_PARTIAL_WIN_RATES[param];
+  if (group === "ai_parity" || group === "ai_size") return AI_DERIVED_PARTIAL_WIN_RATES[param];
   if (group === "bbfs") return BBFS_PARTIAL_WIN_RATES[param];
   if (group === "jumlah") return JUMLAH_PARTIAL_WIN_RATES[param];
   if (group === "shio") return SHIO_PARTIAL_WIN_RATES[param];
@@ -140,7 +144,7 @@ export default function CustomDigitBuilder({
   meta: { accent: string; soft: string };
   customFocus: CustomFocus;
   customAiDigitByPair: PairAiMap;
-  setCustomAiDigitForPair: (pair: TargetPair, value: 2 | 4 | 6 | null) => void;
+  setCustomAiDigitForPair: (pair: TargetPair, value: 2 | 4 | 6 | 7 | 8 | null) => void;
   customBBFSDigit: BBFSDigit | null;
   setCustomBBFSDigit: (value: BBFSDigit | null) => void;
   customOffAsCount: number | null;
@@ -168,12 +172,16 @@ export default function CustomDigitBuilder({
         const bbfsScope = customFocusToBBFSScope(customFocus);
         const next: RecommendedMap = {};
         await Promise.all(pairs.map(async (pair) => {
-          const [aiRows, jumlahRows, shioRows] = await Promise.all([
+          const [aiRows, aiParityRows, aiSizeRows, jumlahRows, shioRows] = await Promise.all([
             loadRows(marketId, "ai", "all", [2, 4, 6], pair),
+            loadRows(marketId, "ai_parity", "all", [1], pair),
+            loadRows(marketId, "ai_size", "all", [1], pair),
             loadRows(marketId, "jumlah", "all", [1, 2, 3], pair),
             loadRows(marketId, "shio", "all", [1, 2, 3], pair),
           ]);
           applyRecommendationBadges(next, (param) => `ai-${pair}-${param}`, aiRows, [2, 4, 6], "low", "ai");
+          applyRecommendationBadges(next, () => `ai-${pair}-7`, aiParityRows, [1], "low", "ai_parity");
+          applyRecommendationBadges(next, () => `ai-${pair}-8`, aiSizeRows, [1], "low", "ai_size");
           applyRecommendationBadges(next, (param) => `jumlah-${pair}-${param}`, jumlahRows, [1, 2, 3], "high", "jumlah");
           applyRecommendationBadges(next, (param) => `shio-${pair}-${param}`, shioRows, [1, 2, 3], "high", "shio");
         }));
@@ -237,6 +245,10 @@ export default function CustomDigitBuilder({
           <div className="grid grid-cols-3 gap-2">
             {[2, 4, 6].map((n) => optionButton(customAiDigitByPair[pair] === n, String(n), () => setCustomAiDigitForPair(pair, customAiDigitByPair[pair] === n ? null : n as 2 | 4 | 6), "", `ai-${pair}-${n}`))}
           </div>
+          <div className="grid grid-cols-1 gap-2">
+            {optionButton(customAiDigitByPair[pair] === 7, "GANJIL GENAP", () => setCustomAiDigitForPair(pair, customAiDigitByPair[pair] === 7 ? null : 7), "", `ai-${pair}-7`)}
+            {optionButton(customAiDigitByPair[pair] === 8, "BESAR KECIL", () => setCustomAiDigitForPair(pair, customAiDigitByPair[pair] === 8 ? null : 8), "", `ai-${pair}-8`)}
+          </div>
         </section>
       ))}
 
@@ -277,4 +289,4 @@ export default function CustomDigitBuilder({
       <button onClick={onGenerate} className="primary-button ui-motion-soft ui-tap flex w-full items-center justify-center gap-3 p-5 font-['Orbitron'] text-[12px] font-black uppercase tracking-[4px]"><RefreshCw size={18} /> Generate</button>
     </div>
   );
-}
+    }
