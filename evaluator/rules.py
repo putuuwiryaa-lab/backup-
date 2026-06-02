@@ -7,7 +7,7 @@ def calculate_shio_from_2d(two_digit):
     return str(SHIO_TABLE.get(value, SHIO_TABLE.get(value % 100, 1)))
 
 
-def get_bbfs_target_digits(result, analysis_scope):
+def get_scope_target_digits(result, analysis_scope, target_pair="belakang"):
     text = str(result or "").zfill(4)[-4:]
     if analysis_scope == "4d":
         return list(text)
@@ -19,7 +19,27 @@ def get_bbfs_target_digits(result, analysis_scope):
         return list(text[1:3])
     if analysis_scope == "2d_belakang":
         return list(text[2:4])
-    raise RuntimeError(f"Unknown bbfs scope={analysis_scope}")
+    return list(get_target_2d(text, target_pair))
+
+
+def get_scope_target_label(analysis_scope, target_pair="belakang"):
+    if analysis_scope == "4d":
+        return "4D"
+    if analysis_scope == "3d":
+        return "3D"
+    if analysis_scope == "2d_depan":
+        return "2D DEPAN"
+    if analysis_scope == "2d_tengah":
+        return "2D TENGAH"
+    if analysis_scope == "2d_belakang":
+        return "2D BELAKANG"
+    return TARGET_PAIR_LABELS.get(target_pair, "KEPALA-EKOR")
+
+
+def get_bbfs_target_digits(result, analysis_scope):
+    if analysis_scope == "default":
+        raise RuntimeError("Unknown bbfs scope=default")
+    return get_scope_target_digits(result, analysis_scope)
 
 
 def parity_of_digit(digit):
@@ -66,48 +86,57 @@ def evaluate_snapshot(mode, param, snapshot_result, new_result, target_pair="bel
 
     if mode == "ai":
         digits = normalize_digit_list(snapshot_result)
-        target_set = set(target_2d)
+        target_digits = get_scope_target_digits(new_result, analysis_scope, target_pair)
+        target_set = set(target_digits)
         digit_set = set(digits)
         matched = sorted(target_set.intersection(digit_set), key=lambda x: int(x))
         is_hit = bool(matched)
         status = "MASUK" if is_hit else "TIDAK MASUK"
-        return is_hit, target_2d, status, {
+        return is_hit, "".join(target_digits), status, {
             "target_pair": target_pair,
             "target_pair_label": TARGET_PAIR_LABELS.get(target_pair, "KEPALA-EKOR"),
-            "target_2d": target_2d,
+            "analysis_scope": analysis_scope,
+            "analysis_scope_label": get_scope_target_label(analysis_scope, target_pair),
+            "target_digits": target_digits,
             "digits": digits,
             "matched_digits": matched,
-            "rule": "ai_any_2d_digit",
+            "rule": "ai_any_scope_digit",
         }
 
     if mode == "ai_parity":
         prediction = str(snapshot_result or "").strip().upper()
-        target_parities = [parity_of_digit(d) for d in target_2d]
+        target_digits = get_scope_target_digits(new_result, analysis_scope, target_pair)
+        target_parities = [parity_of_digit(d) for d in target_digits]
         is_hit = prediction in target_parities
         status = "MASUK" if is_hit else "TIDAK MASUK"
-        return is_hit, target_2d, status, {
+        return is_hit, "".join(target_digits), status, {
             "target_pair": target_pair,
             "target_pair_label": TARGET_PAIR_LABELS.get(target_pair, "KEPALA-EKOR"),
-            "target_2d": target_2d,
+            "analysis_scope": analysis_scope,
+            "analysis_scope_label": get_scope_target_label(analysis_scope, target_pair),
+            "target_digits": target_digits,
             "prediction": prediction,
             "target_parities": target_parities,
             "matched_parity": prediction if is_hit else None,
-            "rule": "ai_parity_any_2d_parity",
+            "rule": "ai_parity_any_scope_parity",
         }
 
     if mode == "ai_size":
         prediction = str(snapshot_result or "").strip().upper()
-        target_sizes = [size_of_digit(d) for d in target_2d]
+        target_digits = get_scope_target_digits(new_result, analysis_scope, target_pair)
+        target_sizes = [size_of_digit(d) for d in target_digits]
         is_hit = prediction in target_sizes
         status = "MASUK" if is_hit else "TIDAK MASUK"
-        return is_hit, target_2d, status, {
+        return is_hit, "".join(target_digits), status, {
             "target_pair": target_pair,
             "target_pair_label": TARGET_PAIR_LABELS.get(target_pair, "KEPALA-EKOR"),
-            "target_2d": target_2d,
+            "analysis_scope": analysis_scope,
+            "analysis_scope_label": get_scope_target_label(analysis_scope, target_pair),
+            "target_digits": target_digits,
             "prediction": prediction,
             "target_sizes": target_sizes,
             "matched_size": prediction if is_hit else None,
-            "rule": "ai_size_any_2d_size",
+            "rule": "ai_size_any_scope_size",
         }
 
     if mode == "jumlah":
