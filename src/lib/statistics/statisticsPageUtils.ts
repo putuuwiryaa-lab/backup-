@@ -7,6 +7,7 @@ export const MAX_LOSS_STREAK_ALLOWED = 2;
 export const MARKET_STAT_SELECT = "id,market_id,market_name,group_key,group_label,mode,param,position,target_pair,analysis_scope,wins_15,wins_last_5,max_loss_streak,sample_size,score,previous_rank,rank_movement,latest_is_hit,latest_status,updated_at";
 
 export type CategoryKey = "ai" | "ai_parity" | "ai_size" | "bbfs" | "off_digit" | "off_jumlah" | "off_shio";
+export type VisibleCategoryKey = "ai" | "bbfs" | "off_digit" | "off_jumlah" | "off_shio";
 export type TargetPair = "depan" | "tengah" | "belakang";
 export type AnalysisScope = "4d" | "3d" | "2d_depan" | "2d_tengah" | "2d_belakang";
 
@@ -36,10 +37,8 @@ export type MarketStatistic = {
 export type RelatedStatsMap = Record<string, MarketStatistic[]>;
 export type PositionPairMeta = { label: string; subtitle: string };
 
-export const categories: Array<{ key: CategoryKey; title: string }> = [
+export const categories: Array<{ key: VisibleCategoryKey; title: string }> = [
   { key: "ai", title: "AI" },
-  { key: "ai_parity", title: "Ganjil Genap" },
-  { key: "ai_size", title: "Besar Kecil" },
   { key: "bbfs", title: "BBFS" },
   { key: "off_digit", title: "Posisi" },
   { key: "off_jumlah", title: "Jumlah" },
@@ -78,6 +77,22 @@ export function targetPairLabel(value?: string) {
   if (value === "tengah") return "Tengah";
   if (value === "belakang") return "Belakang";
   return "Semua";
+}
+
+export function aiParamLabel(value: number) {
+  if (value === 7) return "Ganjil Genap";
+  if (value === 8) return "Besar Kecil";
+  return `${value}D`;
+}
+
+export function aiParamGroupKey(value: number): CategoryKey {
+  if (value === 7) return "ai_parity";
+  if (value === 8) return "ai_size";
+  return "ai";
+}
+
+export function aiParamStatParam(value: number) {
+  return value === 7 || value === 8 ? 1 : value;
 }
 
 export function bbfsScopeMeta(value?: string) {
