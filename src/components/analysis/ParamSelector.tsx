@@ -18,6 +18,7 @@ export default function ParamSelector({ type, param, meta, onAnalyze, onCustomDi
     jumlah: { title: "PILIH JUMLAH OFF", values: [1, 2, 3], hints: { 1: "RINGAN", 2: "SEIMBANG", 3: "KETAT" } },
     shio: { title: "PILIH JUMLAH SHIO MATI", values: [1, 2, 3], hints: { 1: "RINGAN", 2: "SEIMBANG", 3: "KETAT" } },
   };
+
   const cfg = options[type] || options.ai;
   const isThreeDigitMode = type === "mati" || type === "jumlah" || type === "shio";
   const isAiMode = type === "ai";
@@ -25,18 +26,55 @@ export default function ParamSelector({ type, param, meta, onAnalyze, onCustomDi
 
   return (
     <div className="ui-panel ui-motion-in mt-4 p-4">
-      <div className="mb-3 text-center text-[10px] font-black uppercase tracking-[3px]" style={{ color: meta.accent }}>{cfg.title}</div>
-      <div className={`grid gap-2 ${isAiMode ? "grid-cols-1 sm:grid-cols-3" : isGridThree ? "grid-cols-3" : "grid-cols-2 sm:grid-cols-4"}`}>
+      <div
+        className="mb-3 text-center text-[10px] font-black uppercase tracking-[3px]"
+        style={{ color: meta.accent }}
+      >
+        {cfg.title}
+      </div>
+
+      <div className={`grid gap-2 ${isAiMode || isGridThree ? "grid-cols-3" : "grid-cols-2 sm:grid-cols-4"}`}>
         {cfg.values.map((value: number) => {
           const isSpecial = type === "ai" && (value === 7 || value === 8);
           const hint = cfg.hints?.[value];
           const label = isSpecial ? cfg.labels[value] : String(value);
+
           return (
-            <button key={String(value)} onClick={() => onAnalyze(value)} className={`ui-motion-soft ui-tap ui-lift rounded-3xl border ${isAiMode ? "min-h-[82px] p-3" : isGridThree ? "min-h-[92px] p-3" : "p-5"} text-center`} style={{ borderColor: `${meta.accent}88`, backgroundColor: meta.soft, color: meta.accent }}>
-              <span className={`block font-['Orbitron'] font-black tracking-[2px] ${isSpecial ? "text-[13px] leading-5" : "text-xl"}`}>{label}</span>
-              {(((type === "ai" && !isSpecial) || type === "bbfs") && <span className="mt-2 block text-[8px] font-black uppercase tracking-[1.4px] opacity-80">DIGIT</span>)}
-              {isSpecial && <span className="mt-2 block text-[8px] font-black uppercase tracking-[1.4px] opacity-80">DOMINAN VOTING</span>}
-              {hint && <span className="mt-2 block text-[8px] font-black uppercase tracking-[1.4px] opacity-80">{hint}</span>}
+            <button
+              key={String(value)}
+              onClick={() => onAnalyze(value)}
+              className={`ui-motion-soft ui-tap ui-lift rounded-3xl border ${
+                isSpecial
+                  ? "col-span-3 min-h-[92px] p-4"
+                  : isAiMode || isGridThree
+                    ? "min-h-[92px] p-3"
+                    : "p-5"
+              } text-center`}
+              style={{
+                borderColor: `${meta.accent}88`,
+                backgroundColor: meta.soft,
+                color: meta.accent,
+              }}
+            >
+              <span
+                className={`block font-['Orbitron'] font-black tracking-[2px] ${
+                  isSpecial ? "text-[15px] leading-5" : "text-xl"
+                }`}
+              >
+                {label}
+              </span>
+
+              {(((type === "ai" && !isSpecial) || type === "bbfs") && (
+                <span className="mt-2 block text-[8px] font-black uppercase tracking-[1.4px] opacity-80">
+                  DIGIT
+                </span>
+              ))}
+
+              {hint && (
+                <span className="mt-2 block text-[8px] font-black uppercase tracking-[1.4px] opacity-80">
+                  {hint}
+                </span>
+              )}
             </button>
           );
         })}
