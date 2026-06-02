@@ -104,7 +104,7 @@ export function aiScopeSubtitle(value?: string) {
 export function aiParamLabel(value: number) {
   if (value === 7) return "Ganjil Genap";
   if (value === 8) return "Besar Kecil";
-  return `${value} Angka`;
+  return String(value);
 }
 
 export function aiParamGroupKey(value: number): CategoryKey {
@@ -142,7 +142,7 @@ export function statTitle(item: MarketStatistic) {
   if (item.group_key === "ai") return cleanLabel(`${aiScopeLabel(item.analysis_scope)} ${item.analysis_scope === "default" ? targetPairLabel(item.target_pair) : ""} ${aiParamLabel(item.param)}`);
   if (item.group_key === "ai_parity") return cleanLabel(`${aiScopeLabel(item.analysis_scope)} Ganjil Genap ${item.analysis_scope === "default" ? targetPairLabel(item.target_pair) : ""}`);
   if (item.group_key === "ai_size") return cleanLabel(`${aiScopeLabel(item.analysis_scope)} Besar Kecil ${item.analysis_scope === "default" ? targetPairLabel(item.target_pair) : ""}`);
-  if (item.group_key === "bbfs") return `BBFS ${bbfsScopeLabel(item.analysis_scope)} ${item.param} Angka`;
+  if (item.group_key === "bbfs") return `BBFS ${bbfsScopeLabel(item.analysis_scope)} ${item.param}`;
   if (item.group_key === "off_digit") return `2D ${targetPairLabel(item.target_pair)} · OFF ${item.param}`;
   if (item.group_key === "off_jumlah") return `OFF Jumlah ${targetPairLabel(item.target_pair)} ${item.param}`;
   if (item.group_key === "off_shio") return `OFF Shio ${targetPairLabel(item.target_pair)} ${item.param}`;
@@ -153,7 +153,7 @@ export function shortStatTitle(item: MarketStatistic) {
   if (item.group_key === "ai") return cleanLabel(`${aiScopeLabel(item.analysis_scope)} ${item.analysis_scope === "default" ? targetPairLabel(item.target_pair) : ""} ${aiParamLabel(item.param)}`);
   if (item.group_key === "ai_parity") return cleanLabel(`${aiScopeLabel(item.analysis_scope)} Ganjil Genap ${item.analysis_scope === "default" ? targetPairLabel(item.target_pair) : ""}`);
   if (item.group_key === "ai_size") return cleanLabel(`${aiScopeLabel(item.analysis_scope)} Besar Kecil ${item.analysis_scope === "default" ? targetPairLabel(item.target_pair) : ""}`);
-  if (item.group_key === "bbfs") return `BBFS ${bbfsScopeLabel(item.analysis_scope)} ${item.param} Angka`;
+  if (item.group_key === "bbfs") return `BBFS ${bbfsScopeLabel(item.analysis_scope)} ${item.param}`;
   if (item.group_key === "off_digit") return `2D ${targetPairLabel(item.target_pair)} OFF ${item.param}`;
   if (item.group_key === "off_jumlah") return `Jumlah ${item.param} ${targetPairLabel(item.target_pair)}`;
   if (item.group_key === "off_shio") return `Shio ${item.param} ${targetPairLabel(item.target_pair)}`;
