@@ -56,3 +56,13 @@ def normalize_simple_result(payload):
         if isinstance(payload.get("data"), list):
             return normalize_digit_list(payload.get("data"))
     return []
+
+
+def normalize_text_result(payload):
+    if isinstance(payload, dict):
+        result = payload.get("result")
+        if isinstance(result, list) and result:
+            return str(result[0]).strip().upper()
+        if isinstance(result, str):
+            return result.strip().upper()
+    return ""
