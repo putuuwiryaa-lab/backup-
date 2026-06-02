@@ -31,6 +31,11 @@ function customRows(result: any) {
   const positions = customFocusPositions(focus);
   const rows: any[] = [];
 
+  if (safeArray(result.ai3d).length) rows.push(["AI 3D", formatCompact(result.ai3d), "🔥", "#f3c14b", "emoji"]);
+  if (result.ai3dParity) rows.push(["GENAP/GANJIL 3D", String(result.ai3dParity), "⚖️", "#34d399", "emoji"]);
+  if (result.ai3dSize) rows.push(["BESAR/KECIL 3D", String(result.ai3dSize), "📐", "#38bdf8", "emoji"]);
+  if (safeArray(result.ai4d).length) rows.push(["AI 4D", formatCompact(result.ai4d), "🔥", "#f3c14b", "emoji"]);
+
   pairs.forEach((pair) => {
     if (safeArray(result.aiByPair?.[pair]).length) rows.push([`AI ${pairLabel[pair]}`, formatCompact(result.aiByPair[pair]), "🔥", "#f3c14b", "emoji"]);
     if (result.aiParityByPair?.[pair]) rows.push([`GENAP/GANJIL ${pairLabel[pair]}`, String(result.aiParityByPair[pair]), "⚖️", "#34d399", "emoji"]);
