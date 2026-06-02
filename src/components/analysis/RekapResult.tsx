@@ -33,8 +33,8 @@ function customRows(result: any) {
 
   pairs.forEach((pair) => {
     if (safeArray(result.aiByPair?.[pair]).length) rows.push([`AI ${pairLabel[pair]}`, formatCompact(result.aiByPair[pair]), "🔥", "#f3c14b", "emoji"]);
-    if (result.aiParityByPair?.[pair]) rows.push([`AI GJ GN ${pairLabel[pair]}`, String(result.aiParityByPair[pair]), "⚖️", "#34d399", "emoji"]);
-    if (result.aiSizeByPair?.[pair]) rows.push([`AI BS KC ${pairLabel[pair]}`, String(result.aiSizeByPair[pair]), "📏", "#38bdf8", "emoji"]);
+    if (result.aiParityByPair?.[pair]) rows.push([`GENAP/GANJIL ${pairLabel[pair]}`, String(result.aiParityByPair[pair]), "⚖️", "#34d399", "emoji"]);
+    if (result.aiSizeByPair?.[pair]) rows.push([`BESAR/KECIL ${pairLabel[pair]}`, String(result.aiSizeByPair[pair]), "📐", "#38bdf8", "emoji"]);
   });
 
   if (safeArray(result.bbfsGlobal).length) {
