@@ -71,9 +71,14 @@ const pairDigits = (line: Record<PositionKey, number>, pair: TargetPair) => {
   return [line.kepala, line.ekor];
 };
 
+const digitParity = (digit: number) => digit % 2 === 0 ? "GENAP" : "GANJIL";
+const digitSize = (digit: number) => digit >= 5 ? "BESAR" : "KECIL";
+
 export const buildCustomDigitLines = ({
   focus = "belakang",
   aiByPair,
+  aiParityByPair,
+  aiSizeByPair,
   bbfsByPair,
   bbfsGlobal = [],
   offAs = [],
@@ -85,6 +90,8 @@ export const buildCustomDigitLines = ({
 }: {
   focus?: CustomFocus;
   aiByPair?: Partial<Record<TargetPair, number[]>>;
+  aiParityByPair?: Partial<Record<TargetPair, string>>;
+  aiSizeByPair?: Partial<Record<TargetPair, string>>;
   bbfsByPair?: Partial<Record<TargetPair, number[]>>;
   bbfsGlobal?: number[];
   includeBBFS?: boolean;
@@ -108,10 +115,14 @@ export const buildCustomDigitLines = ({
     for (const pair of pairs) {
       const [a, b] = pairDigits(line, pair);
       const ai = aiByPair?.[pair] || [];
+      const aiParity = aiParityByPair?.[pair] || "";
+      const aiSize = aiSizeByPair?.[pair] || "";
       const bbfs = bbfsByPair?.[pair] || [];
       const offJumlah = jumlahByPair?.[pair] || [];
       const offShio = shioByPair?.[pair] || [];
       if (ai.length && !ai.includes(a) && !ai.includes(b)) return false;
+      if (aiParity && digitParity(a) !== aiParity && digitParity(b) !== aiParity) return false;
+      if (aiSize && digitSize(a) !== aiSize && digitSize(b) !== aiSize) return false;
       if (bbfs.length && (!bbfs.includes(a) || !bbfs.includes(b))) return false;
       if (offJumlah.includes(jumlah2DLocal(a, b))) return false;
       if (offShio.includes(shioOf2DLocal(a * 10 + b))) return false;
