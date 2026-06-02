@@ -51,6 +51,15 @@ function targetPairFromScope(scope: AnalysisScope): TargetPair {
   return bbfsScopeToTargetPair(scope);
 }
 
+function isAi2DScope(scope: AnalysisScope | null): boolean {
+  return scope === "2d_depan" || scope === "2d_tengah" || scope === "2d_belakang";
+}
+
+function requestScopeForAnalyze(type: string, scope: AnalysisScope): AnalysisScope {
+  if (type === "ai" && isAi2DScope(scope)) return "default";
+  return scope;
+}
+
 export default function AnalysisPageV3Core({ type, title, icon, marketId }: { type: string; title: string; icon: string; marketId: string }) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -235,16 +244,17 @@ export default function AnalysisPageV3Core({ type, title, icon, marketId }: { ty
   };
 
   const handleAnalyze = async (selectedParam: number, selectedTargetPair?: TargetPair) => {
-    const finalScope = analysisScope || "default";
+    const selectedScope = analysisScope || "default";
     if (isAI && !analysisScope) {
       setError("Pilih jenis Angka Ikut dulu.");
       return;
     }
-    if (isBBFS && finalScope === "default") {
+    if (isBBFS && selectedScope === "default") {
       setError("Pilih jenis BBFS dulu.");
       return;
     }
-    const finalTargetPair = isBBFS || isAI ? targetPairFromScope(finalScope) : selectedTargetPair || targetPair || "belakang";
+    const requestScope = requestScopeForAnalyze(type, selectedScope);
+    const finalTargetPair = isBBFS || isAI ? targetPairFromScope(selectedScope) : selectedTargetPair || targetPair || "belakang";
     if (needsTargetPair && !finalTargetPair) {
       setError("Pilih fokus 2D dulu.");
       return;
@@ -254,7 +264,7 @@ export default function AnalysisPageV3Core({ type, title, icon, marketId }: { ty
     resetBeforeAnalyze();
     try {
       const data = await getMarketData();
-      setResult(await postAnalyze(type, data, selectedParam, finalTargetPair, finalScope));
+      setResult(await postAnalyze(type, data, selectedParam, finalTargetPair, requestScope));
       setDetailValidationOpen(false);
     } catch (e: any) {
       setError(e.message || "Error koneksi server");
@@ -381,8 +391,6 @@ export default function AnalysisPageV3Core({ type, title, icon, marketId }: { ty
           ai3dDigit: customAi3dDigit,
           ai3dParityEnabled: customAi3dParity,
           ai3dSizeEnabled: customAi3dSize,
-          ai3dParity,
-          ai3dSize,
           ai4dDigit: customAi4dDigit,
           bbfsDigit: customBBFSDigit,
           offCounts: { as: customOffAsCount, kop: customOffKopCount, kepala: customOffKepalaCount, ekor: customOffEkorCount },
