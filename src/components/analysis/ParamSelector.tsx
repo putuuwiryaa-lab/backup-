@@ -1,14 +1,20 @@
+type AnalyzeOption = number | "parity" | "size";
+
 export default function ParamSelector({ type, param, meta, onAnalyze, onCustomDigit }: {
   type: string;
   param: number | null;
   meta: { accent: string; soft: string };
-  onAnalyze: (param: number) => void;
+  onAnalyze: (param: AnalyzeOption) => void;
   onCustomDigit: () => void;
 }) {
   if (type === "rekap" || param !== 0) return null;
 
   const options: any = {
-    ai: { title: "PILIH JUMLAH DIGIT AI", values: [2, 4, 6] },
+    ai: {
+      title: "PILIH JENIS ANGKA IKUT",
+      values: [2, 4, 6, "parity", "size"],
+      labels: { parity: "GANJIL GENAP", size: "BESAR KECIL" }
+    },
     bbfs: { title: "PILIH JUMLAH DIGIT BBFS", values: [7, 8, 9] },
     mati: { title: "PILIH JUMLAH DIGIT OFF", values: [1, 2, 3], hints: { 1: "RINGAN", 2: "SEIMBANG", 3: "KETAT" } },
     jumlah: { title: "PILIH JUMLAH OFF", values: [1, 2, 3], hints: { 1: "RINGAN", 2: "SEIMBANG", 3: "KETAT" } },
@@ -16,18 +22,22 @@ export default function ParamSelector({ type, param, meta, onAnalyze, onCustomDi
   };
   const cfg = options[type] || options.ai;
   const isThreeDigitMode = type === "mati" || type === "jumlah" || type === "shio";
-  const isGridThree = isThreeDigitMode || type === "ai" || type === "bbfs";
+  const isAiMode = type === "ai";
+  const isGridThree = isThreeDigitMode || type === "bbfs";
 
   return (
     <div className="ui-panel ui-motion-in mt-4 p-4">
       <div className="mb-3 text-center text-[10px] font-black uppercase tracking-[3px]" style={{ color: meta.accent }}>{cfg.title}</div>
-      <div className={`grid gap-2 ${isGridThree ? "grid-cols-3" : "grid-cols-2 sm:grid-cols-4"}`}>
-        {cfg.values.map((n: number) => {
-          const hint = cfg.hints?.[n];
+      <div className={`grid gap-2 ${isAiMode ? "grid-cols-1 sm:grid-cols-3" : isGridThree ? "grid-cols-3" : "grid-cols-2 sm:grid-cols-4"}`}>
+        {cfg.values.map((value: AnalyzeOption) => {
+          const isSpecial = value === "parity" || value === "size";
+          const hint = typeof value === "number" ? cfg.hints?.[value] : undefined;
+          const label = isSpecial ? cfg.labels[value] : String(value);
           return (
-            <button key={n} onClick={() => onAnalyze(n)} className={`ui-motion-soft ui-tap ui-lift rounded-3xl border ${isGridThree ? "min-h-[92px] p-3" : "p-5"} text-center`} style={{ borderColor: `${meta.accent}88`, backgroundColor: meta.soft, color: meta.accent }}>
-              <span className="block font-['Orbitron'] text-xl font-black tracking-[2px]">{n}</span>
-              {(type === "ai" || type === "bbfs") && <span className="mt-2 block text-[8px] font-black uppercase tracking-[1.4px] opacity-80">DIGIT</span>}
+            <button key={String(value)} onClick={() => onAnalyze(value)} className={`ui-motion-soft ui-tap ui-lift rounded-3xl border ${isAiMode ? "min-h-[82px] p-3" : isGridThree ? "min-h-[92px] p-3" : "p-5"} text-center`} style={{ borderColor: `${meta.accent}88`, backgroundColor: meta.soft, color: meta.accent }}>
+              <span className={`block font-['Orbitron'] font-black tracking-[2px] ${isSpecial ? "text-[13px] leading-5" : "text-xl"}`}>{label}</span>
+              {(((type === "ai" && typeof value === "number") || type === "bbfs") && <span className="mt-2 block text-[8px] font-black uppercase tracking-[1.4px] opacity-80">DIGIT</span>)}
+              {isSpecial && <span className="mt-2 block text-[8px] font-black uppercase tracking-[1.4px] opacity-80">DOMINAN VOTING</span>}
               {hint && <span className="mt-2 block text-[8px] font-black uppercase tracking-[1.4px] opacity-80">{hint}</span>}
             </button>
           );
