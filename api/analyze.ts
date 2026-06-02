@@ -204,8 +204,9 @@ export default async function handler(req: any, res: any) {
         : remapDataForTargetPair(engineType, cleanedData, targetPair);
 
     const result = runAnalysis(engineType, analysisData, safeParam, {
-      analysisScope: safeScope,
-    });
+  analysisScope: safeScope,
+  forceDigitResult: isBBFS,
+});
 
     return res.json({
       ...result,
