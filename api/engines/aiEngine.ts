@@ -2,6 +2,15 @@ import { AI_I, AI_L, AI_B, AI_T, AI_P, _0xc3c54e, _0xJ2d } from './tables.js';
 
 export const _0xe57f0c: Record<number, number> = { 4: 11, 5: 12, 6: 13 };
 
+type AiEngineOptions = {
+  targetIndexes?: number[];
+  thresholds?: Record<number, number>;
+};
+
+function thresholdForDigitCount(dg: number, thresholds?: Record<number, number>) {
+  return thresholds?.[dg] ?? _0xe57f0c[dg] ?? 10;
+}
+
 export const _0x9a025f = [
   { n: "R1 Delta Square", f: (c: string, p: string, p2: string) => { const X = Math.abs(+c[1] - +c[3]); return Array.from(new Set([X, AI_B[X], AI_T[X], AI_I[X]])); }, dg: 4 },
   { n: "R2 Mirror Cross", f: (c: string, p: string, p2: string) => { const X = (+c[0] + (+c[2])) % 10; return Array.from(new Set([X, AI_I[X], _0xc3c54e(X + 1), AI_I[_0xc3c54e(X + 1)], _0xc3c54e(X + 2)])); }, dg: 5 },
@@ -12,7 +21,7 @@ export const _0x9a025f = [
   { n: "R7 Prime Pulse", f: (c: string, p: string, p2: string) => { const X = (+c[0] + (+c[3])) % 10; return Array.from(new Set([X, AI_P[X], AI_L[X], AI_T[X]])); }, dg: 4 },
   { n: "R8 Shadow Digit", f: (c: string, p: string, p2: string) => { const X = (+c[1] + (+c[3])) % 10; const sh = _0xc3c54e(10 - X); return Array.from(new Set([X, sh, AI_I[X], AI_I[sh]])); }, dg: 4 },
   { n: "R9 Head Twin Flow", f: (c: string, p: string, p2: string) => { if (!p) return null; const X = (+p[2] + (+c[2])) % 10; return Array.from(new Set([X, _0xc3c54e(X + 1), AI_B[X], AI_I[X]])); }, dg: 4 },
-  { n: "R10 Quantum Leap", f: (c: string, p: string, p2: string) => { if (!p2) return null; const X = Math.abs(+c[3] - +p2[3]); return Array.from(new Set([X, AI_B[X], AI_I[X], AI_T[X], _0xc3c54e(X + 1)])); }, dg: 5 },
+  { n: "R10 Quantum Leap", f: (c: string, p2a: string, p2: string) => { if (!p2) return null; const X = Math.abs(+c[3] - +p2[3]); return Array.from(new Set([X, AI_B[X], AI_I[X], AI_T[X], _0xc3c54e(X + 1)])); }, dg: 5 },
   { n: "R11 Alpha Core", f: (c: string, p: string, p2: string) => { const X = (+c[0] + (+c[1])) % 10; return Array.from(new Set([X, AI_L[X], AI_B[X], AI_I[X]])); }, dg: 4 },
   { n: "R12 Delta Strike", f: (c: string, p: string, p2: string) => { const X = Math.abs(+c[0] - +c[2]); return Array.from(new Set([X, AI_T[X], AI_B[X], AI_I[X]])); }, dg: 4 },
   { n: "R13 Tail Run", f: (c: string, p: string, p2: string) => { const X = (+c[2] + (+c[3])) % 10; return Array.from(new Set([X, _0xc3c54e(X + 1), _0xc3c54e(X + 2), _0xc3c54e(X + 3), AI_I[X]])); }, dg: 5 },
@@ -52,9 +61,10 @@ function _0xSeedRank(seed: string, digit: number) {
   return h >>> 0;
 }
 
-export function _0xEngineAI(D: string[], param: number = 6) {
+export function _0xEngineAI(D: string[], param: number = 6, options: AiEngineOptions = {}) {
   const U = D.slice(-17);
   const vote: Record<number, number> = {};
+  const targetIndexes = options.targetIndexes?.length ? options.targetIndexes : [2, 3];
 
   for (let d = 0; d <= 9; d++) vote[d] = 0;
 
@@ -69,10 +79,10 @@ export function _0xEngineAI(D: string[], param: number = 6) {
       const ai = rm.f(curr, prev, prev2);
 
       if (ai === null) continue;
-      if (ai.includes(parseInt(tgt[2])) || ai.includes(parseInt(tgt[3]))) hits++;
+      if (targetIndexes.some((index) => ai.includes(parseInt(tgt[index])))) hits++;
     }
 
-    const thr = _0xe57f0c[rm.dg] || 10;
+    const thr = thresholdForDigitCount(rm.dg, options.thresholds);
 
     if (hits >= thr) {
       const fp = rm.f(D[D.length - 1], D[D.length - 2], D[D.length - 3]);
@@ -106,13 +116,15 @@ export function _0xEngineAI(D: string[], param: number = 6) {
   }
 
   recentWindow.forEach((r) => {
-    freq[parseInt(r[2])] += 1;
-    freq[parseInt(r[3])] += 1;
+    targetIndexes.forEach((index) => {
+      freq[parseInt(r[index])] += 1;
+    });
   });
 
   const latestResult = recentWindow[recentWindow.length - 1] || U[U.length - 1] || "0000";
-  latest[parseInt(latestResult[2])] = 1;
-  latest[parseInt(latestResult[3])] = 1;
+  targetIndexes.forEach((index) => {
+    latest[parseInt(latestResult[index])] = 1;
+  });
 
   const seed = U.join("|");
 
@@ -162,4 +174,4 @@ export function _0xEngineAI(D: string[], param: number = 6) {
   }
 
   return selected.sort((a, b) => a - b);
-                                                                                                                                                                           }
+}
