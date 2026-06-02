@@ -148,6 +148,7 @@ export default function AnalysisResult({ type, result, param, marketId, meta, ta
   const active = result.elitCount ?? result.eliteTotal ?? stats.length;
   const effectiveMode = result.evaluationMode || type;
   const effectiveParam = result.evaluationParam || param || 1;
+  const effectiveAnalysisScope = (result.analysis_scope || analysisScope || "default") as AnalysisScope;
   const formulaTotal = type === "ai" || type === "bbfs" ? 35 : type === "jumlah" ? 56 : type === "shio" ? 60 : 50;
   const isBBFSResult = type === "bbfs";
   const resultLabel = result.displayLabel || (isBBFSResult ? "BBFS" : meta.label);
@@ -161,7 +162,7 @@ export default function AnalysisResult({ type, result, param, marketId, meta, ta
         {detailValidationOpen && <div className="mt-4"><StatsList stats={stats} accent={meta.accent} /></div>}
       </div>
       <AngkaJadiPanel type={type} result={result} open={angkaJadiOpen} setOpen={setAngkaJadiOpen} meta={meta} />
-      {evaluationModes.has(effectiveMode) && param !== 0 && <div className="ui-panel ui-motion-in space-y-3 p-4"><EvaluationHistory marketId={marketId} mode={effectiveMode as any} param={effectiveParam} targetPair={targetPair} analysisScope={analysisScope} /></div>}
+      {evaluationModes.has(effectiveMode) && param !== 0 && <div className="ui-panel ui-motion-in space-y-3 p-4"><EvaluationHistory marketId={marketId} mode={effectiveMode as any} param={effectiveParam} targetPair={targetPair} analysisScope={effectiveAnalysisScope} /></div>}
     </div>
   );
 }
