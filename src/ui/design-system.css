@@ -1,6 +1,10 @@
 /* UI Design System Entry
    Visual source is currently consolidated in ../design-system.css.
    Performance overrides are disabled temporarily for animation/motion testing.
+
+   Font rule:
+   - ../design-system.css may still contain legacy font imports.
+   - ./font-premium.css MUST stay last so Orbitron/Outfit/mono win globally.
 */
 
 @import "./design-tokens.css";
