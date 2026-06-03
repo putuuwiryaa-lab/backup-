@@ -23,7 +23,7 @@ function StatsList({ stats, accent }: { stats: any[]; accent: string }) {
               <div className="truncate text-[9.5px] font-semibold uppercase tracking-[1px] text-[var(--ui-text)] opacity-90">{s.name || `Rumus ${i + 1}`}</div>
               <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full ui-motion-soft" style={{ width: `${pct}%`, background: accent, backgroundColor: accent }} /></div>
             </div>
-            <span className="font-['JetBrains_Mono'] text-[9px] font-black" style={{ color: accent }}>{score}/14</span>
+            <span className="ui-mono text-[9px] font-black" style={{ color: accent }}>{score}/14</span>
           </div>
         );
       })}
@@ -33,9 +33,9 @@ function StatsList({ stats, accent }: { stats: any[]; accent: string }) {
 
 function DigitPills({ items, accent, compact = true, singleLine = false, center = false }: { items: any[]; accent: string; compact?: boolean; singleLine?: boolean; center?: boolean }) {
   return (
-    <div className={`${singleLine ? `flex flex-nowrap ${center ? "justify-center" : "justify-end"} gap-1 overflow-x-auto pb-1` : `flex flex-wrap ${center ? "justify-center" : "justify-end"} gap-2`}`}>
+    <div className={`${singleLine ? `flex flex-nowrap ${center ? "justify-center" : "justify-end"} gap-1 overflow-x-auto pb-1` : `flex flex-wrap ${center ? "justify-center" : "justify-end"} gap-2`} `}>
       {items.map((item: any, i: number) => (
-        <div key={i} className={`${singleLine ? "h-10 min-w-9 shrink-0 px-2 text-[16px]" : compact ? "h-10 min-w-10 px-3 text-[16px]" : "h-13 min-w-13 px-3 text-[22px]"} ui-motion-soft ui-tap flex items-center justify-center rounded-2xl border font-['Orbitron'] font-black`} style={{ borderColor: accent, backgroundColor: `${accent}14`, color: "var(--ui-text)" }}>
+        <div key={i} className={`${singleLine ? "h-10 min-w-9 shrink-0 px-2 text-[16px]" : compact ? "h-10 min-w-10 px-3 text-[16px]" : "h-13 min-w-13 px-3 text-[22px]"} ui-font-display ui-motion-soft ui-tap flex items-center justify-center rounded-2xl border font-black`} style={{ borderColor: accent, backgroundColor: `${accent}14`, color: "var(--ui-text)" }}>
           {item}
         </div>
       ))}
