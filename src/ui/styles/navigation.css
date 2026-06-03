@@ -1,3 +1,41 @@
-/* Navigation split target.
-   Move bottom navigation, route navigation, account button, floating buttons, and safe-area nav rules here.
+/* Navigation split.
+   This file owns bottom navigation, route buttons, account/floating buttons, and safe-area nav rules.
 */
+
+.bottom-nav {
+  background: rgba(10,7,20,0.88) !important;
+  border: 1px solid rgba(255,255,255,0.10) !important;
+  box-shadow: 0 14px 30px rgba(0,0,0,0.34) !important;
+  backdrop-filter: blur(24px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(200%) !important;
+  border-radius: clamp(1.5rem, 7vw, 2.25rem) !important;
+  padding: clamp(0.5rem, 2vw, 0.65rem) !important;
+  animation: fadeIn 0.5s ease both;
+}
+
+.bottom-account-button,
+.report-floating-button {
+  max-width: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bottom-account-button {
+  border-radius: var(--radius-card) !important;
+}
+
+.report-floating-button {
+  border-radius: 999px !important;
+}
+
+.ghost-button,
+.primary-button,
+.bottom-account-button,
+.report-floating-button {
+  touch-action: manipulation;
+}
+
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .bottom-nav {
+    margin-bottom: env(safe-area-inset-bottom);
+  }
+}
