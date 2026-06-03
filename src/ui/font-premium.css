@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800;900&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700;800&family=DM+Mono:wght@500;700&display=swap');
 
 :root {
   --font-body: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -19,10 +19,13 @@ select,
   font-family: var(--font-body) !important;
 }
 
-.font-\['Orbitron'\],
-.font-\['Space_Grotesk'\],
-.app-container [class*="font-['Orbitron']"],
-.app-container [class*="font-['Space_Grotesk']"],
+.ui-font-body {
+  font-family: var(--font-body) !important;
+  text-rendering: optimizeLegibility;
+}
+
+.ui-font-display,
+.ui-title,
 .app-container h1,
 .app-container h2,
 .app-container h3,
@@ -32,7 +35,11 @@ select,
 .app-container .primary-button,
 .app-container .ghost-button,
 .app-container .report-floating-button,
-.app-container .bottom-account-button {
+.app-container .bottom-account-button,
+.font-\['Orbitron'\],
+.font-\['Space_Grotesk'\],
+.app-container [class*="font-['Orbitron']"],
+.app-container [class*="font-['Space_Grotesk']"] {
   font-family: var(--font-display) !important;
   font-optical-sizing: auto;
   letter-spacing: 0.045rem !important;
@@ -53,6 +60,8 @@ select,
   letter-spacing: 0.055rem !important;
 }
 
+.ui-font-mono,
+.ui-mono,
 .font-\['JetBrains_Mono'\],
 .font-\['DM_Mono'\],
 .app-container [class*="font-['JetBrains_Mono']"],
