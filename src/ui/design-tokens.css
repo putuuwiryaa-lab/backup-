@@ -66,7 +66,7 @@
 }
 
 .ui-title {
-  font-family: 'Syne', 'Outfit', system-ui, sans-serif;
+  font-family: var(--app-font-display, var(--font-display, 'Orbitron', 'Outfit', system-ui, sans-serif));
   color: var(--ui-text);
   font-weight: 900;
   letter-spacing: 0.12em;
@@ -82,7 +82,7 @@
 }
 
 .ui-number {
-  font-family: 'DM Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: var(--app-font-mono, var(--font-mono, 'JetBrains Mono', 'DM Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace));
   color: var(--ui-gold-bright);
   font-weight: 900;
   letter-spacing: 0.2em;
