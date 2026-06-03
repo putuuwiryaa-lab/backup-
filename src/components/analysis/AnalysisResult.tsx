@@ -3,7 +3,7 @@ import { Trophy } from "lucide-react";
 import EvaluationHistory from "../EvaluationHistory";
 import { evaluationModes } from "../../lib/analysis/constants";
 import { safeArray, statsFrom } from "../../lib/analysis/utils";
-import { DetailToggle, ResultHeader, SectionTitle, ShioChip } from "./Shared";
+import { DetailToggle, SectionTitle, ShioChip } from "./Shared";
 import AngkaJadiPanel from "./AngkaJadiPanel";
 
 type TargetPair = "depan" | "tengah" | "belakang";
@@ -76,6 +76,29 @@ function MainResultCard({ label, values, accent, shio = false, singleLine = fals
   );
 }
 
+function ActiveFormulaBadge({ value, accent }: { value: string; accent: string }) {
+  return (
+    <span
+      className="shrink-0 rounded-full px-3 py-1.5 text-[8px] font-black uppercase tracking-[1px] sm:text-[9px]"
+      style={{ backgroundColor: `${accent}1f`, color: accent }}
+    >
+      {value}
+    </span>
+  );
+}
+
+function DetailValidationHeader({ activeLabel, accent, open, onToggle }: { activeLabel: string; accent: string; open: boolean; onToggle: () => void }) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <SectionTitle accent={accent} title="Detail Validasi" />
+      <div className="flex shrink-0 items-center gap-2">
+        <ActiveFormulaBadge value={activeLabel} accent={accent} />
+        <DetailToggle open={open} accent={accent} onClick={onToggle} />
+      </div>
+    </div>
+  );
+}
+
 function MatiEvaluationTabs({ marketId, param, accent, soft }: { marketId: string; param: number; accent: string; soft: string }) {
   const [activePosition, setActivePosition] = useState<"as" | "kop" | "kepala" | "ekor">("as");
   const tabs = [
@@ -131,10 +154,14 @@ export default function AnalysisResult({ type, result, param, marketId, meta, ta
     const totalActive = POS.reduce((acc, p) => acc + statsFrom(result[p]).length, 0);
     return (
       <div className="ui-motion-in space-y-4">
-        <ResultHeader label="HASIL ANALISA" value={`RUMUS ACTIVE ${totalActive}/56`} accent={meta.accent} />
         <div className="ui-panel space-y-3 p-4">{POS.map((p) => <ResultRow key={p} label={`OFF ${p}`} values={result[p]?.result} accent={meta.accent} />)}</div>
         <div className="ui-panel space-y-5 p-4">
-          <div className="flex items-center justify-between gap-3"><SectionTitle accent={meta.accent} title="Detail Validasi" /><DetailToggle open={detailValidationOpen} accent={meta.accent} onClick={() => setDetailValidationOpen((open) => !open)} /></div>
+          <DetailValidationHeader
+            activeLabel={`RUMUS ACTIVE ${totalActive}/56`}
+            accent={meta.accent}
+            open={detailValidationOpen}
+            onToggle={() => setDetailValidationOpen((open) => !open)}
+          />
           {detailValidationOpen && POS.map((p) => <section key={p} className="space-y-3"><div className="flex items-center gap-3"><div className="h-px flex-1 bg-white/10" /><span className="ui-title text-[10px]" style={{ color: meta.accent }}>{p}</span><div className="h-px flex-1 bg-white/10" /></div><StatsList stats={statsFrom(result[p])} accent={meta.accent} /></section>)}
         </div>
         <AngkaJadiPanel type={type} result={result} open={angkaJadiOpen} setOpen={setAngkaJadiOpen} meta={meta} />
@@ -156,9 +183,13 @@ export default function AnalysisResult({ type, result, param, marketId, meta, ta
   return (
     <div className="ui-motion-in space-y-4">
       <MainResultCard label={resultLabel} values={displayResult} accent={meta.accent} shio={type === "shio"} singleLine={isBBFSResult} stacked={type === "ai" || type === "bbfs"} />
-      <ResultHeader label="VALIDASI" value={`RUMUS ACTIVE ${active}/${formulaTotal}`} accent={meta.accent} />
       <div className="ui-panel p-4">
-        <div className="flex items-center justify-between gap-3"><SectionTitle accent={meta.accent} title="Detail Validasi" /><DetailToggle open={detailValidationOpen} accent={meta.accent} onClick={() => setDetailValidationOpen((open) => !open)} /></div>
+        <DetailValidationHeader
+          activeLabel={`RUMUS ACTIVE ${active}/${formulaTotal}`}
+          accent={meta.accent}
+          open={detailValidationOpen}
+          onToggle={() => setDetailValidationOpen((open) => !open)}
+        />
         {detailValidationOpen && <div className="mt-4"><StatsList stats={stats} accent={meta.accent} /></div>}
       </div>
       <AngkaJadiPanel type={type} result={result} open={angkaJadiOpen} setOpen={setAngkaJadiOpen} meta={meta} />
