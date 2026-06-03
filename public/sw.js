@@ -1,4 +1,4 @@
-const CACHE_NAME = "analisa-angka-v3";
+const CACHE_NAME = "analisa-angka-v4";
 const urlsToCache = ["/", "/index.html"];
 
 self.addEventListener("install", (event) => {
