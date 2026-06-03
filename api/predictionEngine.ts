@@ -6,13 +6,28 @@ import { _0x9a025f, _0xe57f0c, _0xEngineAI } from './engines/aiEngine.js';
 import { runRekap } from './engines/rekapEngine.js';
 
 type AiVote = Record<number, number>;
+type TargetPair = 'depan' | 'tengah' | 'belakang';
 type AnalysisScope = 'default' | '4d' | '3d' | '2d_depan' | '2d_tengah' | '2d_belakang';
-type RunAnalysisOptions = { analysisScope?: AnalysisScope; forceDigitResult?: boolean };
+type RunAnalysisOptions = { analysisScope?: AnalysisScope; targetPair?: TargetPair; forceDigitResult?: boolean };
 
-function aiTargetIndexes(scope: AnalysisScope = 'default') {
+function pairTargetIndexes(targetPair: TargetPair = 'belakang') {
+  if (targetPair === 'depan') return [0, 1];
+  if (targetPair === 'tengah') return [1, 2];
+  return [2, 3];
+}
+
+function aiTargetIndexes(scope: AnalysisScope = 'default', targetPair: TargetPair = 'belakang') {
   if (scope === '4d') return [0, 1, 2, 3];
   if (scope === '3d') return [1, 2, 3];
-  return [2, 3];
+  if (scope === '2d_depan') return [0, 1];
+  if (scope === '2d_tengah') return [1, 2];
+  if (scope === '2d_belakang') return [2, 3];
+  return pairTargetIndexes(targetPair);
+}
+
+function jumlahTarget(result: string, targetPair: TargetPair = 'belakang') {
+  const [a, b] = pairTargetIndexes(targetPair);
+  return _0xJ2d(result[a], result[b]);
 }
 
 function aiThresholds(scope: AnalysisScope = 'default'): Record<number, number> {
@@ -96,16 +111,15 @@ export function runAnalysis(type: string, payload: string[], param: number, opti
   const D = payload;
   const U = D.slice(-17);
   const analysisScope = options.analysisScope || 'default';
+  const targetPair = options.targetPair || 'belakang';
   const forceDigitResult = options.forceDigitResult === true;
 
-  // ── REKAP ─────────────────────────────────────────────────────────────────
   if (type === 'rekap') {
     return runRekap(D, param);
   }
 
-  // ── AI ────────────────────────────────────────────────────────────────────
   if (type === 'ai' || type === 'ai_parity' || type === 'ai_size') {
-    const targetIndexes = aiTargetIndexes(analysisScope);
+    const targetIndexes = aiTargetIndexes(analysisScope, targetPair);
     const thresholds = aiThresholds(analysisScope);
     const { sr, elitCount, vote, fallback } = buildAiVote(D, targetIndexes, thresholds);
     const aiResultParam = forceDigitResult ? param : type === 'ai' && param !== 7 && param !== 8 ? param : 6;
@@ -128,7 +142,6 @@ export function runAnalysis(type: string, payload: string[], param: number, opti
     };
   }
 
-  // ── MATI ──────────────────────────────────────────────────────────────────
   if (type === 'mati') {
     const POS = [
       { n: 'AS', x: 0 }, { n: 'KOP', x: 1 }, { n: 'KEPALA', x: 2 }, { n: 'EKOR', x: 3 }
@@ -183,18 +196,17 @@ export function runAnalysis(type: string, payload: string[], param: number, opti
     return { success: true, data: posResults };
   }
 
-  // ── JUMLAH ────────────────────────────────────────────────────────────────
   if (type === 'jumlah') {
     const SA: Record<string, number> = {};
     const MK = Object.keys(_0x3ca571('0000', '0000'));
     MK.forEach(k => { SA[k] = 0; });
     for (let i = 0; i < 14; i++) {
       const pr: any = _0x3ca571(U[i], U[i + 1]), tg = U[i + 2];
-      const j2d = _0xJ2d(tg[2], tg[3]);
+      const j2d = jumlahTarget(tg, targetPair);
       MK.forEach(k => { if (pr[k] !== j2d) SA[k] += 1; });
     }
 
-    const ljList = _0xEngineJumlahMati(D, param);
+    const ljList = _0xEngineJumlahMati(D, param, targetPair);
     const FP: any = _0x3ca571(D[D.length - 2], D[D.length - 1]);
     const stats: any[] = [];
 
@@ -214,17 +226,16 @@ export function runAnalysis(type: string, payload: string[], param: number, opti
     return { success: true, data: { result: ljList, stats, eliteTotal: el.length, supportCount: eliteCount } };
   }
 
-  // ── SHIO ──────────────────────────────────────────────────────────────────
   if (type === 'shio') {
     const SA: Record<string, number> = {};
     const MK = Object.keys(_0xRumusShio('0000', '0000'));
     MK.forEach(k => { SA[k] = 0; });
     for (let i = 0; i < 14; i++) {
-      const pr: any = _0xRumusShio(U[i], U[i + 1]), sh = _0x2d4get(U[i + 2]);
+      const pr: any = _0xRumusShio(U[i], U[i + 1]), sh = _0x2d4get(U[i + 2], targetPair);
       MK.forEach(k => { if (pr[k] !== sh) SA[k] += 1; });
     }
 
-    const ls = _0xEngineShioMati(D, param);
+    const ls = _0xEngineShioMati(D, param, targetPair);
     const FP: any = _0xRumusShio(D[D.length - 2], D[D.length - 1]);
     const stats: any[] = [];
     const offResults = Array.isArray(ls) ? ls : [ls];
