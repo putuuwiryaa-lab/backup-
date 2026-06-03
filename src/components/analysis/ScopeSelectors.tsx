@@ -53,7 +53,7 @@ function SelectorPanel({ title, subtitle, children, meta }: { title: string; sub
 function SelectorButton({ option, meta, onClick }: { option: { key: string; title: string; subtitle: string }; meta: { accent: string; soft: string }; onClick: () => void }) {
   return (
     <button type="button" onClick={onClick} className="ui-motion-soft ui-tap ui-lift min-h-[76px] w-full rounded-3xl border px-5 py-4 text-center" style={{ borderColor: `${meta.accent}77`, backgroundColor: meta.soft, color: meta.accent }}>
-      <span className="block font-['Orbitron'] text-[15px] font-black uppercase tracking-[2.2px]">{option.title}</span>
+      <span className="ui-font-display block text-[15px] font-black uppercase tracking-[2.2px]">{option.title}</span>
       <span className="mt-3 block text-[10px] font-black uppercase tracking-[1.4px] opacity-80">{option.subtitle}</span>
     </button>
   );
