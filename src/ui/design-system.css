@@ -5,6 +5,10 @@
    Font rule:
    - ../design-system.css may still contain legacy font imports.
    - ./font-premium.css MUST stay last so Orbitron/Outfit/mono win globally.
+
+   Split CSS rule:
+   - src/ui/styles/*.css are gradual overrides while ../design-system.css is decomposed.
+   - Keep split imports after legacy styles and before font-premium.css.
 */
 
 @import "./design-tokens.css";
@@ -13,4 +17,5 @@
 @import "./market-card-ref.css";
 @import "./market-grid-force.css";
 @import "./request-market-card.css";
+@import "./styles/base.css";
 @import "./font-premium.css";
