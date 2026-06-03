@@ -1,3 +1,52 @@
-/* Login split target.
-   Move login, trial, PIN form, auth panel, and device-code screen rules here.
+/* Login split.
+   This file owns login, trial, PIN form, auth panel, and device-code screen rules.
 */
+
+.login-panel,
+.auth-panel,
+.pin-panel,
+.trial-panel,
+.device-code-panel {
+  min-width: 0;
+  max-width: 100%;
+  color: var(--ui-text, var(--text));
+}
+
+.login-panel input,
+.auth-panel input,
+.pin-panel input,
+.trial-panel input,
+.device-code-panel input {
+  min-width: 0;
+  max-width: 100%;
+  font-variant-numeric: tabular-nums slashed-zero;
+  font-feature-settings: 'tnum' 1, 'zero' 1;
+}
+
+.login-panel button,
+.auth-panel button,
+.pin-panel button,
+.trial-panel button,
+.device-code-panel button {
+  max-width: 100%;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.login-panel .absolute,
+.auth-panel .absolute,
+.pin-panel .absolute,
+.trial-panel .absolute,
+.device-code-panel .absolute {
+  pointer-events: none;
+}
+
+@media (max-width: 420px) {
+  .login-panel,
+  .auth-panel,
+  .pin-panel,
+  .trial-panel,
+  .device-code-panel {
+    border-radius: var(--radius-panel) !important;
+  }
+}
