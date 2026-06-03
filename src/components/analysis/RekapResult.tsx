@@ -91,7 +91,7 @@ export default function RekapResult({ result, meta }: {
         <div className="mb-4 flex items-center justify-between gap-3">
           <div>
             <p className="ui-label text-[9px]">Hasil Rekap</p>
-            <h3 className="font-['Orbitron'] text-[18px] font-black uppercase tracking-[3px] text-[var(--ui-text)]">Mode Custom Digit</h3>
+            <h3 className="ui-font-display text-[18px] font-black uppercase tracking-[3px] text-[var(--ui-text)]">Mode Custom Digit</h3>
           </div>
           <span className="rounded-full px-3 py-1 text-[10px] font-black" style={{ backgroundColor: meta.soft, color: meta.accent }}>READY</span>
         </div>
@@ -99,7 +99,7 @@ export default function RekapResult({ result, meta }: {
           {rows.length ? rows.map(([label, value, icon, color, iconType]: any, index: number) => (
             <div key={`${label}-${index}`} className="ui-card ui-motion-soft ui-lift flex items-center justify-between gap-3 rounded-3xl p-3">
               <div className="flex min-w-0 items-center gap-3"><RowIcon icon={icon} color={color} type={iconType} /><span className="ui-label min-w-0 text-[10px]">{label}</span></div>
-              <span className="max-w-[54%] truncate text-right font-['Orbitron'] text-[12px] font-black tracking-[1.5px]" style={{ color }}>{value}</span>
+              <span className="ui-font-display max-w-[54%] truncate text-right text-[12px] font-black tracking-[1.5px]" style={{ color }}>{value}</span>
             </div>
           )) : (
             <div className="ui-card rounded-3xl p-4 text-center text-[11px] font-bold uppercase tracking-[1.4px] text-[var(--ui-text-muted)]">Filter yang dipilih belum terbaca pada hasil ini.</div>
@@ -109,8 +109,8 @@ export default function RekapResult({ result, meta }: {
 
       <div className="ui-panel ui-motion-in space-y-3 p-4">
         <div className="flex items-center justify-between"><span className="ui-title text-[12px]">Generate Lines</span><span className="rounded-full px-3 py-1 text-[10px] font-black" style={{ backgroundColor: meta.soft, color: meta.accent }}>{lines.length} LINE</span></div>
-        <div className="max-h-[260px] overflow-y-auto rounded-3xl border border-[var(--ui-border-soft)] bg-black/30 p-4 font-['JetBrains_Mono'] text-[14px] font-bold leading-8 tracking-[2px] custom-scrollbar" style={{ color: meta.accent }}>{displayLines}</div>
-        <button onClick={() => navigator.clipboard?.writeText(copyLines)} className="ui-motion-soft ui-tap flex w-full items-center justify-center gap-2 rounded-3xl p-4 font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px] text-black" style={{ backgroundColor: meta.accent }}><Copy size={16} /> Copy Semua</button>
+        <div className="ui-mono max-h-[260px] overflow-y-auto rounded-3xl border border-[var(--ui-border-soft)] bg-black/30 p-4 text-[14px] font-bold leading-8 tracking-[2px] custom-scrollbar" style={{ color: meta.accent }}>{displayLines}</div>
+        <button onClick={() => navigator.clipboard?.writeText(copyLines)} className="ui-font-display ui-motion-soft ui-tap flex w-full items-center justify-center gap-2 rounded-3xl p-4 text-[11px] font-black uppercase tracking-[3px] text-black" style={{ backgroundColor: meta.accent }}><Copy size={16} /> Copy Semua</button>
       </div>
     </div>
   );
