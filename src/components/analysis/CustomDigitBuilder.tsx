@@ -10,7 +10,13 @@ import {
   type PositionKey,
   type TargetPair,
 } from "../../lib/analysis/customDigit";
-import { MiniLabel } from "./Shared";
+import {
+  CustomDigitOptionButton,
+  CustomDigitSection,
+  SingleColumnOptions,
+  ThreeColumnOptions,
+  type RecommendationBadge,
+} from "./CustomDigitControls";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
@@ -34,7 +40,6 @@ const JUMLAH_PARTIAL_WIN_RATES: Record<number, number> = { 1: 14 / 15, 2: 12 / 1
 const SHIO_PARTIAL_WIN_RATES: Record<number, number> = { 1: 14 / 15, 2: 13 / 15, 3: 12 / 15 };
 
 type RecommendationGroup = "ai" | "ai_parity" | "ai_size" | "bbfs" | "mati" | "jumlah" | "shio";
-type RecommendationBadge = "thumb" | "fire";
 type RecommendedMap = Record<string, RecommendationBadge>;
 type ScoredRecommendation = { param: number; badge: RecommendationBadge };
 
@@ -278,16 +283,17 @@ export default function CustomDigitBuilder({
 
   if (!show) return null;
 
-  const optionButton = (active: boolean, label: string, onClick: () => void, extraClass = "", recommendKey?: string) => {
-    const badge = recommendKey ? badges[recommendKey] : undefined;
-    const isRecommended = Boolean(badge);
-    return (
-      <button type="button" onClick={onClick} className={`${extraClass} ui-motion-soft ui-tap ui-lift relative rounded-3xl border p-4 text-center`} style={{ borderColor: active ? meta.accent : isRecommended ? `${meta.accent}88` : "rgba(255,255,255,0.14)", backgroundColor: active ? meta.soft : "rgba(255,255,255,0.04)", color: active ? meta.accent : "var(--ui-text-muted)" }}>
-        {badge && <span className="absolute right-3 top-2 text-[15px] leading-none">{badge === "fire" ? "🔥" : "👍"}</span>}
-        <span className="block font-['Orbitron'] text-[13px] font-black uppercase tracking-[2px]">{label}</span>
-      </button>
-    );
-  };
+  const optionButton = (active: boolean, label: string, onClick: () => void, extraClass = "", recommendKey?: string) => (
+    <CustomDigitOptionButton
+      active={active}
+      label={label}
+      onClick={onClick}
+      accent={meta.accent}
+      soft={meta.soft}
+      extraClass={extraClass}
+      badge={recommendKey ? badges[recommendKey] : undefined}
+    />
+  );
 
   return (
     <div className="ui-panel ui-motion-in mt-4 space-y-4 p-4">
@@ -297,75 +303,68 @@ export default function CustomDigitBuilder({
       </div>
 
       {showAi4d && (
-        <section className="ui-card space-y-2 rounded-3xl p-3">
-          <MiniLabel>AI 4D · AS - KOP - KEPALA - EKOR</MiniLabel>
-          <div className="grid grid-cols-3 gap-2">
+        <CustomDigitSection label="AI 4D · AS - KOP - KEPALA - EKOR">
+          <ThreeColumnOptions>
             {[1, 2, 4].map((n) => optionButton(customAi4dDigit === n, String(n), () => setCustomAi4dDigit(customAi4dDigit === n ? null : (n as Ai4DDigit)), "", `ai4d-${n}`))}
-          </div>
-        </section>
+          </ThreeColumnOptions>
+        </CustomDigitSection>
       )}
 
       {showAi3d && (
-        <section className="ui-card space-y-2 rounded-3xl p-3">
-          <MiniLabel>AI 3D · KOP - KEPALA - EKOR</MiniLabel>
-          <div className="grid grid-cols-3 gap-2">
+        <CustomDigitSection label="AI 3D · KOP - KEPALA - EKOR">
+          <ThreeColumnOptions>
             {[1, 3, 5].map((n) => optionButton(customAi3dDigit === n, String(n), () => setCustomAi3dDigit(customAi3dDigit === n ? null : (n as Ai3DDigit)), "", `ai3d-${n}`))}
-          </div>
-          <div className="grid grid-cols-1 gap-2">
+          </ThreeColumnOptions>
+          <SingleColumnOptions>
             {optionButton(customAi3dParity, "GENAP GANJIL", () => setCustomAi3dParity(!customAi3dParity), "", "ai3d-7")}
             {optionButton(customAi3dSize, "BESAR KECIL", () => setCustomAi3dSize(!customAi3dSize), "", "ai3d-8")}
-          </div>
-        </section>
+          </SingleColumnOptions>
+        </CustomDigitSection>
       )}
 
       {visiblePairs.map((pair) => (
-        <section key={`ai-${pair}`} className="ui-card space-y-2 rounded-3xl p-3">
-          <MiniLabel>AI {pairLabel[pair]} · {pairSubtitle[pair]}</MiniLabel>
-          <div className="grid grid-cols-3 gap-2">
+        <CustomDigitSection key={`ai-${pair}`} label={`AI ${pairLabel[pair]} · ${pairSubtitle[pair]}`}>
+          <ThreeColumnOptions>
             {[2, 4, 6].map((n) => optionButton(customAiDigitByPair[pair] === n, String(n), () => setCustomAiDigitForPair(pair, customAiDigitByPair[pair] === n ? null : (n as 2 | 4 | 6)), "", `ai-${pair}-${n}`))}
-          </div>
-          <div className="grid grid-cols-1 gap-2">
+          </ThreeColumnOptions>
+          <SingleColumnOptions>
             {optionButton(Boolean(customAiParityByPair[pair]), "GENAP GANJIL", () => setCustomAiParityForPair(pair, !customAiParityByPair[pair]), "", `ai-${pair}-7`)}
             {optionButton(Boolean(customAiSizeByPair[pair]), "BESAR KECIL", () => setCustomAiSizeForPair(pair, !customAiSizeByPair[pair]), "", `ai-${pair}-8`)}
-          </div>
-        </section>
+          </SingleColumnOptions>
+        </CustomDigitSection>
       ))}
 
-      <section className="ui-card space-y-2 rounded-3xl p-3">
-        <MiniLabel>BBFS {bbfsScope.toUpperCase().replaceAll("_", " ")}</MiniLabel>
-        <div className="grid grid-cols-3 gap-2">
+      <CustomDigitSection label={`BBFS ${bbfsScope.toUpperCase().replaceAll("_", " ")}`}>
+        <ThreeColumnOptions>
           {[7, 8, 9].map((n) => optionButton(customBBFSDigit === n, String(n), () => setCustomBBFSDigit(customBBFSDigit === n ? null : (n as BBFSDigit)), "", `bbfs-${n}`))}
-        </div>
-      </section>
+        </ThreeColumnOptions>
+      </CustomDigitSection>
 
       {visiblePositions.map((position) => (
-        <section key={position} className="ui-card space-y-2 rounded-3xl p-3">
-          <MiniLabel>Angka Mati {customFocusPositionLabels[position]}</MiniLabel>
-          <div className="grid grid-cols-3 gap-2">
+        <CustomDigitSection key={position} label={`Angka Mati ${customFocusPositionLabels[position]}`}>
+          <ThreeColumnOptions>
             {[1, 2, 3].map((n) => optionButton(positionValues[position] === n, String(n), () => positionSetters[position](positionValues[position] === n ? null : n), "", `${position}-${n}`))}
-          </div>
-        </section>
+          </ThreeColumnOptions>
+        </CustomDigitSection>
       ))}
 
       {visiblePairs.map((pair) => (
-        <section key={`jumlah-${pair}`} className="ui-card space-y-2 rounded-3xl p-3">
-          <MiniLabel>Jumlah Mati {pairLabel[pair]} · {pairSubtitle[pair]}</MiniLabel>
-          <div className="grid grid-cols-3 gap-2">
+        <CustomDigitSection key={`jumlah-${pair}`} label={`Jumlah Mati ${pairLabel[pair]} · ${pairSubtitle[pair]}`}>
+          <ThreeColumnOptions>
             {[1, 2, 3].map((n) => optionButton(customOffJumlahCountByPair[pair] === n, String(n), () => setCustomOffJumlahCountForPair(pair, customOffJumlahCountByPair[pair] === n ? null : n), "", `jumlah-${pair}-${n}`))}
-          </div>
-        </section>
+          </ThreeColumnOptions>
+        </CustomDigitSection>
       ))}
 
       {visiblePairs.map((pair) => (
-        <section key={`shio-${pair}`} className="ui-card space-y-2 rounded-3xl p-3">
-          <MiniLabel>Shio Mati {pairLabel[pair]} · {pairSubtitle[pair]}</MiniLabel>
-          <div className="grid grid-cols-3 gap-2">
+        <CustomDigitSection key={`shio-${pair}`} label={`Shio Mati ${pairLabel[pair]} · ${pairSubtitle[pair]}`}>
+          <ThreeColumnOptions>
             {[1, 2, 3].map((n) => optionButton(customOffShioCountByPair[pair] === n, String(n), () => setCustomOffShioCountForPair(pair, customOffShioCountByPair[pair] === n ? null : n), "", `shio-${pair}-${n}`))}
-          </div>
-        </section>
+          </ThreeColumnOptions>
+        </CustomDigitSection>
       ))}
 
-      <button onClick={onGenerate} className="primary-button ui-motion-soft ui-tap flex w-full items-center justify-center gap-3 p-5 font-['Orbitron'] text-[12px] font-black uppercase tracking-[4px]">
+      <button onClick={onGenerate} className="primary-button ui-font-display ui-motion-soft ui-tap flex w-full items-center justify-center gap-3 p-5 text-[12px] font-black uppercase tracking-[4px]">
         <RefreshCw size={18} /> Generate
       </button>
     </div>
