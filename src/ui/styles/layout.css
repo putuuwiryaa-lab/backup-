@@ -1,3 +1,52 @@
-/* Layout split target.
-   Move app container, width, overflow, shell spacing, and safe-area rules here.
+/* Layout split.
+   This file overrides low-risk shell/layout rules from src/design-system.css.
 */
+
+body,
+#root,
+.app-container {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  color: var(--text) !important;
+}
+
+.app-container {
+  background:
+    radial-gradient(ellipse 80% 60% at 15% 10%, rgba(124,77,255,0.28) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 85% 15%, rgba(240,98,146,0.22) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 40% at 50% 85%, rgba(181,123,238,0.16) 0%, transparent 55%),
+    linear-gradient(180deg, #110e22 0%, #0d0a1a 64%, #080514 100%) !important;
+}
+
+img,
+svg,
+canvas,
+video,
+button,
+a,
+input,
+select,
+textarea {
+  max-width: 100%;
+}
+
+.app-container > .relative.mx-auto {
+  width: 100% !important;
+  max-width: min(48rem, 100vw) !important;
+  padding-left: clamp(0.75rem, 3.5vw, 1.5rem) !important;
+  padding-right: clamp(0.75rem, 3.5vw, 1.5rem) !important;
+}
+
+.app-container main,
+.app-container main > div {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.absolute.-right-12,
+.absolute.-right-14,
+.absolute.-right-7 {
+  max-width: 40vw;
+  pointer-events: none;
+}
