@@ -1,3 +1,58 @@
-/* Dashboard split target.
-   Move dashboard header, market grid, market cards, stats cards, and dashboard-specific responsive rules here.
+/* Dashboard split.
+   This file owns dashboard, market grid, market cards, and dashboard-specific responsive rules.
 */
+
+.market-grid,
+.market-list,
+.dashboard-grid {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.market-card,
+.market-card-ref,
+.market-card-premium {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--ui-text, var(--text));
+}
+
+.market-name,
+.market-name-strip,
+.market-section-title {
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+.market-last-value,
+.market-result,
+.market-number {
+  font-variant-numeric: tabular-nums slashed-zero;
+  font-feature-settings: 'tnum' 1, 'zero' 1;
+}
+
+.dashboard-header,
+.market-dashboard-header {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.dashboard-header .absolute,
+.market-dashboard-header .absolute {
+  pointer-events: none;
+}
+
+@media (max-width: 420px) {
+  .market-name,
+  .market-name-strip {
+    letter-spacing: 0.045rem !important;
+  }
+
+  .market-card,
+  .market-card-ref,
+  .market-card-premium {
+    border-radius: var(--radius-card) !important;
+  }
+}
