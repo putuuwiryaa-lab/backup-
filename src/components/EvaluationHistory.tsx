@@ -142,7 +142,7 @@ export default function EvaluationHistory({
 
           return (
             <div key={row.id} className="ui-card ui-motion-soft ui-lift rounded-3xl p-2 text-center">
-              <div className="font-['JetBrains_Mono'] text-[10px] font-black tracking-[0.5px] text-[var(--ui-text)] sm:text-[11px]">
+              <div className="ui-mono text-[10px] font-black tracking-[0.5px] text-[var(--ui-text)] sm:text-[11px]">
                 {row.from_result} → {row.new_result}
               </div>
               <div
