@@ -1,3 +1,76 @@
-/* Analysis split target.
-   Move analysis page, result cards, validation rows, digit chips, custom rekap, and evaluation history rules here.
+/* Analysis split.
+   This file owns low-risk analysis/result/debuggable UI rules while src/design-system.css is decomposed.
 */
+
+.result-glow {
+  box-shadow: 0 14px 30px rgba(124,77,255,0.18) !important;
+}
+
+.analysis-mode-ai,
+.analysis-mode-bbfs,
+.analysis-mode-mati,
+.analysis-mode-jumlah,
+.analysis-mode-shio,
+.analysis-mode-rekap {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.analysis-mode-ai *,
+.analysis-mode-bbfs *,
+.analysis-mode-mati *,
+.analysis-mode-jumlah *,
+.analysis-mode-shio *,
+.analysis-mode-rekap * {
+  min-width: 0;
+}
+
+.ui-panel.result-glow,
+.premium-panel.result-glow {
+  overflow: visible !important;
+  background: rgba(255,255,255,0.055) !important;
+  border-color: rgba(181,123,238,0.22) !important;
+}
+
+.ui-panel.result-glow > .relative.rounded-3xl,
+.premium-panel.result-glow > .relative.rounded-3xl {
+  overflow: hidden !important;
+  padding: clamp(0.875rem, 3.6vw, 1rem) !important;
+  background:
+    radial-gradient(circle at top center, rgba(124,77,255,0.06), transparent 54%),
+    rgba(10,7,20,0.90) !important;
+  border-color: rgba(255,255,255,0.08) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04) !important;
+}
+
+.main-digit-chip,
+.ui-mono,
+.custom-scrollbar {
+  font-variant-numeric: tabular-nums slashed-zero;
+  font-feature-settings: 'tnum' 1, 'zero' 1;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(181,123,238,0.35), rgba(240,98,146,0.25));
+  border-radius: 999px;
+}
+
+.ui-note {
+  border-radius: var(--radius-card);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+}
+
+.ui-card,
+.ui-panel {
+  color: var(--ui-text, var(--text));
+}
