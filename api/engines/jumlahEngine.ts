@@ -1,7 +1,20 @@
 import { _0xJ2d } from './tables.js';
 import { _0x3ca571 } from './offFormula.js';
 
-export function _0xEngineJumlahMati(D: string[], param: number = 1) {
+type TargetPair = 'depan' | 'tengah' | 'belakang';
+
+function targetIndexes(targetPair: TargetPair = 'belakang') {
+  if (targetPair === 'depan') return [0, 1] as const;
+  if (targetPair === 'tengah') return [1, 2] as const;
+  return [2, 3] as const;
+}
+
+function targetJumlah2D(result: string, targetPair: TargetPair = 'belakang') {
+  const [a, b] = targetIndexes(targetPair);
+  return _0xJ2d(result[a], result[b]);
+}
+
+export function _0xEngineJumlahMati(D: string[], param: number = 1, targetPair: TargetPair = 'belakang') {
   const U = D.slice(-17);
   const SA: Record<string, number> = {};
   const MK = Object.keys(_0x3ca571('0000', '0000'));
@@ -9,18 +22,18 @@ export function _0xEngineJumlahMati(D: string[], param: number = 1) {
 
   for (let i = 0; i < 14; i++) {
     const pr: any = _0x3ca571(U[i], U[i + 1]), tg = U[i + 2];
-    const j2d = _0xJ2d(tg[2], tg[3]);
+    const j2d = targetJumlah2D(tg, targetPair);
     MK.forEach((k) => { if (pr[k] !== j2d) SA[k] += 1; });
   }
 
   const fq: Record<string, number> = {};
   for (let d = 0; d <= 9; d++) fq[String(d)] = 0;
-  U.forEach((r) => { const j = _0xJ2d(r[2], r[3]); fq[String(j)]++; });
+  U.forEach((r) => { const j = targetJumlah2D(r, targetPair); fq[String(j)]++; });
 
   const rc: Record<string, number> = {};
   for (let d = 0; d <= 9; d++) rc[String(d)] = 99;
   for (let j = U.length - 1; j >= 0; j--) {
-    const jd = String(_0xJ2d(U[j][2], U[j][3]));
+    const jd = String(targetJumlah2D(U[j], targetPair));
     if (rc[jd] === 99) rc[jd] = (U.length - 1 - j);
   }
 
