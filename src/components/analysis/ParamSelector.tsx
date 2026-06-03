@@ -61,7 +61,7 @@ export default function ParamSelector({ type, param, meta, analysisScope = "defa
               }}
             >
               <span
-                className={`block font-['Orbitron'] font-black tracking-[2px] ${
+                className={`ui-font-display block font-black tracking-[2px] ${
                   isSpecial ? "text-[15px] leading-5" : "text-xl"
                 }`}
               >
