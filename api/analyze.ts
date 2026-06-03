@@ -21,6 +21,7 @@ function getHeaderValue(req: any, name: string) {
 
 function sanitizeData(data: any) {
   if (!Array.isArray(data)) return null;
+
   const cleaned = data
     .map((item) => String(item || "").trim())
     .filter((item) => /^\d{4}$/.test(item));
@@ -30,10 +31,18 @@ function sanitizeData(data: any) {
 }
 
 type TargetPair = "depan" | "tengah" | "belakang";
-type AnalysisScope = "default" | "4d" | "3d" | "2d_depan" | "2d_tengah" | "2d_belakang";
+type AnalysisScope =
+  | "default"
+  | "4d"
+  | "3d"
+  | "2d_depan"
+  | "2d_tengah"
+  | "2d_belakang";
 
 function sanitizeTargetPair(value: any): TargetPair {
-  return value === "depan" || value === "tengah" || value === "belakang" ? value : "belakang";
+  return value === "depan" || value === "tengah" || value === "belakang"
+    ? value
+    : "belakang";
 }
 
 function sanitizeAnalysisScope(value: any): AnalysisScope {
@@ -51,6 +60,8 @@ function isAi2DScope(scope: AnalysisScope): boolean {
 }
 
 function normalizeScopeForType(type: string, scope: AnalysisScope): AnalysisScope {
+  // AI 2D lama tetap disimpan sebagai scope default.
+  // Pembeda depan/tengah/belakang dikirim lewat targetPair, bukan remap data.
   if (type === "ai" && isAi2DScope(scope)) return "default";
   return scope;
 }
@@ -60,36 +71,6 @@ function targetPairFromScope(scope: AnalysisScope, fallback: TargetPair): Target
   if (scope === "2d_tengah") return "tengah";
   if (scope === "2d_belakang") return "belakang";
   return fallback;
-}
-
-function getTarget2D(result: string, targetPair: TargetPair) {
-  if (targetPair === "depan") return result.slice(0, 2);
-  if (targetPair === "tengah") return result.slice(1, 3);
-  return result.slice(2, 4);
-}
-
-function getTargetByScope(result: string, scope: AnalysisScope, targetPair: TargetPair) {
-  if (scope === "4d") return result.slice(0, 4);
-  if (scope === "3d") return result.slice(1, 4);
-  if (scope === "2d_depan") return result.slice(0, 2);
-  if (scope === "2d_tengah") return result.slice(1, 3);
-  if (scope === "2d_belakang") return result.slice(2, 4);
-  return getTarget2D(result, targetPair);
-}
-
-function remapDataForTargetPair(type: string, data: string[], targetPair: TargetPair) {
-  if (targetPair === "belakang") return data;
-  if (!["ai", "jumlah", "shio"].includes(type)) return data;
-  return data.map((result) => `00${getTarget2D(result, targetPair)}`);
-}
-
-function remapDataForAiScope(data: string[], scope: AnalysisScope, targetPair: TargetPair) {
-  if (scope === "4d") return data;
-
-  return data.map((result) => {
-    const target = getTargetByScope(result, scope, targetPair);
-    return target.padStart(4, "0");
-  });
 }
 
 function aiParamIsValid(param: number, scope: AnalysisScope) {
@@ -125,7 +106,10 @@ async function validateAccessToken(req: any, jwtSecret: string) {
   }
 
   if (decoded.role === "TRIAL") {
-    const supabase = createClient(requireEnv("SUPABASE_URL"), requireEnv("SUPABASE_SERVICE_ROLE_KEY"));
+    const supabase = createClient(
+      requireEnv("SUPABASE_URL"),
+      requireEnv("SUPABASE_SERVICE_ROLE_KEY")
+    );
 
     const { data, error } = await supabase
       .from("trial_activations_v2")
@@ -133,8 +117,13 @@ async function validateAccessToken(req: any, jwtSecret: string) {
       .eq("device_id", String(decoded.deviceId))
       .maybeSingle();
 
-    if (error) return { ok: false, status: 500, error: "Gagal memeriksa akses trial" };
-    if (!data?.expires_at) return { ok: false, status: 403, error: "Trial tidak ditemukan" };
+    if (error) {
+      return { ok: false, status: 500, error: "Gagal memeriksa akses trial" };
+    }
+
+    if (!data?.expires_at) {
+      return { ok: false, status: 403, error: "Trial tidak ditemukan" };
+    }
 
     if (new Date(data.expires_at).getTime() <= Date.now()) {
       return { ok: false, status: 403, error: "Trial sudah habis. Silakan aktivasi VIP." };
@@ -185,9 +174,10 @@ export default async function handler(req: any, res: any) {
     const safeScope = normalizeScopeForType(type, rawScope);
     const engineType = isBBFS ? "ai" : type;
 
-    const targetPair = isBBFS || isAI
-      ? targetPairFromScope(rawScope, sanitizeTargetPair(target_pair))
-      : sanitizeTargetPair(target_pair);
+    const targetPair =
+      isBBFS || isAI
+        ? targetPairFromScope(rawScope, sanitizeTargetPair(target_pair))
+        : sanitizeTargetPair(target_pair);
 
     const paramIsValid = isBBFS
       ? [7, 8, 9].includes(safeParam)
@@ -205,16 +195,13 @@ export default async function handler(req: any, res: any) {
       return res.status(400).json({ error: "Invalid request" });
     }
 
-    const shouldRemapBBFS = isBBFS && safeScope.startsWith("2d_");
-
-    const analysisData = isAI
-      ? remapDataForAiScope(cleanedData, safeScope, targetPair)
-      : shouldRemapBBFS
-        ? remapDataForTargetPair("ai", cleanedData, targetPair)
-        : remapDataForTargetPair(engineType, cleanedData, targetPair);
-
-    const result = runAnalysis(engineType, analysisData, safeParam, {
+    // Penting:
+    // Jangan remap input data.
+    // Semua engine tetap menerima 4D mentah.
+    // Fokus depan/tengah/belakang dikendalikan lewat targetPair di predictionEngine.
+    const result = runAnalysis(engineType, cleanedData, safeParam, {
       analysisScope: safeScope,
+      targetPair,
       forceDigitResult: isBBFS,
     });
 
@@ -224,6 +211,7 @@ export default async function handler(req: any, res: any) {
       analysis_scope: safeScope,
     });
   } catch (e: any) {
+    console.error(e);
     return res.status(500).json({ error: "Gagal memproses analisa" });
   }
 }
