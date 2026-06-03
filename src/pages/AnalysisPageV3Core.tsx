@@ -1,19 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, RefreshCw, Sparkles } from "lucide-react";
 import ParamSelector from "../components/analysis/ParamSelector";
 import CustomDigitBuilder from "../components/analysis/CustomDigitBuilder";
 import RekapResult from "../components/analysis/RekapResult";
 import AnalysisResult from "../components/analysis/AnalysisResult";
+import AnalysisPageChrome from "../components/analysis/AnalysisPageChrome";
 import { useStepBackNavigation } from "../hooks/useStepBackNavigation";
 import { typeMeta } from "../lib/analysis/constants";
 import { toNumberList } from "../lib/analysis/utils";
 import {
   buildCustomDigitLines,
   bbfsScopeToTargetPair,
-  customFocusLabel,
   customFocusPairs,
-  customFocusSubtitle,
   customFocusToBBFSScope,
   type CustomFocus,
   type TargetPair,
@@ -24,8 +22,6 @@ import {
   RekapFocusSelector,
   TargetPairSelector,
   BBFS_SCOPE_OPTIONS,
-  analysisScopeLabel,
-  targetPairLabel,
   type AnalysisScope,
 } from "../components/analysis/ScopeSelectors";
 
@@ -410,38 +406,39 @@ export default function AnalysisPageV3Core({ type, title, icon, marketId }: { ty
   const showTargetPairSelector = needsTargetPair && !targetPair && !result && !loading;
   const showBBFSScopeSelector = isBBFS && !analysisScope && !result && !loading;
   const showParamSelector = !showAIScopeSelector && !showTargetPairSelector && !showBBFSScopeSelector && !showRekapFocusSelector;
+  const canStartAnalyze = !result && !loading && param !== 0 && !isRekapCustom && !autoMode;
 
   return (
     <div className={`analysis-mode-${type} ui-motion-in pb-8`}>
-      <button onClick={handleBack} className="ghost-button ui-motion-soft ui-tap mb-3 flex items-center gap-2 px-4 py-3 text-[10px] font-black uppercase tracking-[2px] text-[var(--ui-text-muted)]"><ArrowLeft size={16} /> Kembali</button>
+      <AnalysisPageChrome
+        type={type}
+        title={title}
+        icon={icon}
+        marketId={marketId}
+        meta={meta}
+        isAI={isAI}
+        isBBFS={isBBFS}
+        isRekapCustom={isRekapCustom}
+        needsTargetPair={needsTargetPair}
+        analysisScope={analysisScope}
+        targetPair={targetPair}
+        customFocus={customFocus}
+        loading={loading}
+        canStartAnalyze={canStartAnalyze}
+        onBack={handleBack}
+        onStartAnalyze={() => handleAnalyze(param || 1)}
+        onAIScopeReset={handleAIScopeReset}
+        onTargetPairReset={handleTargetPairReset}
+        onBBFSScopeReset={handleBBFSScopeReset}
+        onCustomFocusReset={handleCustomFocusReset}
+      />
 
-      <div className="ui-panel ui-motion-in relative mb-4 overflow-hidden p-4">
-        <div className="absolute -right-12 -top-12 h-28 w-28 rounded-full blur-3xl" style={{ backgroundColor: `${meta.accent}18` }} />
-        <div className="absolute inset-x-0 top-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${meta.accent}, transparent)` }} />
-        <div className="relative mb-4 flex items-center gap-3">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border bg-white/[0.028] text-[18px]" style={{ borderColor: `${meta.accent}66`, color: meta.accent }}>{icon}</div>
-          <div className="min-w-0 flex-1">
-            <div className="mb-1 inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-[8px] font-black uppercase tracking-[1.8px]" style={{ backgroundColor: meta.soft, color: meta.accent }}><Sparkles size={10} /> Mode Analisa</div>
-            <h2 className="truncate font-['Orbitron'] text-[16px] font-black uppercase tracking-[3px] text-[var(--ui-text)]">{title}</h2>
-          </div>
-        </div>
-        <div className="ui-card relative flex min-h-[78px] items-center justify-center rounded-2xl px-4 py-4 text-center">
-          <p className="break-words font-['Orbitron'] text-[24px] font-black uppercase leading-tight tracking-[4px] text-[var(--ui-text)] sm:text-[28px]">{marketId}</p>
-        </div>
-        {isAI && analysisScope && <div className="ui-card ui-motion-in relative mt-3 flex items-center justify-between gap-3 rounded-2xl p-3"><div className="min-w-0 text-left"><span className="mr-2 ui-label text-[9px]">AI:</span><span className="font-['Orbitron'] text-[10px] font-black uppercase tracking-[2px]" style={{ color: meta.accent }}>{analysisScopeLabel(analysisScope)}</span></div><button type="button" onClick={handleAIScopeReset} className="ui-motion-soft ui-tap shrink-0 rounded-full border px-3 py-1.5 text-[8px] font-black uppercase tracking-[1px]" style={{ borderColor: `${meta.accent}66`, color: meta.accent }}>Ganti</button></div>}
-        {needsTargetPair && targetPair && <div className="ui-card ui-motion-in relative mt-3 flex items-center justify-between gap-3 rounded-2xl p-3"><div className="min-w-0 text-left"><span className="mr-2 ui-label text-[9px]">Fokus:</span><span className="font-['Orbitron'] text-[10px] font-black uppercase tracking-[2px]" style={{ color: meta.accent }}>{targetPairLabel(targetPair)}</span></div><button type="button" onClick={handleTargetPairReset} className="ui-motion-soft ui-tap shrink-0 rounded-full border px-3 py-1.5 text-[8px] font-black uppercase tracking-[1px]" style={{ borderColor: `${meta.accent}66`, color: meta.accent }}>Ganti</button></div>}
-        {isBBFS && analysisScope && analysisScope !== "default" && <div className="ui-card ui-motion-in relative mt-3 flex items-center justify-between gap-3 rounded-2xl p-3"><div className="min-w-0 text-left"><span className="mr-2 ui-label text-[9px]">BBFS:</span><span className="font-['Orbitron'] text-[10px] font-black uppercase tracking-[2px]" style={{ color: meta.accent }}>{analysisScopeLabel(analysisScope)}</span></div><button type="button" onClick={handleBBFSScopeReset} className="ui-motion-soft ui-tap shrink-0 rounded-full border px-3 py-1.5 text-[8px] font-black uppercase tracking-[1px]" style={{ borderColor: `${meta.accent}66`, color: meta.accent }}>Ganti</button></div>}
-        {isRekapCustom && customFocus && <div className="ui-card ui-motion-in relative mt-3 flex items-center justify-between gap-3 rounded-2xl p-3"><div className="min-w-0 text-left"><span className="mr-2 ui-label text-[9px]">Rekap:</span><span className="font-['Orbitron'] text-[10px] font-black uppercase tracking-[2px]" style={{ color: meta.accent }}>{customFocusLabel(customFocus)} · {customFocusSubtitle(customFocus)}</span></div><button type="button" onClick={handleCustomFocusReset} className="ui-motion-soft ui-tap shrink-0 rounded-full border px-3 py-1.5 text-[8px] font-black uppercase tracking-[1px]" style={{ borderColor: `${meta.accent}66`, color: meta.accent }}>Ganti</button></div>}
-      </div>
-
-      {!result && !loading && param !== 0 && !isRekapCustom && !autoMode && <button onClick={() => handleAnalyze(param || 1)} className="primary-button ui-motion-soft ui-tap mb-4 flex w-full items-center justify-center gap-3 p-5 font-['Orbitron'] text-[12px] font-black uppercase tracking-[4px]"><RefreshCw size={18} /> Mulai Analisa</button>}
       {showAIScopeSelector && <AIScopeSelector meta={meta} onSelect={handleAIScopeSelect} />}
       {showTargetPairSelector && <TargetPairSelector meta={meta} onSelect={handleTargetPairSelect} />}
       {showBBFSScopeSelector && <BBFSScopeSelector meta={meta} onSelect={handleBBFSScopeSelect} />}
       {showRekapFocusSelector && <RekapFocusSelector meta={meta} onSelect={(focus) => { setCustomFocus(focus); setCustomAi3dDigit(null); setCustomAi3dParity(false); setCustomAi3dSize(false); setCustomAi4dDigit(null); setCustomBBFSDigit(null); setError(""); }} />}
       {showParamSelector && !autoMode && <ParamSelector type={type} param={param} meta={meta} analysisScope={analysisScope || "default"} onAnalyze={handleAnalyze} onCustomDigit={() => { setParam(3); setResult(null); setError(""); }} />}
       {customFocus && <CustomDigitBuilder show={showCustomDigitBuilder} marketId={marketId} meta={meta} customFocus={customFocus} customAiDigitByPair={customAiDigitByPair} setCustomAiDigitForPair={setCustomAiDigitForPair} customAiParityByPair={customAiParityByPair} setCustomAiParityForPair={setCustomAiParityForPair} customAiSizeByPair={customAiSizeByPair} setCustomAiSizeForPair={setCustomAiSizeForPair} customAi3dDigit={customAi3dDigit} setCustomAi3dDigit={setCustomAi3dDigit} customAi3dParity={customAi3dParity} setCustomAi3dParity={setCustomAi3dParity} customAi3dSize={customAi3dSize} setCustomAi3dSize={setCustomAi3dSize} customAi4dDigit={customAi4dDigit} setCustomAi4dDigit={setCustomAi4dDigit} customBBFSDigit={customBBFSDigit} setCustomBBFSDigit={setCustomBBFSDigit} customOffAsCount={customOffAsCount} setCustomOffAsCount={setCustomOffAsCount} customOffKopCount={customOffKopCount} setCustomOffKopCount={setCustomOffKopCount} customOffKepalaCount={customOffKepalaCount} setCustomOffKepalaCount={setCustomOffKepalaCount} customOffEkorCount={customOffEkorCount} setCustomOffEkorCount={setCustomOffEkorCount} customOffJumlahCountByPair={customOffJumlahCountByPair} setCustomOffJumlahCountForPair={setCustomOffJumlahCountForPair} customOffShioCountByPair={customOffShioCountByPair} setCustomOffShioCountForPair={setCustomOffShioCountForPair} onGenerate={handleCustomDigitGenerate} />}
-      {loading && <div className="ui-panel ui-motion-in my-4 flex flex-col items-center justify-center gap-4 p-8 text-center"><div className="h-12 w-12 animate-spin rounded-full border-4 border-white/10" style={{ borderTopColor: meta.accent }} /><div className="font-['Orbitron'] text-[11px] font-black uppercase tracking-[3px]">Memproses Analisa</div></div>}
       {error && <div className="ui-note ui-motion-in my-4 border-red-400/30 bg-red-500/10 p-4 text-center text-[12px] font-bold text-red-300">{error}</div>}
       {result && type === "rekap" && <RekapResult result={result} param={param} marketId={marketId} meta={meta} />}
       {result && type !== "rekap" && <AnalysisResult type={type} result={result} param={param} marketId={marketId} meta={meta} targetPair={targetPair || "belakang"} analysisScope={analysisScope || "default"} detailValidationOpen={detailValidationOpen} setDetailValidationOpen={setDetailValidationOpen} angkaJadiOpen={angkaJadiOpen} setAngkaJadiOpen={setAngkaJadiOpen} />}
