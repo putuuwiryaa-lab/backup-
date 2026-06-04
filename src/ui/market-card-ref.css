@@ -1,41 +1,7 @@
-/* Compact market card final polish
-   Strong visible pass: proportional card, balanced strip/result, single report action.
+/* Compact market card and analysis mode color polish.
+   No typography ownership here. Font rules live only in font-premium.css.
 */
 
-/* Force stable typography across WebView/devices. */
-:root {
-  --app-font-ui: 'Outfit', 'Inter', 'Segoe UI', Arial, Helvetica, sans-serif;
-  --app-font-display: 'Syne', 'Outfit', 'Inter', 'Segoe UI', Arial, Helvetica, sans-serif;
-  --app-font-mono: 'DM Mono', 'Roboto Mono', 'Courier New', monospace;
-}
-
-.app-container,
-.app-container * {
-  font-family: var(--app-font-ui) !important;
-}
-
-.app-container [class*="font-['Orbitron']"],
-.app-container [class*="font-['Space_Grotesk']"],
-.app-container h1,
-.app-container h2,
-.app-container h3,
-.app-container .market-name,
-.app-container .market-section-title,
-.app-container .market-name-strip,
-.app-container .primary-button,
-.app-container .ghost-button,
-.app-container .report-floating-button {
-  font-family: var(--app-font-display) !important;
-}
-
-.app-container [class*="font-['JetBrains_Mono']"],
-.app-container [class*="font-['DM_Mono']"],
-.app-container .market-last-value,
-.app-container .custom-scrollbar {
-  font-family: var(--app-font-mono) !important;
-}
-
-/* Header subtitle: give the hero title more breathing room. */
 .hero-card p,
 header p {
   margin-top: 0.9rem !important;
@@ -88,10 +54,7 @@ header p {
   width: 100% !important;
   padding: 0 !important;
   text-align: center !important;
-  font-size: 0.7rem !important;
-  font-weight: 900 !important;
   line-height: 1 !important;
-  letter-spacing: 0.08rem !important;
   color: rgba(250, 246, 255, 0.96) !important;
   text-shadow: none !important;
 }
@@ -118,10 +81,7 @@ header p {
 .market-card-compact .market-last-value {
   width: auto !important;
   text-align: center !important;
-  font-size: 1.34rem !important;
-  font-weight: 900 !important;
   line-height: 1 !important;
-  letter-spacing: 0.17rem !important;
   color: #f8cb6f !important;
   text-shadow: 0 0 10px rgba(248, 203, 111, 0.12) !important;
 }
@@ -131,7 +91,6 @@ header p {
   display: none !important;
 }
 
-/* Mode color identity for analysis detail pages. No color-mix: safer on mobile WebView. */
 .analysis-mode-ai {
   --mode-accent: #f3c14b;
   --mode-soft: rgba(243, 193, 75, 0.16);
@@ -199,18 +158,14 @@ header p {
 .analysis-mode-mati .premium-panel,
 .analysis-mode-jumlah .premium-panel,
 .analysis-mode-shio .premium-panel,
-.analysis-mode-rekap .premium-panel {
-  background: linear-gradient(180deg, var(--mode-panel), var(--mode-panel-2)) !important;
-  border-color: var(--mode-border-soft) !important;
-}
-
+.analysis-mode-rekap .premium-panel,
 .analysis-mode-ai > .premium-panel,
 .analysis-mode-mati > .premium-panel,
 .analysis-mode-jumlah > .premium-panel,
 .analysis-mode-shio > .premium-panel,
 .analysis-mode-rekap > .premium-panel {
-  border-color: var(--mode-border) !important;
   background: linear-gradient(180deg, var(--mode-panel), var(--mode-panel-2)) !important;
+  border-color: var(--mode-border-soft) !important;
 }
 
 .analysis-mode-ai .primary-button,
@@ -240,64 +195,6 @@ header p {
 .analysis-mode-rekap .result-glow {
   background: linear-gradient(180deg, var(--mode-panel), var(--mode-inner)) !important;
   border-color: var(--mode-border) !important;
-}
-
-.analysis-mode-ai .rounded-3xl.bg-black\/20,
-.analysis-mode-mati .rounded-3xl.bg-black\/20,
-.analysis-mode-jumlah .rounded-3xl.bg-black\/20,
-.analysis-mode-shio .rounded-3xl.bg-black\/20,
-.analysis-mode-rekap .rounded-3xl.bg-black\/20,
-.analysis-mode-ai .rounded-3xl.bg-black\/25,
-.analysis-mode-mati .rounded-3xl.bg-black\/25,
-.analysis-mode-jumlah .rounded-3xl.bg-black\/25,
-.analysis-mode-shio .rounded-3xl.bg-black\/25,
-.analysis-mode-rekap .rounded-3xl.bg-black\/25,
-.analysis-mode-ai .rounded-3xl.bg-black\/30,
-.analysis-mode-mati .rounded-3xl.bg-black\/30,
-.analysis-mode-jumlah .rounded-3xl.bg-black\/30,
-.analysis-mode-shio .rounded-3xl.bg-black\/30,
-.analysis-mode-rekap .rounded-3xl.bg-black\/30 {
-  background: var(--mode-inner) !important;
-  border-color: var(--mode-border-soft) !important;
-}
-
-.analysis-mode-ai .h-full.rounded-full,
-.analysis-mode-mati .h-full.rounded-full,
-.analysis-mode-jumlah .h-full.rounded-full,
-.analysis-mode-shio .h-full.rounded-full,
-.analysis-mode-rekap .h-full.rounded-full {
-  background-color: var(--mode-accent) !important;
-}
-
-.analysis-mode-ai .inline-flex,
-.analysis-mode-mati .inline-flex,
-.analysis-mode-jumlah .inline-flex,
-.analysis-mode-shio .inline-flex,
-.analysis-mode-rekap .inline-flex {
-  border-color: var(--mode-border-soft) !important;
-}
-
-/* Long screenshot stability: layout isolation only. Motion remains enabled for testing. */
-.analysis-mode-ai .premium-panel,
-.analysis-mode-mati .premium-panel,
-.analysis-mode-jumlah .premium-panel,
-.analysis-mode-shio .premium-panel,
-.analysis-mode-rekap .premium-panel,
-.analysis-mode-ai .premium-card,
-.analysis-mode-mati .premium-card,
-.analysis-mode-jumlah .premium-card,
-.analysis-mode-shio .premium-card,
-.analysis-mode-rekap .premium-card,
-.analysis-mode-ai .result-glow,
-.analysis-mode-mati .result-glow,
-.analysis-mode-jumlah .result-glow,
-.analysis-mode-shio .result-glow,
-.analysis-mode-rekap .result-glow {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  filter: none !important;
-  contain: layout paint !important;
-  isolation: isolate !important;
 }
 
 .analysis-mode-ai .absolute.blur-3xl,
@@ -340,21 +237,9 @@ header p {
     border-radius: 9px !important;
   }
 
-  .market-card-compact .market-name {
-    font-size: 0.68rem !important;
-    font-weight: 900 !important;
-    letter-spacing: 0.07rem !important;
-  }
-
   .market-card-compact .market-result-row {
     top: 61px !important;
     height: 31px !important;
     min-height: 31px !important;
-  }
-
-  .market-card-compact .market-last-value {
-    font-size: 1.31rem !important;
-    font-weight: 900 !important;
-    letter-spacing: 0.16rem !important;
   }
 }
