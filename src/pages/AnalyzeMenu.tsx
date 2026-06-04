@@ -72,14 +72,14 @@ function AnalyzeList() {
         <div className="absolute -right-10 -top-10 h-20 w-20 rounded-full bg-[var(--cyan-dim)] blur-xl" />
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[var(--gold)] via-[var(--cyan)] to-[var(--gold)]" />
         <div className="relative rounded-[1.7rem] border border-white/10 bg-black/20 px-4 py-7 text-center sm:py-8">
-          <h3 className="mx-auto max-w-[96%] break-words font-['Orbitron'] text-[25px] font-black uppercase leading-tight tracking-[4px] text-[var(--text)] sm:text-[31px]">
+          <h3 className="ui-font-display mx-auto max-w-[96%] break-words text-[25px] font-black uppercase leading-tight tracking-[4px] text-[var(--text)] sm:text-[31px]">
             {marketName}
           </h3>
         </div>
       </div>
 
       <div className="analyze-section-title mb-3 px-1">
-        <p className="font-['Orbitron'] text-[10px] font-black uppercase tracking-[3px] text-[var(--text-dim)]">Pilih Analisa</p>
+        <p className="ui-font-display text-[10px] font-black uppercase tracking-[3px] text-[var(--text-dim)]">Pilih Analisa</p>
       </div>
 
       <div className="analyze-menu-grid grid grid-cols-1 gap-3">
@@ -95,7 +95,7 @@ function AnalyzeList() {
       </div>
 
       <div className="analyze-section-title mb-3 mt-5 px-1">
-        <p className="font-['Orbitron'] text-[10px] font-black uppercase tracking-[3px] text-[var(--text-dim)]">Racik Angka</p>
+        <p className="ui-font-display text-[10px] font-black uppercase tracking-[3px] text-[var(--text-dim)]">Racik Angka</p>
       </div>
 
       <div className="analyze-menu-grid grid grid-cols-1 gap-3">
@@ -130,7 +130,7 @@ function SubMenuCard({ label, meta, onClick, index = 0 }: any) {
         <Icon size={20} strokeWidth={1.9} />
       </div>
       <div className="relative min-w-0 flex-1">
-        <span className="block font-['Orbitron'] text-[13px] font-black uppercase tracking-[2.2px]" style={{ color: meta.accent }}>{label}</span>
+        <span className="ui-font-display block text-[13px] font-black uppercase tracking-[2.2px]" style={{ color: meta.accent }}>{label}</span>
       </div>
       <div className="analyze-menu-chevron relative flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl bg-white/[0.045] text-[var(--text-dim)] group-active:text-[var(--gold)]">
         <ChevronRight size={17} strokeWidth={2.3} />
