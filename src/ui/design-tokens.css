@@ -1,5 +1,5 @@
 /* Shared visual tokens and reusable UI primitives.
-   This layer keeps color, spacing, radius, and motion consistent across the app.
+   This layer keeps color, spacing, radius, typography, and motion consistent across the app.
 */
 
 :root {
@@ -68,24 +68,25 @@
 .ui-title {
   font-family: var(--app-font-display, var(--font-display, 'Orbitron', 'Outfit', system-ui, sans-serif));
   color: var(--ui-text);
-  font-weight: 900;
-  letter-spacing: 0.12em;
+  font-weight: 800;
+  letter-spacing: var(--app-track-display, 0.055em);
   text-transform: uppercase;
 }
 
 .ui-label {
+  font-family: var(--app-font-display, var(--font-display, 'Orbitron', 'Outfit', system-ui, sans-serif));
   color: var(--ui-text-muted);
   font-size: 0.68rem;
-  font-weight: 900;
-  letter-spacing: 0.16em;
+  font-weight: 700;
+  letter-spacing: var(--app-track-label, 0.105em);
   text-transform: uppercase;
 }
 
 .ui-number {
-  font-family: var(--app-font-mono, var(--font-mono, 'JetBrains Mono', 'DM Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace));
+  font-family: var(--app-font-mono, var(--font-mono, 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace));
   color: var(--ui-gold-bright);
-  font-weight: 900;
-  letter-spacing: 0.2em;
+  font-weight: 800;
+  letter-spacing: var(--app-track-mono, 0.075em);
 }
 
 .ui-motion-in {
