@@ -46,7 +46,9 @@ button {
 .app-container .primary-button,
 .app-container .ghost-button,
 .app-container .report-floating-button,
-.app-container .bottom-account-button {
+.app-container .bottom-account-button,
+.app-container [class*="Orbitron"],
+.app-container [class*="Space_Grotesk"] {
   font-family: var(--font-display) !important;
   font-optical-sizing: auto;
   text-rendering: geometricPrecision;
@@ -59,7 +61,9 @@ button {
 .app-container h3,
 .app-container .market-name,
 .app-container .market-section-title,
-.app-container .market-name-strip {
+.app-container .market-name-strip,
+.app-container [class*="Orbitron"],
+.app-container [class*="Space_Grotesk"] {
   letter-spacing: var(--app-track-display) !important;
 }
 
@@ -79,7 +83,9 @@ button {
 .ui-number,
 .app-container .market-last-value,
 .app-container .custom-scrollbar,
-.app-container .main-digit-chip {
+.app-container .main-digit-chip,
+.app-container [class*="JetBrains_Mono"],
+.app-container [class*="DM_Mono"] {
   font-family: var(--font-mono) !important;
   font-variant-numeric: tabular-nums slashed-zero;
   font-feature-settings: 'tnum' 1, 'zero' 1;
