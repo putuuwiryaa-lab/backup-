@@ -155,7 +155,7 @@ function AppLayout() {
         <div className="mb-4 flex items-start gap-3 rounded-3xl border border-red-400/25 bg-red-500/10 p-4 shadow-sm">
           <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-[var(--red)]" />
           <div>
-            <span className="font-['Orbitron'] text-[10px] font-bold uppercase tracking-[2px] text-[var(--red)]">Database Error</span>
+            <span className="ui-font-display text-[10px] font-bold uppercase tracking-[2px] text-[var(--red)]">Database Error</span>
             <p className="mt-1 text-[11px] leading-5 text-red-200">{systemSetting.dbError}</p>
           </div>
         </div>
@@ -193,7 +193,7 @@ function LoadingScreen({ authStage, onSkip }: { authStage: string; onSkip: () =>
         <Zap className="relative h-9 w-9 text-[var(--gold)]" />
       </div>
       <div>
-        <p className="font-['Orbitron'] text-[11px] uppercase tracking-[4px] text-[var(--gold)] animate-pulse">{authStage}</p>
+        <p className="ui-font-display text-[11px] uppercase tracking-[4px] text-[var(--gold)] animate-pulse">{authStage}</p>
         <p className="mt-3 text-sm text-[var(--text-dim)]">Membuka dashboard analisa premium.</p>
       </div>
       <button onClick={onSkip} className="ghost-button px-6 py-3 text-[11px] font-black uppercase tracking-[2px] text-[var(--text)] active:scale-95">Klik jika macet</button>
@@ -205,7 +205,7 @@ function ExpiredScreen() {
   return (
     <div className="flex min-h-screen items-center justify-center p-8 text-center">
       <div className="premium-panel max-w-sm p-8">
-        <h2 className="mb-4 font-['Orbitron'] text-[var(--red)] tracking-[4px]">ACCOUNT EXPIRED</h2>
+        <h2 className="ui-font-display mb-4 text-[var(--red)] tracking-[4px]">ACCOUNT EXPIRED</h2>
         <p className="mb-6 text-sm text-[var(--text-dim)]">Masa trial akun anda telah berakhir. Hubungi Admin untuk aktivasi VIP.</p>
         <button onClick={() => { localStorage.removeItem("supreme_token");  window.location.reload(); }} className="w-full rounded-2xl bg-[var(--red)] p-4 text-[12px] font-black tracking-[2px] text-white">REFRESH</button>
       </div>
@@ -282,7 +282,7 @@ function HeroHeader() {
           <div className="hero-badge mb-3 inline-flex w-fit items-center gap-2 rounded-full bg-[var(--gold-dim)] px-3 py-1 text-[9px] font-black uppercase tracking-[1.8px] text-[var(--gold)]">
             <Sparkles size={12} /> Supreme Dark Pro
           </div>
-          <h1 className="font-['Orbitron'] text-[26px] font-black uppercase leading-none tracking-[4px] text-[var(--text)] sm:text-[34px]">Analisa Angka</h1>
+          <h1 className="ui-font-display text-[26px] font-black uppercase leading-none tracking-[4px] text-[var(--text)] sm:text-[34px]">Analisa Angka</h1>
           <p className="mt-3 max-w-sm text-[11px] font-semibold uppercase tracking-[1.6px] text-[var(--text-dim)]">Aplikasi berbasis matematis.</p>
         </div>
       </div>
@@ -358,10 +358,10 @@ function Dashboard({ markets, onRefresh }: { markets: any[]; onRefresh: () => vo
               className="market-card market-card-compact premium-card relative cursor-pointer overflow-hidden text-center transition active:scale-[0.985]"
             >
               <div className="market-name-strip">
-                <span className="market-name block truncate font-['Orbitron'] text-[12px] font-black uppercase tracking-[2px] text-[var(--text)]">{title}</span>
+                <span className="market-name ui-font-display block truncate text-[12px] font-black uppercase tracking-[2px] text-[var(--text)]">{title}</span>
               </div>
               <div className="market-result-row flex flex-1 items-center justify-center">
-                <span className="market-last-value font-['JetBrains_Mono'] text-[18px] font-black tracking-[1px] text-[var(--cyan)]">{lastResult}</span>
+                <span className="market-last-value ui-font-mono text-[18px] font-black tracking-[1px] text-[var(--cyan)]">{lastResult}</span>
               </div>
             </div>
           );
@@ -377,7 +377,7 @@ function Dashboard({ markets, onRefresh }: { markets: any[]; onRefresh: () => vo
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/12 bg-white/[0.06] text-[var(--gold)]">
             <Plus size={24} strokeWidth={3} />
           </div>
-          <span className="mt-3 block font-['Orbitron'] text-[11px] font-black uppercase tracking-[1.8px] text-[var(--text)]">
+          <span className="ui-font-display mt-3 block text-[11px] font-black uppercase tracking-[1.8px] text-[var(--text)]">
             Request Pasaran
           </span>
           <span className="mt-1 text-[9px] font-bold uppercase tracking-[1.2px] text-[var(--text-dim)]">
@@ -447,7 +447,7 @@ function AccountPanel({ open, role, displayCode, onClose, onLogout }: { open: bo
         <div className="mb-4 flex items-center justify-between gap-3">
           <div>
             <p className="text-[9px] font-black uppercase tracking-[2px] text-[var(--text-dim)]">Akun Saya</p>
-            <h3 className="mt-1 font-['Orbitron'] text-[18px] font-black uppercase tracking-[3px] text-[var(--text)]">{roleLabel}</h3>
+            <h3 className="ui-font-display mt-1 text-[18px] font-black uppercase tracking-[3px] text-[var(--text)]">{roleLabel}</h3>
             <p className="mt-1 text-[11px] font-semibold text-[var(--text-dim)]">{roleSub}</p>
           </div>
           <button onClick={onClose} className="ghost-button rounded-2xl px-4 py-3 text-[10px] font-black uppercase tracking-[1.4px] text-[var(--text)]">Tutup</button>
@@ -455,7 +455,7 @@ function AccountPanel({ open, role, displayCode, onClose, onLogout }: { open: bo
 
         <div className="rounded-3xl border border-white/10 bg-black/20 p-4 text-center">
           <p className="text-[9px] font-black uppercase tracking-[1.6px] text-[var(--text-dim)]">Device Key</p>
-          <p className="mt-2 font-['JetBrains_Mono'] text-[24px] font-black tracking-[5px] text-[var(--gold)]">{displayCode}</p>
+          <p className="ui-font-mono mt-2 text-[24px] font-black tracking-[5px] text-[var(--gold)]">{displayCode}</p>
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-2">
@@ -480,7 +480,7 @@ function LogoutConfirmModal({ open, onCancel, onConfirm }: { open: boolean; onCa
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
       <div className="premium-panel w-full max-w-sm p-6 text-center">
-        <h3 className="font-['Orbitron'] text-[15px] font-black uppercase tracking-[3px] text-[var(--text)]">Keluar akun?</h3>
+        <h3 className="ui-font-display text-[15px] font-black uppercase tracking-[3px] text-[var(--text)]">Keluar akun?</h3>
         <p className="mt-3 text-[12px] leading-5 text-[var(--text-dim)]">Akses perangkat ini akan dikunci sampai login ulang.</p>
         <div className="mt-5 grid grid-cols-2 gap-2">
           <button onClick={onCancel} className="ghost-button rounded-2xl px-4 py-3 text-[10px] font-black uppercase tracking-[1.5px] text-[var(--text)]">Batal</button>
