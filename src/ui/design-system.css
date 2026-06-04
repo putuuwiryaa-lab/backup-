@@ -1,17 +1,10 @@
 /* UI Design System Entry
-   Visual source is currently consolidated in ../design-system.css.
-   Performance overrides are disabled temporarily for animation/motion testing.
-
-   Font rule:
-   - ./font-premium.css is the single active app font layer.
-   - Legacy font imports in ../design-system.css are neutralized by the final import order.
-   - Keep split imports after legacy styles and before font-premium.css.
+   Keep this file as the only CSS entrypoint for app visuals.
+   Font ownership lives in ./font-premium.css.
  */
 
 @import "./design-tokens.css";
 @import "../design-system.css";
-/* @import "./performance-polish.css"; */
-@import "./market-card-ref.css";
 @import "./market-grid-force.css";
 @import "./request-market-card.css";
 @import "./styles/base.css";
