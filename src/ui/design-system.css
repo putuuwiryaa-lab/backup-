@@ -3,13 +3,10 @@
    Performance overrides are disabled temporarily for animation/motion testing.
 
    Font rule:
-   - ../design-system.css may still contain legacy font imports.
-   - ./font-premium.css MUST stay last so Orbitron/Outfit/mono win globally.
-
-   Split CSS rule:
-   - src/ui/styles/*.css are gradual overrides while ../design-system.css is decomposed.
+   - ./font-premium.css is the single active app font layer.
+   - Legacy font imports in ../design-system.css are neutralized by the final import order.
    - Keep split imports after legacy styles and before font-premium.css.
-*/
+ */
 
 @import "./design-tokens.css";
 @import "../design-system.css";
