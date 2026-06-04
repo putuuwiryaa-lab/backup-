@@ -5,6 +5,7 @@ import './ui/design-system.css';
 import './ui/theme-polish.css';
 import './ui/motion-polish.css';
 import './ui/logo-mark-size.css';
+import './ui/font-premium.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
