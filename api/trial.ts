@@ -3,9 +3,9 @@ import crypto from "crypto";
 import { createClient } from "@supabase/supabase-js";
 
 const TRIAL_DAYS = 14;
-const MAX_TRIALS_PER_IP_24H = 2;
-const MAX_TRIALS_PER_IP_LIFETIME = 5;
-const TRIAL_USED_MESSAGE = "Trial gratis di perangkat ini sudah pernah digunakan. Silakan aktivasi VIP.";
+const MAX_TRIALS_PER_IP_24H = 1;
+const MAX_TRIALS_PER_IP_LIFETIME = 1;
+const TRIAL_USED_MESSAGE = "Trial gratis di perangkat atau jaringan ini sudah pernah digunakan. Silakan aktivasi VIP.";
 
 function requireEnv(name: string) {
   const value = process.env[name];
@@ -197,23 +197,22 @@ export default async function handler(req: any, res: any) {
       });
     }
 
-    const { data: existingByNetworkBrowser, error: networkBrowserError } = await supabase
+    const { data: existingByNetwork, error: networkError } = await supabase
       .from("trial_activations_v2")
       .select("id, activated_at, expires_at")
       .eq("ip_hash", ipHash)
-      .eq("user_agent_hash", userAgentHash)
       .order("activated_at", { ascending: false })
       .limit(1)
       .maybeSingle();
 
-    if (networkBrowserError) throw networkBrowserError;
+    if (networkError) throw networkError;
 
-    if (existingByNetworkBrowser?.expires_at) {
-      if (isExpired(existingByNetworkBrowser.expires_at)) {
+    if (existingByNetwork?.expires_at) {
+      if (isExpired(existingByNetwork.expires_at)) {
         await supabase
           .from("trial_activations_v2")
-          .update({ last_seen_at: now.toISOString(), trial_block_reason: "network_browser_expired" })
-          .eq("id", existingByNetworkBrowser.id);
+          .update({ last_seen_at: now.toISOString(), trial_block_reason: "network_expired" })
+          .eq("id", existingByNetwork.id);
         return res.status(403).json({ success: false, expired: true, error: TRIAL_USED_MESSAGE });
       }
 
@@ -223,11 +222,13 @@ export default async function handler(req: any, res: any) {
           device_id: deviceId,
           display_code: displayCode,
           fingerprint_hash: fingerprintHash,
+          user_agent_hash: userAgentHash,
+          user_agent: userAgent,
           last_seen_at: now.toISOString()
         })
-        .eq("id", existingByNetworkBrowser.id);
+        .eq("id", existingByNetwork.id);
 
-      const expiresAt = new Date(existingByNetworkBrowser.expires_at);
+      const expiresAt = new Date(existingByNetwork.expires_at);
       const remainingSeconds = remainingSecondsFrom(expiresAt);
       return res.json({
         success: true,
