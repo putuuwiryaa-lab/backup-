@@ -57,8 +57,9 @@
 .dashboard-page .grid.grid-cols-2.gap-3.pb-6.market-grid-compact {
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  gap: 0.68rem !important;
+  gap: 0.72rem !important;
   align-items: stretch !important;
+  padding-bottom: 7.25rem !important;
 }
 
 .dashboard-page .market-grid.market-grid-compact > .market-card-compact,
@@ -75,40 +76,56 @@
 .dashboard-page .market-card-compact.premium-card,
 .dashboard-page .market-grid.market-grid-compact > .market-card-compact,
 .dashboard-page .grid.grid-cols-2.gap-3.pb-6.market-grid-compact > .market-card-compact {
-  min-height: 108px !important;
-  height: 108px !important;
-  border-radius: 1.32rem !important;
-  background: linear-gradient(180deg, rgba(21, 16, 37, 0.98), rgba(13, 9, 25, 0.98)) !important;
-  border-color: rgba(181, 123, 238, 0.16) !important;
-  box-shadow: 0 7px 18px rgba(0, 0, 0, 0.20), inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+  min-height: 112px !important;
+  height: 112px !important;
+  border-radius: 1.45rem !important;
+  background:
+    radial-gradient(circle at 20% 12%, rgba(124, 77, 255, 0.20), transparent 42%),
+    linear-gradient(180deg, rgba(31, 24, 49, 0.94), rgba(16, 12, 30, 0.96)) !important;
+  border-color: rgba(255, 255, 255, 0.105) !important;
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.055) !important;
+}
+
+.dashboard-page .market-card-compact:nth-child(even),
+.dashboard-page .market-card-compact.premium-card:nth-child(even) {
+  background:
+    radial-gradient(circle at 80% 15%, rgba(246, 198, 106, 0.13), transparent 42%),
+    linear-gradient(180deg, rgba(34, 25, 43, 0.94), rgba(17, 12, 28, 0.96)) !important;
 }
 
 .dashboard-page .market-card-compact .market-name-strip,
 .dashboard-page .market-name-strip {
-  top: 14px !important;
+  top: 13px !important;
   left: 13px !important;
   right: 13px !important;
-  min-height: 31px !important;
-  height: 31px !important;
-  border-radius: 9px !important;
-  background: linear-gradient(135deg, rgba(124, 77, 255, 0.46), rgba(246, 198, 106, 0.14)) !important;
+  min-height: 28px !important;
+  height: 28px !important;
+  border-radius: 0.75rem !important;
+  background: rgba(255, 255, 255, 0.075) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
 }
 
 .dashboard-page .market-card-compact .market-name {
-  font-size: 0.66rem !important;
-  letter-spacing: 0.065rem !important;
+  font-size: 0.64rem !important;
+  letter-spacing: 0.075rem !important;
+  line-height: 1.05 !important;
+  color: rgba(255, 255, 255, 0.88) !important;
 }
 
 .dashboard-page .market-card-compact .market-result-row {
-  top: 59px !important;
-  height: 31px !important;
-  min-height: 31px !important;
+  top: 56px !important;
+  height: 38px !important;
+  min-height: 38px !important;
 }
 
 .dashboard-page .market-card-compact .market-last-value {
-  font-size: 1.26rem !important;
-  letter-spacing: 0.13rem !important;
-  color: #f8cb6f !important;
+  font-size: 1.46rem !important;
+  letter-spacing: 0.14rem !important;
+  color: #f4ca73 !important;
+  text-shadow: 0 0 16px rgba(244, 202, 115, 0.18) !important;
 }
 
 .bottom-account-shell {
@@ -146,39 +163,41 @@
   .dashboard-page .market-grid.market-grid-compact,
   .dashboard-page .grid.grid-cols-2.gap-3.pb-6.market-grid-compact {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 0.55rem !important;
+    gap: 0.62rem !important;
+    padding-bottom: 7.5rem !important;
   }
 
   .dashboard-page .market-card-compact,
   .dashboard-page .market-card-compact.premium-card,
   .dashboard-page .market-grid.market-grid-compact > .market-card-compact,
   .dashboard-page .grid.grid-cols-2.gap-3.pb-6.market-grid-compact > .market-card-compact {
-    min-height: 106px !important;
-    height: 106px !important;
-    border-radius: 1.22rem !important;
+    min-height: 108px !important;
+    height: 108px !important;
+    border-radius: 1.35rem !important;
   }
 
   .dashboard-page .market-card-compact .market-name-strip,
   .dashboard-page .market-name-strip {
-    top: 13px !important;
+    top: 12px !important;
     left: 12px !important;
     right: 12px !important;
-    min-height: 30px !important;
-    height: 30px !important;
+    min-height: 27px !important;
+    height: 27px !important;
   }
 
   .dashboard-page .market-card-compact .market-name {
-    font-size: 0.62rem !important;
-    letter-spacing: 0.055rem !important;
+    font-size: 0.6rem !important;
+    letter-spacing: 0.06rem !important;
   }
 
   .dashboard-page .market-card-compact .market-result-row {
-    top: 57px !important;
+    top: 53px !important;
+    height: 37px !important;
   }
 
   .dashboard-page .market-card-compact .market-last-value {
-    font-size: 1.18rem !important;
-    letter-spacing: 0.12rem !important;
+    font-size: 1.34rem !important;
+    letter-spacing: 0.13rem !important;
   }
 }
 
@@ -186,16 +205,16 @@
   .dashboard-page .market-grid.market-grid-compact,
   .dashboard-page .grid.grid-cols-2.gap-3.pb-6.market-grid-compact {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 0.45rem !important;
+    gap: 0.5rem !important;
   }
 
   .dashboard-page .market-card-compact,
   .dashboard-page .market-card-compact.premium-card,
   .dashboard-page .market-grid.market-grid-compact > .market-card-compact,
   .dashboard-page .grid.grid-cols-2.gap-3.pb-6.market-grid-compact > .market-card-compact {
-    min-height: 102px !important;
-    height: 102px !important;
-    border-radius: 1.05rem !important;
+    min-height: 104px !important;
+    height: 104px !important;
+    border-radius: 1.18rem !important;
   }
 
   .dashboard-page .market-card-compact .market-name-strip,
@@ -203,26 +222,26 @@
     top: 11px !important;
     left: 9px !important;
     right: 9px !important;
-    min-height: 30px !important;
-    height: 30px !important;
+    min-height: 27px !important;
+    height: 27px !important;
     padding: 0 0.32rem !important;
-    border-radius: 8px !important;
+    border-radius: 0.65rem !important;
   }
 
   .dashboard-page .market-card-compact .market-name {
-    font-size: 0.58rem !important;
+    font-size: 0.56rem !important;
     letter-spacing: 0.045rem !important;
     line-height: 1.05 !important;
   }
 
   .dashboard-page .market-card-compact .market-result-row {
-    top: 56px !important;
-    height: 30px !important;
-    min-height: 30px !important;
+    top: 52px !important;
+    height: 34px !important;
+    min-height: 34px !important;
   }
 
   .dashboard-page .market-card-compact .market-last-value {
-    font-size: 1.08rem !important;
+    font-size: 1.22rem !important;
     letter-spacing: 0.11rem !important;
   }
 }
@@ -231,13 +250,13 @@
   .dashboard-page .market-grid.market-grid-compact,
   .dashboard-page .grid.grid-cols-2.gap-3.pb-6.market-grid-compact {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 0.38rem !important;
+    gap: 0.42rem !important;
   }
 
   .dashboard-page .market-card-compact,
   .dashboard-page .market-card-compact.premium-card {
-    min-height: 96px !important;
-    height: 96px !important;
+    min-height: 98px !important;
+    height: 98px !important;
   }
 
   .dashboard-page .market-card-compact .market-name-strip,
@@ -245,21 +264,21 @@
     top: 10px !important;
     left: 8px !important;
     right: 8px !important;
-    min-height: 28px !important;
-    height: 28px !important;
+    min-height: 26px !important;
+    height: 26px !important;
   }
 
   .dashboard-page .market-card-compact .market-name {
-    font-size: 0.54rem !important;
+    font-size: 0.52rem !important;
     letter-spacing: 0.035rem !important;
   }
 
   .dashboard-page .market-card-compact .market-result-row {
-    top: 52px !important;
+    top: 49px !important;
   }
 
   .dashboard-page .market-card-compact .market-last-value {
-    font-size: 1rem !important;
+    font-size: 1.12rem !important;
     letter-spacing: 0.09rem !important;
   }
 }
