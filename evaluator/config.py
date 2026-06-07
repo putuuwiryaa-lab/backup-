@@ -2,7 +2,8 @@ import os
 
 SUPABASE_URL = os.environ["SUPABASE_URL"]
 SUPABASE_KEY = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
-ANALYZE_API_URL = os.environ.get("ANALYZE_API_URL", "https://analisaangka.online/api/analyze")
+APP_BASE_URL = os.environ["APP_BASE_URL"].rstrip("/")
+ANALYZE_API_URL = f"{APP_BASE_URL}/api/analyze"
 INTERNAL_API_SECRET = os.environ.get("INTERNAL_API_SECRET", "")
 
 MODES = {
