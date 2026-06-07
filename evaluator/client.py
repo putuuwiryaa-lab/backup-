@@ -1,3 +1,5 @@
+import time
+
 import requests
 from supabase import create_client
 
@@ -7,10 +9,25 @@ from .utils import get_payload_data, normalize_mati_result, normalize_simple_res
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 
+def execute_with_retry(operation, label, attempts=4):
+    last_error = None
+    for attempt in range(1, attempts + 1):
+        try:
+            return operation().execute()
+        except Exception as error:
+            last_error = error
+            if attempt >= attempts:
+                raise
+            wait_seconds = attempt * 2
+            print(f"SUPABASE RETRY: {label} attempt={attempt}/{attempts} error={error}")
+            time.sleep(wait_seconds)
+    raise last_error
+
+
 def analyze_mode(history, mode, param, target_pair="belakang", analysis_scope="default"):
     headers = {}
     if INTERNAL_API_SECRET:
-        headers["x-internal-secret"] = INTERNAL_API_SECRET
+        headers["x-internal-api-secret"] = INTERNAL_API_SECRET
 
     api_mode = mode
     api_param = param
@@ -63,9 +80,12 @@ def analyze_mode(history, mode, param, target_pair="belakang", analysis_scope="d
 
 
 def get_one(table, **filters):
-    query = supabase.table(table).select("*")
-    for key, value in filters.items():
-        query = query.eq(key, value)
-    result = query.limit(1).execute()
+    def operation():
+        query = supabase.table(table).select("*")
+        for key, value in filters.items():
+            query = query.eq(key, value)
+        return query.limit(1)
+
+    result = execute_with_retry(operation, f"select {table}")
     rows = result.data or []
     return rows[0] if rows else None
