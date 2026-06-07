@@ -1,4 +1,4 @@
-from .client import get_one, supabase
+from .client import execute_with_retry, get_one, supabase
 from .utils import now_iso
 
 
@@ -15,7 +15,13 @@ def save_snapshot(market_id, market_name, mode, param, target_pair, analysis_sco
         "payload": payload,
         "updated_at": now_iso(),
     }
-    supabase.table("analysis_snapshots").upsert(row, on_conflict="market_id,mode,param,target_pair,analysis_scope").execute()
+    execute_with_retry(
+        lambda: supabase.table("analysis_snapshots").upsert(
+            row,
+            on_conflict="market_id,mode,param,target_pair,analysis_scope",
+        ),
+        f"upsert analysis_snapshots {market_id} {mode} {param} {target_pair} {analysis_scope}",
+    )
 
 
 def insert_evaluation_row(market_id, market_name, mode, param, position, target_pair, analysis_scope, from_result, new_result, is_hit, target, status, snapshot_result, detail):
@@ -50,6 +56,9 @@ def insert_evaluation_row(market_id, market_name, mode, param, position, target_
         "detail": detail,
         "evaluated_at": now_iso(),
     }
-    supabase.table("analysis_evaluations").insert(row).execute()
+    execute_with_retry(
+        lambda: supabase.table("analysis_evaluations").insert(row),
+        f"insert analysis_evaluations {market_id} {mode} {param} {position} {target_pair} {analysis_scope}",
+    )
     print(f"ANALYSIS EVAL OK: {market_id} {mode} {param} {position} {target_pair} {analysis_scope} {status}")
     return True
