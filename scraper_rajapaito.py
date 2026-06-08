@@ -10,6 +10,10 @@ RAJAPAITO_MARKETS = {
     "MACAU P4": "https://w2.rajapaito1.net/data-togel-macau-p4/",
     "MACAU P5": "https://w2.rajapaito1.net/data-togel-macau-p5/",
     "MACAU P6": "https://w2.rajapaito1.net/data-togel-macau-p6/",
+    "PENNSYLVANIA DAY": "https://w2.rajapaito1.net/data-togel-pennsylvania-day/",
+    "PENNSYLVANIA EVENING": "https://w2.rajapaito1.net/data-togel-pennsylvania-evening/",
+    "DELAWARE DAY": "https://w2.rajapaito1.net/data-togel-delaware-day/",
+    "DELAWARE NIGHT": "https://w2.rajapaito1.net/data-togel-delaware-night/",
 }
 
 HEADERS = {
@@ -87,3 +91,4 @@ if __name__ == "__main__":
         print("TOTAL:", len(items))
         print("LATEST:", items[-1] if items else "KOSONG")
         print(data)
+        
