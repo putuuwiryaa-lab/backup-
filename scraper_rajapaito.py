@@ -14,6 +14,8 @@ RAJAPAITO_MARKETS = {
     "PENNSYLVANIA EVENING": "https://w2.rajapaito1.net/data-togel-pennsylvania-evening/",
     "DELAWARE DAY": "https://w2.rajapaito1.net/data-togel-delaware-day/",
     "DELAWARE NIGHT": "https://w2.rajapaito1.net/data-togel-delaware-night/",
+    "OHIO MIDDAY": "https://w2.rajapaito1.net/data-togel-ohio-midday/",
+    "OHIO EVENING": "https://w2.rajapaito1.net/data-togel-ohio-evening/",
 }
 
 HEADERS = {
