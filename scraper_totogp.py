@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 
 TOTOGP_MARKETS = {
     "SINGAPORE6D": "https://totogpb.store/wap/keluaran/8",
+    "NUSANTARA": "https://totogpb.store/wap/keluaran/109",
 }
 
 DAYS = "Senin|Selasa|Rabu|Kamis|Jumat|Sabtu|Minggu"
