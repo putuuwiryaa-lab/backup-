@@ -2,6 +2,11 @@ from .client import execute_with_retry, get_one, supabase
 from .utils import now_iso
 
 
+def _is_duplicate_key_error(error):
+    text = str(error).lower()
+    return "23505" in text or "duplicate key value violates unique constraint" in text
+
+
 def save_snapshot(market_id, market_name, mode, param, target_pair, analysis_scope, base_result, result, payload):
     row = {
         "market_id": market_id,
@@ -56,9 +61,15 @@ def insert_evaluation_row(market_id, market_name, mode, param, position, target_
         "detail": detail,
         "evaluated_at": now_iso(),
     }
-    execute_with_retry(
-        lambda: supabase.table("analysis_evaluations").insert(row),
-        f"insert analysis_evaluations {market_id} {mode} {param} {position} {target_pair} {analysis_scope}",
-    )
+    try:
+        execute_with_retry(
+            lambda: supabase.table("analysis_evaluations").insert(row),
+            f"insert analysis_evaluations {market_id} {mode} {param} {position} {target_pair} {analysis_scope}",
+        )
+    except Exception as error:
+        if _is_duplicate_key_error(error):
+            print(f"ANALYSIS EVAL SKIP DUPLICATE AFTER RETRY: {market_id} {mode} {param} {position} {target_pair} {analysis_scope}")
+            return False
+        raise
     print(f"ANALYSIS EVAL OK: {market_id} {mode} {param} {position} {target_pair} {analysis_scope} {status}")
     return True
