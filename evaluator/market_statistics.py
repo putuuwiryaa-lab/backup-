@@ -85,7 +85,7 @@ def group_key_for_row(row):
         return "ai_parity"
     if mode == "ai_size" and param == 1:
         return "ai_size"
-    if mode == "bbfs" and param in (7, 8, 9):
+    if mode == "bbfs" and param in (7, 8, 9, 10):
         return "bbfs"
     if mode == "mati":
         return "off_digit"
@@ -266,103 +266,26 @@ def build_position_2d_statistics(rows):
             "sample_size": len(sample),
             "score": score,
             "latest_is_hit": latest_is_hit,
-            "latest_status": "MASUK" if latest_is_hit else "ZONK",
+            "latest_status": "MASUK" if latest_is_hit else "TIDAK MASUK",
             "is_active": True,
             "updated_at": now_iso(),
         })
     return output
 
 
-def rank_scope_key(item):
-    return "|".join([
-        str(item.get("group_key") or ""),
-        str(item.get("mode") or ""),
-        str(item.get("param") or ""),
-        str(item.get("position") or ""),
-        str(item.get("target_pair") or ""),
-        str(item.get("analysis_scope") or "default"),
-    ])
+def clear_existing_statistics():
+    supabase.table("market_statistics").delete().neq("id", "00000000-0000-0000-0000-000000000000").execute()
 
 
-def rank_sort_key(item, old_rank_by_stat_key=None):
-    old_rank_by_stat_key = old_rank_by_stat_key or {}
-    old_rank = old_rank_by_stat_key.get(item.get("stat_key")) or item.get("previous_rank") or RANK_FALLBACK
-    return (
-        -(item.get("score") or 0),
-        -(item.get("wins_15") or 0),
-        -(item.get("wins_last_5") or 0),
-        old_rank,
-        str(item.get("market_name") or item.get("market_id") or ""),
-    )
+def insert_statistics(rows):
+    if not rows:
+        return
+    supabase.table("market_statistics").insert(rows).execute()
 
 
-def fetch_existing_rank_map():
-    existing = (
-        supabase.table("market_statistics")
-        .select("stat_key,market_id,market_name,group_key,mode,param,position,target_pair,analysis_scope,wins_15,wins_last_5,score,previous_rank,is_active")
-        .eq("is_active", True)
-        .execute()
-        .data
-        or []
-    )
-    grouped = {}
-    for row in existing:
-        if row.get("stat_key"):
-            grouped.setdefault(rank_scope_key(row), []).append(row)
-
-    old_rank_by_stat_key = {}
-    for group in grouped.values():
-        ranked = sorted(group, key=lambda item: rank_sort_key(item))
-        for index, item in enumerate(ranked, start=1):
-            old_rank_by_stat_key[item.get("stat_key")] = index
-    return old_rank_by_stat_key
-
-
-def apply_rank_movement(stats):
-    if not stats:
-        return stats
-    old_rank_by_stat_key = fetch_existing_rank_map()
-    grouped = {}
-    for item in stats:
-        grouped.setdefault(rank_scope_key(item), []).append(item)
-
-    for group in grouped.values():
-        ranked = sorted(group, key=lambda item: rank_sort_key(item, old_rank_by_stat_key))
-        for index, item in enumerate(ranked, start=1):
-            previous_rank = old_rank_by_stat_key.get(item.get("stat_key"))
-            item["previous_rank"] = previous_rank
-            item["rank_movement"] = int(previous_rank) - index if previous_rank else None
-    return stats
-
-
-def build_market_statistics(rows):
-    output = build_single_statistics(rows)
-    output.extend(build_position_2d_statistics(rows))
-    output = sorted(output, key=lambda item: rank_sort_key(item))
-    return apply_rank_movement(output)
-
-
-def is_missing_statistics_table(error):
-    text = str(error)
-    return "market_statistics" in text and ("PGRST205" in text or "schema cache" in text or "Could not find the table")
-
-
-def refresh_market_statistics():
+def rebuild_market_statistics():
     rows = fetch_evaluation_rows()
-    stats = build_market_statistics(rows)
-    try:
-        supabase.table("market_statistics").update({"is_active": False, "updated_at": now_iso()}).neq("stat_key", "").execute()
-        if stats:
-            supabase.table("market_statistics").upsert(stats, on_conflict="stat_key").execute()
-        supabase.table("market_statistics").delete().eq("is_active", False).execute()
-    except Exception as error:
-        if is_missing_statistics_table(error):
-            print("MARKET STATISTICS SKIP: tabel market_statistics belum ada. Jalankan supabase_market_statistics.sql sekali di Supabase SQL Editor.")
-            return []
-        raise
-    print(f"MARKET STATISTICS DONE: source_rows={len(rows)} stats_rows={len(stats)}")
-    return stats
-
-
-if __name__ == "__main__":
-    refresh_market_statistics()
+    output = build_single_statistics(rows) + build_position_2d_statistics(rows)
+    clear_existing_statistics()
+    insert_statistics(output)
+    print(f"MARKET STATISTICS DONE: {len(output)} rows")
