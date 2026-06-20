@@ -16,6 +16,8 @@ AI_3D_PARAMS = [1, 3, 5]
 AI_4D_PARAMS = [1, 2, 4]
 AI_GGBK_PARAMS = [1]
 BBFS_SCOPES = ["4d", "3d", "2d_depan", "2d_tengah", "2d_belakang"]
+BBFS_GGBK_PARAM = 10
+BBFS_GGBK_SCOPES = ["3d", "2d_depan", "2d_tengah", "2d_belakang"]
 
 
 def get_mode_target_pairs(mode):
@@ -60,6 +62,10 @@ def iter_analysis_jobs():
                 resolved_target_pair = target_pair_for_scope(analysis_scope) if mode == "bbfs" else target_pair
                 for param in params:
                     yield mode, param, resolved_target_pair, analysis_scope
+
+    # BBFS GGBK 8D follows BBFS evaluation rules, but only for 2D and 3D scopes.
+    for analysis_scope in BBFS_GGBK_SCOPES:
+        yield "bbfs", BBFS_GGBK_PARAM, target_pair_for_scope(analysis_scope), analysis_scope
 
 
 def save_evaluation(market_id, market_name, mode, param, target_pair, analysis_scope, snapshot, new_result):
