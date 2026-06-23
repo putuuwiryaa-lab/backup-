@@ -2,7 +2,7 @@ from .client import supabase
 from .utils import now_iso
 
 SAMPLE_SIZE = 15
-MIN_WINS_15 = 13
+MIN_WINS_15 = 12
 MIN_WINS_LAST_5 = 3
 MAX_LOSS_STREAK_ALLOWED = 2
 PAGE_SIZE = 1000
