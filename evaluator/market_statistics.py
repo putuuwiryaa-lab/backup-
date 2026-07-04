@@ -1,4 +1,4 @@
-from .client import supabase
+from .client import execute_with_retry, supabase
 from .utils import now_iso
 
 SAMPLE_SIZE = 15
@@ -6,7 +6,8 @@ MIN_WINS_15 = 12
 MIN_WINS_LAST_5 = 3
 MAX_LOSS_STREAK_ALLOWED = 2
 PAGE_SIZE = 1000
-MAX_EVALUATION_ROWS = 70000
+MAX_EVALUATION_ROWS = 300000
+INSERT_CHUNK_SIZE = 500
 RANK_FALLBACK = 999999
 
 POSITIONS = ("as", "kop", "kepala", "ekor")
@@ -273,19 +274,49 @@ def build_position_2d_statistics(rows):
     return output
 
 
-def clear_existing_statistics():
-    supabase.table("market_statistics").delete().neq("id", "00000000-0000-0000-0000-000000000000").execute()
-
-
-def insert_statistics(rows):
+def upsert_statistics(rows, chunk_size=INSERT_CHUNK_SIZE):
     if not rows:
         return
-    supabase.table("market_statistics").insert(rows).execute()
+
+    for start in range(0, len(rows), chunk_size):
+        end = min(start + chunk_size, len(rows))
+        chunk = rows[start:end]
+        execute_with_retry(
+            lambda chunk=chunk: supabase.table("market_statistics").upsert(
+                chunk,
+                on_conflict="stat_key",
+            ),
+            f"upsert market_statistics {start + 1}-{end}",
+        )
+
+
+def deactivate_stale_statistics(build_started_at):
+    execute_with_retry(
+        lambda: supabase.table("market_statistics")
+        .update({"is_active": False})
+        .lt("updated_at", build_started_at),
+        "deactivate stale market_statistics",
+    )
 
 
 def rebuild_market_statistics():
+    build_started_at = now_iso()
     rows = fetch_evaluation_rows()
     output = build_single_statistics(rows) + build_position_2d_statistics(rows)
-    clear_existing_statistics()
-    insert_statistics(output)
+
+    print(f"MARKET STATISTICS SOURCE ROWS: {len(rows)}")
+    print(f"MARKET STATISTICS OUTPUT ROWS: {len(output)}")
+
+    if not rows:
+        raise RuntimeError("MARKET STATISTICS SOURCE EMPTY - abort build")
+
+    if not output:
+        raise RuntimeError("MARKET STATISTICS OUTPUT EMPTY - abort upsert/deactivate")
+
+    for row in output:
+        row["is_active"] = True
+        row["updated_at"] = build_started_at
+
+    upsert_statistics(output)
+    deactivate_stale_statistics(build_started_at)
     print(f"MARKET STATISTICS DONE: {len(output)} rows")
