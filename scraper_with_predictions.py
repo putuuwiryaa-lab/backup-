@@ -108,10 +108,10 @@ def build_invest_digits(kpl_scores, ekr_scores):
     ranked = rank_from_scores(invest_scores)
 
     return {
-        "scores": invest_scores,
-        "ai4": sorted(ranked[:4], key=int),
-        "ai6": sorted(ranked[:6], key=int),
-        "bbfs8": sorted(ranked[:8], key=int),
+    "scores": invest_scores,
+    "ai4": ranked[:4],
+    "ai6": ranked[:6],
+    "bbfs8": ranked[:8],
     }
 
 
