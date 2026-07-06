@@ -6,7 +6,7 @@ import os
 from supabase import create_client
 
 SUPABASE_URL = os.environ["SUPABASE_URL"]
-SUPABASE_KEY = os.environ["SUPABASE_ANON_KEY"]
+SUPABASE_KEY = os.environ.get("SUPABASE_ANON_KEY") or os.environ["SUPABASE_SERVICE_ROLE_KEY"]
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 BASE = "https://159.65.133.131"
@@ -139,7 +139,6 @@ def main():
             print(f"SKIP: {market_id} (data kosong)")
             errors += 1
 
-        # Delay random 2-4 detik
         delay = random.uniform(2, 4)
         time.sleep(delay)
 
