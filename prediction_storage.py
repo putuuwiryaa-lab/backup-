@@ -55,7 +55,12 @@ def save_prediction_snapshot(market_id, market_name, base_result, prediction):
         "updated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     }
 
-    supabase.table("prediction_snapshots").upsert(row).execute()
+    (
+        supabase
+        .table("prediction_snapshots")
+        .upsert(row, on_conflict="market_id")
+        .execute()
+    )
 
 
 def evaluate_bbfs(bbfs_digits, result):
