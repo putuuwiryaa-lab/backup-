@@ -13,7 +13,7 @@ SUPABASE_URL = os.environ["SUPABASE_URL"]
 SUPABASE_KEY = os.environ["SUPABASE_" + "SERVICE_ROLE_KEY"]
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-ENGINE_VERSION = "full-cross-transition-score-v1"
+ENGINE_VERSION = "full-cross-transition-score-v2-bbfs9"
 HISTORY_LIMIT = 169
 MIN_HISTORY_SIZE = 21
 TOP_LINE_LIMIT = 8
@@ -108,10 +108,34 @@ def build_invest_digits(kpl_scores, ekr_scores):
     ranked = rank_from_scores(invest_scores)
 
     return {
-    "scores": invest_scores,
-    "ai4": ranked[:4],
-    "ai6": ranked[:6],
-    "bbfs8": ranked[:8],
+        "scores": invest_scores,
+        "ai4": ranked[:4],
+        "ai6": ranked[:6],
+        "bbfs8": ranked[:8],
+    }
+
+
+def build_bbfs9_digits(kop_scores, kpl_scores, ekr_scores):
+    """
+    BBFS9 khusus 3D belakang.
+
+    Sumber score:
+    KOP/COP + KEPALA/KPL + EKOR/EKR
+    """
+    bbfs9_scores = empty_digit_scores()
+
+    for digit in bbfs9_scores:
+        bbfs9_scores[digit] = (
+            kop_scores.get(digit, 0)
+            + kpl_scores.get(digit, 0)
+            + ekr_scores.get(digit, 0)
+        )
+
+    ranked = rank_from_scores(bbfs9_scores)
+
+    return {
+        "scores": bbfs9_scores,
+        "bbfs9": ranked[:9],
     }
 
 
@@ -169,6 +193,7 @@ def run_engine_v2(results):
     - AI4   = top 4 dari KPL + EKR
     - CT6   = top 6 dari KPL + EKR
     - BBFS8 = top 8 dari KPL + EKR
+    - BBFS9 = top 9 dari KOP + KPL + EKR
     """
     position_scores = [
         compute_cross_transition_scores(results, pos)
@@ -185,6 +210,12 @@ def run_engine_v2(results):
         position_scores[3],
     )
 
+    bbfs9_invest = build_bbfs9_digits(
+        position_scores[1],
+        position_scores[2],
+        position_scores[3],
+    )
+
     top_line = build_top_line_2d_belakang(
         position_ranks[2],
         position_ranks[3],
@@ -195,6 +226,7 @@ def run_engine_v2(results):
 
     prediction = {
         "bbfs8": invest["bbfs8"],
+        "bbfs9": bbfs9_invest["bbfs9"],
         "ai4": invest["ai4"],
         "ai6": invest["ai6"],
         "poltar_as": position_ranks[0],
@@ -211,6 +243,7 @@ def run_engine_v2(results):
         f"AI4={''.join(prediction['ai4'])} "
         f"CT6={''.join(prediction['ai6'])} "
         f"BBFS8={''.join(prediction['bbfs8'])} "
+        f"BBFS9={''.join(prediction['bbfs9'])} "
         f"TOPLINE={len(prediction['top_line'])}"
     )
 
@@ -244,6 +277,7 @@ def save_prediction_snapshot(market_id, market_name, base_result, prediction):
         "market_name": market_name,
         "base_result": base_result,
         "bbfs8": prediction["bbfs8"],
+        "bbfs9": prediction["bbfs9"],
         "ai4": prediction["ai4"],
         "ai6": prediction["ai6"],
         "poltar_as": prediction["poltar_as"],
