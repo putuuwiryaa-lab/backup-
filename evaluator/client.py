@@ -27,7 +27,7 @@ def execute_with_retry(operation, label, attempts=4):
 def analyze_mode(history, mode, param, target_pair="belakang", analysis_scope="default"):
     headers = {}
     if INTERNAL_API_SECRET:
-        headers["x-internal-api-secret"] = INTERNAL_API_SECRET
+        headers["x-internal-secret"] = INTERNAL_API_SECRET
 
     api_mode = mode
     api_param = param
