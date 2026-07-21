@@ -13,13 +13,13 @@ import time
 
 from prediction_storage import process_prediction_flow, supabase
 from scraper_koalavictoria_multi_v6_fixed import (
-    BASE_URL_TEMPLATE,
-    DELAY_BETWEEN_MARKETS_MAX,
-    DELAY_BETWEEN_MARKETS_MIN,
+    BASE_URL,
+    HOME_URL,
+    MARKET_DELAY,
     MARKET_IDS,
+    REQUEST_TIMEOUT,
     create_session,
     scrape_market,
-    warm_up_session,
 )
 
 
@@ -40,10 +40,19 @@ def main() -> None:
     session = create_session()
 
     try:
-        warm_up_session(session)
+        try:
+            warmup = session.get(HOME_URL, timeout=REQUEST_TIMEOUT)
+            print(
+                f"[KOALA WARM-UP] status={warmup.status_code} "
+                f"cookies={len(session.cookies)}"
+            )
+        except Exception as error:
+            # Warm-up membantu stabilitas sesi, tetapi kegagalannya tidak boleh
+            # menghentikan seluruh scraper.
+            print(f"[KOALA WARM-UP WARNING] {error}")
 
         for index, source_id in enumerate(unique_market_ids):
-            url = BASE_URL_TEMPLATE.format(market_id=source_id)
+            url = BASE_URL.format(market_id=source_id)
             stable_market_id = f"KOALA_{source_id}"
             current_order = KOALA_ORDER_START + index
 
@@ -56,17 +65,17 @@ def main() -> None:
             print("=" * 72)
 
             try:
-                records, detected_name, metadata = scrape_market(
-                    session=session,
-                    url=url,
+                records, detected_name, pages_read, scrape_error = scrape_market(
+                    session,
+                    source_id,
                 )
 
                 history_data = build_history_data(records)
-
                 if not history_data:
                     print(
                         f"SKIP KOALA: {stable_market_id} "
-                        f"({detected_name}) data kosong"
+                        f"({detected_name}) data kosong "
+                        f"error={scrape_error or '-'}"
                     )
                     errors += 1
                     continue
@@ -99,7 +108,7 @@ def main() -> None:
                     f"name={detected_name} "
                     f"total={total} "
                     f"latest={latest} "
-                    f"pages={metadata['pages_read']}"
+                    f"pages={pages_read}"
                 )
                 success += 1
 
@@ -112,12 +121,7 @@ def main() -> None:
                 errors += 1
 
             if index < len(unique_market_ids) - 1:
-                time.sleep(
-                    random.uniform(
-                        DELAY_BETWEEN_MARKETS_MIN,
-                        DELAY_BETWEEN_MARKETS_MAX,
-                    )
-                )
+                time.sleep(random.uniform(*MARKET_DELAY))
 
     finally:
         session.close()
