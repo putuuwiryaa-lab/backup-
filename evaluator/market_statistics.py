@@ -120,20 +120,70 @@ def normalize_analysis_scope(row):
 
 def fetch_evaluation_rows():
     all_rows = []
-    for start in range(0, MAX_EVALUATION_ROWS, PAGE_SIZE):
-        end = start + PAGE_SIZE - 1
-        result = (
-            supabase.table("analysis_evaluations")
-            .select("id,market_id,market_name,mode,param,position,target_pair,analysis_scope,is_hit,status,evaluated_at")
-            .in_("mode", ["ai", "ai_parity", "ai_size", "bbfs", "mati", "jumlah", "shio"])
-            .order("evaluated_at", desc=True)
-            .range(start, end)
-            .execute()
+    cursor_time = None
+    cursor_id = None
+
+    while len(all_rows) < MAX_EVALUATION_ROWS:
+        remaining = MAX_EVALUATION_ROWS - len(all_rows)
+        page_limit = min(PAGE_SIZE, remaining)
+
+        def operation():
+            query = (
+                supabase.table("analysis_evaluations")
+                .select(
+                    "id,market_id,market_name,mode,param,position,"
+                    "target_pair,analysis_scope,is_hit,status,evaluated_at"
+                )
+                .in_(
+                    "mode",
+                    [
+                        "ai",
+                        "ai_parity",
+                        "ai_size",
+                        "bbfs",
+                        "mati",
+                        "jumlah",
+                        "shio",
+                    ],
+                )
+            )
+
+            if cursor_time and cursor_id:
+                query = query.or_(
+                    f"evaluated_at.lt.{cursor_time},"
+                    f"and(evaluated_at.eq.{cursor_time},id.lt.{cursor_id})"
+                )
+
+            return (
+                query.order("evaluated_at", desc=True)
+                .order("id", desc=True)
+                .limit(page_limit)
+            )
+
+        result = execute_with_retry(
+            operation,
+            (
+                "fetch analysis_evaluations "
+                f"cursor={cursor_time or 'start'} "
+                f"loaded={len(all_rows)}"
+            ),
         )
+
         page = result.data or []
-        all_rows.extend(page)
-        if len(page) < PAGE_SIZE:
+        if not page:
             break
+
+        all_rows.extend(page)
+        if len(page) < page_limit:
+            break
+
+        last_row = page[-1]
+        cursor_time = last_row.get("evaluated_at")
+        cursor_id = last_row.get("id")
+
+        if not cursor_time or not cursor_id:
+            raise RuntimeError("Invalid analysis_evaluations pagination cursor")
+
     return all_rows
 
 
