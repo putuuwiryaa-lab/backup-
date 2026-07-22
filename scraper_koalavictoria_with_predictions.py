@@ -24,6 +24,9 @@ from scraper_koalavictoria_multi_v6_fixed import (
 
 
 KOALA_ORDER_START = 34
+MARKET_NAME_OVERRIDES = {
+    76: "Beijing",
+}
 
 
 def build_history_data(records) -> str:
@@ -69,6 +72,14 @@ def main() -> None:
                     session,
                     source_id,
                 )
+
+                resolved_name = MARKET_NAME_OVERRIDES.get(source_id, detected_name)
+                if resolved_name != detected_name:
+                    print(
+                        f"[KOALA NAME OVERRIDE] source_id={source_id} "
+                        f"detected={detected_name!r} resolved={resolved_name!r}"
+                    )
+                detected_name = resolved_name
 
                 history_data = build_history_data(records)
                 if not history_data:
