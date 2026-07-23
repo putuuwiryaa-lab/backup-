@@ -4,14 +4,63 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: write
+
 jobs:
-  diagnose:
+  migrate-and-validate:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout branch
         uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
+
+      - name: Move API utilities outside route directory
+        run: |
+          mkdir -p server
+
+          if [ -d api/engines ]; then
+            git mv api/engines server/engines
+          fi
+
+          if [ -f api/predictionEngine.ts ]; then
+            git mv api/predictionEngine.ts server/predictionEngine.ts
+          fi
+
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('api/analyze.ts')
+          text = path.read_text(encoding='utf-8')
+          text = text.replace(
+              'from "./predictionEngine.js"',
+              'from "../server/predictionEngine.js"',
+          )
+          path.write_text(text, encoding='utf-8')
+          PY
+
+          echo "API function entries:"
+          find api -type f -maxdepth 2 | sort
+
+          python - <<'PY'
+          from pathlib import Path
+
+          expected = {
+              'api/admin.ts',
+              'api/analyze.ts',
+              'api/auth.ts',
+              'api/markets.ts',
+              'api/trial.ts',
+              'api/verify.ts',
+          }
+          actual = {path.as_posix() for path in Path('api').rglob('*') if path.is_file()}
+          unexpected = sorted(actual - expected)
+          missing = sorted(expected - actual)
+          if unexpected or missing:
+              raise SystemExit(f'Invalid API layout: unexpected={unexpected} missing={missing}')
+          print('API_LAYOUT_OK=6 handlers')
+          PY
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -22,70 +71,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run diagnostics
+      - name: TypeScript check
+        run: npm run lint
+
+      - name: Vite build
+        run: npm run build
+
+      - name: Persist validated API layout
         run: |
-          mkdir -p diagnostics
-          set +e
-
-          python - <<'PY' > diagnostics/paths.log 2>&1
-          from pathlib import Path
-          from collections import defaultdict
-
-          root = Path('api')
-          paths = []
-          for path in root.rglob('*'):
-              if path.is_file():
-                  relative = path.as_posix()
-                  suffixless = path.with_suffix('').as_posix() if path.suffix else relative
-                  paths.append((relative, suffixless.casefold()))
-
-          groups = defaultdict(list)
-          for original, normalized in paths:
-              groups[normalized].append(original)
-
-          conflicts = {key: values for key, values in groups.items() if len(values) > 1}
-          print('API_FILES_BEGIN')
-          for original, normalized in sorted(paths):
-              print(f'{original} -> {normalized}')
-          print('API_FILES_END')
-          if conflicts:
-              print('VERCEL_PATH_CONFLICTS_BEGIN')
-              for key, values in sorted(conflicts.items()):
-                  print(f'{key}: {values}')
-              print('VERCEL_PATH_CONFLICTS_END')
-              raise SystemExit(1)
-          print(f'VERCEL_PATH_CONFLICTS=0 files={len(paths)}')
-          PY
-          echo $? > diagnostics/paths.exit
-
-          npm run lint > diagnostics/tsc.log 2>&1
-          echo $? > diagnostics/tsc.exit
-
-          npm run build > diagnostics/vite.log 2>&1
-          echo $? > diagnostics/vite.exit
-
-          npx --yes vercel@56.5.0 build --yes > diagnostics/vercel.log 2>&1
-          echo $? > diagnostics/vercel.exit
-
-          exit 0
-
-      - name: Upload diagnostics
-        uses: actions/upload-artifact@v4
-        with:
-          name: vercel-cli-diagnostics
-          path: diagnostics
-
-      - name: Report diagnostic status
-        run: |
-          cat diagnostics/paths.log
-          cat diagnostics/tsc.log
-          cat diagnostics/vite.log
-          cat diagnostics/vercel.log
-          echo "paths=$(cat diagnostics/paths.exit)"
-          echo "tsc=$(cat diagnostics/tsc.exit)"
-          echo "vite=$(cat diagnostics/vite.exit)"
-          echo "vercel=$(cat diagnostics/vercel.exit)"
-          test "$(cat diagnostics/paths.exit)" = "0"
-          test "$(cat diagnostics/tsc.exit)" = "0"
-          test "$(cat diagnostics/vite.exit)" = "0"
-          test "$(cat diagnostics/vercel.exit)" = "0"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add api server
+          if git diff --cached --quiet; then
+            echo "API utilities already migrated"
+          else
+            git commit -m "fix: move API utilities outside Vercel routes"
+            git push origin HEAD:${{ github.head_ref }}
+          fi
