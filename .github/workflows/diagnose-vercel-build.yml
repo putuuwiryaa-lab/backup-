@@ -1,0 +1,56 @@
+name: Diagnose Vercel Build
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect Vercel path conflicts
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from collections import defaultdict
+
+          root = Path('api')
+          paths = []
+          for path in root.rglob('*'):
+              if path.is_file():
+                  relative = path.as_posix()
+                  suffixless = path.with_suffix('').as_posix() if path.suffix else relative
+                  paths.append((relative, suffixless.casefold()))
+
+          groups = defaultdict(list)
+          for original, normalized in paths:
+              groups[normalized].append(original)
+
+          conflicts = {key: values for key, values in groups.items() if len(values) > 1}
+          if conflicts:
+              print('VERCEL_PATH_CONFLICTS_BEGIN')
+              for key, values in sorted(conflicts.items()):
+                  print(f'{key}: {values}')
+              print('VERCEL_PATH_CONFLICTS_END')
+              raise SystemExit(1)
+
+          print(f'VERCEL_PATH_CONFLICTS=0 files={len(paths)}')
+          PY
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript check
+        run: npm run lint
+
+      - name: Vite build
+        run: npm run build
