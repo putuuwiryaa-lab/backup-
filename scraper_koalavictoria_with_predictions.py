@@ -31,7 +31,9 @@ KOALA_ORDER_START = 34
 # is resolved from the official KoalaVictoria market links or page heading.
 VERIFIED_MARKET_NAMES = {
     20: "Swedia",
+    68: "Kingkong 4D 1",
     76: "Beijing",
+    81: "Kingkong 4D 2",
 }
 
 GENERIC_MARKET_NAMES = {
