@@ -13,7 +13,8 @@ jobs:
 
       - name: Detect Vercel path conflicts
         run: |
-          python - <<'PY'
+          mkdir -p diagnostics
+          python - <<'PY' > diagnostics/paths.log 2>&1
           from pathlib import Path
           from collections import defaultdict
 
@@ -39,6 +40,7 @@ jobs:
 
           print(f'VERCEL_PATH_CONFLICTS=0 files={len(paths)}')
           PY
+          echo $? > diagnostics/paths.exit
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -50,7 +52,30 @@ jobs:
         run: npm ci
 
       - name: TypeScript check
-        run: npm run lint
+        run: |
+          set +e
+          npm run lint > diagnostics/tsc.log 2>&1
+          echo $? > diagnostics/tsc.exit
+          exit 0
 
       - name: Vite build
-        run: npm run build
+        run: |
+          set +e
+          npm run build > diagnostics/vite.log 2>&1
+          echo $? > diagnostics/vite.exit
+          exit 0
+
+      - name: Upload diagnostics
+        uses: actions/upload-artifact@v4
+        with:
+          name: vercel-build-diagnostics
+          path: diagnostics
+
+      - name: Fail on diagnostic errors
+        run: |
+          cat diagnostics/paths.log
+          cat diagnostics/tsc.log
+          cat diagnostics/vite.log
+          test "$(cat diagnostics/paths.exit)" = "0"
+          test "$(cat diagnostics/tsc.exit)" = "0"
+          test "$(cat diagnostics/vite.exit)" = "0"
