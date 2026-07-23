@@ -1,0 +1,112 @@
+name: Audit Market Identities
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Audit scraper IDs against Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          python - <<'PY'
+          import ast
+          import json
+          import os
+          import urllib.parse
+          import urllib.request
+          from collections import Counter
+          from pathlib import Path
+
+          def read_dict(path, variable):
+              tree = ast.parse(Path(path).read_text(encoding="utf-8"), filename=path)
+              for node in tree.body:
+                  if isinstance(node, ast.Assign):
+                      for target in node.targets:
+                          if isinstance(target, ast.Name) and target.id == variable:
+                              return ast.literal_eval(node.value)
+              raise RuntimeError(f"{variable} not found in {path}")
+
+          expected = {}
+
+          sources = [
+              ("PRIMARY", "scraper.py", "MARKETS", "keys"),
+              ("RAJAPAITO", "scraper_rajapaito.py", "RAJAPAITO_MARKETS", "keys"),
+              ("TOTOGP", "scraper_totogp.py", "TOTOGP_MARKETS", "keys"),
+              ("SEJAHTERA", "scraper_sejahtera.py", "SEJAHTERA_MARKETS", "keys"),
+              ("KOALA", "scraper_koalavictoria_with_predictions.py", "KOALA_MARKETS", "values"),
+          ]
+
+          for source, path, variable, identity_side in sources:
+              mapping = read_dict(path, variable)
+              identities = mapping.keys() if identity_side == "keys" else mapping.values()
+              for identity in identities:
+                  identity = str(identity)
+                  if identity in expected:
+                      raise RuntimeError(
+                          f"duplicate scraper identity {identity!r}: "
+                          f"{expected[identity]} and {source}"
+                      )
+                  expected[identity] = source
+
+          base = os.environ["SUPABASE_URL"].rstrip("/")
+          key = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
+          query = urllib.parse.urlencode({
+              "select": "id,name,order",
+              "order": "order.asc,id.asc",
+          })
+          request = urllib.request.Request(
+              f"{base}/rest/v1/markets?{query}",
+              headers={
+                  "apikey": key,
+                  "Authorization": f"Bearer {key}",
+                  "Accept": "application/json",
+              },
+          )
+          with urllib.request.urlopen(request, timeout=30) as response:
+              rows = json.load(response)
+
+          actual = {str(row["id"]): row for row in rows}
+          name_counts = Counter(str(row.get("name") or "") for row in rows)
+
+          print(f"EXPECTED_COUNT={len(expected)}")
+          print(f"DATABASE_COUNT={len(rows)}")
+
+          print("IDENTITY_MISMATCHES_BEGIN")
+          mismatch_count = 0
+          for row in rows:
+              market_id = str(row.get("id") or "")
+              market_name = str(row.get("name") or "")
+              if market_id != market_name:
+                  mismatch_count += 1
+                  print(json.dumps(row, ensure_ascii=False, sort_keys=True))
+          print("IDENTITY_MISMATCHES_END")
+          print(f"IDENTITY_MISMATCH_COUNT={mismatch_count}")
+
+          missing = sorted(identity for identity in expected if identity not in actual)
+          unexpected = sorted(identity for identity in actual if identity not in expected)
+          canonical_conflicts = sorted(
+              identity
+              for identity, source in expected.items()
+              if source == "KOALA" and identity in actual
+          )
+          duplicate_names = sorted(
+              name for name, count in name_counts.items() if name and count > 1
+          )
+
+          print("MISSING_EXPECTED=" + json.dumps(missing, ensure_ascii=False))
+          print("UNEXPECTED_DATABASE_IDS=" + json.dumps(unexpected, ensure_ascii=False))
+          print("KOALA_CANONICAL_IDS_ALREADY_PRESENT=" + json.dumps(canonical_conflicts, ensure_ascii=False))
+          print("DUPLICATE_NAMES=" + json.dumps(duplicate_names, ensure_ascii=False))
+
+          legacy_koala = sorted(
+              market_id for market_id in actual if market_id.startswith("KOALA_")
+          )
+          print("LEGACY_KOALA_IDS=" + json.dumps(legacy_koala, ensure_ascii=False))
+          PY
