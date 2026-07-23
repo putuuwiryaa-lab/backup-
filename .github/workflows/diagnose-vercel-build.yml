@@ -4,9 +4,6 @@ on:
   pull_request:
     branches: [main]
 
-permissions:
-  contents: write
-
 jobs:
   diagnose:
     runs-on: ubuntu-latest
@@ -16,9 +13,20 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
 
-      - name: Detect Vercel path conflicts
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run diagnostics
         run: |
           mkdir -p diagnostics
+          set +e
+
           python - <<'PY' > diagnostics/paths.log 2>&1
           from pathlib import Path
           from collections import defaultdict
@@ -36,59 +44,48 @@ jobs:
               groups[normalized].append(original)
 
           conflicts = {key: values for key, values in groups.items() if len(values) > 1}
+          print('API_FILES_BEGIN')
+          for original, normalized in sorted(paths):
+              print(f'{original} -> {normalized}')
+          print('API_FILES_END')
           if conflicts:
               print('VERCEL_PATH_CONFLICTS_BEGIN')
               for key, values in sorted(conflicts.items()):
                   print(f'{key}: {values}')
               print('VERCEL_PATH_CONFLICTS_END')
               raise SystemExit(1)
-
           print(f'VERCEL_PATH_CONFLICTS=0 files={len(paths)}')
           PY
           echo $? > diagnostics/paths.exit
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: npm
-
-      - name: Generate frontend type fix
-        run: |
-          npm install --save-dev @types/react@^19.0.0 @types/react-dom@^19.0.0
-          printf '%s\n' '/// <reference types="vite/client" />' > src/vite-env.d.ts
-
-      - name: TypeScript check
-        run: |
-          set +e
           npm run lint > diagnostics/tsc.log 2>&1
           echo $? > diagnostics/tsc.exit
-          exit 0
 
-      - name: Vite build
-        run: |
-          set +e
           npm run build > diagnostics/vite.log 2>&1
           echo $? > diagnostics/vite.exit
+
+          npx --yes vercel@56.5.0 build --yes > diagnostics/vercel.log 2>&1
+          echo $? > diagnostics/vercel.exit
+
           exit 0
 
-      - name: Fail on diagnostic errors
+      - name: Upload diagnostics
+        uses: actions/upload-artifact@v4
+        with:
+          name: vercel-cli-diagnostics
+          path: diagnostics
+
+      - name: Report diagnostic status
         run: |
           cat diagnostics/paths.log
           cat diagnostics/tsc.log
           cat diagnostics/vite.log
+          cat diagnostics/vercel.log
+          echo "paths=$(cat diagnostics/paths.exit)"
+          echo "tsc=$(cat diagnostics/tsc.exit)"
+          echo "vite=$(cat diagnostics/vite.exit)"
+          echo "vercel=$(cat diagnostics/vercel.exit)"
           test "$(cat diagnostics/paths.exit)" = "0"
           test "$(cat diagnostics/tsc.exit)" = "0"
           test "$(cat diagnostics/vite.exit)" = "0"
-
-      - name: Persist generated type fix
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package.json package-lock.json src/vite-env.d.ts
-          if git diff --cached --quiet; then
-            echo "Generated type fix already committed"
-          else
-            git commit -m "fix: add frontend type declarations"
-            git push origin HEAD:${{ github.head_ref }}
-          fi
+          test "$(cat diagnostics/vercel.exit)" = "0"
