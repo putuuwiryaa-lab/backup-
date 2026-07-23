@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          show-progress: false
 
       - name: Audit scraper IDs against Supabase
         env:
@@ -34,7 +36,6 @@ jobs:
               raise RuntimeError(f"{variable} not found in {path}")
 
           expected = {}
-
           sources = [
               ("PRIMARY", "scraper.py", "MARKETS", "keys"),
               ("RAJAPAITO", "scraper_rajapaito.py", "RAJAPAITO_MARKETS", "keys"),
@@ -74,21 +75,10 @@ jobs:
 
           actual = {str(row["id"]): row for row in rows}
           name_counts = Counter(str(row.get("name") or "") for row in rows)
-
-          print(f"EXPECTED_COUNT={len(expected)}")
-          print(f"DATABASE_COUNT={len(rows)}")
-
-          print("IDENTITY_MISMATCHES_BEGIN")
-          mismatch_count = 0
-          for row in rows:
-              market_id = str(row.get("id") or "")
-              market_name = str(row.get("name") or "")
-              if market_id != market_name:
-                  mismatch_count += 1
-                  print(json.dumps(row, ensure_ascii=False, sort_keys=True))
-          print("IDENTITY_MISMATCHES_END")
-          print(f"IDENTITY_MISMATCH_COUNT={mismatch_count}")
-
+          identity_mismatches = [
+              row for row in rows
+              if str(row.get("id") or "") != str(row.get("name") or "")
+          ]
           missing = sorted(identity for identity in expected if identity not in actual)
           unexpected = sorted(identity for identity in actual if identity not in expected)
           canonical_conflicts = sorted(
@@ -99,14 +89,33 @@ jobs:
           duplicate_names = sorted(
               name for name, count in name_counts.items() if name and count > 1
           )
-
-          print("MISSING_EXPECTED=" + json.dumps(missing, ensure_ascii=False))
-          print("UNEXPECTED_DATABASE_IDS=" + json.dumps(unexpected, ensure_ascii=False))
-          print("KOALA_CANONICAL_IDS_ALREADY_PRESENT=" + json.dumps(canonical_conflicts, ensure_ascii=False))
-          print("DUPLICATE_NAMES=" + json.dumps(duplicate_names, ensure_ascii=False))
-
           legacy_koala = sorted(
               market_id for market_id in actual if market_id.startswith("KOALA_")
           )
-          print("LEGACY_KOALA_IDS=" + json.dumps(legacy_koala, ensure_ascii=False))
+
+          result = {
+              "expected_count": len(expected),
+              "database_count": len(rows),
+              "identity_mismatch_count": len(identity_mismatches),
+              "identity_mismatches": identity_mismatches,
+              "missing_expected": missing,
+              "unexpected_database_ids": unexpected,
+              "koala_canonical_ids_already_present": canonical_conflicts,
+              "duplicate_names": duplicate_names,
+              "legacy_koala_ids": legacy_koala,
+              "expected_sources": expected,
+          }
+
+          Path("market-identity-audit.json").write_text(
+              json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True),
+              encoding="utf-8",
+          )
+          print(json.dumps(result, ensure_ascii=False, sort_keys=True))
           PY
+
+      - name: Upload audit result
+        uses: actions/upload-artifact@v4
+        with:
+          name: market-identity-audit
+          path: market-identity-audit.json
+          if-no-files-found: error
