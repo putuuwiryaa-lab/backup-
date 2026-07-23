@@ -1,0 +1,44 @@
+name: Diagnose Koala Names
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read Koala market rows
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import urllib.parse
+          import urllib.request
+
+          base = os.environ["SUPABASE_URL"].rstrip("/")
+          key = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
+          query = urllib.parse.urlencode({
+              "select": "id,name,order",
+              "id": "like.KOALA_*",
+              "order": "order.asc,id.asc",
+          })
+          request = urllib.request.Request(
+              f"{base}/rest/v1/markets?{query}",
+              headers={
+                  "apikey": key,
+                  "Authorization": f"Bearer {key}",
+                  "Accept": "application/json",
+              },
+          )
+          with urllib.request.urlopen(request, timeout=30) as response:
+              rows = json.load(response)
+
+          print("KOALA_ROWS_BEGIN")
+          for row in rows:
+              print(json.dumps(row, ensure_ascii=False, sort_keys=True))
+          print("KOALA_ROWS_END")
+          PY
