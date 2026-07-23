@@ -4,12 +4,17 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: write
+
 jobs:
   diagnose:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout branch
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
 
       - name: Detect Vercel path conflicts
         run: |
@@ -67,16 +72,6 @@ jobs:
           echo $? > diagnostics/vite.exit
           exit 0
 
-      - name: Upload generated fix and diagnostics
-        uses: actions/upload-artifact@v4
-        with:
-          name: vercel-type-fix
-          path: |
-            diagnostics
-            package.json
-            package-lock.json
-            src/vite-env.d.ts
-
       - name: Fail on diagnostic errors
         run: |
           cat diagnostics/paths.log
@@ -85,3 +80,15 @@ jobs:
           test "$(cat diagnostics/paths.exit)" = "0"
           test "$(cat diagnostics/tsc.exit)" = "0"
           test "$(cat diagnostics/vite.exit)" = "0"
+
+      - name: Persist generated type fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json src/vite-env.d.ts
+          if git diff --cached --quiet; then
+            echo "Generated type fix already committed"
+          else
+            git commit -m "fix: add frontend type declarations"
+            git push origin HEAD:${{ github.head_ref }}
+          fi
