@@ -48,8 +48,10 @@ jobs:
           node-version: '22'
           cache: npm
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Generate frontend type fix
+        run: |
+          npm install --save-dev @types/react@^19.0.0 @types/react-dom@^19.0.0
+          printf '%s\n' '/// <reference types="vite/client" />' > src/vite-env.d.ts
 
       - name: TypeScript check
         run: |
@@ -65,11 +67,15 @@ jobs:
           echo $? > diagnostics/vite.exit
           exit 0
 
-      - name: Upload diagnostics
+      - name: Upload generated fix and diagnostics
         uses: actions/upload-artifact@v4
         with:
-          name: vercel-build-diagnostics
-          path: diagnostics
+          name: vercel-type-fix
+          path: |
+            diagnostics
+            package.json
+            package-lock.json
+            src/vite-env.d.ts
 
       - name: Fail on diagnostic errors
         run: |
