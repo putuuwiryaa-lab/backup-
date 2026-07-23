@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import { createClient } from "@supabase/supabase-js";
-import { runAnalysis } from "./predictionEngine.js";
+import { runAnalysis } from "../server/predictionEngine.js";
 
 function requireEnv(name: string) {
   const value = process.env[name];
